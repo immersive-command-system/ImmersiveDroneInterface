@@ -1,0 +1,225 @@
+﻿<StringTable>
+  <Creator>创建MTE地形</Creator>
+  <MeshSize>模型大小</MeshSize>
+  <SplatTexture>溅斑(Splat)贴图</SplatTexture>
+  <CreateMultipleCopies>创建多个副本</CreateMultipleCopies>
+  <AsAPlane>平面</AsAPlane>
+  <FromAHeightMap>从高度图</FromAHeightMap>
+  <FromACurve>从曲线</FromACurve>
+  <BaseHeight>基础高度</BaseHeight>
+  <TotalHeight>总高度</TotalHeight>
+  <MTEConverter>MTE转换器</MTEConverter>
+  <MTEConverter_Title>MTE地形/模型转换器</MTEConverter_Title>
+  <UnityTerrainToMTEMesh>Unity地形 → MTE地形</UnityTerrainToMTEMesh>
+  <MeshToMTEMesh>模型 → MTE地形</MeshToMTEMesh>
+  <Name>名称</Name>
+  <UseObjNameWhenEmpty>不指定名称时，将使用选择对象的名称</UseObjNameWhenEmpty>
+  <CreatePrefab>创建预置</CreatePrefab>
+  <SelectOutputDir>选择输出文件夹</SelectOutputDir>
+  <Textures>贴图</Textures>
+  <Vertexes>顶点</Vertexes>
+  <SplatTextureCount>溅斑(Splat)贴图数量</SplatTextureCount>
+  <ControlTextureSize>控制图大小</ControlTextureSize>
+  <ExportTrees>输出树</ExportTrees>
+  <BeginCovert>开始转换</BeginCovert>
+  <MTEEditor>MTE编辑器</MTEEditor>
+  <MTEEditor_Title>MTE地形编辑器</MTEEditor_Title>
+  <RaiseLower_Header>提升/降低高度</RaiseLower_Header>
+  <RaiseLower_Description>拖动鼠标绘制，按空格键来切换上升和下降</RaiseLower_Description>
+  <Falloff>衰减</Falloff>
+  <PaintHeight_Header>绘制高度</PaintHeight_Header>
+  <PaintHeight_Description>按住Ctrl对高度取样</PaintHeight_Description>
+  <SmoothHeight_Header>平滑高度</SmoothHeight_Header>
+  <SmoothHeight_Description>点击、拖动鼠标来平滑</SmoothHeight_Description>
+  <PaintControl_Header>绘制地形贴图</PaintControl_Header>
+  <PaintControl_Description>选择贴图，点击、拖动鼠标绘制</PaintControl_Description>
+  <Info_PaintControl_NoSplatTextureFound>没有在编辑目标中找到贴图</Info_PaintControl_NoSplatTextureFound>
+  <PaintVertexColor_Header>绘制顶点颜色</PaintVertexColor_Header>
+  <PaintVertexColor_Description>拖动鼠标来绘制</PaintVertexColor_Description>
+  <ColorPresets>颜色预置</ColorPresets>
+  <SingleChannel>单通道绘制</SingleChannel>
+  <Info_ToolDescription_VertexColorFill>用指定颜色填充所有MTE地形</Info_ToolDescription_VertexColorFill>
+  <Info_ToolDescription_VertexColorRandomize>用随机颜色填充所有MTE地形</Info_ToolDescription_VertexColorRandomize>
+  <AttachVertexColor>附加
+顶点颜色</AttachVertexColor>
+  <Info_ToolDescription_AttachVertexColor>将顶点颜色组件附加到选中的对象上</Info_ToolDescription_AttachVertexColor>
+  <PaintGrass_Header>草绘制工具 (测试版)</PaintGrass_Header>
+  <PaintGrass_Description>按住Shift删除草。(撤销功能暂不可用)</PaintGrass_Description>
+  <Grasses>草</Grasses>
+  <Warning_NoGrassDetail>没有定义草</Warning_NoGrassDetail>
+  <Warning_NoGrassLoader>请首先设置GrassLoader</Warning_NoGrassLoader>
+  <AttachGrassLoader>附加
+GrassLoader
+  </AttachGrassLoader>
+  <Info_ToolDescription_AttachGrassLoader>附加GrassLoader组件到选择的GameObject. 或修复上面的GrassLoader.</Info_ToolDescription_AttachGrassLoader>
+  <PaintFlow_Header>流编辑器 (测试版)</PaintFlow_Header>
+  <PaintFlow_Description>按住Ctrl，滚动滚轮来调整方向</PaintFlow_Description>
+  <CreateFlowMap>创建
+流动图</CreateFlowMap>
+  <Info_ToolDescription_CreateFlowMap>使用当前的方向创建一张flowmap.</Info_ToolDescription_CreateFlowMap>
+  <MeshMisc_Header>模型工具</MeshMisc_Header>
+  <MeshMisc_Description>拖动选择顶点(按住Shift取消选择)
+按回车确认,
+按Esc重新选择</MeshMisc_Description>
+  <Info_ToolDescription_DeleteVertices>删除选中的顶点（只删除相连的面）。含有顶点颜色组件的对象会被忽略。</Info_ToolDescription_DeleteVertices>
+  <Warning_CannotCutHolesOnAVertexColoredMesh>不能在附加有顶点颜色组件的对象上挖洞</Warning_CannotCutHolesOnAVertexColoredMesh>
+  <Settings_Header>设置</Settings_Header>
+  <Settings_Description>总体设置</Settings_Description>
+  <CompactGUI>使用紧凑界面</CompactGUI>
+  <AutoRefreshFilter>自动刷新筛选器</AutoRefreshFilter>
+  <PointSize>标识点大小</PointSize>
+  <ShowAffectedVertex>标识受影响的顶点</ShowAffectedVertex>
+  <FlashAffectedVertex>闪烁</FlashAffectedVertex>
+  <ShowBrushRect>显示笔刷矩形</ShowBrushRect>
+  <ShowNormal>显示顶点的法线方向</ShowNormal>
+  <BrushUnit>笔刷单位大小</BrushUnit>
+  <UseTileSize>使用格子(瓦片)大小</UseTileSize>
+  <MeshSmoothAngle>模型平滑角度</MeshSmoothAngle>
+  <Language>语言</Language>
+  <HistoryViewer>MTE历史</HistoryViewer>
+  <MeshStatisticsViewer>Mesh统计数据</MeshStatisticsViewer>
+  <BasemapBaker>Basemap生成工具</BasemapBaker>
+  <Info_ToolDescription_BasemapBaker>生成MeshTerrain的BaseMap</Info_ToolDescription_BasemapBaker>
+  <BeginBake>开始生成</BeginBake>
+  <MeshToTerrainConverter>模型转地形工具</MeshToTerrainConverter>
+  <MeshToTerrainConverter_Description>将mesh-terrain转换为Unity3D地形。</MeshToTerrainConverter_Description>
+  <UVEditor>模型UV调整工具</UVEditor>
+  <UVEditor_Description>标准化模型UV；取反模型的u或v贴图坐标。</UVEditor_Description>
+  <PivotEditor>模型基准点(Pivot)调整工具</PivotEditor>
+  <PivotEditor_Description>移动模型的基准点(pivot)。</PivotEditor_Description>
+  <MeshZUpToYUpConverter>Z-up模型转Y-up模型工具</MeshZUpToYUpConverter>
+  <MeshZUpToYUpConverter_Description>通过将模型绕x轴旋转 -90 度，将上方向为z的模型转换为上方向为y的模型。</MeshZUpToYUpConverter_Description>
+  <MeshSaver>模型保存工具</MeshSaver>
+  <MeshSaver_Description>将单个模型保存到obj或asset文件中。</MeshSaver_Description>
+  <Info>信息</Info>
+  <Warning>警告</Warning>
+  <Error>错误</Error>
+  <Settings>设置</Settings>
+  <Tools>工具</Tools>
+  <Brushes>笔刷</Brushes>
+  <Size>大小</Size>
+  <Speed>速度</Speed>
+  <Height>高度</Height>
+  <Strength>强度</Strength>
+  <Color>颜色</Color>
+  <Flow>流量</Flow>
+  <Intensity>硬度</Intensity>
+  <Density>密度</Density>
+  <VertexCount>顶点数</VertexCount>
+  <TriangleCount>三角形/面数</TriangleCount>
+  <IndexCount>索引数</IndexCount>
+  <CellSize>格子/瓦片大小</CellSize>
+  <TexelDensity>纹理像素密度</TexelDensity>
+  <SplatTextureTilling>层次贴图平铺数(Tilling)</SplatTextureTilling>
+  <HeightMap>高度图</HeightMap>
+  <Curve>曲线</Curve>
+  <Rotation>旋转</Rotation>
+  <RepeatCount>重复次数</RepeatCount>
+  <Mesh>Mesh</Mesh>
+  <FileFormat>文件格式</FileFormat>
+  <Material>材质</Material>
+  <MinWidth>最小宽度</MinWidth>
+  <MaxWidth>最大宽度</MaxWidth>
+  <MinHeight>最小高度</MinHeight>
+  <MaxHeight>最大高度</MaxHeight>
+  <Direction>方向</Direction>
+  <AngleInDegrees>角度(°)</AngleInDegrees>
+  <Yes>是</Yes>
+  <No>否</No>
+  <OK>确定</OK>
+  <Cancel>取消</Cancel>
+  <Save>保存</Save>
+  <SaveAs>另存为</SaveAs>
+  <SaveLater>稍后保存</SaveLater>
+  <Fill>填充</Fill>
+  <Create>创建</Create>
+  <Delete>删除</Delete>
+  <Randomize>随机化</Randomize>
+  <Undo>撤销</Undo>
+  <Redo>重做</Redo>
+  <SelectFile>选择文件</SelectFile>
+  <ReloadBrushes>重新加载笔刷</ReloadBrushes>
+	<Add>添加</Add>
+	<Apply>应用</Apply>
+  <Horizontal>水平(x)</Horizontal>
+  <Vertical>垂直(z)</Vertical>
+  <Info_UseTheSaveButtonToSaveMesh>必须使用下面的保存按钮来保存对模型的修改，Ctrl+S不会保存对模型的修改！</Info_UseTheSaveButtonToSaveMesh>
+  <Info_PleaseSelectAGameObjectWithVaildMesh>请选中带有有效Mesh的MeshFilter的GameObject再进行操作！</Info_PleaseSelectAGameObjectWithVaildMesh>
+  <Info_PleaseSelectAGameObjectWithTerrain>请选中带有有效Terrain的GameObject再进行操作！</Info_PleaseSelectAGameObjectWithTerrain>
+  <Info_LimitOfTexture5>当使用的shader是 MTE/XXXX/5 Textures/XXXX/Fog 时，第5张贴图与第4张贴图共享Tilling和Offset属性。</Info_LimitOfTexture5>
+  <Info_HotkeyTable>快捷键表
+
+F1		高度工具：提升降低地形
+F2		高度工具：压平/绘制高度
+F3		高度工具：平滑
+F4		绘制贴图
+F5		绘制顶点颜色
+F6		草绘制工具
+F7		流编辑器
+F8		模型工具
+F9		设置
+
+- +		调整笔刷大小
+[ ]		调整笔刷速度/强度/流量
+
+PageUp		撤销 (Mac: Fn+Up)
+PageDown	重做 (Mac: Fn+Down)
+
+~		切换选择网格的显隐
+
+* 快捷键仅在以下条件满足时有效
+  1. 输入法处于关闭状态
+  2. 编辑器窗口或场景窗口具有焦点
+</Info_HotkeyTable>
+  <Info_PleaseSelectAMeshTerrain>请选中一个mesh-terrain.</Info_PleaseSelectAMeshTerrain>
+  <Info_WillBeSavedInstantly>修改会自动保存。</Info_WillBeSavedInstantly>
+  <Info_FreeVersion_UsingSplatTexturesExcept4IsAProFeature>非专业版用户只能使用4张贴图。
+请减少或增加贴图数量为4.</Info_FreeVersion_UsingSplatTexturesExcept4IsAProFeature>
+  <Warning_ProFeature>MTE 专业版功能</Warning_ProFeature>
+  <About>关于MTE</About>
+  <AuthorWebsite>作者的站点</AuthorWebsite>
+  <Buy>购买专业版</Buy>
+  <Forum>论坛</Forum>
+  <EmailAuthor>向作者发邮件</EmailAuthor>
+  <About_CopyInfo>© 2016-2017 邹维. 保留所有权利.
+版本: {0}</About_CopyInfo>
+  <About_AuthorWebsiteLink>https://zwcloud.net</About_AuthorWebsiteLink>
+  <BuyLink>http://u3d.as/oWB</BuyLink>
+  <ForumLink>http://forum.china.unity3d.com/thread-16521-1-1.html</ForumLink>
+  <EmailLink>mailto:zwcloud@hotmail.com</EmailLink>
+  <Warning_Confirm>确定执行此操作吗?</Warning_Confirm>
+  <Warning_ConfirmReplaceControlTexture>确定要替换控制图吗？</Warning_ConfirmReplaceControlTexture>
+  <Warning_MeshIsNotSaved>对地形模型的修改还没有保存，需要现在保存吗？
+
+也可以稍后再保存，但如果在保存前就关闭了Unity3D，您的修改就会丢失。</Warning_MeshIsNotSaved>
+  <Warning_PleaseSelectAPathInsideAssets>请选择一个在"Assets"目录下的路径。</Warning_PleaseSelectAPathInsideAssets>
+  <Warning_TextureCountNotSupported>选择的地形的贴图数量不是2/3/4/5，请删除或添加贴图到2/3/4/5张后再试。</Warning_TextureCountNotSupported>
+  <Warning_SelectAGameObject>请选中一个GameObject.</Warning_SelectAGameObject>
+  <Warning_CannotAttchGrassLoaderToAGameObjectWithMeshFilter>无法向带有MeshFilter的GameObject附加GrassLoader.</Warning_CannotAttchGrassLoaderToAGameObjectWithMeshFilter>
+  <Warning_AlreadyAttached>已附加此组件。</Warning_AlreadyAttached>
+  <Error_ShaderNotSupported>此shader不支持当前平台！</Error_ShaderNotSupported>
+  <RateAndReview>评分和评价</RateAndReview>
+  <Info_InvoiceNumberHint>Invoice number 可以在两个地方找到。
+  1. 由Unity asset store发来的购买确认邮件的pdf附件中
+  2. 打开 https://www.assetstore.unity3d.com/#!/account/transactions, 找到 *Mesh Terrain Editor Pro*, invoice number 在 *Description* 这一栏</Info_InvoiceNumberHint>
+  <OpenAssetStore>打开Asset Store</OpenAssetStore>
+  <Activation>激活</Activation>
+  <ActivateProLicense>激活MTE专业版</ActivateProLicense>
+  <Activating>激活中...</Activating>
+  <ActivateHint>使用Invoice/Serial号码激活MTE专业版 (需要联网)</ActivateHint>
+  <DeactivateProLicense>反激活MTE专业版</DeactivateProLicense>
+  <Deactivating>反激活中...</Deactivating>
+  <DeactivateHint>反激活这台机器上的MTE专业版副本，之后可以在其他机器上激活该副本 (需要联网)</DeactivateHint>
+  <ManualActivate>手动激活</ManualActivate>
+  <ManualActivateHint>用于在无法联网的机器上激活MTE专业版</ManualActivateHint>
+  <Error_AccessServerFailed>访问服务器发生异常。请检查你的网络连接后再试。 错误:
+{0}</Error_AccessServerFailed>
+  <Warning_ActivateFailed>Invoice/serial无效，请检查后再试。</Warning_ActivateFailed>
+  <Info_ActivationHelp>若在激活过程中遇到问题，请通过 zwcloud@hotmail.com 联系作者
+(请在邮件中附上你的Invoice number)</Info_ActivationHelp>
+  <ManualActivationHint1>请确保你的Invoice/Serial是正确的。
+然后在可以联网的机器上用浏览器打开下面的URL.
+然后会获得一条激活码。
+此URL已经被复制了，可Ctrl+V粘贴到某处。</ManualActivationHint1>
+  <ManualActivationHint2>将激活码粘贴到下面：</ManualActivationHint2>
+</StringTable>
