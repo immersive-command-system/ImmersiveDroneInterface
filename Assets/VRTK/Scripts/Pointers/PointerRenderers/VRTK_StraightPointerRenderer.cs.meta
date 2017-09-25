@@ -1,10 +1,20 @@
 fileFormatVersion: 2
 guid: 7fc65878c7102524bb8c2bcfbefff497
-timeCreated: 1492438379
-licenseType: Pro
+timeCreated: 1506372382
+licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - playareaCursor: {instanceID: 0}
+  - directionIndicator: {instanceID: 0}
+  - customRaycast: {instanceID: 0}
+  - customTracer: {instanceID: 0}
+  - customCursor: {instanceID: 0}
+  - drone: {fileID: 1053414955726750, guid: 67dffcde772374345a0c069978bf3b38, type: 2}
+  - waypoint: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801, type: 2}
+  - menu: {instanceID: 0}
+  - world: {instanceID: 0}
+  - lineSelected: {instanceID: 0}
   executionOrder: 0
   icon: {fileID: 2800000, guid: 9fc9cd059ece45b40827fa0850950687, type: 3}
   userData: 

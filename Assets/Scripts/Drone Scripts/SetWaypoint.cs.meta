@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a2b42ec493e21be42ba7f3c7698e7b80
+timeCreated: 1506373765
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - drone: {instanceID: 0}
+  - waypoint: {instanceID: 0}
+  - selectedMaterial: {instanceID: 0}
+  - deselectedMaterial: {instanceID: 0}
+  - startWaypointMaterial: {instanceID: 0}
+  - interWaypoint: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
