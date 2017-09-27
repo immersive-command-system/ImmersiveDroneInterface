@@ -21,6 +21,7 @@
         private GameObject controller; // Pointer Controller
         private GameObject world; // Refers to the ground
         private Vector3 groundPoint; // Vector3 indicating where the pointer is pointing on the ground
+        private bool firstClickFinished = false;
         private bool adjustingHeight = false;
         private GameObject adjustingWaypoint; // new instantiated waypoint
         private Vector3 currentScale; // Current Scale of the World
@@ -59,15 +60,19 @@
                 UpdateScale();
 
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (controller.GetComponent<VRTK_StraightPointerRenderer>().IsSettingWaypoint() && OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
+                if (controller.GetComponent<VRTK_StraightPointerRenderer>().IsSettingWaypoint() && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     adjustingWaypoint = SetGroundpoint();
+                    adjustingHeight = true;
                 }
-
-                // Allows user to adjust the newly placed waypoints height
-                if (adjustingHeight)
+                if (adjustingHeight && !firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
                 {
-                    AdjustHeight(adjustingWaypoint);
+                    firstClickFinished = true;
+                }
+                // Allows user to adjust the newly placed waypoints height
+                if (adjustingHeight && firstClickFinished)
+                {
+                    AdjustHeight(adjustingWaypoint);                    
                 }
 
                 // Allows user to clear the most recently placed waypoint
@@ -94,7 +99,6 @@
             groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
             GameObject newWaypoint = CreateWaypoint(groundPoint);
             controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
-            adjustingHeight = true;
             return newWaypoint;
         }
 
@@ -148,8 +152,9 @@
             float height = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch).z / 40;
             newWaypoint.transform.Translate(0f, height, 0f);
 
-            adjustingHeight = !OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
-            settingInterWaypoint = !OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
+            adjustingHeight = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+            firstClickFinished = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+            settingInterWaypoint = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
         }
 
         // Returns the maximum height that the waypoint can be placed
@@ -190,7 +195,6 @@
             GameObject[] drones = GameObject.FindGameObjectsWithTag("Drone");
             foreach (GameObject i in drones)
             {
-                Debug.Log(i);
                 if (i.gameObject != this.gameObject)
                 {
                     i.GetComponent<SetWaypoint>().selected = false;
