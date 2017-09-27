@@ -67,7 +67,7 @@ using System.Collections;
         private void ChooseGroundPoint()
         {
             Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
-            groundPoint.y = MaxHeight();
+            groundPoint.y = groundPoint.y+0.5f* world.GetComponent<ControllerInteractions>().actualScale.y;
             Instantiate(drone, groundPoint, Quaternion.identity, world.transform);
             placingDrone = false;
         }

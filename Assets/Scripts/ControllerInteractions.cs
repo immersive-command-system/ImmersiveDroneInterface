@@ -42,6 +42,7 @@ public class ControllerInteractions : MonoBehaviour {
         //This provides us with basis to create bounds on scaling and something to return to
         originalScale = transform.localScale;
         originalPosition = transform.position;
+        actualScale = new Vector3(1, 1, 1);
 
         //These are the bounds on scaling
         minScale = Vector3.Scale(originalScale, new Vector3(0.1F, 0.1F, 0.1F));

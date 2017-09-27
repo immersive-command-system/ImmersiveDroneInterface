@@ -105,7 +105,7 @@
         {
             if (targetWaypoint != null)
             {
-                float step = speed * Time.deltaTime;
+                float step = speed * Time.deltaTime * world.GetComponent<ControllerInteractions>().actualScale.x;
                 this.transform.position = Vector3.MoveTowards(this.transform.position, targetWaypoint.transform.position, step);
             } else
             {
