@@ -128,20 +128,20 @@
         // Places a collider around the waypoint line
         public void SetLineCollider(Vector3 endpoint)
         {
-            lineCollider.transform.parent = waypointLine.transform;
             if (passed)
             {
                 Destroy(lineCollider);
             } else if (referenceDrone.GetComponent<SetWaypoint>().selected)
             {
+                lineCollider.transform.parent = waypointLine.transform;
                 lineCollider.radius = world.GetComponent<ControllerInteractions>().actualScale.y / 50;
                 lineCollider.center = Vector3.zero;
                 lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
                 lineCollider.direction = 2;
                 lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
                 lineCollider.height = (endpoint - this.transform.position).magnitude;
+                lineCollider.transform.parent = world.transform;
             }
-            lineCollider.transform.parent = world.transform;
         }
 
         // Creates the groundpoint under waypoint
