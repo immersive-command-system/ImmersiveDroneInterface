@@ -355,8 +355,9 @@ namespace VRTK
 
         private void OnGround(bool rayHit, RaycastHit pointerCollidedWith)
         {
-            Collider world = GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>();
-            onGround = (rayHit && pointerCollidedWith.collider.Equals(world));
+            Collider terrain = GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>();
+            Collider floor = GameObject.FindGameObjectWithTag("Floor").GetComponent<BoxCollider>();
+            onGround = (rayHit && (pointerCollidedWith.collider.Equals(terrain)|| pointerCollidedWith.collider.Equals(floor)));
         }
 
         public bool OnGround()

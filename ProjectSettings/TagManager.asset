@@ -18,6 +18,7 @@ TagManager:
   - World
   - Drone
   - Line Collider
+  - Floor
   layers:
   - Default
   - TransparentFX

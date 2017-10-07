@@ -7088,7 +7088,7 @@ MonoBehaviour:
   selectedPassedLine: {fileID: 2100000, guid: 27c39b5231ccc5442911794c139776f0, type: 2}
   unselectedPassedLine: {fileID: 2100000, guid: 1e28fed50ea79664484fd85b6c397929,
     type: 2}
-  speed: 0.2
+  speed: 0.1
   move: 0
   targetWaypoint: {fileID: 0}
   currentWaypoint: 0

@@ -5,29 +5,45 @@ using UnityEditor;
 
 public class ControllerInteractions : MonoBehaviour {
     //terrain is the textured heightmap
-    GameObject terrain;
+    public GameObject terrain;
     //pivot is the center of the table
-    GameObject pivot;
+    public GameObject pivot;
     //originalScale is the original localScale of the world
     public Vector3 originalScale;
     //actualScale is the relative localScale of the world in comparison to its original localScale
     public Vector3 actualScale;
     //currentScale is the current localScale
-    Vector3 currentScale;
+    public Vector3 currentScale;
     //This is the original position of the world
-    Vector3 originalPosition;
+    public Vector3 originalPosition;
     //This is the 1/10th of the originalScale of the world
-    Vector3 minScale;
+    public Vector3 minScale;
     //This is the 10 times the originalScale of the world
-    Vector3 maxScale;
+    public Vector3 maxScale;
     //This is the speed at which the drone can be moved at
-    float speed;
+    public float speed;
     //This is the rotating flag
-    bool isRotating;
+    public bool isRotating;
     //This tells us where the controller was when the rotation started
-    Vector3 controllerOriginalPosition;
+    private LinkedList<Quaternion> rots;
+    private LinkedList<float> times;
+    //This tells us if the map is still moving or being dragged
+    public enum MapState
+    {
+        IDLE, MOVING, DRAGGING, STOPPED
+    }
 
-
+    public MapState mapState;
+    public OVRInput.Controller currentController;
+    private Vector3 startVec;
+    private Quaternion originalRotation;
+    private Quaternion movementRotation;
+    public float velocityDeltaTime = .1f;
+    private float movementDeltaTime;
+    private float angleScale = 1;
+    private float storedTime;
+    private float currSpeed;
+    private float previousGet = 0f;
 
     public Vector3 objectScale;
 
@@ -51,45 +67,92 @@ public class ControllerInteractions : MonoBehaviour {
         //This adjusts how fast the map can be moved on the x-z plane
         speed = 3;
 
-        //the rotation flag will only be activated when squeezing one of the grip controllers
-        isRotating = false;
+        //list of rotation kept to average as decay reference
+        rots = new LinkedList<Quaternion>();
+        times = new LinkedList<float>();
+
+        mapState = MapState.IDLE;
+
+        currentController = OVRInput.Controller.LTouch;
+
     }
 
-    void Update() {
-        //SCALING WORLD
+    void FixedUpdate() {
+
         if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
+            //SCALING WORLD
             ScaleWorld();
             UpdateScale();
-        } else if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
+        }
+        else
         {
-            //ROTATING WORLD LEFT
-            rotateWorld();
-        } else if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
-        {
-            //ROTATING WORLD RIGHT
-            rotateWorld();
+            SimpleRotateWorld();
+            //If only one controller is gripped, we will rotate the world.
+            //if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger) || OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
+            //{
+            //    //STARTING ROTATION
+            //    //Set map to rotation state
+            //    mapState = MapState.DRAGGING;
+            //    //Mark which controller is causing the rotation
+            //    if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
+            //    {
+            //        currentController = OVRInput.Controller.LTouch;
+            //    }
+            //    else
+            //    {
+            //        currentController = OVRInput.Controller.RTouch;
+            //    }
+            //    //Grab controller position in world space
+            //    Vector3 currPos = OVRInput.GetLocalControllerPosition(currentController);
+
+            //    //Reinitialize values
+            //    originalRotation = terrain.transform.rotation;
+            //    startVec = (currPos - terrain.transform.position);
+            //    rots.Clear();
+            //    times.Clear();
+            //    currSpeed = 0;
+            //}
+            ////ROTATING WORLD
+            //if (mapState == MapState.DRAGGING)
+            //{
+            //    Vector3 currPos = OVRInput.GetLocalControllerPosition(currentController);
+            //    //IF THE CONTROLLER IS PRESSED DOWN
+            //    if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController) != 0f)
+            //    {
+            //        Vector3 endVec = (currPos - terrain.transform.position);
+            //        Quaternion rot = Quaternion.FromToRotation(startVec, endVec);
+            //        terrain.transform.rotation = rot * originalRotation;
+
+            //        // Update lists
+            //        rots.AddLast(terrain.transform.rotation);
+            //        times.AddLast(Time.time);
+            //        while (times.First.Value < Time.time - velocityDeltaTime)
+            //        {
+            //            rots.RemoveFirst();
+            //            times.RemoveFirst();
+            //        }
+            //    }
+            //    //IF WE RELEASE THE CONTROLLER
+            //    else if (previousGet != 0f)
+            //    {
+            //        // Set / Reinitialize values
+            //        movementRotation = Quaternion.Inverse(rots.First.Value) * terrain.transform.rotation;
+            //        movementDeltaTime = Time.time - times.First.Value;
+            //        angleScale = 1;
+            //        mapState = MapState.MOVING;
+            //    }
+            //}
         }
 
+
         //MOVING WORLD
-        moveWorld(); 
+        MoveWorld();
+        previousGet = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController);
     }
 
-    private void moveWorld()
-    {
-        float moveX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x;
-        float moveZ = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y;
-        float moveY = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y;
 
-        // update map position based on input
-        Vector3 position = transform.position;
-        position.x += moveX * speed * Time.deltaTime;
-        //position.y += moveY * speed * Time.deltaTime;
-        position.z += moveZ * speed * Time.deltaTime;
-        transform.position = position;
-    }
-
-    private void rotateWorld()
+    private void SimpleRotateWorld()
     {
         if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
         {
@@ -103,18 +166,20 @@ public class ControllerInteractions : MonoBehaviour {
         }
     }
 
-    //private float getRotationAngle(OVRInput.Controller controller)
-    //{
-    //    Vector3 originalVector = controllerOriginalPosition - pivot.transform.position;
-    //    Debug.Log("Original Vector is: " + originalVector);
-    //    Vector3 newVector = OVRInput.GetLocalControllerPosition(controller) - pivot.transform.position;
-    //    Debug.Log("New Vector is: " + newVector);
-    //    Vector2 originalVector2D = new Vector2(originalVector.x, originalVector.z);
-    //    Vector2 newVector2D = new Vector2(newVector.x, newVector.z);
-    //    float rotate = Mathf.Acos(Vector3.Dot(originalVector2D, newVector2D));
-    //    Debug.Log("Angular Rotation speed is: "+rotate);
-    //    return rotate;
-    //}
+    private void MoveWorld()
+    {
+        float moveX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x;
+        float moveZ = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y;
+        float moveY = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y;
+
+        // update map position based on input
+        Vector3 position = transform.position;
+        position.x += moveX * speed * Time.deltaTime;
+        //position.y += moveY * speed * Time.deltaTime;
+        position.z += moveZ * speed * Time.deltaTime;
+        transform.position = position;
+    }
+
 
     private void ScaleWorld()
     {
