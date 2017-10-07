@@ -379,7 +379,8 @@ namespace VRTK
             if (rayHit && pointerCollidedWith.collider.tag == "Line Collider")
             {
                 //return pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().waypoints.IndexOf(pointerCollidedWith.collider.gameObject);
-                GameObject selectedWaypoint = pointerCollidedWith.collider.transform.parent.gameObject;
+                //GameObject selectedWaypoint = pointerCollidedWith.collider.transform.parent.gameObject;
+                GameObject selectedWaypoint = pointerCollidedWith.collider.gameObject.GetComponent<WaypointLine>().waypoint;
                 //ArrayList temp1 = selectedWaypoint.GetComponent<SetWaypoint>().waypoints;
                 //return selectedWaypoint.GetComponent<SetWaypoint>().waypoints.IndexOf(selectedWaypoint);
                 return selectedWaypoint;

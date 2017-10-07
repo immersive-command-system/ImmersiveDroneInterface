@@ -93,13 +93,13 @@ public class ControllerInteractions : MonoBehaviour {
     {
         if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
         {
-            transform.RotateAround(pivot.transform.position, Vector3.up, 1);
-            Debug.Log("Rotating based on right controller!");
+            //transform.RotateAround(pivot.transform.position, Vector3.up, 1);
+            //Debug.Log("Rotating based on right controller!");
         }
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
-            transform.RotateAround(pivot.transform.position, Vector3.up, -1);
-            Debug.Log("Rotating based on left controller!");
+            //transform.RotateAround(pivot.transform.position, Vector3.up, -1);
+            //Debug.Log("Rotating based on left controller!");
         }
     }
 
