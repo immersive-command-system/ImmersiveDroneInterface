@@ -49,9 +49,15 @@
 
             lineCollider = new GameObject("Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
-            lineCollider.transform.parent = waypointLine.transform;
+            lineCollider.gameObject.AddComponent<WaypointLine>().waypoint = gameObject;
+            
+            // Commented out due to child collider conflicts with parent collider.
+            //lineCollider.transform.parent = waypointLine.transform;
 
             setInterwaypointToggle = true;
+
+            // Sets up interaction events
+            GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += new InteractableObjectEventHandler(InteractableObjectUngrabbed);
         }
 
         void Update()
@@ -127,18 +133,23 @@
                 Destroy(lineCollider);
             } else if (referenceDrone.GetComponent<SetWaypoint>().selected)
             {
+                lineCollider.transform.parent = waypointLine.transform;
                 lineCollider.radius = world.GetComponent<ControllerInteractions>().actualScale.y / 50;
                 lineCollider.center = Vector3.zero;
                 lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
                 lineCollider.direction = 2;
                 lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
                 lineCollider.height = (endpoint - this.transform.position).magnitude;
+                lineCollider.transform.parent = world.transform;
             }
         }
 
         // Creates the groundpoint under waypoint
         public void CreateGroundpoint()
         {
+            if (groundpointLine != null)
+                Destroy(groundpointLine);
+
             Vector3 groundpoint = new Vector3(this.transform.position.x, world.transform.position.y + modelGroundpoint.transform.localScale.y, this.transform.position.z);
             thisGroundpoint = Instantiate(modelGroundpoint, groundpoint, Quaternion.identity);
             thisGroundpoint.transform.localScale = world.GetComponent<ControllerInteractions>().actualScale / 100;
@@ -225,6 +236,11 @@
             }
             //Debug.Log(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch));
             //Debug.Log(this.transform.position);
+        }
+
+        void InteractableObjectUngrabbed(object sender, VRTK.InteractableObjectEventArgs e)
+        {
+            CreateGroundpoint();
         }
     }
 }
