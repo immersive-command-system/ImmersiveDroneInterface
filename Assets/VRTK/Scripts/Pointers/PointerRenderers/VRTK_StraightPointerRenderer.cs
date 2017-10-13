@@ -1,5 +1,4 @@
-﻿// Straight Pointer Renderer|PointerRenderers|10020
-namespace VRTK
+﻿namespace VRTK
 {
     using UnityEngine;
     using System.Collections;
@@ -189,15 +188,17 @@ namespace VRTK
                 }
 
                 destinationHit = new RaycastHit();
-                
+
                 // SETTING WAYPOINT
                 if (setWaypoint)
                 {
                     ChangeColor(waypointColor);
-                } else if (setDrone)
+                }
+                else if (setDrone)
                 {
                     ChangeColor(droneColor);
-                } else
+                }
+                else
                 {
                     ChangeColor(invalidCollisionColor);
                 }
@@ -211,7 +212,7 @@ namespace VRTK
                 PointerEnter(pointerCollidedWith);
 
                 destinationHit = pointerCollidedWith;
-                
+
                 // SETTING WAYPOINT
                 if (setWaypoint)
                 {
@@ -220,7 +221,8 @@ namespace VRTK
                 else if (setDrone)
                 {
                     ChangeColor(droneColor);
-                } else
+                }
+                else
                 {
                     ChangeColor(validCollisionColor);
                 }
@@ -238,7 +240,7 @@ namespace VRTK
             }
         }
 
-        
+
         // Requires Vector3 actualScale in SetWaypoint script to be public
         private void LogHeight(bool rayHit, RaycastHit pointerCollidedWith)
         {
@@ -248,7 +250,7 @@ namespace VRTK
                 Debug.Log(world.GetComponent<SetWaypoint>().actualScale.y + " scale");
             }
         }
-        
+
 
         // DRONE MENU
         protected virtual void ActivateDroneMenu(bool rayHit, RaycastHit pointerCollidedWith)
@@ -356,8 +358,7 @@ namespace VRTK
         private void OnGround(bool rayHit, RaycastHit pointerCollidedWith)
         {
             Collider terrain = GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>();
-            Collider floor = GameObject.FindGameObjectWithTag("Floor").GetComponent<BoxCollider>();
-            onGround = (rayHit && (pointerCollidedWith.collider.Equals(terrain)|| pointerCollidedWith.collider.Equals(floor)));
+            onGround = (rayHit && (pointerCollidedWith.collider.Equals(terrain)));
         }
 
         public bool OnGround()
@@ -385,7 +386,8 @@ namespace VRTK
                 //ArrayList temp1 = selectedWaypoint.GetComponent<SetWaypoint>().waypoints;
                 //return selectedWaypoint.GetComponent<SetWaypoint>().waypoints.IndexOf(selectedWaypoint);
                 return selectedWaypoint;
-            } else
+            }
+            else
             {
                 return null;
             }
@@ -407,13 +409,15 @@ namespace VRTK
                         if (pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected)
                         {
                             Debug.Log("Selected!");
-                        } else
+                        }
+                        else
                         {
                             Debug.Log("Deselected!");
                         }
                         selectDroneToggle = false;
                     }
-                } else
+                }
+                else
                 {
                     selectDroneToggle = true;
                 }
