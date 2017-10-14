@@ -289,8 +289,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fce500faaffe7ac4a9135cb03c53891a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  terrain: {fileID: 0}
+  pivot: {fileID: 0}
   originalScale: {x: 0, y: 0, z: 0}
   actualScale: {x: 0, y: 0, z: 0}
+  currentScale: {x: 0, y: 0, z: 0}
+  originalPosition: {x: 0, y: 0, z: 0}
+  minScale: {x: 0, y: 0, z: 0}
+  maxScale: {x: 0, y: 0, z: 0}
+  speed: 0
+  isRotating: 0
+  tableRadius: 1
+  mapRadius: 3
+  mapState: 0
+  currentController: 0
+  velocityDeltaTime: 0.1
   objectScale: {x: 0, y: 0, z: 0}
 --- !u!114 &146794965
 MonoBehaviour:

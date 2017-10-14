@@ -32,6 +32,10 @@ public class ControllerInteractions : MonoBehaviour {
     {
         IDLE, MOVING, DRAGGING, STOPPED
     }
+    // The radius of the table (assuming the table is circular)
+    public float tableRadius;
+    // The radius of the map (assuming the map is circular)
+    public float mapRadius;
 
     public MapState mapState;
     public OVRInput.Controller currentController;
@@ -148,6 +152,7 @@ public class ControllerInteractions : MonoBehaviour {
 
         //MOVING WORLD
         MoveWorld();
+        EnforceMapBoundary();
         previousGet = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController);
     }
 
@@ -229,5 +234,28 @@ public class ControllerInteractions : MonoBehaviour {
         actualScale.x = (currentScale.x / originalScale.x);
         actualScale.y = (currentScale.y / originalScale.y);
         actualScale.z = (currentScale.z / originalScale.z);
+    }
+
+    // Makes sure the map sits within the boundaries of the visible table.
+    // Checks if two circles (tableCenter w/ radius tableRadius, and mapCenter w/ radius worldMapRadius), intersect
+    // If not, then moves the map towards the center until it does.
+    private void EnforceMapBoundary()
+    {
+        Vector3 tableCenter = originalPosition;
+        Vector3 mapCenter = transform.position;
+        float worldMapRadius = mapRadius * transform.localScale.x;
+
+        // Distance check
+        float distSqr = Vector3.SqrMagnitude(tableCenter - mapCenter);
+        if (distSqr > Mathf.Pow(tableRadius + worldMapRadius, 2))
+        {
+            // Create vector from mapCenter to edge of table circle (in bounds)
+            float distDiff = Vector3.Distance(tableCenter, mapCenter) - tableRadius - worldMapRadius;
+            Vector3 movement = Vector3.Normalize(tableCenter - mapCenter) * distDiff;
+            movement.y = 0;
+
+            // Move
+            transform.Translate(movement, Space.World);
+        }
     }
 }
