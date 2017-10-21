@@ -1,4 +1,4 @@
-﻿namespace VRTK
+namespace VRTK
 {
     using System;
     using System.Collections;
@@ -149,7 +149,7 @@
                 newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, MaxHeight(), newWaypoint.transform.position.z);
             }
 
-            float height = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch).z / 40;
+            float height = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch).x / 40;
             newWaypoint.transform.Translate(0f, height, 0f);
 
             adjustingHeight = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
