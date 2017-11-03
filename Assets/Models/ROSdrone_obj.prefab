@@ -805,7 +805,7 @@ GameObject:
   - component: {fileID: 114978072206787216}
   - component: {fileID: 114568125012931094}
   m_Layer: 0
-  m_Name: drone_obj
+  m_Name: ROSdrone_obj
   m_TagString: Drone
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7230,6 +7230,7 @@ LineRenderer:
     numCapVertices: 0
     alignment: 0
     textureMode: 0
+    generateLightingData: 0
   m_UseWorldSpace: 1
   m_Loop: 0
 --- !u!135 &135519695496822468
