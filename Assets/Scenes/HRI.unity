@@ -42,7 +42,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 11
   m_GIWorkflowMode: 0
   m_GISettings:
     serializedVersion: 2
@@ -54,7 +54,7 @@ LightmapSettings:
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 1
   m_LightmapEditorSettings:
-    serializedVersion: 8
+    serializedVersion: 9
     m_Resolution: 2
     m_BakeResolution: 40
     m_TextureWidth: 1024
@@ -87,7 +87,7 @@ LightmapSettings:
     m_PVRFilteringAtrousNormalSigma: 1
     m_PVRFilteringAtrousPositionSigma: 1
   m_LightingDataAsset: {fileID: 0}
-  m_ShadowMaskMode: 2
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -275,6 +275,7 @@ Transform:
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
   - {fileID: 498374680}
+  - {fileID: 640218393}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -299,6 +300,8 @@ MonoBehaviour:
   maxScale: {x: 0, y: 0, z: 0}
   speed: 0
   isRotating: 0
+  tableRadius: 0
+  mapRadius: 0
   mapState: 0
   currentController: 0
   velocityDeltaTime: 0.1
@@ -311,10 +314,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 146794962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c598293390add2b45a036cfe0ca39525, type: 3}
+  m_Script: {fileID: 11500000, guid: 552cecad80d3ae148b0457c9647390a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drone: {fileID: 1497704686498948, guid: 23ccd6cb144b5f54db5836aa8a1f377b, type: 2}
+  drone: {fileID: 1497704686498948, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
   mainMenu: {fileID: 1959261476}
 --- !u!1 &216611872
 GameObject:
@@ -405,7 +408,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 146794965}
+      - m_Target: {fileID: 0}
         m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
@@ -502,6 +505,53 @@ Transform:
   m_PrefabParentObject: {fileID: 4002361448634520, guid: f49e25518ab4b8f4797b7d993359a8a7,
     type: 2}
   m_PrefabInternal: {fileID: 889628482}
+--- !u!1001 &640218392
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 146794963}
+    m_Modifications:
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 2.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 19145f5b6a2c2714ebe4598f9c4ea589, type: 2}
+  m_IsPrefabParent: 0
+--- !u!4 &640218393 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 4064626513410216, guid: 19145f5b6a2c2714ebe4598f9c4ea589,
+    type: 2}
+  m_PrefabInternal: {fileID: 640218392}
 --- !u!1 &665289476 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 157742, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
@@ -554,6 +604,20 @@ Light:
   m_Lightmapping: 4
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
+  m_FalloffTable:
+    m_Table[0]: 0
+    m_Table[1]: 0
+    m_Table[2]: 0
+    m_Table[3]: 0
+    m_Table[4]: 0
+    m_Table[5]: 0
+    m_Table[6]: 0
+    m_Table[7]: 0
+    m_Table[8]: 0
+    m_Table[9]: 0
+    m_Table[10]: 0
+    m_Table[11]: 0
+    m_Table[12]: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_ShadowRadius: 0
