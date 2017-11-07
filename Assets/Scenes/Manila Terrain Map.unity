@@ -297,7 +297,8 @@ MonoBehaviour:
   originalPosition: {x: 0, y: 0, z: 0}
   minScale: {x: 0, y: 0, z: 0}
   maxScale: {x: 0, y: 0, z: 0}
-  speed: 0
+  speed: 3
+  rotSpeed: 0.5
   isRotating: 0
   tableRadius: 1
   mapRadius: 3

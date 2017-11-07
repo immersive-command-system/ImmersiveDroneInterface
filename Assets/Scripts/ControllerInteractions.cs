@@ -20,8 +20,10 @@ public class ControllerInteractions : MonoBehaviour {
     public Vector3 minScale;
     //This is the 10 times the originalScale of the world
     public Vector3 maxScale;
-    //This is the speed at which the drone can be moved at
-    public float speed;
+    //This is the speed at which the map can be moved at
+    public float speed = 3;
+    // Rotation speed (in rev/s)
+    public float rotSpeed = 1;
     //This is the rotating flag
     public bool isRotating;
     //This tells us where the controller was when the rotation started
@@ -67,9 +69,6 @@ public class ControllerInteractions : MonoBehaviour {
         //These are the bounds on scaling
         minScale = Vector3.Scale(originalScale, new Vector3(0.1F, 0.1F, 0.1F));
         maxScale = Vector3.Scale(originalScale, new Vector3(10F, 10F, 10F));
-
-        //This adjusts how fast the map can be moved on the x-z plane
-        speed = 3;
 
         //list of rotation kept to average as decay reference
         rots = new LinkedList<Quaternion>();
@@ -156,31 +155,21 @@ public class ControllerInteractions : MonoBehaviour {
         previousGet = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController);
     }
 
-
+    // Rotate the world based off of the right thumbstick
     private void SimpleRotateWorld()
     {
-        if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
-        {
-            //transform.RotateAround(pivot.transform.position, Vector3.up, 1);
-            //Debug.Log("Rotating based on right controller!");
-        }
-        if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
-        {
-            //transform.RotateAround(pivot.transform.position, Vector3.up, -1);
-            //Debug.Log("Rotating based on left controller!");
-        }
+        float deltaX = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x;
+        transform.RotateAround(pivot.transform.position, Vector3.up, deltaX * rotSpeed * 360 * Time.fixedDeltaTime);
     }
 
     private void MoveWorld()
     {
         float moveX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x;
         float moveZ = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y;
-        float moveY = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y;
 
         // update map position based on input
         Vector3 position = transform.position;
         position.x += moveX * speed * Time.deltaTime;
-        //position.y += moveY * speed * Time.deltaTime;
         position.z += moveZ * speed * Time.deltaTime;
         transform.position = position;
     }
