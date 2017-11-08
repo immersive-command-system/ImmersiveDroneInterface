@@ -26,30 +26,26 @@ public class ControllerInteractions : MonoBehaviour {
     public float rotSpeed = 1;
     //This is the rotating flag
     public bool isRotating;
-    //This tells us where the controller was when the rotation started
-    private LinkedList<Quaternion> rots;
-    private LinkedList<float> times;
     //This tells us if the map is still moving or being dragged
     public enum MapState
     {
-        IDLE, MOVING, DRAGGING, STOPPED
+        IDLE, DRAGGING, MOVING
     }
     // The radius of the table (assuming the table is circular)
     public float tableRadius;
     // The radius of the map (assuming the map is circular)
     public float mapRadius;
+    // The circular table
+    public GameObject rotatingTable;
 
+    // Rotation stuff
+    public LinkedList<float> angles;
+    public bool handleHeldTrigger = false;
     public MapState mapState;
     public OVRInput.Controller currentController;
-    private Vector3 startVec;
-    private Quaternion originalRotation;
-    private Quaternion movementRotation;
-    public float velocityDeltaTime = .1f;
-    private float movementDeltaTime;
-    private float angleScale = 1;
-    private float storedTime;
-    private float currSpeed;
-    private float previousGet = 0f;
+    private Vector3 oldVec;
+    private float movementAngle;
+    public float movementAngleDecay = .95f;
 
     public Vector3 objectScale;
 
@@ -70,96 +66,122 @@ public class ControllerInteractions : MonoBehaviour {
         minScale = Vector3.Scale(originalScale, new Vector3(0.1F, 0.1F, 0.1F));
         maxScale = Vector3.Scale(originalScale, new Vector3(10F, 10F, 10F));
 
-        //list of rotation kept to average as decay reference
-        rots = new LinkedList<Quaternion>();
-        times = new LinkedList<float>();
-
         mapState = MapState.IDLE;
-
-        currentController = OVRInput.Controller.LTouch;
-
+        angles = new LinkedList<float>();
     }
 
     void FixedUpdate() {
 
         if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
-            //SCALING WORLD
+            // SCALE WORLD
             ScaleWorld();
             UpdateScale();
         }
         else
         {
-            SimpleRotateWorld();
-            //If only one controller is gripped, we will rotate the world.
-            //if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger) || OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
-            //{
-            //    //STARTING ROTATION
-            //    //Set map to rotation state
-            //    mapState = MapState.DRAGGING;
-            //    //Mark which controller is causing the rotation
-            //    if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
-            //    {
-            //        currentController = OVRInput.Controller.LTouch;
-            //    }
-            //    else
-            //    {
-            //        currentController = OVRInput.Controller.RTouch;
-            //    }
-            //    //Grab controller position in world space
-            //    Vector3 currPos = OVRInput.GetLocalControllerPosition(currentController);
-
-            //    //Reinitialize values
-            //    originalRotation = terrain.transform.rotation;
-            //    startVec = (currPos - terrain.transform.position);
-            //    rots.Clear();
-            //    times.Clear();
-            //    currSpeed = 0;
-            //}
-            ////ROTATING WORLD
-            //if (mapState == MapState.DRAGGING)
-            //{
-            //    Vector3 currPos = OVRInput.GetLocalControllerPosition(currentController);
-            //    //IF THE CONTROLLER IS PRESSED DOWN
-            //    if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController) != 0f)
-            //    {
-            //        Vector3 endVec = (currPos - terrain.transform.position);
-            //        Quaternion rot = Quaternion.FromToRotation(startVec, endVec);
-            //        terrain.transform.rotation = rot * originalRotation;
-
-            //        // Update lists
-            //        rots.AddLast(terrain.transform.rotation);
-            //        times.AddLast(Time.time);
-            //        while (times.First.Value < Time.time - velocityDeltaTime)
-            //        {
-            //            rots.RemoveFirst();
-            //            times.RemoveFirst();
-            //        }
-            //    }
-            //    //IF WE RELEASE THE CONTROLLER
-            //    else if (previousGet != 0f)
-            //    {
-            //        // Set / Reinitialize values
-            //        movementRotation = Quaternion.Inverse(rots.First.Value) * terrain.transform.rotation;
-            //        movementDeltaTime = Time.time - times.First.Value;
-            //        angleScale = 1;
-            //        mapState = MapState.MOVING;
-            //    }
-            //}
+            // ROTATE WORLD
+            ControllerRotateWorld();
+            ManualRotateWorld();
         }
 
-
-        //MOVING WORLD
+        // MOVING WORLD
         MoveWorld();
         EnforceMapBoundary();
-        previousGet = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController);
     }
 
     // Rotate the world based off of the right thumbstick
-    private void SimpleRotateWorld()
+    private void ControllerRotateWorld()
     {
         float deltaX = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x;
-        transform.RotateAround(pivot.transform.position, Vector3.up, deltaX * rotSpeed * 360 * Time.fixedDeltaTime);
+
+        // We only consider inputs above a certain threshold.
+        if (Mathf.Abs(deltaX) > 0.2f)
+        {
+            mapState = MapState.IDLE; // Controller input overrides manual
+            float angle = deltaX * rotSpeed * 360 * Time.fixedDeltaTime;
+            transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+            rotatingTable.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+        }
+    }
+
+    // Rotate the world based off of physical movement/interaction
+    private void ManualRotateWorld()
+    {
+        // CASE: User has held the handle.
+        if (handleHeldTrigger)
+        {
+            // Update state.
+            handleHeldTrigger = false;
+            mapState = MapState.DRAGGING;
+
+            // Initialize oldVec: direction vec from hand to pivot.
+            oldVec = OVRInput.GetLocalControllerPosition(currentController) - pivot.transform.position;
+            oldVec.y = 0;
+            oldVec = Vector3.Normalize(oldVec);
+
+            // Initialize angles: linked list that'll contain recent angle rotations.
+            angles.Clear();
+        }
+
+        // CASE: Map is in the dragging state.
+        if (mapState == MapState.DRAGGING)
+        {
+            // CASE: User has released the handle.
+            if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, currentController) < .1f)
+            {
+                // CASE: User was dragging the table when they released the handle.
+                if (mapState == MapState.DRAGGING)
+                {
+                    // Initialize movementAngle: the initial movement per fixedupdate, to avg of recent rots
+                    movementAngle = 0;
+                    foreach (float a in angles)
+                        movementAngle += a;
+                    movementAngle /= angles.Count;
+
+                    // Set the map to moving.
+                    mapState = MapState.MOVING;
+                }
+            }
+
+            // Initialize currVec.
+            Vector3 currVec = OVRInput.GetLocalControllerPosition(currentController) - pivot.transform.position;
+            currVec.y = 0;
+            currVec = Vector3.Normalize(currVec);
+
+            // Find the angle going from oldVec to currVec.
+            float angle = Vector3.Angle(oldVec, currVec);
+            Vector3 cross = Vector3.Cross(oldVec, currVec);
+            if (cross.y > 0) angle = -angle;
+
+            // Rotate the map and circular table by that angle.
+            transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+            rotatingTable.transform.Rotate(Vector3.up, angle);
+
+            // Update startVec
+            oldVec = currVec;
+
+            // Add recent rotation angle to angles. Keep only the N most recent angles.
+            angles.AddLast(angle);
+            if (angles.Count > 10)
+                angles.RemoveFirst();
+
+        }
+        else if (mapState == MapState.MOVING)
+        {
+            // Rotate the map/table by the movementAngle.
+            transform.RotateAround(pivot.transform.position, Vector3.up, movementAngle);
+            rotatingTable.transform.Rotate(Vector3.up, movementAngle);
+
+            // Decay movementAngle.
+            movementAngle *= movementAngleDecay;
+
+            // Check if we've stopped moving - if so, set to IDLE.
+            if (Mathf.Abs(movementAngle) < 0.005f)
+            {
+                mapState = MapState.IDLE;
+            }
+        }
     }
 
     private void MoveWorld()
