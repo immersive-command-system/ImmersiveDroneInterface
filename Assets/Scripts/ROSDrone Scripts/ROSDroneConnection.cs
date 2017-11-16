@@ -8,12 +8,11 @@ public class ROSDroneConnection : MonoBehaviour {
 
     void Start()
     {
-        Debug.Log("Creating ROS connection");
+        Debug.Log("Attempting to create ROS connection");
         ros = new ROSBridgeWebSocketConnection("ws://192.168.10.4", 9090);
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
-        Debug.Log("ROS connected");
         //ros.callService ("/turtle1/set_pen", "{\"off\": 0}");
     }
 

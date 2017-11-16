@@ -26,7 +26,7 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
 
     public static string getMessageType()
     {
-        return "/crazyflie_msgs/DubinsStateStamped";
+        return "crazyflie_msgs/DubinsStateStamped";
     }
 
     public static ROSBridgeMsg parseMessage(JSONNode msg)
