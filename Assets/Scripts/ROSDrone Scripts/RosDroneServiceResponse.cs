@@ -1,4 +1,5 @@
 ﻿using ROSBridgeLib;
+using ROSBridgeLib.std_msgs;
 using System.Collections;
 using SimpleJSON;
 using UnityEngine;
@@ -15,11 +16,9 @@ using UnityEngine;
  * @version 3.0
  **/
 
-public class RosDroneServiceResponse
-{
+public class ROSDroneServiceResponse {
 
-    public static void ServiceCallBack(string service, string response)
-    {
+    public static void ServiceCallBack(string service, string response) {
         if (response == null)
             Debug.Log("ServiceCallback for service " + service);
         else
