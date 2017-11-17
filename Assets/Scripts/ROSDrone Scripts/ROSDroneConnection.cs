@@ -9,11 +9,10 @@ public class ROSDroneConnection : MonoBehaviour {
     void Start()
     {
         Debug.Log("Attempting to create ROS connection");
-        ros = new ROSBridgeWebSocketConnection("ws://192.168.10.4", 9090);
+        ros = new ROSBridgeWebSocketConnection("ws://192.168.0.107", 9090);
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
-        //ros.callService ("/turtle1/set_pen", "{\"off\": 0}");
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow

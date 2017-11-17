@@ -19,31 +19,33 @@ using UnityEngine;
 public class ROSDroneSubscriber : ROSBridgeSubscriber
 {
 
-    public static string getMessageTopic()
+    public static string GetMessageTopic()
     {
         return "/state/dubins";
     }
 
-    public static string getMessageType()
+    public static string GetMessageType()
     {
         return "crazyflie_msgs/DubinsStateStamped";
     }
 
-    public static ROSBridgeMsg parseMessage(JSONNode msg)
+    public static ROSBridgeMsg ParseMessage(JSONNode msg)
     {
         return new PoseMsg(msg);
     }
 
-    public static void callBack(ROSBridgeMsg msg)
+    public static void CallBack(ROSBridgeMsg msg)
     {
         Debug.Log("callback");
-        GameObject robot = GameObject.Find("drone");
+        GameObject robot = GameObject.FindWithTag("ROSDrone");
         if (robot == null)
             Debug.Log("Can't find the robot???");
         else
         {
             PoseMsg pose = (PoseMsg)msg;
-            robot.transform.position = new Vector3(pose.getX(), pose.getZ(), pose.getY());
+            Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
+            robot.transform.position = new Vector3(pose.getX()/5 + tablePos.x, pose.getZ()/5 + tablePos.z +2.1f, pose.getY()/5);
+            Debug.Log(robot.transform.position);
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
         }
     }

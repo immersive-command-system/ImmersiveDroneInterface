@@ -19,6 +19,9 @@ TagManager:
   - Drone
   - Line Collider
   - Floor
+  - Handle
+  - ROSDrone
+  - Table
   layers:
   - Default
   - TransparentFX
