@@ -347,7 +347,6 @@
         {
             setDrone = !setDrone;
         }
-        // SETTING DRONE
 
         // SETTING WAYPOINT
         public void OnClick()
@@ -360,6 +359,32 @@
             Collider terrain = GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>();
             onGround = (rayHit && (pointerCollidedWith.collider.Equals(terrain)));
         }
+
+        // IF THERE ARE MULTIPLE TERRAIN TILES
+        //GameObject[] groundPrefabs;
+        //MeshCollider[] terrain;
+
+        //private void OnGround(bool rayHit, RaycastHit pointerCollidedWith)
+        //{
+        //    groundPrefabs = GameObject.FindGameObjectsWithTag("Ground");
+        //    terrain = new MeshCollider[groundPrefabs.Length];
+        //    bool hitTerrain = false;
+
+        //    for (int i = 0; i < groundPrefabs.Length; i++)
+        //    {
+        //        terrain[i] = groundPrefabs[i].GetComponent<MeshCollider>();
+        //    }
+
+        //    for (int i = 0; i < terrain.Length; i++)
+        //    {
+        //        if (pointerCollidedWith.collider.Equals(terrain[i]))
+        //        {
+        //            hitTerrain = true;
+        //        }
+        //    }
+
+        //    onGround = (rayHit && hitTerrain);
+        //}
 
         public bool OnGround()
         {

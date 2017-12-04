@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ROSBridgeLib;
+using UnityEditor;
+using System.IO;
 
 public class ROSDroneConnection : MonoBehaviour {
     private ROSBridgeWebSocketConnection ros = null;
@@ -28,5 +30,33 @@ public class ROSDroneConnection : MonoBehaviour {
     void Update()
     {
         ros.Render();
+        if(OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
+        {
+            GameObject robot = GameObject.FindWithTag("ROSDrone");
+            if (robot == null)
+                Debug.Log("Can't find the robot???");
+            else
+            {
+                WriteData(robot);
+            }
+        }
+    }
+
+    [MenuItem("Tools/Write file")]
+    static void WriteData(GameObject robot)
+    {
+        string path = "Assets/Resultss/user_test.txt";
+
+        //Write some text to the test.txt file
+        StreamWriter writer = new StreamWriter(path, true);
+        writer.WriteLine(robot.transform.position);
+        writer.Close();
+
+        //Re-import the file to update the reference in the editor
+        AssetDatabase.ImportAsset(path);
+        TextAsset asset = (TextAsset) Resources.Load("test");
+
+        //Print the text from the file
+        Debug.Log(asset.text);
     }
 }
