@@ -1,0 +1,3 @@
+[submodule "ROSBridgeLib"]
+	path = Assets/ROSBridgeLib
+	url = https://github.com/MathiasCiarlo/ROSBridgeLib
