@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
 using UnityEngine;
+using System.IO;
 
 public class ObstacleSubscriber : ROSBridgeSubscriber
 {
@@ -39,6 +40,12 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             sphere.transform.localPosition = new Vector3(pose._x / 5 + tablePos.x, pose._z / 5 + tablePos.z + 2.1f, pose._y / 5);
             sphere.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) / 5;
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
+            string path = "Assets/Results/user_test.txt";
+
+            //Here we write 
+            StreamWriter writer = new StreamWriter(path, true);
+            writer.WriteLine("Sphere: "+ pose.id + ", Position: " + sphere.transform.localPosition + ", Scale: " + sphere.transform.localScale);
+            writer.Close();
         }
     }
 }
