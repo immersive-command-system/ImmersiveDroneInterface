@@ -12,6 +12,7 @@ public class ROSDroneConnection : MonoBehaviour {
     {
         Debug.Log("Attempting to create ROS connection");
         ros = new ROSBridgeWebSocketConnection("ws://192.168.0.107", 9090);
+        ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
@@ -20,6 +21,7 @@ public class ROSDroneConnection : MonoBehaviour {
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
     void OnApplicationQuit()
     {
+        Debug.Log("Quiting application");
         if (ros != null)
         {
             ros.Disconnect();
@@ -45,7 +47,7 @@ public class ROSDroneConnection : MonoBehaviour {
     [MenuItem("Tools/Write file")]
     static void WriteData(GameObject robot)
     {
-        string path = "Assets/Resultss/user_test.txt";
+        string path = "Assets/Results/user_test.txt";
 
         //Write some text to the test.txt file
         StreamWriter writer = new StreamWriter(path, true);

@@ -24,7 +24,6 @@ using System.Collections;
             controller = GameObject.FindGameObjectWithTag("GameController");
             menuState = false;
             toggleMenuStopper = true;
-            mainMenu.SetActive(menuState);
         }
 	
 	    // Update is called once per frame

@@ -101,7 +101,10 @@ public class ControllerInteractions : MonoBehaviour {
             mapState = MapState.IDLE; // Controller input overrides manual
             float angle = deltaX * rotSpeed * 360 * Time.fixedDeltaTime;
             transform.RotateAround(pivot.transform.position, Vector3.up, angle);
-            rotatingTable.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+            if (rotatingTable)
+            {
+                rotatingTable.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+            }
         }
     }
 
@@ -235,7 +238,10 @@ public class ControllerInteractions : MonoBehaviour {
 
     void OnApplicationQuit()
     {
-        terrain.transform.localScale = originalScale;
+        if (terrain)
+        {
+            terrain.transform.localScale = originalScale;
+        }
     }
 
     private void UpdateScale()
