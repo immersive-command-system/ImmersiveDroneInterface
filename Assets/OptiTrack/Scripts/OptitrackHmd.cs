@@ -32,10 +32,10 @@ public class OptitrackHmd : MonoBehaviour
             }
         }
 
-        if ( UnityEngine.VR.VRDevice.isPresent )
+        if ( UnityEngine.XR.XRDevice.isPresent )
         {
-            string vrDeviceFamily = UnityEngine.VR.VRDevice.family;
-            string vrDeviceModel = UnityEngine.VR.VRDevice.model;
+            string vrDeviceFamily = UnityEngine.XR.XRDevice.family;
+            string vrDeviceModel = UnityEngine.XR.XRDevice.model;
             bool isOculusDevice = String.Equals( vrDeviceFamily, "oculus", StringComparison.CurrentCultureIgnoreCase );
 
             if ( isOculusDevice )

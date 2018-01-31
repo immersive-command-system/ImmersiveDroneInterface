@@ -11,7 +11,7 @@ GameObject:
   - 20: {fileID: 20000010189485334}
   m_Layer: 0
   m_Name: RightEyeAnchor
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -292,12 +292,20 @@ MonoBehaviour:
   queueAhead: 1
   useRecommendedMSAALevel: 0
   enableAdaptiveResolution: 0
-  maxRenderScale: 1
   minRenderScale: 0.7
+  maxRenderScale: 1
+  enableMixedReality: 0
+  useDirectComposition: 0
+  greenScreenColorToleranceA: 20
+  greenScreenColorToleranceB: 15
+  greenScreenColorAlphaCutoff: 0.01
+  greenScreenColorShadows: 0.02
   _trackingOriginType: 0
   usePositionTracking: 1
+  useRotationTracking: 1
   useIPDInPositionTracking: 1
   resetTrackerOnLoad: 0
+  multipleMainCameraWarningPresented: 0
 --- !u!114 &11400010
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -310,6 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   usePerEyeCameras: 0
+  useFixedUpdateForTracking: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

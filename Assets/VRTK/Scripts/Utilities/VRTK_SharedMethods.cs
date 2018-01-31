@@ -409,7 +409,7 @@ namespace VRTK
         {
 #if UNITY_5_6_OR_NEWER
             float gpuTimeLastFrame;
-            if (VRStats.TryGetGPUTimeLastFrame(out gpuTimeLastFrame))
+            if (UnityEngine.XR.XRStats.TryGetGPUTimeLastFrame(out gpuTimeLastFrame))
             {
                 return gpuTimeLastFrame;
             }

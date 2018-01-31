@@ -2,14 +2,14 @@
 
 Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
-Licensed under the Oculus VR Rift SDK License Version 3.3 (the "License");
+Licensed under the Oculus VR Rift SDK License Version 3.4.1 (the "License");
 you may not use the Oculus VR Rift SDK except in compliance with the License,
 which is provided at the time of installation or download, or which
 otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
 
-http://www.oculus.com/licenses/LICENSE-3.3
+https://developer.oculus.com/licenses/sdk-3.4.1
 
 Unless required by applicable law or agreed to in writing, the Oculus VR SDK
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,52 +23,58 @@ using UnityEngine;
 using System.Collections; // required for Coroutines
 
 /// <summary>
-/// Fades the screen from black after a new scene is loaded.
+/// Fades the screen from black after a new scene is loaded. Fade can also be controlled mid-scene using SetUIFade and SetFadeLevel
 /// </summary>
 public class OVRScreenFade : MonoBehaviour
 {
-	/// <summary>
-	/// How long it takes to fade.
-	/// </summary>
+    [Tooltip("Fade duration")]
 	public float fadeTime = 2.0f;
 
-	/// <summary>
-	/// The initial screen color.
-	/// </summary>
+    [Tooltip("Screen color at maximum fade")]
 	public Color fadeColor = new Color(0.01f, 0.01f, 0.01f, 1.0f);
 
-	private Material fadeMaterial = null;
-	private bool isFading = false;
-	private YieldInstruction fadeInstruction = new WaitForEndOfFrame();
+    public bool fadeOnStart = true;
 
-	/// <summary>
-	/// Initialize.
-	/// </summary>
+    private float uiFadeAlpha = 0;
+
+	private Material fadeMaterial = null;
+    private bool isFading = false;
+
+    public float currentAlpha { get; private set; }
+
 	void Awake()
 	{
 		// create the fade material
 		fadeMaterial = new Material(Shader.Find("Oculus/Unlit Transparent Color"));
 	}
 
-	/// <summary>
-	/// Starts the fade in
-	/// </summary>
-	void OnEnable()
-	{
-		StartCoroutine(FadeIn());
-	}
+    /// <summary>
+    /// Start a fade out
+    /// </summary>
+    public void FadeOut()
+    {
+        StartCoroutine(Fade(0,1));
+    }
+
 
 	/// <summary>
 	/// Starts a fade in when a new level is loaded
 	/// </summary>
-#if UNITY_5_4_OR_NEWER
 	void OnLevelFinishedLoading(int level)
-#else
-	void OnLevelWasLoaded(int level)
-#endif
 	{
-		StartCoroutine(FadeIn());
+		StartCoroutine(Fade(1,0));
 	}
+
+    /// <summary>
+    /// Automatically starts a fade in
+    /// </summary>
+    void Start()
+    {
+        if (fadeOnStart)
+        {
+            StartCoroutine(Fade(1,0));
+        }
+    }
 
 	/// <summary>
 	/// Cleans up the fade material
@@ -81,24 +87,53 @@ public class OVRScreenFade : MonoBehaviour
 		}
 	}
 
+    /// <summary>
+	/// Set the UI fade level - fade due to UI in foreground
+	/// </summary>
+    public void SetUIFade(float level)
+    {
+        uiFadeAlpha = Mathf.Clamp01(level);
+        SetMaterialAlpha();
+    }
+    /// <summary>
+    /// Override current fade level
+    /// </summary>
+    /// <param name="level"></param>
+    public void SetFadeLevel(float level)
+    {
+        currentAlpha = level;
+        SetMaterialAlpha();
+    }
+
 	/// <summary>
 	/// Fades alpha from 1.0 to 0.0
 	/// </summary>
-	IEnumerator FadeIn()
+	IEnumerator Fade(float startAlpha, float endAlpha)
 	{
 		float elapsedTime = 0.0f;
-		fadeMaterial.color = fadeColor;
-		Color color = fadeColor;
-		isFading = true;
 		while (elapsedTime < fadeTime)
 		{
-			yield return fadeInstruction;
 			elapsedTime += Time.deltaTime;
-			color.a = 1.0f - Mathf.Clamp01(elapsedTime / fadeTime);
-			fadeMaterial.color = color;
+            currentAlpha = Mathf.Lerp(startAlpha, endAlpha, Mathf.Clamp01(elapsedTime / fadeTime));
+            SetMaterialAlpha();
+			yield return new WaitForEndOfFrame();
 		}
-		isFading = false;
 	}
+
+    /// <summary>
+    /// Update material alpha. UI fade and the current fade due to fade in/out animations (or explicit control)
+    /// both affect the fade. (The max is taken) 
+    /// </summary>
+    private void SetMaterialAlpha()
+    {
+		Color color = fadeColor;
+        color.a = Mathf.Max(currentAlpha, uiFadeAlpha);
+		isFading = color.a > 0;
+        if (fadeMaterial != null)
+        {
+            fadeMaterial.color = color;
+        }
+    }
 
 	/// <summary>
 	/// Renders the fade overlay when attached to a camera object
