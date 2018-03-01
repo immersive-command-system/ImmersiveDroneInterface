@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class ControllerInteractions : MonoBehaviour {
     //terrain is the textured heightmap
-    public GameObject terrain;
+    public GameObject[] terrain;
     //pivot is the center of the table
     public GameObject pivot;
     //originalScale is the original localScale of the world
@@ -52,10 +52,10 @@ public class ControllerInteractions : MonoBehaviour {
     // Use this for initialization
     void Start () {
         //Terrain assignment
-        terrain = GameObject.Find("/World/manila_mesh");
+        terrain = GameObject.FindGameObjectsWithTag("Ground");
 
         //Pivot assignment
-        pivot = GameObject.Find("/coffee_table");
+        pivot = GameObject.FindWithTag("Table");
 
         //This provides us with basis to create bounds on scaling and something to return to
         originalScale = transform.localScale;
@@ -74,13 +74,13 @@ public class ControllerInteractions : MonoBehaviour {
 
         if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
-            // SCALE WORLD
+            // SCALE WORLD - if both grip triggers are held
             ScaleWorld();
             UpdateScale();
         }
         else
         {
-            // ROTATE WORLD
+            // ROTATE WORLD - these methods check for just one grip input on a turntable handle or the right joystick moving
             ControllerRotateWorld();
             ManualRotateWorld();
         }
@@ -136,7 +136,7 @@ public class ControllerInteractions : MonoBehaviour {
                 // CASE: User was dragging the table when they released the handle.
                 if (mapState == MapState.DRAGGING)
                 {
-                    // Initialize movementAngle: the initial movement per fixedupdate, to avg of recent rots
+                    // Initize movementAngle: the initial movement per fixedupdate, to avg of recent rots
                     movementAngle = 0;
                     foreach (float a in angles)
                         movementAngle += a;
@@ -236,14 +236,6 @@ public class ControllerInteractions : MonoBehaviour {
         }
     }
 
-    void OnApplicationQuit()
-    {
-        if (terrain)
-        {
-            terrain.transform.localScale = originalScale;
-        }
-    }
-
     private void UpdateScale()
     {
         currentScale = transform.localScale;
@@ -274,5 +266,10 @@ public class ControllerInteractions : MonoBehaviour {
             // Move
             transform.Translate(movement, Space.World);
         }
+    }
+
+    void OnApplicationQuit()
+    {
+
     }
 }
