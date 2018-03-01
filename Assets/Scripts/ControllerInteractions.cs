@@ -47,7 +47,9 @@ public class ControllerInteractions : MonoBehaviour {
     private float movementAngle;
     public float movementAngleDecay = .95f;
 
-    public Vector3 objectScale;
+    // Pointer Controller
+    private GameObject controller;
+    private VRTK.VRTK_StraightPointerRenderer pointer;
 
     // Use this for initialization
     void Start () {
@@ -66,8 +68,13 @@ public class ControllerInteractions : MonoBehaviour {
         minScale = Vector3.Scale(originalScale, new Vector3(0.1F, 0.1F, 0.1F));
         maxScale = Vector3.Scale(originalScale, new Vector3(10F, 10F, 10F));
 
+        //handle rotation
         mapState = MapState.IDLE;
         angles = new LinkedList<float>();
+
+        //For accessing StraightPointerRenderer and gradually phase it out
+        controller = GameObject.FindGameObjectWithTag("GameController");
+        pointer = controller.GetComponent<VRTK.VRTK_StraightPointerRenderer>();
     }
 
     void FixedUpdate() {
@@ -88,6 +95,16 @@ public class ControllerInteractions : MonoBehaviour {
         // MOVING WORLD
         MoveWorld();
         EnforceMapBoundary();
+
+        //Pointer mode -- adjusting pointer colors
+        if (pointer.setWaypoint)
+        {
+            pointer.validCollisionColor = Color.blue;
+        }
+        else if (pointer.setDrone)
+        {
+            pointer.validCollisionColor = Color.yellow;
+        }
     }
 
     // Rotate the world based off of the right thumbstick
@@ -213,7 +230,6 @@ public class ControllerInteractions : MonoBehaviour {
         float final_result = 1.0F + 0.2F * result;
 
         Vector3 scalingFactor = Vector3.Scale(transform.localScale, new Vector3(final_result, final_result, final_result));
-        objectScale = scalingFactor;
 
         //Checking Scaling Bounds
         if (scalingFactor.sqrMagnitude > minScale.sqrMagnitude && scalingFactor.sqrMagnitude < maxScale.sqrMagnitude)
