@@ -87,6 +87,8 @@ public class ControllerInteractions : MonoBehaviour {
         }
         else
         {
+            //POINTER MODE - this method should check for just one grip input and activate the pointer mode.
+            
             // ROTATE WORLD - these methods check for just one grip input on a turntable handle or the right joystick moving
             ControllerRotateWorld();
             ManualRotateWorld();
@@ -96,15 +98,19 @@ public class ControllerInteractions : MonoBehaviour {
         MoveWorld();
         EnforceMapBoundary();
 
-        //Pointer mode -- adjusting pointer colors
-        if (pointer.setWaypoint)
-        {
-            pointer.validCollisionColor = Color.blue;
-        }
-        else if (pointer.setDrone)
-        {
-            pointer.validCollisionColor = Color.yellow;
-        }
+        //Adjusting pointer colors based on current mode (currently mode is stored in VRTK_StraightPointerRenderer, but this will be phased out!) 
+        //if (pointer.setWaypoint)
+        //{
+        //    pointer.validCollisionColor = Color.blue;
+        //}
+        //else if (pointer.setDrone)
+        //{
+        //    pointer.validCollisionColor = Color.yellow;
+        //}
+        //else
+        //{
+        //    pointer.validCollisionColor = Color.green;
+        //}
     }
 
     // Rotate the world based off of the right thumbstick

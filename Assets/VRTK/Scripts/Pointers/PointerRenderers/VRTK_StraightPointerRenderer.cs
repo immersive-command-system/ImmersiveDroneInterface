@@ -55,8 +55,8 @@
         // SETTING WAYPOINT
         public GameObject waypoint;
         public GameObject menu;
-        public bool setWaypoint = false;
-        public bool onGround = false;
+        private bool setWaypoint = false;
+        private bool onGround = false;
         private Vector3 groundPoint;
         public GameObject world;
         private bool selectDroneToggle;
