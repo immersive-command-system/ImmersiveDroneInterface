@@ -102,6 +102,7 @@ namespace VRTK
         protected bool selectionButtonPressed;
         protected bool attemptControllerSetup;
         protected Transform originalCustomOrigin;
+        protected VRTK_ControllerEvents.ButtonAlias raycastActivationButton = VRTK_ControllerEvents.ButtonAlias.GripPress;
 
         public virtual void OnActivationButtonPressed(ControllerInteractionEventArgs e)
         {
@@ -495,9 +496,9 @@ namespace VRTK
 
             if (controller != null)
             {
-                controller.SubscribeToButtonAliasEvent(activationButton, true, DoActivationButtonPressed);
-                controller.SubscribeToButtonAliasEvent(activationButton, false, DoActivationButtonReleased);
-                subscribedActivationButton = activationButton;
+                controller.SubscribeToButtonAliasEvent(raycastActivationButton, true, DoActivationButtonPressed);
+                controller.SubscribeToButtonAliasEvent(raycastActivationButton, false, DoActivationButtonReleased);
+                subscribedActivationButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
             }
         }
 
