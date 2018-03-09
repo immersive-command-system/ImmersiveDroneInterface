@@ -36,6 +36,8 @@
         public bool settingInterWaypoint;
         public GameObject interWaypoint;
 
+        public GameObject waypointPlacer; // Place waypoint in front of controller
+
         void Start()
         {
             selected = true;
@@ -46,6 +48,11 @@
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
             settingInterWaypoint = false;
+
+            waypointPlacer = GameObject.FindGameObjectWithTag("WaypointPlacement");
+            waypointPlacer.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
+            waypointPlacer.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
+            waypointPlacer.SetActive(false);
         }
 
         void Update()
@@ -91,9 +98,11 @@
         // Allows user to select where the waypoint will appear above
         private GameObject SetGroundpoint()
         {
-            groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+            waypointPlacer.SetActive(true);
+            groundPoint = waypointPlacer.transform.position;
             GameObject newWaypoint = CreateWaypoint(groundPoint);
             controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
+            waypointPlacer.SetActive(false);
             return newWaypoint;
         }
 

@@ -289,9 +289,4 @@ public class ControllerInteractions : MonoBehaviour {
             transform.Translate(movement, Space.World);
         }
     }
-
-    void OnApplicationQuit()
-    {
-
-    }
 }
