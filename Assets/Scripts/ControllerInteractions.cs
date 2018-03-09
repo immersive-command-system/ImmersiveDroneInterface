@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class ControllerInteractions : MonoBehaviour {
     //terrain is the textured heightmap
-    public GameObject terrain;
+    public GameObject[] terrain;
     //pivot is the center of the table
     public GameObject pivot;
     //originalScale is the original localScale of the world
@@ -47,15 +47,17 @@ public class ControllerInteractions : MonoBehaviour {
     private float movementAngle;
     public float movementAngleDecay = .95f;
 
-    public Vector3 objectScale;
+    // Pointer Controller
+    private GameObject controller;
+    private VRTK.VRTK_StraightPointerRenderer pointer;
 
     // Use this for initialization
     void Start () {
         //Terrain assignment
-        terrain = GameObject.Find("/World/manila_mesh");
+        terrain = GameObject.FindGameObjectsWithTag("Ground");
 
         //Pivot assignment
-        pivot = GameObject.Find("/coffee_table");
+        pivot = GameObject.FindWithTag("Table");
 
         //This provides us with basis to create bounds on scaling and something to return to
         originalScale = transform.localScale;
@@ -66,21 +68,28 @@ public class ControllerInteractions : MonoBehaviour {
         minScale = Vector3.Scale(originalScale, new Vector3(0.1F, 0.1F, 0.1F));
         maxScale = Vector3.Scale(originalScale, new Vector3(10F, 10F, 10F));
 
+        //handle rotation
         mapState = MapState.IDLE;
         angles = new LinkedList<float>();
+
+        //For accessing StraightPointerRenderer and gradually phase it out
+        controller = GameObject.FindGameObjectWithTag("GameController");
+        pointer = controller.GetComponent<VRTK.VRTK_StraightPointerRenderer>();
     }
 
     void FixedUpdate() {
 
         if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
-            // SCALE WORLD
+            // SCALE WORLD - if both grip triggers are held
             ScaleWorld();
             UpdateScale();
         }
         else
         {
-            // ROTATE WORLD
+            //POINTER MODE - this method should check for just one grip input and activate the pointer mode.
+            
+            // ROTATE WORLD - these methods check for just one grip input on a turntable handle or the right joystick moving
             ControllerRotateWorld();
             ManualRotateWorld();
         }
@@ -88,6 +97,20 @@ public class ControllerInteractions : MonoBehaviour {
         // MOVING WORLD
         MoveWorld();
         EnforceMapBoundary();
+
+        //Adjusting pointer colors based on current mode (currently mode is stored in VRTK_StraightPointerRenderer, but this will be phased out!) 
+        //if (pointer.setWaypoint)
+        //{
+        //    pointer.validCollisionColor = Color.blue;
+        //}
+        //else if (pointer.setDrone)
+        //{
+        //    pointer.validCollisionColor = Color.yellow;
+        //}
+        //else
+        //{
+        //    pointer.validCollisionColor = Color.green;
+        //}
     }
 
     // Rotate the world based off of the right thumbstick
@@ -136,7 +159,7 @@ public class ControllerInteractions : MonoBehaviour {
                 // CASE: User was dragging the table when they released the handle.
                 if (mapState == MapState.DRAGGING)
                 {
-                    // Initialize movementAngle: the initial movement per fixedupdate, to avg of recent rots
+                    // Initize movementAngle: the initial movement per fixedupdate, to avg of recent rots
                     movementAngle = 0;
                     foreach (float a in angles)
                         movementAngle += a;
@@ -213,7 +236,6 @@ public class ControllerInteractions : MonoBehaviour {
         float final_result = 1.0F + 0.2F * result;
 
         Vector3 scalingFactor = Vector3.Scale(transform.localScale, new Vector3(final_result, final_result, final_result));
-        objectScale = scalingFactor;
 
         //Checking Scaling Bounds
         if (scalingFactor.sqrMagnitude > minScale.sqrMagnitude && scalingFactor.sqrMagnitude < maxScale.sqrMagnitude)
@@ -233,14 +255,6 @@ public class ControllerInteractions : MonoBehaviour {
             // finally, actually perform the scale/translation
             transform.localScale = endScale;
             transform.position = FinalPosition;
-        }
-    }
-
-    void OnApplicationQuit()
-    {
-        if (terrain)
-        {
-            terrain.transform.localScale = originalScale;
         }
     }
 
@@ -275,5 +289,4 @@ public class ControllerInteractions : MonoBehaviour {
             transform.Translate(movement, Space.World);
         }
     }
-
 }

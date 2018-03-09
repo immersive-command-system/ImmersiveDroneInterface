@@ -22,6 +22,7 @@ TagManager:
   - Handle
   - ROSDrone
   - Table
+  - Test
   layers:
   - Default
   - TransparentFX

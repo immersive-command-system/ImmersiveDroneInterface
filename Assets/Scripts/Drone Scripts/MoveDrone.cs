@@ -28,7 +28,7 @@
 
         void Update()
         {
-            totalWaypoints = this.GetComponentInParent<SetWaypoint>().waypoints.Count - 1;
+            totalWaypoints = SetWaypoint.waypoints.Count - 1;
 
             if (prevPoint != null)
             {
@@ -46,7 +46,7 @@
         private void DisplayPastPath()
         {
             line.SetPosition(0, this.transform.position);
-            if (this.GetComponentInParent<SetWaypoint>().waypoints.Count == 0)
+            if (SetWaypoint.waypoints.Count == 0)
             {
                 line.SetPosition(1, this.transform.position);
             } else
@@ -66,14 +66,14 @@
 
         private void SelectTarget()
         {
-            if (this.GetComponentInParent<SetWaypoint>().waypoints.Count != 0)
+            if (SetWaypoint.waypoints.Count != 0)
             {
                 if (totalWaypoints > currentWaypoint)
                 {
-                    targetWaypoint = (GameObject)this.GetComponentInParent<SetWaypoint>().waypoints[currentWaypoint + 1];
+                    targetWaypoint = (GameObject)SetWaypoint.waypoints[currentWaypoint + 1];
                     if (this.transform.position == targetWaypoint.transform.position)
                     {
-                        prevPoint = (GameObject)this.GetComponentInParent<SetWaypoint>().waypoints[currentWaypoint + 1];
+                        prevPoint = (GameObject)SetWaypoint.waypoints[currentWaypoint + 1];
                         currentWaypoint++;
                     }
                 }
@@ -86,7 +86,7 @@
                     //    currentWaypoint = totalWaypoints;
                     //}
                     currentWaypoint = totalWaypoints;
-                    prevPoint = (GameObject)this.GetComponentInParent<SetWaypoint>().waypoints[totalWaypoints];
+                    prevPoint = (GameObject)SetWaypoint.waypoints[totalWaypoints];
                 }
                 else
                 {

@@ -187,21 +187,9 @@
                     PointerExit(destinationHit);
                 }
 
-                destinationHit = new RaycastHit();
+                ChangeColor(invalidCollisionColor);
 
-                // SETTING WAYPOINT
-                if (setWaypoint)
-                {
-                    ChangeColor(waypointColor);
-                }
-                else if (setDrone)
-                {
-                    ChangeColor(droneColor);
-                }
-                else
-                {
-                    ChangeColor(invalidCollisionColor);
-                }
+                destinationHit = new RaycastHit();
             }
         }
 
@@ -213,19 +201,7 @@
 
                 destinationHit = pointerCollidedWith;
 
-                // SETTING WAYPOINT
-                if (setWaypoint)
-                {
-                    ChangeColor(waypointColor);
-                }
-                else if (setDrone)
-                {
-                    ChangeColor(droneColor);
-                }
-                else
-                {
-                    ChangeColor(validCollisionColor);
-                }
+                ChangeColor(validCollisionColor);
             }
         }
 
@@ -239,18 +215,6 @@
                 groundPoint = pointerCollidedWith.point;
             }
         }
-
-
-        // Requires Vector3 actualScale in SetWaypoint script to be public
-        private void LogHeight(bool rayHit, RaycastHit pointerCollidedWith)
-        {
-            if (rayHit && pointerCollidedWith.collider.tag == "waypoint")
-            {
-                Debug.Log(pointerCollidedWith.point.y + " point");
-                Debug.Log(world.GetComponent<SetWaypoint>().actualScale.y + " scale");
-            }
-        }
-
 
         // DRONE MENU
         protected virtual void ActivateDroneMenu(bool rayHit, RaycastHit pointerCollidedWith)

@@ -32,18 +32,9 @@ public class ROSDroneConnection : MonoBehaviour {
     void Update()
     {
         ros.Render();
-        if(OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
-        {
-            GameObject robot = GameObject.FindWithTag("ROSDrone");
-            if (robot == null)
-                Debug.Log("Can't find the robot???");
-            else
-            {
-                WriteData(robot);
-            }
-        }
     }
 
+    //WriteData will write the location of the gameObject passed to it to a text file
     [MenuItem("Tools/Write file")]
     static void WriteData(GameObject robot)
     {

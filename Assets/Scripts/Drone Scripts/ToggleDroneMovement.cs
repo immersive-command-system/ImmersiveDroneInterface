@@ -36,7 +36,7 @@
 
         private bool HasWaypoints()
         {
-            return (referenceDrone.GetComponent<SetWaypoint>().waypoints.Count > 1);
+            return (SetWaypoint.waypoints.Count > 1);
         }
 
         private void ActivateButton()
