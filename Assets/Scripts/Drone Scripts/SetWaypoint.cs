@@ -1,4 +1,4 @@
-namespace VRTK
+﻿namespace VRTK
 {
     using System;
     using System.Collections;
@@ -8,13 +8,17 @@ namespace VRTK
     public class SetWaypoint : MonoBehaviour {
 
         public GameObject drone; // Drone object
-        public GameObject waypoint; // Waypoint object    
+        public GameObject waypoint; // Waypoint object
+        
+        //CHECK STATIC BECAUSE I AM (PAXTAN) ONLY IN 61B
+        //UNCOMMENT DESTROY FUNCTION ONCE REFERENCE DRONE CAN BE FOUND 
+
         public float maxHeight; // maximum height waypoint can be at when adjusting
         public bool selected; // Indicated if the drone is selected
         public bool toggleDeselectOtherDrones;
         public Material selectedMaterial;
         public Material deselectedMaterial;
-        public ArrayList waypoints;
+        public static ArrayList waypoints;
         public int order;
         public Material startWaypointMaterial;
 
@@ -27,7 +31,7 @@ namespace VRTK
         private Vector3 currentScale; // Current Scale of the World
         private Vector3 originalScale; // Scale that the world started in
         public Vector3 actualScale; // currentScale / OriginalScale
-        private bool clearWaypointsToggle;
+        private static bool clearWaypointsToggle;
 
         public bool settingInterWaypoint;
         public GameObject interWaypoint;
@@ -75,18 +79,9 @@ namespace VRTK
                     AdjustHeight(adjustingWaypoint);                    
                 }
 
-                // Allows user to clear the most recently placed waypoint
-                if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) && OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
-                {
-                    if (clearWaypointsToggle)
-                    {
-                        ClearWaypoint();
-                    }
-                } else
-                {
-                    clearWaypointsToggle = true;
-                }
-            } else
+            }
+
+            else
             {
                 // Changes the drones color to indicated that it has been unselected
                 transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = deselectedMaterial;
@@ -122,10 +117,15 @@ namespace VRTK
             newWaypoint.tag = "waypoint";
             newWaypoint.transform.localScale = actualScale / 100;
             newWaypoint.transform.parent = world.transform;
+            
 
             if (settingInterWaypoint) // Placing a new waypoint in between old ones
             {
                 int index = waypoints.IndexOf(interWaypoint);
+                if (index < 0)
+                {
+                    index = 0;
+                }
                 waypoints.Insert(index, newWaypoint);
                 interWaypoint.GetComponent<WaypointProperties>().prevPoint = newWaypoint;
                 newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) waypoints[index - 1];
@@ -173,16 +173,52 @@ namespace VRTK
             actualScale.z = (currentScale.z / originalScale.z);
         }
 
-        // Clears currently placed waypoints
-        private void ClearWaypoint()
+        // Clears 'furthest' placed waypoint
+        public static void ClearWaypoint()
         {
+            
+            Debug.Log("removing waypoint");
+            Destroy((GameObject)waypoints[waypoints.Count - 1]);
+            waypoints.RemoveAt(waypoints.Count - 1);
+                
+            
+        }
+
+        public static void ClearSpecificWayPoint(GameObject currentWayPoint)
+        {
+            WaypointProperties tempProperties = currentWayPoint.GetComponent<WaypointProperties>();
+            int tempIndex = waypoints.IndexOf(currentWayPoint);
+            Debug.Log(tempIndex);
+            Debug.Log(waypoints.Count);
             if (waypoints.Count > 0)
             {
-                Destroy((GameObject)waypoints[waypoints.Count - 1]);
-                waypoints.RemoveAt(waypoints.Count - 1);
-                clearWaypointsToggle = false; 
+                //Checking to see if it is the latest waypoint and calling ClearWaypoint if so...
+                if (tempIndex == waypoints.Count - 1 && tempIndex != 0)
+                {
+                    ClearWaypoint();
+                    return;
+                }
+
+                //Checking to see if the waypoint is the drone waypoint and deleting the entire drone if so
+                if (tempIndex == 0)
+                {
+                    Debug.Log("should be deleting drone now");
+                    Destroy(tempProperties.referenceDrone);
+                    return;
+                }
+
+                GameObject nextDrone = (GameObject) waypoints[(tempIndex + 1)];
+
+                Debug.Log("inside new function");
+                Debug.Log("removing specific waypoint");
+                nextDrone.GetComponent<WaypointProperties>().prevPoint = tempProperties.prevPoint;
+                Destroy((GameObject)waypoints[tempIndex]);
+                waypoints.RemoveAt(tempIndex);
+                
             }
         }
+
+
         // Returns the actual scale
         public Vector3 GetScale()
         {
@@ -218,6 +254,11 @@ namespace VRTK
             {
                 Destroy(i);
             }
+        }
+
+        public GameObject getDrone()
+        {
+            return drone;
         }
     }
 }
