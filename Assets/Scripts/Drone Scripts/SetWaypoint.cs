@@ -49,7 +49,7 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             settingInterWaypoint = false;
 
-            waypointPlacer = GameObject.FindGameObjectWithTag("WaypointPlacement");
+            waypointPlacer = Instantiate(waypoint);
             waypointPlacer.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             waypointPlacer.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
             waypointPlacer.SetActive(false);
@@ -98,11 +98,18 @@
         // Allows user to select where the waypoint will appear above
         private GameObject SetGroundpoint()
         {
-            waypointPlacer.SetActive(true);
-            groundPoint = waypointPlacer.transform.position;
+            if (controller.GetComponent<VRTK_Pointer>().IsActivationButtonPressed())
+            {
+                groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+
+            } else
+            {
+                groundPoint = waypointPlacer.transform.position;
+            }
+            //waypointPlacer.SetActive(true);
             GameObject newWaypoint = CreateWaypoint(groundPoint);
             controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
-            waypointPlacer.SetActive(false);
+            //waypointPlacer.SetActive(false);
             return newWaypoint;
         }
 
