@@ -37,6 +37,8 @@
         public GameObject interWaypoint;
 
         public GameObject waypointPlacer; // Place waypoint in front of controller
+        private static bool currentlySetting = false;
+        private static bool doneSetting = true; // Prevent accidental waypoint placement
 
         void Start()
         {
@@ -71,10 +73,12 @@
                 UpdateScale();
 
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (controller.GetComponent<VRTK_StraightPointerRenderer>().IsSettingWaypoint() && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                if (currentlySetting && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     adjustingWaypoint = SetGroundpoint();
                     adjustingHeight = true;
+                    currentlySetting = false;
+                    doneSetting = false;
                 }
                 if (adjustingHeight && !firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
                 {
@@ -83,7 +87,8 @@
                 // Allows user to adjust the newly placed waypoints height
                 if (adjustingHeight && firstClickFinished)
                 {
-                    AdjustHeight(adjustingWaypoint);                    
+                    AdjustHeight(adjustingWaypoint);
+                    doneSetting = true;
                 }
 
             }
@@ -94,6 +99,7 @@
                 transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = deselectedMaterial;
             }
         }
+
 
         // Allows user to select where the waypoint will appear above
         private GameObject SetGroundpoint()
@@ -106,10 +112,8 @@
             {
                 groundPoint = waypointPlacer.transform.position;
             }
-            //waypointPlacer.SetActive(true);
             GameObject newWaypoint = CreateWaypoint(groundPoint);
             controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
-            //waypointPlacer.SetActive(false);
             return newWaypoint;
         }
 
@@ -276,5 +280,16 @@
         {
             return drone;
         }
+
+        //Toggle waypoint placement mode if menu is pressed (called from waypoint adder).
+        public static void menuPressed()
+        {
+            if (doneSetting)
+            {
+                currentlySetting = true;
+            }
+        }
+
+        
     }
 }
