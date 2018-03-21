@@ -7,6 +7,8 @@ public class ControllerCollider : MonoBehaviour {
 
     public static bool selectionZone = false;
     public GameObject currentWaypointZone = null;
+    public Material defaultMaterial;
+    public Material selectedMaterial;
     
 	// Update is called once per frame
 	void Update () {
@@ -65,6 +67,10 @@ public class ControllerCollider : MonoBehaviour {
             selectionZone = true;
             Debug.Log("setting deletion Zone");
             currentWaypointZone = currentCollider.gameObject;
+            print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
+
+            currentCollider.gameObject.GetComponent<MeshRenderer>().material = selectedMaterial;
+            print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
         }
         
 
@@ -78,6 +84,7 @@ public class ControllerCollider : MonoBehaviour {
         {
             Debug.Log("Leaving Deletion Zone");
             selectionZone = false;
+            currentCollider.gameObject.GetComponent<MeshRenderer>().material = defaultMaterial;
         }
 
 
