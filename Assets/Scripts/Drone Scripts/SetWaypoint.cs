@@ -81,15 +81,15 @@
                     {
                         return;
                     }
+
                     deactivateSetWaypointState();
-                    adjustingHeight = true;
                     currentlySetting = false;
                     doneSetting = false;
                 } else if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     activateSetWaypointState();
                 }
-                if (adjustingHeight && !firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
+                if (!firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     firstClickFinished = true;
                 }
@@ -102,6 +102,11 @@
                     }
                     AdjustHeight(adjustingWaypoint);
                     doneSetting = true;
+                } else if (firstClickFinished)
+                {
+                    doneSetting = true;
+                    firstClickFinished = false;
+                    activateSetWaypointState();
                 }
                 
 
@@ -122,6 +127,7 @@
             {
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().IsSettingWaypoint())
                 {
+                    adjustingHeight = true;
                     groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
                 } else
                 {
@@ -151,7 +157,7 @@
                 waypoints.Add(startWaypoint);
             }
 
-            groundPoint.y = drone.transform.position.y;
+            groundPoint.y = waypointPlacer.transform.position.y;
             GameObject newWaypoint = Instantiate(waypoint, groundPoint, Quaternion.identity);
             newWaypoint.tag = "waypoint";
             newWaypoint.transform.localScale = actualScale / 100;
