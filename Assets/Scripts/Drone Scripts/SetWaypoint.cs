@@ -40,6 +40,8 @@
         private static bool currentlySetting = false;
         private static bool doneSetting = true; // Prevent accidental waypoint placement
 
+        private static bool setWaypointState = false;
+
         void Start()
         {
             selected = true;
@@ -71,14 +73,17 @@
                 }
                
                 UpdateScale();
-
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (currentlySetting && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                if (setWaypointState && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
                 {
+                    deactivateSetWaypointState();
                     adjustingWaypoint = SetGroundpoint();
                     adjustingHeight = true;
                     currentlySetting = false;
                     doneSetting = false;
+                } else if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                {
+                    activateSetWaypointState();
                 }
                 if (adjustingHeight && !firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
                 {
@@ -87,9 +92,14 @@
                 // Allows user to adjust the newly placed waypoints height
                 if (adjustingHeight && firstClickFinished)
                 {
+                    if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                    {
+                        activateSetWaypointState();
+                    }
                     AdjustHeight(adjustingWaypoint);
                     doneSetting = true;
                 }
+                
 
             }
 
@@ -290,6 +300,20 @@
             }
         }
 
-        
+        //Set setWaypointState to true
+        public static void activateSetWaypointState()
+        {
+            if (doneSetting)
+            {
+                setWaypointState = true;
+            }
+        }        
+        //Set setWaypointState to false
+        public static void deactivateSetWaypointState()
+        {
+                setWaypointState = false;
+        }
+
+
     }
 }
