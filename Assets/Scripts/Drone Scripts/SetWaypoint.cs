@@ -76,8 +76,12 @@
                 // Allows user to select a groundpoint which a new waypoint will appear above
                 if (setWaypointState && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
                 {
-                    deactivateSetWaypointState();
                     adjustingWaypoint = SetGroundpoint();
+                    if (adjustingWaypoint == null)
+                    {
+                        return;
+                    }
+                    deactivateSetWaypointState();
                     adjustingHeight = true;
                     currentlySetting = false;
                     doneSetting = false;
@@ -116,8 +120,13 @@
         {
             if (controller.GetComponent<VRTK_Pointer>().IsActivationButtonPressed())
             {
-                groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
-
+                if (controller.GetComponent<VRTK_StraightPointerRenderer>().IsSettingWaypoint())
+                {
+                    groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+                } else
+                {
+                    return null;
+                }
             } else
             {
                 groundPoint = waypointPlacer.transform.position;

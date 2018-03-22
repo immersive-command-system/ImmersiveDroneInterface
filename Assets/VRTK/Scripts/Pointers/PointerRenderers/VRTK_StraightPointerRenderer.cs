@@ -357,7 +357,7 @@
 
         public bool IsSettingWaypoint()
         {
-            return (setWaypoint && onGround);
+            return (onGround);
         }
 
         public Vector3 GetGroundPoint()
