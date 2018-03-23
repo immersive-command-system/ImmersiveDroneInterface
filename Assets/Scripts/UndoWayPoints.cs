@@ -22,8 +22,12 @@ public class UndoWayPoints : MonoBehaviour {
             //THIS IS THE UNDO FUNCTION (Delete except not in zone) 
             else
             {
-                Debug.Log("YES");
-                SetWaypoint.ClearWaypoint();
+                Debug.Log(SetWaypoint.waypoints.Count + "normal");
+                Debug.Log(SetWaypoint.waypointOrder.Count + "new");
+                //Debug.Log("YES");
+                //SetWaypoint.ClearWaypoint();
+                SetWaypoint.ClearSpecificWayPoint((GameObject)SetWaypoint.waypointOrder[SetWaypoint.waypointOrder.Count - 1]);
+                
 
             }
 
@@ -39,7 +43,7 @@ public class UndoWayPoints : MonoBehaviour {
             {
                 Destroy(tempDrone);
             }
-            
+            SetWaypoint.waypointOrder = new ArrayList(0);
         }
     }
 }

@@ -19,7 +19,7 @@ public class ControllerInteractions : MonoBehaviour {
             UndoWayPoints.UndoAndDeleteWaypoints(selectionZone, currentWaypointZone);
         }
 
-        Debug.Log(selectionZone);
+       
     }
 
     public void Start()
