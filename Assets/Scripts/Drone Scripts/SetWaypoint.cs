@@ -215,7 +215,7 @@
         private void UpdateScale()
         {
             currentScale = world.transform.localScale;
-            originalScale = world.GetComponent<ControllerInteractions>().originalScale;
+            originalScale = world.GetComponent<MapInteractions>().originalScale;
             actualScale.x = (currentScale.x / originalScale.x);
             actualScale.y = (currentScale.y / originalScale.y);
             actualScale.z = (currentScale.z / originalScale.z);

@@ -67,7 +67,7 @@ using System.Collections;
         private void ChooseGroundPoint()
         {
             Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
-            groundPoint.y = groundPoint.y+0.5f* world.GetComponent<ControllerInteractions>().actualScale.y;
+            groundPoint.y = groundPoint.y+0.5f* world.GetComponent<MapInteractions>().actualScale.y;
             Instantiate(drone, groundPoint, Quaternion.identity, world.transform);
             placingDrone = false;
         }
@@ -75,7 +75,7 @@ using System.Collections;
         // Returns the height taking the scale into account
         private float MaxHeight()
         {
-            return 1+(float)((1.0008874438 * 1.5 - 0.7616114718) * world.GetComponent<ControllerInteractions>().actualScale.y + .703);
+            return 1+(float)((1.0008874438 * 1.5 - 0.7616114718) * world.GetComponent<MapInteractions>().actualScale.y + .703);
         }
     }
 }
