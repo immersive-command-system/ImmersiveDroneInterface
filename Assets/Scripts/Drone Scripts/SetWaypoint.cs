@@ -35,11 +35,11 @@
         private static bool clearWaypointsToggle;
 
         public bool settingInterWaypoint;
+        private bool currentlySetting = false;
         public GameObject interWaypoint;
 
         public GameObject waypointPlacer; // Place waypoint in front of controller
-        private static bool currentlySetting = false;
-        private static bool doneSetting = true; // Prevent accidental waypoint placement
+
 
         private static bool setWaypointState = false;
 
@@ -85,15 +85,14 @@
                     {
                         return;
                     }
-
+                    currentlySetting = true;
                     deactivateSetWaypointState();
-                    currentlySetting = false;
-                    doneSetting = false;
+
                 } else if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     activateSetWaypointState();
                 }
-                if (!firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
+                if (currentlySetting && !firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     firstClickFinished = true;
                 }
@@ -105,12 +104,14 @@
                         activateSetWaypointState();
                     }
                     AdjustHeight(adjustingWaypoint);
-                    doneSetting = true;
+
                 } else if (firstClickFinished)
                 {
-                    doneSetting = true;
                     firstClickFinished = false;
                     activateSetWaypointState();
+                    settingInterWaypoint = false;
+                    currentlySetting = false;
+                        
                 }
                 
 
@@ -129,7 +130,7 @@
         {
             if (controller.GetComponent<VRTK_Pointer>().IsActivationButtonPressed())
             {
-                if (controller.GetComponent<VRTK_StraightPointerRenderer>().IsSettingWaypoint())
+                if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
                 {
                     adjustingHeight = true;
                     groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
@@ -171,6 +172,8 @@
 
             if (settingInterWaypoint) // Placing a new waypoint in between old ones
             {
+                Debug.Log("hi");
+
                 int index = waypoints.IndexOf(interWaypoint);
                 if (index < 0)
                 {
@@ -207,6 +210,8 @@
             adjustingHeight = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
             firstClickFinished = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
             settingInterWaypoint = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+            currentlySetting = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+
         }
 
         // Returns the maximum height that the waypoint can be placed
@@ -325,22 +330,13 @@
             return currentDrone;
         }
 
-        //Toggle waypoint placement mode if menu is pressed (called from waypoint adder).
-        public static void menuPressed()
-        {
-            if (doneSetting)
-            {
-                currentlySetting = true;
-            }
-        }
 
         //Set setWaypointState to true
         public static void activateSetWaypointState()
         {
-            if (doneSetting)
-            {
+
                 setWaypointState = true;
-            }
+            
         }        
         //Set setWaypointState to false
         public static void deactivateSetWaypointState()
