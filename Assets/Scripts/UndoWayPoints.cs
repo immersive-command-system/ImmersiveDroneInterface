@@ -14,7 +14,7 @@ public class UndoWayPoints : MonoBehaviour {
             //Checking to see if the controller is near a specific waypoint
             if (selectionZone)
             {
-                Debug.Log("attempting to remove!!!");
+                Debug.Log("attempting to remove specific waypoint in zone");
                 ControllerInteractions.selectionZone = false;
                 SetWaypoint.ClearSpecificWayPoint(currentWaypointZone.gameObject);
             }
@@ -22,10 +22,7 @@ public class UndoWayPoints : MonoBehaviour {
             //THIS IS THE UNDO FUNCTION (Delete except not in zone) 
             else
             {
-                Debug.Log(SetWaypoint.waypoints.Count + "normal");
-                Debug.Log(SetWaypoint.waypointOrder.Count + "new");
-                //Debug.Log("YES");
-                //SetWaypoint.ClearWaypoint();
+                Debug.Log("removing latest waypoint from action array");
                 SetWaypoint.ClearSpecificWayPoint((GameObject)SetWaypoint.waypointOrder[SetWaypoint.waypointOrder.Count - 1]);
                 
 

@@ -229,14 +229,14 @@
         public static void ClearWaypoint()
         {
             
-            Debug.Log("removing waypoint");
+            Debug.Log("removing latest waypoint");
             GameObject latestWayPoint = (GameObject)waypoints[waypoints.Count - 1];
             int tempIndex2 = waypointOrder.IndexOf(latestWayPoint);
             WaypointProperties tempProperties = latestWayPoint.GetComponent<WaypointProperties>();
             tempProperties.deleteLineCollider();
             Destroy(latestWayPoint);
-            waypoints.RemoveAt(waypoints.Count - 1);
-            waypointOrder.RemoveAt(tempIndex2);
+            waypoints.RemoveAt(waypoints.Count - 1); //removing latest waypoint from both lists
+            waypointOrder.RemoveAt(tempIndex2);//^
                 
             
         }
@@ -251,6 +251,7 @@
                 //Checking to see if it is the latest waypoint and calling ClearWaypoint if so...
                 if (tempIndex == waypoints.Count - 1 && tempIndex != 0)
                 {
+                    Debug.Log("Specific Waypoint happened to be the latest");
                     ClearWaypoint();
                     return;
                 }
@@ -258,7 +259,7 @@
                 //Checking to see if the waypoint is the drone waypoint and deleting the entire drone if so
                 if (tempIndex == 0)
                 {
-                    
+                    Debug.Log("destroying drone as last resort");
                     Destroy((GameObject) waypoints[0]); // Getting rid of last Waypoint gameObject before destroying Drone
                     Destroy(tempProperties.referenceDrone);
                     waypoints = new ArrayList(0); // resetting both lists 
@@ -268,7 +269,7 @@
 
                 GameObject nextDrone = (GameObject) waypoints[(tempIndex + 1)];
 
-                Debug.Log("inside new function");
+                
                 Debug.Log("removing specific waypoint");
                 nextDrone.GetComponent<WaypointProperties>().prevPoint = tempProperties.prevPoint;
                 tempProperties.deleteLineCollider();
@@ -277,39 +278,7 @@
                 waypointOrder.RemoveAt(tempIndex2);
                 
             }
-            /*
-            WaypointProperties tempProperties = currentWayPoint.GetComponent<WaypointProperties>();
-            int tempIndex = waypoints.IndexOf(currentWayPoint);
-            Debug.Log(tempIndex);
-            Debug.Log(waypoints.Count);
-            if (waypoints.Count > 0)
-            {
-                //Checking to see if it is the latest waypoint and calling ClearWaypoint if so...
-                if (tempIndex == waypoints.Count - 1 && tempIndex != 0)
-                {
-                    ClearWaypoint();
-                    return;
-                }
 
-                //Checking to see if the waypoint is the drone waypoint and deleting the entire drone if so
-                if (tempIndex == 0)
-                {
-                    Debug.Log("should be deleting drone now");
-                    Destroy(tempProperties.referenceDrone);
-                    return;
-                }
-
-                GameObject nextDrone = (GameObject)waypoints[(tempIndex + 1)];
-
-                Debug.Log("inside new function");
-                Debug.Log("removing specific waypoint");
-                nextDrone.GetComponent<WaypointProperties>().prevPoint = tempProperties.prevPoint;
-                tempProperties.deleteLineCollider();
-                Destroy((GameObject)waypoints[tempIndex]);
-                waypoints.RemoveAt(tempIndex);
-
-            }
-            */
 
         }
 
