@@ -15,8 +15,8 @@ public class UndoWayPoints : MonoBehaviour {
             if (selectionZone)
             {
                 Debug.Log("attempting to remove!!!");
+                ControllerInteractions.selectionZone = false;
                 SetWaypoint.ClearSpecificWayPoint(currentWaypointZone.gameObject);
-                selectionZone = false;
             }
 
             //THIS IS THE UNDO FUNCTION (Delete except not in zone) 

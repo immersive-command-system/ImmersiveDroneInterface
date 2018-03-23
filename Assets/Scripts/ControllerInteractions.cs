@@ -17,9 +17,9 @@ public class ControllerInteractions : MonoBehaviour {
         if (OVRInput.GetDown(OVRInput.Button.Two))
         {
             UndoWayPoints.UndoAndDeleteWaypoints(selectionZone, currentWaypointZone);
-
-            
         }
+
+        Debug.Log(selectionZone);
     }
 
     public void Start()

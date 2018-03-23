@@ -245,7 +245,7 @@
 
         public void deleteLineCollider()
         {
-            Destroy(this.lineCollider);
+            Destroy(this.lineCollider.gameObject);
         }
     }
 }
