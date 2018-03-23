@@ -16,35 +16,7 @@ public class ControllerCollider : MonoBehaviour {
         //Checks to see if B button was pressed the previous frame
         if (OVRInput.GetDown(OVRInput.Button.Two))
         {
-            //Makes sure that there are some waypoints
-            if (SetWaypoint.waypoints.Count > 0)
-            {
-                //THIS IS THE DELETE FUNCTION
-                //Checking to see if the controller is near a specific waypoint
-                if (selectionZone)
-                {
-                    Debug.Log("attempting to remove!!!");
-                    SetWaypoint.ClearSpecificWayPoint(currentWaypointZone.gameObject);
-                    selectionZone = false;
-                }
-               
-                //THIS IS THE UNDO FUNCTION (Delete except not in zone) 
-                else
-                {
-                    Debug.Log("YES");
-                    SetWaypoint.ClearWaypoint();
-                    
-                }
-
-            }
-
-
-            //THIS IS THE UNDO FUNCTION if no waypoints
-            else
-            {
-                Debug.Log("Undo: Delete Drone");
-                //Destroy(SetWaypoint.getDrone());
-            }
+            UndoWayPoints.UndoAndDeleteWaypoints(selectionZone, currentWaypointZone);
 
             
         }

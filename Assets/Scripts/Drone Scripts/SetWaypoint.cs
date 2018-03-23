@@ -7,6 +7,7 @@
 
     public class SetWaypoint : MonoBehaviour {
 
+        public static GameObject currentDrone;
         public GameObject drone; // Drone object
         public GameObject waypoint; // Waypoint object
         
@@ -61,6 +62,8 @@
 
         void Update()
         {
+            currentDrone = drone;
+
             if (selected)
             {
                 // Changes the color of the drone to indicate that it has been selected
@@ -223,7 +226,10 @@
         {
             
             Debug.Log("removing waypoint");
-            Destroy((GameObject)waypoints[waypoints.Count - 1]);
+            GameObject latestWayPoint = (GameObject)waypoints[waypoints.Count - 1];
+            WaypointProperties tempProperties = latestWayPoint.GetComponent<WaypointProperties>();
+            tempProperties.deleteLineCollider();
+            Destroy(latestWayPoint);
             waypoints.RemoveAt(waypoints.Count - 1);
                 
             
@@ -257,6 +263,7 @@
                 Debug.Log("inside new function");
                 Debug.Log("removing specific waypoint");
                 nextDrone.GetComponent<WaypointProperties>().prevPoint = tempProperties.prevPoint;
+                tempProperties.deleteLineCollider();
                 Destroy((GameObject)waypoints[tempIndex]);
                 waypoints.RemoveAt(tempIndex);
                 
@@ -301,9 +308,9 @@
             }
         }
 
-        public GameObject getDrone()
+        public static GameObject getCurrentDrone()
         {
-            return drone;
+            return currentDrone;
         }
 
         //Toggle waypoint placement mode if menu is pressed (called from waypoint adder).

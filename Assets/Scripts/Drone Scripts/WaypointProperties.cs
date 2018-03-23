@@ -242,5 +242,10 @@
         {
             CreateGroundpoint();
         }
+
+        public void deleteLineCollider()
+        {
+            Destroy(this.lineCollider);
+        }
     }
 }
