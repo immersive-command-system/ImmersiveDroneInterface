@@ -30,7 +30,7 @@ public class UndoWayPoints : MonoBehaviour {
 
         }
 
-
+        //TODO I don't think this is ever getting run because I think SpecificWayPointClear / WayPointClear are taking care of it. I could be wrong though. 
         //THIS IS THE UNDO FUNCTION if no waypoints
         else
         {

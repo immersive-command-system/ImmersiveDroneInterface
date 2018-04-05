@@ -5,8 +5,8 @@ using VRTK;
 
 public class ControllerInteractions : MonoBehaviour {
 
-    public static bool selectionZone = false;
-    public GameObject currentWaypointZone = null;
+    public static bool selectionZone = false; // Is the controller in a waypoint zone?
+    public GameObject currentWaypointZone = null; //Waypoint of zone that controller is in
     public Material defaultMaterial;
     public Material selectedMaterial;
     
@@ -24,7 +24,7 @@ public class ControllerInteractions : MonoBehaviour {
 
     public void Start()
     {
-        this.gameObject.AddComponent<SphereCollider>();
+        this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
         gameObject.GetComponent<SphereCollider>().radius = 0.1f;
     }
 
