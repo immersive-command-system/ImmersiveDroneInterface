@@ -9,9 +9,15 @@ public class ControllerInteractions : MonoBehaviour {
     public GameObject currentWaypointZone = null; //Waypoint of zone that controller is in
     public Material defaultMaterial;
     public Material selectedMaterial;
+    private GameObject controller; //needed to access pointer
+    public static bool raycastOn; //raycast state
+    public static bool indexPressed;
+    public static bool indexReleased;
     
 	// Update is called once per frame
 	void Update () {
+        indexPressed = false;
+        indexReleased = false;
        
         //Checks to see if B button was pressed the previous frame
         if (OVRInput.GetDown(OVRInput.Button.Two))
@@ -19,13 +25,37 @@ public class ControllerInteractions : MonoBehaviour {
             UndoWayPoints.UndoAndDeleteWaypoints(selectionZone, currentWaypointZone);
         }
 
-       
+
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+        {
+            indexPressed = true;
+        }
+
+        if (OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
+        {
+            indexReleased = true;
+        }
+
+        //Checks grip trigger for raycast toggle
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
+        {
+            controller.GetComponent<VRTK_Pointer>().Toggle(true);
+            raycastOn = true;
+        } else
+        {
+            controller.GetComponent<VRTK_Pointer>().Toggle(false);
+            raycastOn = false;
+        }
+
+        
     }
 
     public void Start()
     {
         this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
         gameObject.GetComponent<SphereCollider>().radius = 0.1f;
+
+        controller = GameObject.FindGameObjectWithTag("GameController");
     }
 
 
@@ -59,9 +89,18 @@ public class ControllerInteractions : MonoBehaviour {
             currentCollider.gameObject.GetComponent<MeshRenderer>().material = defaultMaterial;
         }
 
-
-
     }
 
+    //Checks if index pressed a second time, after it was pressed in Update()
+    public static bool secondIndexPressed()
+    {
+        return OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+    }
+
+    //Get local rotation of controller
+    public static Quaternion getLocalControllerRotation(OVRInput.Controller buttonType)
+    {
+        return OVRInput.GetLocalControllerRotation(buttonType);
+    }
 
 }

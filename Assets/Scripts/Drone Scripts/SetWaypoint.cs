@@ -58,9 +58,12 @@
             waypointPlacer = Instantiate(waypoint);
             waypointPlacer.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             waypointPlacer.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
+            waypointPlacer.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+
             waypointPlacer.SetActive(false);
         }
 
+        
         void Update()
         {
             currentDrone = drone;
@@ -78,7 +81,7 @@
                
                 UpdateScale();
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (setWaypointState && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                if (setWaypointState && ControllerInteractions.indexPressed)
                 {
                     adjustingWaypoint = SetGroundpoint();
                     if (adjustingWaypoint == null)
@@ -88,18 +91,18 @@
                     currentlySetting = true;
                     deactivateSetWaypointState();
 
-                } else if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                } else if (ControllerInteractions.indexPressed)
                 {
                     activateSetWaypointState();
                 }
-                if (currentlySetting && !firstClickFinished && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
+                if (currentlySetting && !firstClickFinished && ControllerInteractions.indexReleased)
                 {
                     firstClickFinished = true;
                 }
                 // Allows user to adjust the newly placed waypoints height
                 if (adjustingHeight && firstClickFinished)
                 {
-                    if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+                    if (ControllerInteractions.indexPressed)
                     {
                         activateSetWaypointState();
                     }
@@ -127,9 +130,11 @@
 
         // Allows user to select where the waypoint will appear above
         private GameObject SetGroundpoint()
+            
         {
-            if (controller.GetComponent<VRTK_Pointer>().IsActivationButtonPressed())
+            if (ControllerInteractions.raycastOn)
             {
+              
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
                 {
                     adjustingHeight = true;
@@ -204,13 +209,13 @@
                 newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, MaxHeight(), newWaypoint.transform.position.z);
             }
 
-            float height = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch).x / 40;
+            float height = ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x / 40;
             newWaypoint.transform.Translate(0f, height, 0f);
 
-            adjustingHeight = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
-            firstClickFinished = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
-            settingInterWaypoint = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
-            currentlySetting = !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+            adjustingHeight = !ControllerInteractions.secondIndexPressed();
+            firstClickFinished = !ControllerInteractions.secondIndexPressed();
+            settingInterWaypoint = !ControllerInteractions.secondIndexPressed();
+            currentlySetting = !ControllerInteractions.secondIndexPressed();
 
         }
 
