@@ -8,7 +8,7 @@
     {
         public void OnClick()
         {
-            SetWaypoint.menuPressed();
+           // SetWaypoint.menuPressed();
         }
     }
 }

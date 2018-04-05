@@ -5,8 +5,8 @@ using UnityEngine;
 public class DroneController : MonoBehaviour {
 
     public int speed = 0;
-    public ArrayList waypoints = new ArrayList();
-    public GameObject waypoint;
+    //public ArrayList waypoints = new ArrayList();
+    //public GameObject waypoint;
 
     // Use this for initialization
     void Start()

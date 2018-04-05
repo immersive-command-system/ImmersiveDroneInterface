@@ -265,7 +265,14 @@
                 if (tempIndex == 0)
                 {
                     Debug.Log("destroying drone as last resort");
-                    Destroy((GameObject) waypoints[0]); // Getting rid of last Waypoint gameObject before destroying Drone
+                    for (int i = 0; i < waypoints.Count; i++)
+                    {
+                        GameObject forLoopWayPoint = (GameObject)waypoints[i]; //Getting each waypoints
+                        tempProperties = forLoopWayPoint.GetComponent<WaypointProperties>(); //Getting each wayPoints properties
+                        tempProperties.deleteLineCollider(); // Deleting Line collider attached to waypoint
+                        Destroy(forLoopWayPoint); //Deleting waypoint itself 
+                    }
+                    //Destroy((GameObject) waypoints[0]); // Getting rid of last Waypoint gameObject before destroying Drone
                     Destroy(tempProperties.referenceDrone);
                     waypoints = new ArrayList(0); // resetting both lists 
                     waypointOrder = new ArrayList(0); // ^
