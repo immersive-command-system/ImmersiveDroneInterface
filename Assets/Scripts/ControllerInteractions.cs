@@ -38,7 +38,7 @@ public class ControllerInteractions : MonoBehaviour {
     // The circular table
     public GameObject rotatingTable;
 
-    // Rotation stuff
+    // Handle Rotation variables
     public LinkedList<float> angles;
     public bool handleHeldTrigger = false;
     public MapState mapState;
@@ -50,6 +50,8 @@ public class ControllerInteractions : MonoBehaviour {
     // Pointer Controller
     private GameObject controller;
     private VRTK.VRTK_StraightPointerRenderer pointer;
+
+    // Pointer Mode
 
     // Use this for initialization
     void Start () {
