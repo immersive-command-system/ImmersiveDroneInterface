@@ -22,6 +22,8 @@ TagManager:
   - Handle
   - ROSDrone
   - Table
+  - Test
+  - WaypointPlacement
   layers:
   - Default
   - TransparentFX

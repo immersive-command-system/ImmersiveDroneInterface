@@ -28,7 +28,7 @@
 
         void Update()
         {
-            totalWaypoints = this.GetComponentInParent<SetWaypoint>().waypoints.Count - 1;
+            totalWaypoints = SetWaypoint.waypoints.Count - 1;
 
             if (prevPoint != null)
             {
@@ -46,15 +46,15 @@
         private void DisplayPastPath()
         {
             line.SetPosition(0, this.transform.position);
-            if (this.GetComponentInParent<SetWaypoint>().waypoints.Count == 0)
+            if (SetWaypoint.waypoints.Count == 0)
             {
                 line.SetPosition(1, this.transform.position);
             } else
             {
                 line.SetPosition(1, prevPoint.transform.position);
             }
-            line.startWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 200;
-            line.endWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 200;
+            line.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+            line.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
             if (this.GetComponentInParent<SetWaypoint>().selected)
             {
                 line.material = selectedPassedLine;
@@ -66,14 +66,14 @@
 
         private void SelectTarget()
         {
-            if (this.GetComponentInParent<SetWaypoint>().waypoints.Count != 0)
+            if (SetWaypoint.waypoints.Count != 0)
             {
                 if (totalWaypoints > currentWaypoint)
                 {
-                    targetWaypoint = (GameObject)this.GetComponentInParent<SetWaypoint>().waypoints[currentWaypoint + 1];
+                    targetWaypoint = (GameObject)SetWaypoint.waypoints[currentWaypoint + 1];
                     if (this.transform.position == targetWaypoint.transform.position)
                     {
-                        prevPoint = (GameObject)this.GetComponentInParent<SetWaypoint>().waypoints[currentWaypoint + 1];
+                        prevPoint = (GameObject)SetWaypoint.waypoints[currentWaypoint + 1];
                         currentWaypoint++;
                     }
                 }
@@ -86,7 +86,7 @@
                     //    currentWaypoint = totalWaypoints;
                     //}
                     currentWaypoint = totalWaypoints;
-                    prevPoint = (GameObject)this.GetComponentInParent<SetWaypoint>().waypoints[totalWaypoints];
+                    prevPoint = (GameObject)SetWaypoint.waypoints[totalWaypoints];
                 }
                 else
                 {
@@ -105,7 +105,7 @@
         {
             if (targetWaypoint != null)
             {
-                float step = speed * Time.deltaTime * world.GetComponent<ControllerInteractions>().actualScale.x;
+                float step = speed * Time.deltaTime * world.GetComponent<MapInteractions>().actualScale.x;
                 this.transform.position = Vector3.MoveTowards(this.transform.position, targetWaypoint.transform.position, step);
             } else
             {

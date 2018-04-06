@@ -8,8 +8,7 @@
     {
         public void OnClick()
         {
-            GameObject temp = GameObject.Find("RightController");
-            temp.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
+           // SetWaypoint.menuPressed();
         }
     }
 }

@@ -468,7 +468,6 @@ MonoBehaviour:
   mapState: 0
   currentController: 0
   movementAngleDecay: 0.98
-  objectScale: {x: 0, y: 0, z: 0}
 --- !u!114 &146794965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -706,6 +705,20 @@ MonoBehaviour:
 GameObject:
   m_PrefabParentObject: {fileID: 157742, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
   m_PrefabInternal: {fileID: 1935232364}
+--- !u!114 &665289479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 665289476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a6b3d5534d58a1458d4e900f116c673, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWaypointZone: {fileID: 0}
+  defaultMaterial: {fileID: 0}
+  selectedMaterial: {fileID: 0}
 --- !u!1 &690883967
 GameObject:
   m_ObjectHideFlags: 0

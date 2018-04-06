@@ -81,7 +81,9 @@ namespace VRTK
             ButtonOnePress,
             ButtonTwoTouch,
             ButtonTwoPress,
-            StartMenuPress
+            StartMenuPress,
+			GripTouchEnd,
+			GripTouchStart
         }
 
         [Header("Action Alias Buttons")]

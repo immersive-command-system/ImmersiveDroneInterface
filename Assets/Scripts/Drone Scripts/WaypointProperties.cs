@@ -103,8 +103,8 @@
                 // If line being selected by controller
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject && referenceDrone.GetComponent<SetWaypoint>().selected)
                 {
-                    waypointLine.startWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 100;
-                    waypointLine.endWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 100;
+                    waypointLine.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
+                    waypointLine.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
 
                     if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
                     {
@@ -119,8 +119,8 @@
                 }
                 else
                 {
-                    waypointLine.startWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 200;
-                    waypointLine.endWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 200;
+                    waypointLine.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                    waypointLine.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
                 }
             }
         }
@@ -134,7 +134,7 @@
             } else if (referenceDrone.GetComponent<SetWaypoint>().selected)
             {
                 lineCollider.transform.parent = waypointLine.transform;
-                lineCollider.radius = world.GetComponent<ControllerInteractions>().actualScale.y / 50;
+                lineCollider.radius = world.GetComponent<MapInteractions>().actualScale.y / 50;
                 lineCollider.center = Vector3.zero;
                 lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
                 lineCollider.direction = 2;
@@ -152,7 +152,7 @@
 
             Vector3 groundpoint = new Vector3(this.transform.position.x, world.transform.position.y + modelGroundpoint.transform.localScale.y, this.transform.position.z);
             thisGroundpoint = Instantiate(modelGroundpoint, groundpoint, Quaternion.identity);
-            thisGroundpoint.transform.localScale = world.GetComponent<ControllerInteractions>().actualScale / 100;
+            thisGroundpoint.transform.localScale = world.GetComponent<MapInteractions>().actualScale / 100;
             thisGroundpoint.transform.parent = world.transform;
             groundpointLine = thisGroundpoint.GetComponent<LineRenderer>();
         }
@@ -162,8 +162,8 @@
         {
             groundpointLine.SetPosition(0, thisGroundpoint.transform.position);
             groundpointLine.SetPosition(1, this.transform.position);
-            groundpointLine.startWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 400;
-            groundpointLine.endWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 400;
+            groundpointLine.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 400;
+            groundpointLine.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 400;
             if (referenceDrone.GetComponent<SetWaypoint>().selected)
             {
                 groundpointLine.material = selectedGroundpointLine;
@@ -241,6 +241,11 @@
         void InteractableObjectUngrabbed(object sender, VRTK.InteractableObjectEventArgs e)
         {
             CreateGroundpoint();
+        }
+
+        public void deleteLineCollider()
+        {
+            Destroy(this.lineCollider.gameObject);
         }
     }
 }

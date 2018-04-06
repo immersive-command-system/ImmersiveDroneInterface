@@ -25,7 +25,7 @@ namespace VRTK
         [Tooltip("The specific renderer to use when the pointer is activated. The renderer also determines how the pointer reaches it's destination (e.g. straight line, bezier curve).")]
         public VRTK_BasePointerRenderer pointerRenderer;
         [Tooltip("The button used to activate/deactivate the pointer.")]
-        public VRTK_ControllerEvents.ButtonAlias activationButton = VRTK_ControllerEvents.ButtonAlias.TouchpadPress;
+        public VRTK_ControllerEvents.ButtonAlias activationButton;
         [Tooltip("If this is checked then the Activation Button needs to be continuously held down to keep the pointer active. If this is unchecked then the Activation Button works as a toggle, the first press/release enables the pointer and the second press/release disables the pointer.")]
         public bool holdButtonToActivate = true;
         [Tooltip("If this is checked then the pointer will be toggled on when the script is enabled.")]
@@ -102,6 +102,7 @@ namespace VRTK
         protected bool selectionButtonPressed;
         protected bool attemptControllerSetup;
         protected Transform originalCustomOrigin;
+        protected VRTK_ControllerEvents.ButtonAlias raycastActivationButton;
 
         public virtual void OnActivationButtonPressed(ControllerInteractionEventArgs e)
         {
@@ -495,9 +496,9 @@ namespace VRTK
 
             if (controller != null)
             {
-                controller.SubscribeToButtonAliasEvent(activationButton, true, DoActivationButtonPressed);
-                controller.SubscribeToButtonAliasEvent(activationButton, false, DoActivationButtonReleased);
-                subscribedActivationButton = activationButton;
+                controller.SubscribeToButtonAliasEvent(raycastActivationButton, true, DoActivationButtonPressed);
+                controller.SubscribeToButtonAliasEvent(raycastActivationButton, false, DoActivationButtonReleased);
+                subscribedActivationButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
             }
         }
 
