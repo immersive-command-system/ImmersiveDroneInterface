@@ -39,21 +39,29 @@ public class ControllerInteractions : MonoBehaviour {
         //Checks grip trigger for raycast toggle
         if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
         {
+            selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             controller.GetComponent<VRTK_Pointer>().Toggle(true);
             raycastOn = true;
         } else
         {
+            if(raycastOn == true) //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
+            {
+                selectionZone = false; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
+            }
             controller.GetComponent<VRTK_Pointer>().Toggle(false);
             raycastOn = false;
+            
         }
 
         
+
+
     }
 
     public void Start()
     {
         this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-        gameObject.GetComponent<SphereCollider>().radius = 0.1f;
+        gameObject.GetComponent<SphereCollider>().radius = 0.070f;
 
         controller = GameObject.FindGameObjectWithTag("GameController");
     }
@@ -62,21 +70,23 @@ public class ControllerInteractions : MonoBehaviour {
     
     void OnTriggerEnter(Collider currentCollider)
     {
-        //Checking to see if controller touched near a waypoint 
-        if(currentCollider.gameObject.CompareTag("waypoint")) {
-           
-            //Telling Unity that the Controller is in range to delete
-            selectionZone = true;
-            Debug.Log("setting deletion Zone");
-            currentWaypointZone = currentCollider.gameObject;
-            print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
+        if (selectionZone != true) //Preventing multiple zone selections 
+        {
+            //Checking to see if controller touched near a waypoint 
+            if (currentCollider.gameObject.CompareTag("waypoint"))
+            {
 
-            currentCollider.gameObject.GetComponent<MeshRenderer>().material = selectedMaterial;
-            print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
-        }
-        
+                //Telling Unity that the Controller is in range to delete
+                selectionZone = true;
+                Debug.Log("setting deletion Zone");
+                currentWaypointZone = currentCollider.gameObject;
+                //print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
 
-        
+                //currentCollider.gameObject.GetComponent<MeshRenderer>().material = selectedMaterial;
+                //print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
+                WayPointColorSelection.AddWayPointColor(selectionZone, currentWaypointZone);
+            }
+        }   
     }
 
     void OnTriggerExit(Collider currentCollider)
@@ -85,8 +95,10 @@ public class ControllerInteractions : MonoBehaviour {
         if (currentCollider.gameObject.CompareTag("waypoint"))
         {
             Debug.Log("Leaving Deletion Zone");
+            WayPointColorSelection.RemoveWayPointColor(selectionZone, currentWaypointZone); //Requires selection zone to be true
             selectionZone = false;
-            currentCollider.gameObject.GetComponent<MeshRenderer>().material = defaultMaterial;
+            //currentCollider.gameObject.GetComponent<MeshRenderer>().material = defaultMaterial;
+           
         }
 
     }
