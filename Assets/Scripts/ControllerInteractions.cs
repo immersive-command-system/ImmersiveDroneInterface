@@ -10,9 +10,9 @@ public class ControllerInteractions : MonoBehaviour {
     public Material defaultMaterial;
     public Material selectedMaterial;
     private GameObject controller; //needed to access pointer
-    public static bool raycastOn; //raycast state
-    public static bool indexPressed;
-    public static bool indexReleased;
+    private static bool raycastOn; //raycast state
+    private static bool indexPressed;
+    private static bool indexReleased;
     
 	// Update is called once per frame
 	void Update () {
@@ -36,8 +36,8 @@ public class ControllerInteractions : MonoBehaviour {
             indexReleased = true;
         }
 
-        //Checks grip trigger for raycast toggle
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
+        //Checks grip trigger for raycast toggle. Deactivates during height adjustment
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null && !SetWaypoint.IsAdjustingHeight())
         {
             selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             controller.GetComponent<VRTK_Pointer>().Toggle(true);
@@ -52,6 +52,7 @@ public class ControllerInteractions : MonoBehaviour {
             raycastOn = false;
             
         }
+
 
         
 
@@ -115,4 +116,18 @@ public class ControllerInteractions : MonoBehaviour {
         return OVRInput.GetLocalControllerRotation(buttonType);
     }
 
+    public static bool IsRaycastOn()
+    {
+        return raycastOn;
+    }
+
+    public static bool IsIndexPressed()
+    {
+        return indexPressed;
+    }
+
+    public static bool IsIndexReleased()
+    {
+        return indexReleased;
+    }
 }
