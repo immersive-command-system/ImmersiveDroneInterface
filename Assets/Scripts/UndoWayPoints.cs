@@ -8,7 +8,7 @@ public class UndoWayPoints : MonoBehaviour {
 	public static void UndoAndDeleteWaypoints(bool selectionZone,  GameObject currentWaypointZone)
     {
         //Makes sure that there are some waypoints
-        if (SetWaypoint.waypoints.Count > 0)
+        if (SetWaypoint.waypoints != null && SetWaypoint.waypoints.Count > 0)
         {
             //THIS IS THE DELETE FUNCTION
             //Checking to see if the controller is near a specific waypoint
