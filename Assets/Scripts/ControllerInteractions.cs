@@ -36,8 +36,8 @@ public class ControllerInteractions : MonoBehaviour {
             indexReleased = true;
         }
 
-        //Checks grip trigger for raycast toggle. Deactivates during height adjustment
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null && !SetWaypoint.IsAdjustingHeight())
+        //Checks grip trigger for raycast toggle. Deactivates during height adjustment && !SetWaypoint.IsAdjustingHeight())
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
         {
             selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             controller.GetComponent<VRTK_Pointer>().Toggle(true);

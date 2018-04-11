@@ -202,18 +202,16 @@
         // Adjusts the height at which the waypoint appears
         private void AdjustHeight(GameObject newWaypoint)
         {
-            if (newWaypoint.transform.position.y < groundPoint.y + actualScale.y / 200)
-            {
-                newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, groundPoint.y + actualScale.y / 100, newWaypoint.transform.position.z);
-            } else if (newWaypoint.transform.position.y > MaxHeight())
-            {
-                newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, MaxHeight(), newWaypoint.transform.position.z);
-            }
-
-
-
-            float height = (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x) / 40;
-            newWaypoint.transform.Translate(0f, height, 0f);
+            float groundX = newWaypoint.transform.position.x;
+            float groundY = newWaypoint.transform.position.y;
+            float groundZ = newWaypoint.transform.position.z;
+            float localX = controller.transform.position.x;
+            float localY = controller.transform.position.y;
+            float localZ = controller.transform.position.z;
+            float height = 2.147f - (float) Distance(groundX, groundZ, 0f,0f,localX, localZ) * (float) Math.Tan(Math.PI * ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x);
+            float heightMin = 2.147f + actualScale.y/200; //mesh height = 2.147
+            height = Math.Min(MaxHeight(), Math.Max(heightMin, height));
+            newWaypoint.transform.position = new Vector3(groundX, height, groundZ);
 
             adjustingHeight = !ControllerInteractions.secondIndexPressed();
             firstClickFinished = !ControllerInteractions.secondIndexPressed();
@@ -362,6 +360,11 @@
         public static bool IsAdjustingHeight()
         {
             return adjustingHeight;
+        }
+
+        private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
+        {
+            return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY),2)+ Math.Pow((controllerZ - groundZ), 2));
         }
             
     }
