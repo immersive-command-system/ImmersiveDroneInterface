@@ -221,7 +221,7 @@
         {
             if (rayHit && pointerCollidedWith.collider.tag == "Drone")
             {
-                pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().ActivateDroneMenu();
+                //pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().ActivateDroneMenu();
             }
         }
 
@@ -357,7 +357,7 @@
 
         public bool IsSettingWaypoint()
         {
-            return (setWaypoint && onGround);
+            return (onGround);
         }
 
         public Vector3 GetGroundPoint()

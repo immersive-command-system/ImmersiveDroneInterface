@@ -23,6 +23,7 @@ TagManager:
   - ROSDrone
   - Table
   - Test
+  - WaypointPlacement
   layers:
   - Default
   - TransparentFX

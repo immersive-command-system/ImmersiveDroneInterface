@@ -717,6 +717,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentWaypointZone: {fileID: 0}
+  defaultMaterial: {fileID: 0}
+  selectedMaterial: {fileID: 0}
 --- !u!1 &690883967
 GameObject:
   m_ObjectHideFlags: 0

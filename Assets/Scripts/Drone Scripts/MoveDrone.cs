@@ -53,8 +53,8 @@
             {
                 line.SetPosition(1, prevPoint.transform.position);
             }
-            line.startWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 200;
-            line.endWidth = world.GetComponent<ControllerInteractions>().actualScale.y / 200;
+            line.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+            line.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
             if (this.GetComponentInParent<SetWaypoint>().selected)
             {
                 line.material = selectedPassedLine;
@@ -105,7 +105,7 @@
         {
             if (targetWaypoint != null)
             {
-                float step = speed * Time.deltaTime * world.GetComponent<ControllerInteractions>().actualScale.x;
+                float step = speed * Time.deltaTime * world.GetComponent<MapInteractions>().actualScale.x;
                 this.transform.position = Vector3.MoveTowards(this.transform.position, targetWaypoint.transform.position, step);
             } else
             {

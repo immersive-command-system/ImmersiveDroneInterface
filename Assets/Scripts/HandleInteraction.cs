@@ -5,7 +5,7 @@ using VRTK;
 
 public class HandleInteraction : MonoBehaviour {
 
-    public ControllerInteractions controllerInteractions;
+    public MapInteractions controllerInteractions;
 
 	// Use this for initialization
 	void Start () {
