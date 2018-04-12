@@ -7,7 +7,7 @@
 
     public class ToggleDroneMovement : MonoBehaviour
     {
-
+        // THIS HANDLED THE OLD MOVEMENT BUTTON
         public GameObject referenceDrone;
         private Vector3 size;
 

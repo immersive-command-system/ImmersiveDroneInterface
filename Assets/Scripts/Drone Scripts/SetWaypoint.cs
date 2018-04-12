@@ -4,14 +4,14 @@
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using ROSBridgeLib;
+    using ROSBridgeLib.std_msgs;
 
     public class SetWaypoint : MonoBehaviour {
 
         public static GameObject currentDrone;
         public GameObject drone; // Drone object
         public GameObject waypoint; // Waypoint object
-        
-     
 
         public float maxHeight; // maximum height waypoint can be at when adjusting
         public bool selected; // Indicated if the drone is selected
@@ -40,8 +40,8 @@
 
         public GameObject waypointPlacer; // Place waypoint in front of controller
 
-
         private static bool setWaypointState = false;
+        //public ROSDroneConnection currentConnection;
 
         void Start()
         {
@@ -61,9 +61,12 @@
             waypointPlacer.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
 
             waypointPlacer.SetActive(false);
+
+            //currentConnection = new ROSDroneConnection();
+            //Debug.Log("SetWaypoint made new ROSDroneConnection");
         }
 
-        
+
         void Update()
         {
             currentDrone = drone;
@@ -83,6 +86,7 @@
                 // Allows user to select a groundpoint which a new waypoint will appear above
                 if (setWaypointState && ControllerInteractions.indexPressed)
                 {
+                    // Secondary Placement
                     adjustingWaypoint = SetGroundpoint();
                     if (adjustingWaypoint == null)
                     {
@@ -93,13 +97,14 @@
 
                 } else if (ControllerInteractions.indexPressed)
                 {
+                    //Primary Placement
                     activateSetWaypointState();
                 }
                 if (currentlySetting && !firstClickFinished && ControllerInteractions.indexReleased)
                 {
                     firstClickFinished = true;
                 }
-                // Allows user to adjust the newly placed waypoints height
+                // Allows user to adjust the newly placed waypoints height (when using Secondary Placement)
                 if (adjustingHeight && firstClickFinished)
                 {
                     if (ControllerInteractions.indexPressed)
@@ -191,9 +196,14 @@
             }
             else // Placing a new waypoint at the end
             {
+
                 waypoints.Add(newWaypoint);
                 waypointOrder.Add(newWaypoint);
                 newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) waypoints[waypoints.Count - 2];
+
+                //Sending a ROS Update
+                WaypointUpdateMsg msg = new WaypointUpdateMsg(newWaypoint.transform.position.x, newWaypoint.transform.position.y, newWaypoint.transform.position.z);
+                world.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
             }
             return newWaypoint;
         }
@@ -247,7 +257,6 @@
             Destroy(latestWayPoint);
             waypoints.RemoveAt(waypoints.Count - 1); //removing latest waypoint from both lists
             waypointOrder.RemoveAt(tempIndex2);//^
-                
             
         }
 

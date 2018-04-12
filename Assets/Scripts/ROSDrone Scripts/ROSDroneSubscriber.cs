@@ -9,12 +9,12 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
 
     public static string GetMessageTopic()
     {
-        return "/state/dubins";
+        return "/state/position_velocity";
     }
 
     public static string GetMessageType()
     {
-        return "crazyflie_msgs/DubinsStateStamped";
+        return "crazyflie_msgs/PositionVelocityStateStamped";
     }
 
     public static ROSBridgeMsg ParseMessage(JSONNode msg)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ROSBridgeLib;
+using ROSBridgeLib.std_msgs;
 using UnityEditor;
 using System.IO;
 
@@ -14,6 +15,7 @@ public class ROSDroneConnection : MonoBehaviour {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.0.107", 9090);
         ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
+        ros.AddPublisher(typeof(ROSDronePublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
     }
@@ -51,5 +53,11 @@ public class ROSDroneConnection : MonoBehaviour {
 
         //Print the text from the file
         Debug.Log(asset.text);
+    }
+
+    public void PublishWaypointUpdateMessage(WaypointUpdateMsg msg)
+    {
+        Debug.Log("Published new waypoint message");
+        ros.Publish("/waypoints", msg);
     }
 }

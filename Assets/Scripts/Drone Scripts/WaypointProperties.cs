@@ -16,41 +16,40 @@
         public Material selectedGroundpointLine;
         public Material unselectedGroundpointLine;
 
-        public GameObject prevPoint; // Refers to previous waypoint/ drone
+        public GameObject prevPoint; // Refers to previous waypoint/drone
         public GameObject referenceDrone; // Refers to drone waypoint is attached to
+
         private GameObject thisGroundpoint; // groundpoint instantiated under current waypoint
-
-        public bool passed; // Indicates whether this waypoint has been passed by the drone
-
         public GameObject modelGroundpoint; // Refers to the groundpoint object being instantiated
+        private LineRenderer groundpointLine; // Connects the groundpoint to the waypoint
 
         private LineRenderer waypointLine;
         private CapsuleCollider lineCollider;
+        public bool passed; // Indicates whether this waypoint has been passed by the drone
 
         private GameObject world;
         private GameObject controller;
 
-        private LineRenderer groundpointLine; // Connects the groundpoint to the waypoint
-
-        public bool setInterwaypointToggle;
+        public bool setInterwaypointToggle; // This tells us if the next waypoint placed should be inbetween two existing waypoints
 
         void Start()
         {
-            passed = false;
-
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
 
-            waypointLine = this.GetComponentInParent<LineRenderer>();
             if (prevPoint != null)
             {
                 referenceDrone = prevPoint.GetComponent<WaypointProperties>().referenceDrone;
+                // The base case of this is the waypoint that gets created when the drone is.
             }
 
+            passed = false; // Assume drone is behind the current waypoint
+
+            waypointLine = this.GetComponentInParent<LineRenderer>();
             lineCollider = new GameObject("Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
             lineCollider.gameObject.AddComponent<WaypointLine>().waypoint = gameObject;
-            
+           
             // Commented out due to child collider conflicts with parent collider.
             //lineCollider.transform.parent = waypointLine.transform;
 

@@ -90,6 +90,7 @@
                 }
                 else
                 {
+                    // This is where we decide to choose the next waypoint
                     if (targetWaypoint != null && this.transform.position == targetWaypoint.transform.position)
                     {
                         targetWaypoint = null;
@@ -111,6 +112,7 @@
             {
                 move = false;
             }
+
         }
     }
 }
