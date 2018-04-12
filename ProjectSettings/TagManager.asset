@@ -24,6 +24,7 @@ TagManager:
   - Table
   - Test
   - WaypointPlacement
+  - selectionZone
   layers:
   - Default
   - TransparentFX

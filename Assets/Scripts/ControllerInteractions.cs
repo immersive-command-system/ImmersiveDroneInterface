@@ -8,7 +8,10 @@ public class ControllerInteractions : MonoBehaviour {
     public static bool selectionZone = false; // Is the controller in a waypoint zone?
     public GameObject currentWaypointZone = null; //Waypoint of zone that controller is in
     public Material defaultMaterial;
+    public GameObject controller_right;
+    public GameObject sphereVRTK;
     public Material selectedMaterial;
+    public Material opaqueMaterial;
     private GameObject controller; //needed to access pointer
     private static bool raycastOn; //raycast state
     private static bool indexPressed;
@@ -36,6 +39,15 @@ public class ControllerInteractions : MonoBehaviour {
             indexReleased = true;
         }
 
+
+        if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
+        {
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false;
+        } else
+        {
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+        }
+
         //Checks grip trigger for raycast toggle. Deactivates during height adjustment && !SetWaypoint.IsAdjustingHeight())
         if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
         {
@@ -61,10 +73,25 @@ public class ControllerInteractions : MonoBehaviour {
 
     public void Start()
     {
-        this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-        gameObject.GetComponent<SphereCollider>().radius = 0.070f;
+        controller_right = GameObject.Find("controller_right");
+        sphereVRTK = GameObject.Find("sphereVRTK");
 
+        this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
+        gameObject.GetComponent<SphereCollider>().radius = 0.10f;
         controller = GameObject.FindGameObjectWithTag("GameController");
+
+
+        GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
+        tempSphere.transform.position = new Vector3(0F, 0F, 0.05F);
+        tempSphere.transform.parent = this.gameObject.transform;
+        tempSphere.transform.localScale = new Vector3(0.07F, 0.07F, 0.07F);
+        this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
+        tempSphere.gameObject.name = "sphereVRTK";
+        Renderer tempRend = tempSphere.GetComponent<Renderer>();
+        tempRend.material = opaqueMaterial;
+        //tempSphere.GetComponent<SphereCollider>().enabled = false; 
+
     }
 
 
@@ -85,7 +112,7 @@ public class ControllerInteractions : MonoBehaviour {
 
                 //currentCollider.gameObject.GetComponent<MeshRenderer>().material = selectedMaterial;
                 //print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
-                WayPointColorSelection.AddWayPointColor(selectionZone, currentWaypointZone);
+                //WayPointColorSelection.AddWayPointColor(selectionZone, currentWaypointZone);
             }
         }   
     }
@@ -96,7 +123,7 @@ public class ControllerInteractions : MonoBehaviour {
         if (currentCollider.gameObject.CompareTag("waypoint"))
         {
             Debug.Log("Leaving Deletion Zone");
-            WayPointColorSelection.RemoveWayPointColor(selectionZone, currentWaypointZone); //Requires selection zone to be true
+            //WayPointColorSelection.RemoveWayPointColor(selectionZone, currentWaypointZone); //Requires selection zone to be true
             selectionZone = false;
             //currentCollider.gameObject.GetComponent<MeshRenderer>().material = defaultMaterial;
            

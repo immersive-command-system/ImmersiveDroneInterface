@@ -10,7 +10,7 @@
         public static GameObject currentDrone;
         public GameObject drone; // Drone object
         public GameObject waypoint; // Waypoint object
-        
+        public static GameObject controller_right;
      
 
         public float maxHeight; // maximum height waypoint can be at when adjusting
@@ -45,6 +45,7 @@
 
         void Start()
         {
+            controller_right = GameObject.Find("controller_right");
             selected = true;
             adjustingHeight = false;
             actualScale = new Vector3(0, 0, 0);
@@ -160,6 +161,7 @@
             {
                 GameObject startWaypoint = Instantiate(waypoint, this.transform.position, Quaternion.identity);
                 startWaypoint.tag = "waypoint";
+                startWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
                 startWaypoint.transform.localScale = actualScale / 100;
                 startWaypoint.transform.parent = world.transform;
                 startWaypoint.GetComponent<WaypointProperties>().referenceDrone = this.gameObject;
@@ -172,6 +174,7 @@
             groundPoint.y = waypointPlacer.transform.position.y;
             GameObject newWaypoint = Instantiate(waypoint, groundPoint, Quaternion.identity);
             newWaypoint.tag = "waypoint";
+            newWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             newWaypoint.transform.localScale = actualScale / 100;
             newWaypoint.transform.parent = world.transform;
             
