@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using VRTK.UnityEventHelper;
 using VRTK;
 
 public class ControllerInteractions : MonoBehaviour {
@@ -39,7 +41,7 @@ public class ControllerInteractions : MonoBehaviour {
             indexReleased = true;
         }
 
-
+        //Stopping Sphere Collision with the RayCast 
         if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
         {
             GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false;
@@ -65,27 +67,50 @@ public class ControllerInteractions : MonoBehaviour {
             
         }
 
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
+        {
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false;
+        } else
+        {
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+        }
 
-        
 
 
+    }
+    
+    public void startGrab()
+    {
+        controller.GetComponent<VRTK_Pointer>().Toggle(false);
+        controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(false, false);
+        raycastOn = false;
+        Debug.Log("startgrab");
+    }
+
+    public void stopGrab()
+    {
+        controller.GetComponent<VRTK_Pointer>().Toggle(true);
+        controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(true, true);
+        raycastOn = true;
+        Debug.Log("stopgrab");
     }
 
     public void Start()
     {
+
         controller_right = GameObject.Find("controller_right");
         sphereVRTK = GameObject.Find("sphereVRTK");
 
         this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-        gameObject.GetComponent<SphereCollider>().radius = 0.10f;
+        gameObject.GetComponent<SphereCollider>().radius = 0.040f;
         controller = GameObject.FindGameObjectWithTag("GameController");
 
 
         GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
-        tempSphere.transform.position = new Vector3(0F, 0F, 0.05F);
+        tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
         tempSphere.transform.parent = this.gameObject.transform;
-        tempSphere.transform.localScale = new Vector3(0.07F, 0.07F, 0.07F);
+        tempSphere.transform.localScale = new Vector3(0.1F, 0.1F, 0.1F);
         this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
         tempSphere.gameObject.name = "sphereVRTK";
         Renderer tempRend = tempSphere.GetComponent<Renderer>();

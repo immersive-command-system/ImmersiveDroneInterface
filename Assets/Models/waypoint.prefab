@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec2ac476f2fc9a45a4e69712580a603, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  precisionGrab: 0
+  precisionGrab: 1
   rightSnapHandle: {fileID: 0}
   leftSnapHandle: {fileID: 0}
   throwVelocityWithAttachDistance: 0
@@ -184,7 +184,8 @@ MonoBehaviour:
   disableWhenIdle: 1
   touchHighlightColor: {r: 0.9632353, g: 0.021247858, b: 0.74235547, a: 0}
   allowedTouchControllers: 0
-  ignoredColliders: []
+  ignoredColliders:
+  - {fileID: 0}
   isGrabbable: 1
   holdButtonToGrab: 1
   stayGrabbedOnTeleport: 1
