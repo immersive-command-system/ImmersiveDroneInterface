@@ -14,10 +14,12 @@ public class ControllerInteractions : MonoBehaviour {
     public GameObject sphereVRTK;
     public Material selectedMaterial;
     public Material opaqueMaterial;
+    //private GameObject sphereVRTK;
     private GameObject controller; //needed to access pointer
     private static bool raycastOn; //raycast state
     private static bool indexPressed;
     private static bool indexReleased;
+    private static bool haloStyleZoomToggleButton = false; //Yes i know it's a shitty name but I dont know what its actually called
     
 	// Update is called once per frame
 	void Update () {
@@ -41,13 +43,39 @@ public class ControllerInteractions : MonoBehaviour {
             indexReleased = true;
         }
 
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
+        {
+            haloStyleZoomToggleButton = !haloStyleZoomToggleButton;
+            Debug.Log("toggleboi");
+        }
+
+        /*if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] != 0 && haloStyleZoomToggleButton == true)
+        {
+            while (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] > 0 && sphereVRTK.transform.localScale[0] < 0.2F)
+            {
+                Vector3 tempVector = sphereVRTK.transform.localScale; 
+                Vector3 additionVector = new Vector3(0.0001f, 0.0001f, 0.0001f);
+                //float scalarFloat = 1.001f;
+                //sphereVRTK.transform.localScale = scalarFloat *tempVector;
+                //Debug.Log("original" + tempVector.ToString());
+                //Debug.Log("addition" + additionVector.ToString());
+                //Debug.Log("final" + sphereVRTK.transform.localScale.ToString());
+            }
+
+            while (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] < 0 && sphereVRTK.transform.localScale[0] > 0.04F)
+            {
+                //sphereVRTK.transform.localScale -= new Vector3(0.0001F, 0.0001F, 0.0001F);
+            }
+        }*/
+        
+
         //Stopping Sphere Collision with the RayCast 
         if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
         {
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false;
+            sphereVRTK.GetComponent<SphereCollider>().enabled = false;
         } else
         {
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+            sphereVRTK.GetComponent<SphereCollider>().enabled = true;
         }
 
         //Checks grip trigger for raycast toggle. Deactivates during height adjustment && !SetWaypoint.IsAdjustingHeight())
@@ -81,25 +109,30 @@ public class ControllerInteractions : MonoBehaviour {
     
     public void startGrab()
     {
-        controller.GetComponent<VRTK_Pointer>().Toggle(false);
-        controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(false, false);
+        //controller.GetComponent<VRTK_Pointer>().Toggle(false);
+        //controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(false, false);
+        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").SetActive(false);
         raycastOn = false;
         Debug.Log("startgrab");
+        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = false;
     }
 
     public void stopGrab()
     {
-        controller.GetComponent<VRTK_Pointer>().Toggle(true);
-        controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(true, true);
+        //controller.GetComponent<VRTK_Pointer>().Toggle(true);
+        //controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(true, true);
+        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").SetActive(true);
+
         raycastOn = true;
         Debug.Log("stopgrab");
+        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = true;
     }
 
     public void Start()
     {
 
         controller_right = GameObject.Find("controller_right");
-        sphereVRTK = GameObject.Find("sphereVRTK");
+        //sphereVRTK = GameObject.Find("sphereVRTK");
 
         this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
         gameObject.GetComponent<SphereCollider>().radius = 0.040f;
@@ -108,14 +141,15 @@ public class ControllerInteractions : MonoBehaviour {
 
         GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
-        tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
+        tempSphere.transform.position = new Vector3(0F, 0F, 0.13F);
         tempSphere.transform.parent = this.gameObject.transform;
-        tempSphere.transform.localScale = new Vector3(0.1F, 0.1F, 0.1F);
+        tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
         this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
         tempSphere.gameObject.name = "sphereVRTK";
         Renderer tempRend = tempSphere.GetComponent<Renderer>();
         tempRend.material = opaqueMaterial;
-        //tempSphere.GetComponent<SphereCollider>().enabled = false; 
+        //tempSphere.GetComponent<SphereCollider>().enabled = false;
+        sphereVRTK = tempSphere;
 
     }
 
