@@ -82,16 +82,14 @@ public class ControllerInteractions : MonoBehaviour {
         if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
         {
             selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
-            controller.GetComponent<VRTK_Pointer>().Toggle(true);
-            raycastOn = true;
+            toggleRaycastOn();
         } else
         {
             if(raycastOn == true) //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             {
                 selectionZone = false; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             }
-            controller.GetComponent<VRTK_Pointer>().Toggle(false);
-            raycastOn = false;
+            toggleRaycastOff();
             
         }
 
@@ -215,5 +213,19 @@ public class ControllerInteractions : MonoBehaviour {
     public static bool IsIndexReleased()
     {
         return indexReleased;
+    }
+
+    private void toggleRaycastOn()
+    {
+
+        controller.GetComponent<VRTK_Pointer>().Toggle(true);
+        raycastOn = true;
+
+    }
+
+    private void toggleRaycastOff()
+    {
+        controller.GetComponent<VRTK_Pointer>().Toggle(false);
+        raycastOn = false;
     }
 }
