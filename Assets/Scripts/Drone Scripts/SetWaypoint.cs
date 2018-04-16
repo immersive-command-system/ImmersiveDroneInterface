@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using UnityEngine;
     using ROSBridgeLib;
-    using ROSBridgeLib.std_msgs;
+    using ROSBridgeLib.interface_msgs;
 
     public class SetWaypoint : MonoBehaviour {
 
@@ -189,6 +189,7 @@
                 {
                     index = 0;
                 }
+
                 waypoints.Insert(index, newWaypoint);
                 waypointOrder.Add(newWaypoint);
                 interWaypoint.GetComponent<WaypointProperties>().prevPoint = newWaypoint;

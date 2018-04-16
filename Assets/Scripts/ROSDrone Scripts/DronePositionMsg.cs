@@ -5,7 +5,7 @@ using ROSBridgeLib.std_msgs;
 
 namespace ROSBridgeLib
 {
-    namespace std_msgs
+    namespace interface_msgs
     {
         public class DronePositionMsg : ROSBridgeMsg
         {

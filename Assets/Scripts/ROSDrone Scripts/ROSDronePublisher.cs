@@ -1,5 +1,6 @@
 ﻿using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
+using ROSBridgeLib.interface_msgs;
 using System.Collections;
 using SimpleJSON;
 using UnityEngine;
@@ -14,7 +15,7 @@ public class ROSDronePublisher : ROSBridgePublisher
 
     public static string GetMessageType()
     {
-        return "geometry_msgs/Vector3";
+        return "interface_msgs/WaypointUpdateMsg";
     }
 
     public static string ToYAMLString(WaypointUpdateMsg msg)

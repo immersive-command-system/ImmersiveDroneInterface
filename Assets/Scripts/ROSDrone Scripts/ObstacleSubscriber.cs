@@ -1,5 +1,6 @@
 ﻿using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
+using ROSBridgeLib.interface_msgs;
 using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
@@ -42,7 +43,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
             string path = "Assets/Results/user_test.txt";
 
-            //Here we write 
+            //Here we write the obstacle locations to a file.
             StreamWriter writer = new StreamWriter(path, true);
             writer.WriteLine("Sphere: "+ pose.id + ", Position: " + sphere.transform.localPosition + ", Scale: " + sphere.transform.localScale);
             writer.Close();

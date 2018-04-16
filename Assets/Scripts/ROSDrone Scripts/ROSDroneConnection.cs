@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
+using ROSBridgeLib.interface_msgs;
 using UnityEditor;
 using System.IO;
 

@@ -1,5 +1,6 @@
 ﻿using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
+using ROSBridgeLib.interface_msgs;
 using System.Collections;
 using SimpleJSON;
 using UnityEngine;
