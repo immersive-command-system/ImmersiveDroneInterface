@@ -38,8 +38,11 @@
         private bool currentlySetting = false;
         public GameObject interWaypoint;
 
-        public GameObject waypointPlacer; // Place waypoint in front of controller
-
+        private GameObject waypointPlacer; // Place waypoint in front of controller
+        private GameObject currentWaypoint; // The current waypoint we are trying to place
+        private bool placeAtHand = false; // Are we placing the waypoint at our hand?
+        public Material ghostMaterial;
+        public Material adjustMaterial;
 
         private static bool setWaypointState = false;
 
@@ -56,12 +59,11 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             settingInterWaypoint = false;
 
-            waypointPlacer = Instantiate(waypoint);
+            waypointPlacer = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             waypointPlacer.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             waypointPlacer.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
-            waypointPlacer.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-
-            waypointPlacer.SetActive(false);
+            waypointPlacer.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            waypointPlacer.SetActive(true);
         }
 
         
@@ -81,8 +83,19 @@
                 {
                     DeselectOtherDrones();
                 }
+
+          
                
                 UpdateScale();
+
+                if (ControllerInteractions.IsRaycastOn())
+                {
+                    waypointPlacer.SetActive(false);
+                } else
+                {
+                    waypointPlacer.SetActive(true);
+                }
+
                 // Allows user to select a groundpoint which a new waypoint will appear above
                 if (setWaypointState && ControllerInteractions.IsIndexPressed())
                 {
@@ -98,9 +111,15 @@
                 {
                     activateSetWaypointState();
                 }
+
+
                 if (currentlySetting && !firstClickFinished && ControllerInteractions.IsIndexReleased())
                 {
                     firstClickFinished = true;
+                } else if (currentlySetting && !firstClickFinished && placeAtHand)
+                {
+                    currentWaypoint.transform.position = waypointPlacer.transform.position;
+          
                 }
                 // Allows user to adjust the newly placed waypoints height
                 if (adjustingHeight && firstClickFinished)
@@ -109,6 +128,7 @@
                     {
                         activateSetWaypointState();
                     }
+                    waypointPlacer.SetActive(false);
                     AdjustHeight(adjustingWaypoint);
 
                 } else if (firstClickFinished)
@@ -117,6 +137,7 @@
                     activateSetWaypointState();
                     settingInterWaypoint = false;
                     currentlySetting = false;
+                    placeAtHand = false;
                         
                 }
                 
@@ -148,9 +169,11 @@
             } else
             {
                 groundPoint = waypointPlacer.transform.position;
+                placeAtHand = true;
             }
             GameObject newWaypoint = CreateWaypoint(groundPoint);
             controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
+            currentWaypoint = newWaypoint;
             return newWaypoint;
         }
 
@@ -211,7 +234,7 @@
             float localX = controller.transform.position.x;
             float localY = controller.transform.position.y;
             float localZ = controller.transform.position.z;
-            float height = 2.147f - (float) Distance(groundX, groundZ, 0f,0f,localX, localZ) * (float) Math.Tan(Math.PI * ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x);
+            float height = 2.147f + (float) Distance(groundX, groundZ, 0f,0f,localX, localZ) * (float) Math.Tan(Math.PI * (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x));
             float heightMin = 2.147f + actualScale.y/200; //mesh height = 2.147
             height = Math.Min(MaxHeight(), Math.Max(heightMin, height));
             newWaypoint.transform.position = new Vector3(groundX, height, groundZ);
@@ -220,6 +243,10 @@
             firstClickFinished = !ControllerInteractions.secondIndexPressed();
             settingInterWaypoint = !ControllerInteractions.secondIndexPressed();
             currentlySetting = !ControllerInteractions.secondIndexPressed();
+            if (!adjustingHeight)
+            {
+                waypointPlacer.SetActive(true);
+            }
 
         }
 

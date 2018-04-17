@@ -160,7 +160,6 @@ public class ControllerInteractions : MonoBehaviour {
             //Checking to see if controller touched near a waypoint 
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-
                 //Telling Unity that the Controller is in range to delete
                 selectionZone = true;
                 Debug.Log("setting deletion Zone");
