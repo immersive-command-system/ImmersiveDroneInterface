@@ -25,6 +25,7 @@ TagManager:
   - Test
   - WaypointPlacement
   - selectionZone
+  - drone1
   layers:
   - Default
   - TransparentFX

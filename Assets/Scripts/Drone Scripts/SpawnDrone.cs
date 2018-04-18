@@ -52,6 +52,7 @@ using System.Collections;
 
         public void OnClick()
         {
+            //addDroneMenuCard(drones.size())
             controller.GetComponent<VRTK_StraightPointerRenderer>().placingDrone();
             placingDrone = true;
             mainMenu.SetActive(false);
@@ -62,6 +63,11 @@ using System.Collections;
                 i.GetComponent<SetWaypoint>().selected = false;
                 i.GetComponent<DroneMenuActivator>().selected = false;
             }
+        }
+
+        private void addDroneMenuCard(int droneId)
+        {
+            //create new button for droneId
         }
 
         private void ChooseGroundPoint()
