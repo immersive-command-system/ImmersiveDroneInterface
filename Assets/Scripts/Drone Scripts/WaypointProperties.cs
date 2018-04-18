@@ -79,6 +79,8 @@
 
                 ChangeColor();
             }
+
+            UpdateLine();
         }
 
         // Positions line between waypoints and drones
@@ -246,6 +248,15 @@
         public void deleteLineCollider()
         {
             Destroy(this.lineCollider.gameObject);
+        }
+
+        //Update groundpoint line 
+        public void UpdateLine()
+        {
+
+            Vector3 groundpoint = new Vector3(this.transform.position.x, world.transform.position.y + modelGroundpoint.transform.localScale.y, this.transform.position.z);
+            thisGroundpoint.transform.position = groundpoint;
+            groundpointLine = thisGroundpoint.GetComponent<LineRenderer>();
         }
     }
 }
