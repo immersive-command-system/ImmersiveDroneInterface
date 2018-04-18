@@ -10,7 +10,7 @@
         public static GameObject currentDrone;
         public GameObject drone; // Drone object
         public GameObject waypoint; // Waypoint object
-        
+        public static GameObject controller_right;
      
 
         public float maxHeight; // maximum height waypoint can be at when adjusting
@@ -27,7 +27,7 @@
         private GameObject world; // Refers to the ground
         private Vector3 groundPoint; // Vector3 indicating where the pointer is pointing on the ground
         private bool firstClickFinished = false;
-        private bool adjustingHeight = false;
+        private static bool adjustingHeight = false;
         private GameObject adjustingWaypoint; // new instantiated waypoint
         private Vector3 currentScale; // Current Scale of the World
         private Vector3 originalScale; // Scale that the world started in
@@ -45,6 +45,7 @@
 
         void Start()
         {
+            controller_right = GameObject.Find("controller_right");
             selected = true;
             adjustingHeight = false;
             actualScale = new Vector3(0, 0, 0);
@@ -66,6 +67,8 @@
         
         void Update()
         {
+
+
             currentDrone = drone;
 
             if (selected)
@@ -81,7 +84,7 @@
                
                 UpdateScale();
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (setWaypointState && ControllerInteractions.indexPressed)
+                if (setWaypointState && ControllerInteractions.IsIndexPressed())
                 {
                     adjustingWaypoint = SetGroundpoint();
                     if (adjustingWaypoint == null)
@@ -91,18 +94,18 @@
                     currentlySetting = true;
                     deactivateSetWaypointState();
 
-                } else if (ControllerInteractions.indexPressed)
+                } else if (ControllerInteractions.IsIndexPressed())
                 {
                     activateSetWaypointState();
                 }
-                if (currentlySetting && !firstClickFinished && ControllerInteractions.indexReleased)
+                if (currentlySetting && !firstClickFinished && ControllerInteractions.IsIndexReleased())
                 {
                     firstClickFinished = true;
                 }
                 // Allows user to adjust the newly placed waypoints height
                 if (adjustingHeight && firstClickFinished)
                 {
-                    if (ControllerInteractions.indexPressed)
+                    if (ControllerInteractions.IsIndexPressed())
                     {
                         activateSetWaypointState();
                     }
@@ -117,7 +120,6 @@
                         
                 }
                 
-
             }
 
             else
@@ -132,7 +134,7 @@
         private GameObject SetGroundpoint()
             
         {
-            if (ControllerInteractions.raycastOn)
+            if (ControllerInteractions.IsRaycastOn())
             {
               
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
@@ -159,6 +161,7 @@
             {
                 GameObject startWaypoint = Instantiate(waypoint, this.transform.position, Quaternion.identity);
                 startWaypoint.tag = "waypoint";
+                startWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
                 startWaypoint.transform.localScale = actualScale / 100;
                 startWaypoint.transform.parent = world.transform;
                 startWaypoint.GetComponent<WaypointProperties>().referenceDrone = this.gameObject;
@@ -171,6 +174,7 @@
             groundPoint.y = waypointPlacer.transform.position.y;
             GameObject newWaypoint = Instantiate(waypoint, groundPoint, Quaternion.identity);
             newWaypoint.tag = "waypoint";
+            newWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             newWaypoint.transform.localScale = actualScale / 100;
             newWaypoint.transform.parent = world.transform;
             
@@ -201,16 +205,16 @@
         // Adjusts the height at which the waypoint appears
         private void AdjustHeight(GameObject newWaypoint)
         {
-            if (newWaypoint.transform.position.y < groundPoint.y + actualScale.y / 200)
-            {
-                newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, groundPoint.y + actualScale.y / 100, newWaypoint.transform.position.z);
-            } else if (newWaypoint.transform.position.y > MaxHeight())
-            {
-                newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, MaxHeight(), newWaypoint.transform.position.z);
-            }
-
-            float height = ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x / 40;
-            newWaypoint.transform.Translate(0f, height, 0f);
+            float groundX = newWaypoint.transform.position.x;
+            float groundY = newWaypoint.transform.position.y;
+            float groundZ = newWaypoint.transform.position.z;
+            float localX = controller.transform.position.x;
+            float localY = controller.transform.position.y;
+            float localZ = controller.transform.position.z;
+            float height = 2.147f - (float) Distance(groundX, groundZ, 0f,0f,localX, localZ) * (float) Math.Tan(Math.PI * ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x);
+            float heightMin = 2.147f + actualScale.y/200; //mesh height = 2.147
+            height = Math.Min(MaxHeight(), Math.Max(heightMin, height));
+            newWaypoint.transform.position = new Vector3(groundX, height, groundZ);
 
             adjustingHeight = !ControllerInteractions.secondIndexPressed();
             firstClickFinished = !ControllerInteractions.secondIndexPressed();
@@ -356,6 +360,15 @@
                 setWaypointState = false;
         }
 
+        public static bool IsAdjustingHeight()
+        {
+            return adjustingHeight;
+        }
 
+        private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
+        {
+            return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY),2)+ Math.Pow((controllerZ - groundZ), 2));
+        }
+            
     }
 }
