@@ -38,7 +38,7 @@
         private bool currentlySetting = false;
         public GameObject interWaypoint;
 
-        private GameObject waypointPlacer; // Place waypoint in front of controller
+        private static GameObject waypointPlacer; // Place waypoint in front of controller
         private GameObject currentWaypoint; // The current waypoint we are trying to place
         private bool placeAtHand = false; // Are we placing the waypoint at our hand?
         public Material ghostMaterial;
@@ -90,10 +90,10 @@
 
                 if (ControllerInteractions.IsRaycastOn())
                 {
-                    waypointPlacer.SetActive(false);
+                    deactivateGhost();
                 } else
                 {
-                    waypointPlacer.SetActive(true);
+                    activateGhost();
                 }
 
                 // Allows user to select a groundpoint which a new waypoint will appear above
@@ -119,6 +119,7 @@
                 } else if (currentlySetting && !firstClickFinished && placeAtHand)
                 {
                     currentWaypoint.transform.position = waypointPlacer.transform.position;
+                    currentWaypoint.GetComponent<WaypointProperties>().UpdateLine();
           
                 }
                 // Allows user to adjust the newly placed waypoints height
@@ -128,7 +129,7 @@
                     {
                         activateSetWaypointState();
                     }
-                    waypointPlacer.SetActive(false);
+                    deactivateGhost();
                     AdjustHeight(adjustingWaypoint);
 
                 } else if (firstClickFinished)
@@ -147,6 +148,7 @@
             {
                 // Changes the drones color to indicated that it has been unselected
                 transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = deselectedMaterial;
+                waypointPlacer.SetActive(false);
             }
         }
 
@@ -172,7 +174,6 @@
                 placeAtHand = true;
             }
             GameObject newWaypoint = CreateWaypoint(groundPoint);
-            controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
             currentWaypoint = newWaypoint;
             return newWaypoint;
         }
@@ -235,7 +236,8 @@
             float localY = controller.transform.position.y;
             float localZ = controller.transform.position.z;
             float height = 2.147f + (float) Distance(groundX, groundZ, 0f,0f,localX, localZ) * (float) Math.Tan(Math.PI * (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x));
-            float heightMin = 2.147f + actualScale.y/200; //mesh height = 2.147
+            float heightMin = 2.3f + actualScale.y/200; //mesh height = 2.147
+
             height = Math.Min(MaxHeight(), Math.Max(heightMin, height));
             newWaypoint.transform.position = new Vector3(groundX, height, groundZ);
 
@@ -245,7 +247,7 @@
             currentlySetting = !ControllerInteractions.secondIndexPressed();
             if (!adjustingHeight)
             {
-                waypointPlacer.SetActive(true);
+                activateGhost();
             }
 
         }
@@ -312,6 +314,7 @@
                     Destroy(tempProperties.referenceDrone);
                     waypoints = new ArrayList(0); // resetting both lists 
                     waypointOrder = new ArrayList(0); // ^
+                    deactivateGhost();
                     return;
                 }
 
@@ -395,6 +398,18 @@
         private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
         {
             return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY),2)+ Math.Pow((controllerZ - groundZ), 2));
+        }
+
+        //Activate ghost waypoint
+        private static void activateGhost()
+        {
+            waypointPlacer.SetActive(true);
+        }
+
+        //Deactivate ghost waypoint
+        private static void deactivateGhost()
+        {
+            waypointPlacer.SetActive(false);
         }
             
     }
