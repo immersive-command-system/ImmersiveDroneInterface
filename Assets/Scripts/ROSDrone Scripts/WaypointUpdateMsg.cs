@@ -7,22 +7,26 @@ namespace ROSBridgeLib
     {
         public class WaypointUpdateMsg : ROSBridgeMsg
         {
-            public Vector3 position;
-            public int id;
+            public double[] position;
 
             public WaypointUpdateMsg(JSONNode msg)
             {
-                float _x = float.Parse(msg["position"]["x"]);
-                float _y = float.Parse(msg["position"]["y"]);
-                float _z = float.Parse(msg["position"]["z"]);
+                double _x = double.Parse(msg["position"]["x"]);
+                double _y = double.Parse(msg["position"]["y"]);
+                double _z = double.Parse(msg["position"]["z"]);
 
-                position = new Vector3(_x, _y, _z);
-                id = int.Parse(msg["id"]);
+                position = new double[3];
+                position[0] = _x;
+                position[1] = _y;
+                position[2] = _z;
             }
 
             public WaypointUpdateMsg(float x, float y, float z)
             {
-                position = new Vector3(x, y, z);
+                position = new double[3];
+                position[0] = (double) x;
+                position[1] = (double) y;
+                position[2] = (double) z;
             }
         }
     }

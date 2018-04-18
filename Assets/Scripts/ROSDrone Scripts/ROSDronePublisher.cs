@@ -15,7 +15,7 @@ public class ROSDronePublisher : ROSBridgePublisher
 
     public static string GetMessageType()
     {
-        return "interface_msgs/WaypointUpdateMsg";
+        return "meta_planner_msgs/WaypointUpdateMsg";
     }
 
     public static string ToYAMLString(WaypointUpdateMsg msg)

@@ -19,6 +19,7 @@ public class ROSDroneConnection : MonoBehaviour {
         ros.AddPublisher(typeof(ROSDronePublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
+        Debug.Log("Should be connected");
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
@@ -38,27 +39,27 @@ public class ROSDroneConnection : MonoBehaviour {
     }
 
     //WriteData will write the location of the gameObject passed to it to a text file
-    [MenuItem("Tools/Write file")]
-    static void WriteData(GameObject robot)
-    {
-        string path = "Assets/Results/user_test.txt";
+    //[MenuItem("Tools/Write file")]
+    //static void WriteData(GameObject robot)
+    //{
+    //    string path = "Assets/Results/user_test.txt";
 
-        //Write some text to the test.txt file
-        StreamWriter writer = new StreamWriter(path, true);
-        writer.WriteLine(robot.transform.position);
-        writer.Close();
+    //    //Write some text to the test.txt file
+    //    StreamWriter writer = new StreamWriter(path, true);
+    //    writer.WriteLine(robot.transform.position);
+    //    writer.Close();
 
-        //Re-import the file to update the reference in the editor
-        AssetDatabase.ImportAsset(path);
-        TextAsset asset = (TextAsset) Resources.Load("test");
+    //    //Re-import the file to update the reference in the editor
+    //    AssetDatabase.ImportAsset(path);
+    //    TextAsset asset = (TextAsset) Resources.Load("test");
 
-        //Print the text from the file
-        Debug.Log(asset.text);
-    }
+    //    //Print the text from the file
+    //    Debug.Log(asset.text);
+    //}
 
     public void PublishWaypointUpdateMessage(WaypointUpdateMsg msg)
     {
-        Debug.Log("Published new waypoint message");
+        Debug.Log("Published new waypoint message: "+ msg.position);
         ros.Publish("/waypoints", msg);
     }
 }
