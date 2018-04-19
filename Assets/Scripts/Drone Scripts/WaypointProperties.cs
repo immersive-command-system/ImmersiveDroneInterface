@@ -250,6 +250,7 @@
             Destroy(this.lineCollider.gameObject);
         }
 
+
         //Update groundpoint line 
         public void UpdateLine()
         {
