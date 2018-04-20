@@ -6,7 +6,6 @@ using VRTK.UnityEventHelper;
 using VRTK;
 
 public class ControllerInteractions : MonoBehaviour {
-
     public static bool selectionZone = false; // Is the controller in a waypoint zone?
     public GameObject currentWaypointZone = null; //Waypoint of zone that controller is in
     public Material defaultMaterial;
@@ -124,6 +123,7 @@ public class ControllerInteractions : MonoBehaviour {
         raycastOn = true;
         Debug.Log("stopgrab");
         //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = true;
+
     }
 
     public void Start()
