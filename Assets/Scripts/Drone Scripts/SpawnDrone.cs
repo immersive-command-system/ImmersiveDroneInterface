@@ -54,7 +54,7 @@ using System.Collections;
         public void OnClick()
         {
 
-            addDroneCard();
+            //addDroneCard();
             controller.GetComponent<VRTK_StraightPointerRenderer>().placingDrone();
             placingDrone = true;
             //mainMenu.SetActive(false);
@@ -67,13 +67,13 @@ using System.Collections;
             }
         }
 
-        public void addDroneCard()
+        /*public void addDroneCard()
         {
             string currId = "drone" + droneId.ToString();
             GameObject droneButton = GameObject.FindGameObjectWithTag(currId);
             droneButton.SetActive(true);
 
-        }
+        }*/
 
         private void ChooseGroundPoint()
         {

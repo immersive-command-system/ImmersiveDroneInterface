@@ -19,7 +19,11 @@ public class ControllerInteractions : MonoBehaviour {
     private static bool indexPressed;
     private static bool indexReleased;
     private static bool haloStyleZoomToggleButton = false; //Yes i know it's a shitty name but I dont know what its actually called
-    
+    private float minScale;
+    private float maxScale;
+    private float fakeTime;
+    private float timerScale;
+    private Vector3 originalSphereScale; 
 	// Update is called once per frame
 	void Update () {
         indexPressed = false;
@@ -48,24 +52,39 @@ public class ControllerInteractions : MonoBehaviour {
             Debug.Log("toggleboi");
         }
 
-        /*if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] != 0 && haloStyleZoomToggleButton == true)
+        if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] != 0 && haloStyleZoomToggleButton == true)
         {
-            while (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] > 0 && sphereVRTK.transform.localScale[0] < 0.2F)
+            if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] > 0 && sphereVRTK.transform.localScale[0] < 0.14F)
             {
-                Vector3 tempVector = sphereVRTK.transform.localScale; 
-                Vector3 additionVector = new Vector3(0.0001f, 0.0001f, 0.0001f);
+                Vector3 tempVector = sphereVRTK.transform.localScale;
+                //sphereVRTK.transform.localScale = originalSphereScale * timerScale;
+                //fakeTime += 0.5f * Time.deltaTime;
+                //Debug.Log(fakeTime);
+                //Debug.Log(timerScale);
+                Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
                 //float scalarFloat = 1.001f;
-                //sphereVRTK.transform.localScale = scalarFloat *tempVector;
+                sphereVRTK.transform.localScale = additionVector + tempVector;
                 //Debug.Log("original" + tempVector.ToString());
                 //Debug.Log("addition" + additionVector.ToString());
                 //Debug.Log("final" + sphereVRTK.transform.localScale.ToString());
             }
 
-            while (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] < 0 && sphereVRTK.transform.localScale[0] > 0.04F)
+            if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] < 0 && sphereVRTK.transform.localScale[0] > 0.02F)
             {
-                //sphereVRTK.transform.localScale -= new Vector3(0.0001F, 0.0001F, 0.0001F);
+                Vector3 tempVector = sphereVRTK.transform.localScale;
+                //sphereVRTK.transform.localScale = originalSphereScale * timerScale;
+                //fakeTime += 0.5f * Time.deltaTime;
+                //Debug.Log(fakeTime);
+                //Debug.Log(timerScale);
+                Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
+                //float scalarFloat = 1.001f;
+                sphereVRTK.transform.localScale = tempVector - additionVector;
+                //Debug.Log("original" + tempVector.ToString());
+                //Debug.Log("addition" + additionVector.ToString());
+                //Debug.Log("final" + sphereVRTK.transform.localScale.ToString());
             }
-        }*/
+
+        }
         
 
         //Stopping Sphere Collision with the RayCast 
@@ -78,7 +97,7 @@ public class ControllerInteractions : MonoBehaviour {
         }
 
         //Checks grip trigger for raycast toggle. Deactivates during height adjustment && !SetWaypoint.IsAdjustingHeight())
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
         {
             selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             toggleRaycastOn();
@@ -104,30 +123,35 @@ public class ControllerInteractions : MonoBehaviour {
 
     }
     
-    public void startGrab()
+    public void startGrab()//GETS CALLED WHEN YOU START GRABBING AN OBJECT
     {
         //controller.GetComponent<VRTK_Pointer>().Toggle(false);
         //controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(false, false);
         //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").SetActive(false);
-        raycastOn = false;
-        Debug.Log("startgrab");
+        //toggleRaycastOff();
+        //Debug.Log("startgrab");
         //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = false;
     }
 
-    public void stopGrab()
+    public void stopGrab() //GETS CALLED WHEN YOU STOP GRABBING ON OBJECT
     {
         //controller.GetComponent<VRTK_Pointer>().Toggle(true);
         //controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(true, true);
         //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").SetActive(true);
 
-        raycastOn = true;
-        Debug.Log("stopgrab");
+        //raycastOn = true;
+        toggleRaycastOff();
+        //Debug.Log("stopgrab");
         //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = true;
 
     }
 
     public void Start()
     {
+        //minScale = 1;
+        //maxScale = 2;
+        //fakeTime = 0.0f;
+        //timerScale = Mathf.Lerp(minScale, maxScale, fakeTime);
 
         controller_right = GameObject.Find("controller_right");
         //sphereVRTK = GameObject.Find("sphereVRTK");
@@ -139,7 +163,7 @@ public class ControllerInteractions : MonoBehaviour {
 
         GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
-        tempSphere.transform.position = new Vector3(0F, 0F, 0.13F);
+        tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
         tempSphere.transform.parent = this.gameObject.transform;
         tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
         this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
@@ -148,6 +172,7 @@ public class ControllerInteractions : MonoBehaviour {
         tempRend.material = opaqueMaterial;
         //tempSphere.GetComponent<SphereCollider>().enabled = false;
         sphereVRTK = tempSphere;
+        originalSphereScale = sphereVRTK.transform.localScale;
 
     }
 
