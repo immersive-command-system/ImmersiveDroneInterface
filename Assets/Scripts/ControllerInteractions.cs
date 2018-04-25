@@ -18,17 +18,21 @@ public class ControllerInteractions : MonoBehaviour {
     private static bool raycastOn; //raycast state
     private static bool indexPressed;
     private static bool indexReleased;
+    private static bool isGrabbing;
     private static bool haloStyleZoomToggleButton = false; //Yes i know it's a shitty name but I dont know what its actually called
     private float minScale;
     private float maxScale;
     private float fakeTime;
     private float timerScale;
     private Vector3 originalSphereScale; 
+
 	// Update is called once per frame
 	void Update () {
         indexPressed = false;
         indexReleased = false;
-       
+
+        isGrabbing = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null;
+
         //Checks to see if B button was pressed the previous frame
         if (OVRInput.GetDown(OVRInput.Button.Two))
         {
@@ -97,7 +101,7 @@ public class ControllerInteractions : MonoBehaviour {
         }
 
         //Checks grip trigger for raycast toggle. Deactivates during height adjustment && !SetWaypoint.IsAdjustingHeight())
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && !isGrabbing)
         {
             selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
             toggleRaycastOn();
@@ -195,6 +199,12 @@ public class ControllerInteractions : MonoBehaviour {
                 //print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
                 //WayPointColorSelection.AddWayPointColor(selectionZone, currentWaypointZone);
             }
+
+            else if (currentCollider.tag == "Line Collider")
+            {
+                Debug.Log("eyey");
+                
+            }
         }   
     }
 
@@ -251,5 +261,10 @@ public class ControllerInteractions : MonoBehaviour {
     {
         controller.GetComponent<VRTK_Pointer>().Toggle(false);
         raycastOn = false;
+    }
+
+    public static bool IsGrabbing()
+    {
+        return isGrabbing;
     }
 }

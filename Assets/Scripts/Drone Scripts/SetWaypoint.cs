@@ -97,7 +97,7 @@
                 }
 
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (setWaypointState && ControllerInteractions.IsIndexPressed())
+                if (setWaypointState && ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
                 {
                     adjustingWaypoint = SetGroundpoint();
                     if (adjustingWaypoint == null)
@@ -107,7 +107,7 @@
                     currentlySetting = true;
                     deactivateSetWaypointState();
 
-                } else if (ControllerInteractions.IsIndexPressed())
+                } else if (ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
                 {
                     activateSetWaypointState();
                 }
