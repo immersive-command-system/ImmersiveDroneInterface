@@ -221,7 +221,8 @@
         {
             if (rayHit && pointerCollidedWith.collider.tag == "Drone")
             {
-                //pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().ActivateDroneMenu();
+                pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().ActivateDroneMenu();
+                //get object with tag
             }
         }
 
