@@ -17,20 +17,21 @@ using System.Collections;
         private bool toggleMenuStopper;
         private bool placingDrone;
         private Vector3 groundPoint;
+        private int droneId = 1;
 
         // Use this for initialization
 	    void Start () {
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
-            menuState = false;
+            //menuState = false;
             toggleMenuStopper = true;
-            mainMenu.SetActive(menuState);
+            //mainMenu.SetActive(menuState);
         }
 	
 	    // Update is called once per frame
 	    void Update () {
 
-            if (OVRInput.Get(OVRInput.Button.One))
+            /*if (OVRInput.Get(OVRInput.Button.One))
             {
                 if (toggleMenuStopper)
                 {
@@ -41,7 +42,7 @@ using System.Collections;
             } else
             {
                 toggleMenuStopper = true;
-            }
+            }*/
 
             if (placingDrone && controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround() && OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger)!=0)
             {
@@ -52,11 +53,11 @@ using System.Collections;
 
         public void OnClick()
         {
-            //addDroneMenuCard(drones.size())
+
             controller.GetComponent<VRTK_StraightPointerRenderer>().placingDrone();
             placingDrone = true;
-            mainMenu.SetActive(false);
-            menuState = !menuState;
+            //mainMenu.SetActive(false);
+            //menuState = !menuState;
             GameObject[] drones = GameObject.FindGameObjectsWithTag("Drone");
             foreach (GameObject i in drones)
             {
@@ -65,10 +66,6 @@ using System.Collections;
             }
         }
 
-        private void addDroneMenuCard(int droneId)
-        {
-            //create new button for droneId
-        }
 
         private void ChooseGroundPoint()
         {
