@@ -59,7 +59,7 @@ public class ROSDroneConnection : MonoBehaviour {
 
     public void PublishWaypointUpdateMessage(WaypointUpdateMsg msg)
     {
-        Debug.Log("Published new waypoint message: "+ msg.position);
+        Debug.Log("Published new waypoint message: "+ msg.ToYAMLString());
         ros.Publish("/waypoints", msg);
     }
 }

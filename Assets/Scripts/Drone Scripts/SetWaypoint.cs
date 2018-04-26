@@ -6,6 +6,7 @@
     using UnityEngine;
     using ROSBridgeLib;
     using ROSBridgeLib.interface_msgs;
+    using SimpleJSON;
 
     public class SetWaypoint : MonoBehaviour {
 
@@ -203,7 +204,7 @@
                 newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) waypoints[waypoints.Count - 2];
 
                 //Sending a ROS Update
-                WaypointUpdateMsg msg = new WaypointUpdateMsg(newWaypoint.transform.position.x, newWaypoint.transform.position.y, newWaypoint.transform.position.z);
+                WaypointUpdateMsg msg = new WaypointUpdateMsg(newWaypoint.transform.localPosition.x, newWaypoint.transform.localPosition.y, newWaypoint.transform.localPosition.z);
                 world.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
             }
             return newWaypoint;

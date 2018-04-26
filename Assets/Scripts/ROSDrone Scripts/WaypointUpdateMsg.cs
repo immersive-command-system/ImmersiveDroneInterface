@@ -1,4 +1,5 @@
 ﻿using SimpleJSON;
+using System.Text;
 using UnityEngine;
 
 namespace ROSBridgeLib
@@ -8,6 +9,7 @@ namespace ROSBridgeLib
         public class WaypointUpdateMsg : ROSBridgeMsg
         {
             public double[] position;
+            private const float table_height = 0.976f;
 
             public WaypointUpdateMsg(JSONNode msg)
             {
@@ -17,16 +19,23 @@ namespace ROSBridgeLib
 
                 position = new double[3];
                 position[0] = _x;
-                position[1] = _y;
-                position[2] = _z;
+                position[1] = -_z;
+                position[2] = (_y - 0.148f) - table_height;
             }
 
             public WaypointUpdateMsg(float x, float y, float z)
             {
                 position = new double[3];
+
+                Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
                 position[0] = (double) x;
-                position[1] = (double) y;
-                position[2] = (double) z;
+                position[1] = (double) -z;
+                position[2] = (double) (y - 0.148f);
+            }
+
+            public override string ToYAMLString()
+            {
+                return JsonUtility.ToJson(this);
             }
         }
     }

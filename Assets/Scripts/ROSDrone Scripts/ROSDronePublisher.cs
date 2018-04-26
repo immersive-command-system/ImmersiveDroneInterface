@@ -22,11 +22,6 @@ public class ROSDronePublisher : ROSBridgePublisher
     {
         return msg.ToYAMLString();
     }
-
-    public new static ROSBridgeMsg ParseMessage(JSONNode msg)
-    {
-        return new WaypointUpdateMsg(msg);
-    }
 }
 
 // To publish to this topic:
