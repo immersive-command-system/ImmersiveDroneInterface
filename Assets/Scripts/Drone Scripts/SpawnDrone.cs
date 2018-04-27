@@ -132,8 +132,6 @@
 
         }
 
-
-
         private void ChooseGroundPoint()
 
         {

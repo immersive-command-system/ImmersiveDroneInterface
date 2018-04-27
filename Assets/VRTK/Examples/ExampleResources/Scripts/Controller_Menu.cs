@@ -13,6 +13,7 @@
 
         private void Start()
         {
+            Debug.Log("Controller_Menu.Start()");
             GetComponent<VRTK_ControllerEvents>().ButtonTwoPressed += new ControllerInteractionEventHandler(DoMenuOn);
             GetComponent<VRTK_ControllerEvents>().ButtonTwoReleased += new ControllerInteractionEventHandler(DoMenuOff);
             menuInit = false;

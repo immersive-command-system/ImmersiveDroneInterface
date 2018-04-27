@@ -11,6 +11,7 @@ public class ControllerInteractions : MonoBehaviour {
     public Material defaultMaterial;
     public GameObject controller_right;
     public GameObject sphereVRTK;
+    public GameObject sparklePrefab;
     public Material selectedMaterial;
     public Material opaqueMaterial;
     //private GameObject sphereVRTK;
@@ -24,7 +25,8 @@ public class ControllerInteractions : MonoBehaviour {
     private float maxScale;
     private float fakeTime;
     private float timerScale;
-    private Vector3 originalSphereScale; 
+    private Vector3 originalSphereScale;
+    private GameObject toggleSparkle;
 
 	// Update is called once per frame
 	void Update () {
@@ -53,6 +55,7 @@ public class ControllerInteractions : MonoBehaviour {
         if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
         {
             haloStyleZoomToggleButton = !haloStyleZoomToggleButton;
+            toggleSparkle.SetActive(!toggleSparkle.activeSelf);
             Debug.Log("toggleboi");
         }
 
@@ -61,31 +64,15 @@ public class ControllerInteractions : MonoBehaviour {
             if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] > 0 && sphereVRTK.transform.localScale[0] < 0.14F)
             {
                 Vector3 tempVector = sphereVRTK.transform.localScale;
-                //sphereVRTK.transform.localScale = originalSphereScale * timerScale;
-                //fakeTime += 0.5f * Time.deltaTime;
-                //Debug.Log(fakeTime);
-                //Debug.Log(timerScale);
                 Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
-                //float scalarFloat = 1.001f;
                 sphereVRTK.transform.localScale = additionVector + tempVector;
-                //Debug.Log("original" + tempVector.ToString());
-                //Debug.Log("addition" + additionVector.ToString());
-                //Debug.Log("final" + sphereVRTK.transform.localScale.ToString());
             }
 
             if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] < 0 && sphereVRTK.transform.localScale[0] > 0.02F)
             {
                 Vector3 tempVector = sphereVRTK.transform.localScale;
-                //sphereVRTK.transform.localScale = originalSphereScale * timerScale;
-                //fakeTime += 0.5f * Time.deltaTime;
-                //Debug.Log(fakeTime);
-                //Debug.Log(timerScale);
                 Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
-                //float scalarFloat = 1.001f;
                 sphereVRTK.transform.localScale = tempVector - additionVector;
-                //Debug.Log("original" + tempVector.ToString());
-                //Debug.Log("addition" + additionVector.ToString());
-                //Debug.Log("final" + sphereVRTK.transform.localScale.ToString());
             }
 
         }
@@ -127,38 +114,17 @@ public class ControllerInteractions : MonoBehaviour {
 
     }
     
-    public void startGrab()//GETS CALLED WHEN YOU START GRABBING AN OBJECT
-    {
-        //controller.GetComponent<VRTK_Pointer>().Toggle(false);
-        //controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(false, false);
-        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").SetActive(false);
-        //toggleRaycastOff();
-        //Debug.Log("startgrab");
-        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = false;
-    }
+    
 
-    public void stopGrab() //GETS CALLED WHEN YOU STOP GRABBING ON OBJECT
+    public void stopGrab()//GETS CALLED WHEN YOU STOP GRABBING ON 
     {
-        //controller.GetComponent<VRTK_Pointer>().Toggle(true);
-        //controller.GetComponent<VRTK_StraightPointerRenderer>().Toggle(true, true);
-        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").SetActive(true);
-
-        //raycastOn = true;
         toggleRaycastOff();
-        //Debug.Log("stopgrab");
-        //GameObject.Find("[VRTK][AUTOGEN][RightController][StraightPointerRenderer_Tracer]").GetComponent<MeshRenderer>().enabled = true;
-
     }
 
     public void Start()
-    {
-        //minScale = 1;
-        //maxScale = 2;
-        //fakeTime = 0.0f;
-        //timerScale = Mathf.Lerp(minScale, maxScale, fakeTime);
-
+    { 
         controller_right = GameObject.Find("controller_right");
-        //sphereVRTK = GameObject.Find("sphereVRTK");
+
 
         this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
         gameObject.GetComponent<SphereCollider>().radius = 0.040f;
@@ -174,9 +140,15 @@ public class ControllerInteractions : MonoBehaviour {
         tempSphere.gameObject.name = "sphereVRTK";
         Renderer tempRend = tempSphere.GetComponent<Renderer>();
         tempRend.material = opaqueMaterial;
-        //tempSphere.GetComponent<SphereCollider>().enabled = false;
+        
+
         sphereVRTK = tempSphere;
         originalSphereScale = sphereVRTK.transform.localScale;
+        toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
+        toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
+        toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
+        toggleSparkle.SetActive(false);
+
 
     }
 
@@ -193,11 +165,6 @@ public class ControllerInteractions : MonoBehaviour {
                 selectionZone = true;
                 Debug.Log("setting deletion Zone");
                 currentWaypointZone = currentCollider.gameObject;
-                //print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
-
-                //currentCollider.gameObject.GetComponent<MeshRenderer>().material = selectedMaterial;
-                //print(currentCollider.gameObject.GetComponent<MeshRenderer>().material);
-                //WayPointColorSelection.AddWayPointColor(selectionZone, currentWaypointZone);
             }
 
             else if (currentCollider.tag == "Line Collider")
@@ -214,9 +181,7 @@ public class ControllerInteractions : MonoBehaviour {
         if (currentCollider.gameObject.CompareTag("waypoint"))
         {
             Debug.Log("Leaving Deletion Zone");
-            //WayPointColorSelection.RemoveWayPointColor(selectionZone, currentWaypointZone); //Requires selection zone to be true
             selectionZone = false;
-            //currentCollider.gameObject.GetComponent<MeshRenderer>().material = defaultMaterial;
            
         }
 

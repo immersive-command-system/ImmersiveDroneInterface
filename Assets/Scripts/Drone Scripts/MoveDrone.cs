@@ -103,7 +103,7 @@
 
         private void Move()
         {
-            if (targetWaypoint != null)
+            if (targetWaypoint != null && ControllerInteractions.IsRaycastOn())
             {
                 float step = speed * Time.deltaTime * world.GetComponent<MapInteractions>().actualScale.x;
                 this.transform.position = Vector3.MoveTowards(this.transform.position, targetWaypoint.transform.position, step);
