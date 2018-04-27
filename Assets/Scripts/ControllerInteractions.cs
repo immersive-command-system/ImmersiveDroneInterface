@@ -11,6 +11,7 @@ public class ControllerInteractions : MonoBehaviour {
     public Material defaultMaterial;
     public GameObject controller_right;
     public GameObject sphereVRTK;
+    public GameObject sparklePrefab;
     public Material selectedMaterial;
     public Material opaqueMaterial;
     //private GameObject sphereVRTK;
@@ -24,7 +25,8 @@ public class ControllerInteractions : MonoBehaviour {
     private float maxScale;
     private float fakeTime;
     private float timerScale;
-    private Vector3 originalSphereScale; 
+    private Vector3 originalSphereScale;
+    private GameObject toggleSparkle;
 
 	// Update is called once per frame
 	void Update () {
@@ -53,6 +55,7 @@ public class ControllerInteractions : MonoBehaviour {
         if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
         {
             haloStyleZoomToggleButton = !haloStyleZoomToggleButton;
+            toggleSparkle.SetActive(!toggleSparkle.activeSelf);
             Debug.Log("toggleboi");
         }
 
@@ -179,6 +182,10 @@ public class ControllerInteractions : MonoBehaviour {
         //tempSphere.GetComponent<SphereCollider>().enabled = false;
         sphereVRTK = tempSphere;
         originalSphereScale = sphereVRTK.transform.localScale;
+        toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
+        toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
+        toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
+        toggleSparkle.SetActive(false);
 
     }
 
