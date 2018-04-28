@@ -35,7 +35,7 @@
         private static bool clearWaypointsToggle;
 
         public bool settingInterWaypoint;
-        private bool currentlySetting = false;
+        private static bool currentlySetting = false;
         public GameObject interWaypoint;
 
         private static GameObject waypointPlacer; // Place waypoint in front of controller
@@ -43,7 +43,6 @@
         private bool placeAtHand = false; // Are we placing the waypoint at our hand?
         public Material ghostMaterial;
         public Material adjustMaterial;
-
         private static bool setWaypointState = false;
 
         void Start()
@@ -206,6 +205,11 @@
             if (settingInterWaypoint) // Placing a new waypoint in between old ones
             {
                 Debug.Log("hi");
+                if (controller_right.GetComponent<ControllerInteractions>().LineCollided())
+                {
+                    interWaypoint = controller_right.GetComponent<ControllerInteractions>().GetInterWaypoint();
+                    Debug.Log(interWaypoint);
+                }
 
                 int index = waypoints.IndexOf(interWaypoint);
                 if (index < 0)
@@ -410,6 +414,12 @@
         private static void deactivateGhost()
         {
             waypointPlacer.SetActive(false);
+        }
+
+        //Setting?
+        public static bool IsCurrentlySetting()
+        {
+            return currentlySetting;
         }
             
     }
