@@ -10,7 +10,7 @@
         public static GameObject currentDrone;
         public GameObject drone; // Drone object
         public GameObject waypoint; // Waypoint object
-        
+        public static GameObject controller_right;
      
 
         public float maxHeight; // maximum height waypoint can be at when adjusting
@@ -27,7 +27,7 @@
         private GameObject world; // Refers to the ground
         private Vector3 groundPoint; // Vector3 indicating where the pointer is pointing on the ground
         private bool firstClickFinished = false;
-        private bool adjustingHeight = false;
+        private static bool adjustingHeight = false;
         private GameObject adjustingWaypoint; // new instantiated waypoint
         private Vector3 currentScale; // Current Scale of the World
         private Vector3 originalScale; // Scale that the world started in
@@ -35,16 +35,19 @@
         private static bool clearWaypointsToggle;
 
         public bool settingInterWaypoint;
-        private bool currentlySetting = false;
+        private static bool currentlySetting = false;
         public GameObject interWaypoint;
 
-        public GameObject waypointPlacer; // Place waypoint in front of controller
-
-
+        private static GameObject waypointPlacer; // Place waypoint in front of controller
+        private GameObject currentWaypoint; // The current waypoint we are trying to place
+        private bool placeAtHand = false; // Are we placing the waypoint at our hand?
+        public Material ghostMaterial;
+        public Material adjustMaterial;
         private static bool setWaypointState = false;
 
         void Start()
         {
+            controller_right = GameObject.Find("controller_right");
             selected = true;
             adjustingHeight = false;
             actualScale = new Vector3(0, 0, 0);
@@ -55,17 +58,18 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             settingInterWaypoint = false;
 
-            waypointPlacer = Instantiate(waypoint);
+            waypointPlacer = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             waypointPlacer.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             waypointPlacer.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
-            waypointPlacer.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-
-            waypointPlacer.SetActive(false);
+            waypointPlacer.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            waypointPlacer.SetActive(true);
         }
 
         
         void Update()
         {
+
+
             currentDrone = drone;
 
             if (selected)
@@ -78,10 +82,21 @@
                 {
                     DeselectOtherDrones();
                 }
+
+          
                
                 UpdateScale();
+
+                if (ControllerInteractions.IsRaycastOn())
+                {
+                    deactivateGhost();
+                } else
+                {
+                    activateGhost();
+                }
+
                 // Allows user to select a groundpoint which a new waypoint will appear above
-                if (setWaypointState && ControllerInteractions.indexPressed)
+                if (setWaypointState && ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
                 {
                     adjustingWaypoint = SetGroundpoint();
                     if (adjustingWaypoint == null)
@@ -91,21 +106,29 @@
                     currentlySetting = true;
                     deactivateSetWaypointState();
 
-                } else if (ControllerInteractions.indexPressed)
+                } else if (ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
                 {
                     activateSetWaypointState();
                 }
-                if (currentlySetting && !firstClickFinished && ControllerInteractions.indexReleased)
+
+
+                if (currentlySetting && !firstClickFinished && ControllerInteractions.IsIndexReleased())
                 {
                     firstClickFinished = true;
+                } else if (currentlySetting && !firstClickFinished && placeAtHand)
+                {
+                    currentWaypoint.transform.position = waypointPlacer.transform.position;
+                    currentWaypoint.GetComponent<WaypointProperties>().UpdateLine();
+          
                 }
                 // Allows user to adjust the newly placed waypoints height
                 if (adjustingHeight && firstClickFinished)
                 {
-                    if (ControllerInteractions.indexPressed)
+                    if (ControllerInteractions.IsIndexPressed())
                     {
                         activateSetWaypointState();
                     }
+                    deactivateGhost();
                     AdjustHeight(adjustingWaypoint);
 
                 } else if (firstClickFinished)
@@ -114,16 +137,17 @@
                     activateSetWaypointState();
                     settingInterWaypoint = false;
                     currentlySetting = false;
+                    placeAtHand = false;
                         
                 }
                 
-
             }
 
             else
             {
                 // Changes the drones color to indicated that it has been unselected
                 transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = deselectedMaterial;
+                waypointPlacer.SetActive(false);
             }
         }
 
@@ -132,7 +156,7 @@
         private GameObject SetGroundpoint()
             
         {
-            if (ControllerInteractions.raycastOn)
+            if (ControllerInteractions.IsRaycastOn())
             {
               
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
@@ -146,9 +170,10 @@
             } else
             {
                 groundPoint = waypointPlacer.transform.position;
+                placeAtHand = true;
             }
             GameObject newWaypoint = CreateWaypoint(groundPoint);
-            controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
+            currentWaypoint = newWaypoint;
             return newWaypoint;
         }
 
@@ -159,6 +184,7 @@
             {
                 GameObject startWaypoint = Instantiate(waypoint, this.transform.position, Quaternion.identity);
                 startWaypoint.tag = "waypoint";
+                startWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
                 startWaypoint.transform.localScale = actualScale / 100;
                 startWaypoint.transform.parent = world.transform;
                 startWaypoint.GetComponent<WaypointProperties>().referenceDrone = this.gameObject;
@@ -171,6 +197,7 @@
             groundPoint.y = waypointPlacer.transform.position.y;
             GameObject newWaypoint = Instantiate(waypoint, groundPoint, Quaternion.identity);
             newWaypoint.tag = "waypoint";
+            newWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             newWaypoint.transform.localScale = actualScale / 100;
             newWaypoint.transform.parent = world.transform;
             
@@ -178,6 +205,11 @@
             if (settingInterWaypoint) // Placing a new waypoint in between old ones
             {
                 Debug.Log("hi");
+                if (controller_right.GetComponent<ControllerInteractions>().LineCollided())
+                {
+                    interWaypoint = controller_right.GetComponent<ControllerInteractions>().GetInterWaypoint();
+                    Debug.Log(interWaypoint);
+                }
 
                 int index = waypoints.IndexOf(interWaypoint);
                 if (index < 0)
@@ -201,21 +233,26 @@
         // Adjusts the height at which the waypoint appears
         private void AdjustHeight(GameObject newWaypoint)
         {
-            if (newWaypoint.transform.position.y < groundPoint.y + actualScale.y / 200)
-            {
-                newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, groundPoint.y + actualScale.y / 100, newWaypoint.transform.position.z);
-            } else if (newWaypoint.transform.position.y > MaxHeight())
-            {
-                newWaypoint.transform.position = new Vector3(newWaypoint.transform.position.x, MaxHeight(), newWaypoint.transform.position.z);
-            }
+            float groundX = newWaypoint.transform.position.x;
+            float groundY = newWaypoint.transform.position.y;
+            float groundZ = newWaypoint.transform.position.z;
+            float localX = controller.transform.position.x;
+            float localY = controller.transform.position.y;
+            float localZ = controller.transform.position.z;
+            float height = 2.147f + (float) Distance(groundX, groundZ, 0f,0f,localX, localZ) * (float) Math.Tan(Math.PI * (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x));
+            float heightMin = 2.3f + actualScale.y/200; //mesh height = 2.147
 
-            float height = ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x / 40;
-            newWaypoint.transform.Translate(0f, height, 0f);
+            height = Math.Min(MaxHeight(), Math.Max(heightMin, height));
+            newWaypoint.transform.position = new Vector3(groundX, height, groundZ);
 
             adjustingHeight = !ControllerInteractions.secondIndexPressed();
             firstClickFinished = !ControllerInteractions.secondIndexPressed();
             settingInterWaypoint = !ControllerInteractions.secondIndexPressed();
             currentlySetting = !ControllerInteractions.secondIndexPressed();
+            if (!adjustingHeight)
+            {
+                activateGhost();
+            }
 
         }
 
@@ -281,6 +318,7 @@
                     Destroy(tempProperties.referenceDrone);
                     waypoints = new ArrayList(0); // resetting both lists 
                     waypointOrder = new ArrayList(0); // ^
+                    deactivateGhost();
                     return;
                 }
 
@@ -356,6 +394,33 @@
                 setWaypointState = false;
         }
 
+        public static bool IsAdjustingHeight()
+        {
+            return adjustingHeight;
+        }
 
+        private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
+        {
+            return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY),2)+ Math.Pow((controllerZ - groundZ), 2));
+        }
+
+        //Activate ghost waypoint
+        private static void activateGhost()
+        {
+            waypointPlacer.SetActive(true);
+        }
+
+        //Deactivate ghost waypoint
+        private static void deactivateGhost()
+        {
+            waypointPlacer.SetActive(false);
+        }
+
+        //Setting?
+        public static bool IsCurrentlySetting()
+        {
+            return currentlySetting;
+        }
+            
     }
 }

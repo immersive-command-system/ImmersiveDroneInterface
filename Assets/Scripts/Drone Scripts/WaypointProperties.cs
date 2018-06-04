@@ -33,13 +33,14 @@
         private LineRenderer groundpointLine; // Connects the groundpoint to the waypoint
 
         public bool setInterwaypointToggle;
-
+        public static GameObject controller_right;
         void Start()
         {
             passed = false;
 
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
+            controller_right = GameObject.Find("controller_right");
 
             waypointLine = this.GetComponentInParent<LineRenderer>();
             if (prevPoint != null)
@@ -49,6 +50,8 @@
 
             lineCollider = new GameObject("Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
+            lineCollider.isTrigger = true;
+            lineCollider.radius = 0.1f;
             lineCollider.gameObject.AddComponent<WaypointLine>().waypoint = gameObject;
             
             // Commented out due to child collider conflicts with parent collider.
@@ -79,6 +82,8 @@
 
                 ChangeColor();
             }
+
+            UpdateLine();
         }
 
         // Positions line between waypoints and drones
@@ -187,7 +192,7 @@
                 {
                     waypointLine.material = unselectedPassedLine;
                 }
-            } else if (controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject && referenceDrone.GetComponent<SetWaypoint>().selected)
+            } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || controller_right.GetComponent<ControllerInteractions>().GetInterWaypoint() == this.gameObject) && referenceDrone.GetComponent<SetWaypoint>().selected)
             {
                 waypointLine.material = unpassedWaypoint;
             } else
@@ -226,6 +231,7 @@
             referenceDrone.GetComponent<SetWaypoint>().settingInterWaypoint = true;
             referenceDrone.GetComponent<SetWaypoint>().interWaypoint = this.gameObject;
             setInterwaypointToggle = false;
+            
         }
 
         public void ResetWaypoint()
@@ -246,6 +252,20 @@
         public void deleteLineCollider()
         {
             Destroy(this.lineCollider.gameObject);
+        }
+
+
+        //Update groundpoint line 
+        public void UpdateLine()
+        {
+
+            if (thisGroundpoint == null) {
+                return;
+            }
+
+            Vector3 groundpoint = new Vector3(this.transform.position.x, world.transform.position.y + modelGroundpoint.transform.localScale.y, this.transform.position.z);
+            thisGroundpoint.transform.position = groundpoint;
+            groundpointLine = thisGroundpoint.GetComponent<LineRenderer>();
         }
     }
 }

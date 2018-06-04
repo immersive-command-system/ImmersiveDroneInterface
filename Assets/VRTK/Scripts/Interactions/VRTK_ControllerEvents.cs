@@ -96,8 +96,8 @@ namespace VRTK
         public ButtonAlias pointerSetButton = ButtonAlias.TouchpadPress;
         [Tooltip("**OBSOLETE [use VRTK_InteractGrab.grabButton]** The button to use for the action of grabbing game objects.")]
         [Obsolete("`VRTK_ControllerEvents.grabToggleButton` is no longer used in the `VRTK_InteractGrab` class, use `VRTK_InteractGrab.grabButton` instead. This parameter will be removed in a future version of VRTK.")]
-        public ButtonAlias grabToggleButton = ButtonAlias.GripPress;
-        [Tooltip("**OBSOLETE [use VRTK_InteractUse.useButton]** The button to use for the action of using game objects.")]
+        public ButtonAlias grabToggleButton = ButtonAlias.TriggerPress;
+        [Tooltip("**OBSOLETE [use VRTK_InteractUse.useButton]** The buttono use for the action of using game objects.")]
         [Obsolete("`VRTK_ControllerEvents.useToggleButton` is no longer used in the `VRTK_InteractUse` class, use `VRTK_InteractUse.useButton` instead. This parameter will be removed in a future version of VRTK.")]
         public ButtonAlias useToggleButton = ButtonAlias.TriggerPress;
         [Tooltip("**OBSOLETE [use VRTK_UIPointer.selectionButton]** The button to use for the action of clicking a UI element.")]

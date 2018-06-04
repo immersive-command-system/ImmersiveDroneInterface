@@ -17,16 +17,21 @@
 
         void Start()
         {
+            Debug.Log("DroneMenuActivator.Start()");
             selected = true;
-            menuOn = false;
+            menuOn = true;
             controller = GameObject.FindGameObjectWithTag("GameController");
             droneMenu = Instantiate(droneMenu);
-            droneMenu.SetActive(false);
+            droneMenu.SetActive(true);
             droneMenu.GetComponent<ReferenceDrone>().referenceDrone = this.gameObject;
+
+            PositionDroneMenu();
         }
 
         void Update ()
         {
+            // updates disabled
+            /*
             if (!drone.activeSelf)
             {
                 droneMenu.SetActive(false);
@@ -42,7 +47,7 @@
             } else
             {
                 droneMenu.SetActive(false);
-            }
+            } */
 	    }
 
         // Activates the drone menu
@@ -55,15 +60,20 @@
         // Determines where the drone menu will appear
         private void PositionDroneMenu()
         {
-            Vector3 activatePosition = new Vector3(transform.position.x, transform.position.y + 0.1f, transform.position.z + 0.5f);
-            droneMenu.transform.position = activatePosition;
+            droneMenu.transform.position = new Vector3(0.75f, 2f, 2.07f);
+            droneMenu.transform.eulerAngles = new Vector3(
+                droneMenu.transform.eulerAngles.x + 45,
+                droneMenu.transform.eulerAngles.y,
+                droneMenu.transform.eulerAngles.z
+            );
             frameCounter++;
             droneMenu.SetActive(true);
         }
 
-        // Turns the drone menu off
+        // Turns the drone menu off, currently disabled
         private void MenuTimer()
         {
+            /*
             if (menuOn)
             {
                 if (menuTimer + 300 < frameCounter)
@@ -75,6 +85,7 @@
                     droneMenu.SetActive(false);
                 }
             }
+            */
         }
     }
 }
