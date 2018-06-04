@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using VRTK.UnityEventHelper;
 using VRTK;
 
+
 public class ControllerInteractions : MonoBehaviour {
     public static bool selectionZone = false; // Is the controller in a waypoint zone?
     public GameObject currentWaypointZone = null; //Waypoint of zone that controller is in
@@ -27,6 +28,10 @@ public class ControllerInteractions : MonoBehaviour {
     private float timerScale;
     private Vector3 originalSphereScale;
     private GameObject toggleSparkle;
+    public WaypointProperties properties;
+    private bool nearWaypoint = false;
+    private GameObject interWaypoint;
+    private bool lineCollided;
 
 	// Update is called once per frame
 	void Update () {
@@ -156,6 +161,7 @@ public class ControllerInteractions : MonoBehaviour {
     
     void OnTriggerEnter(Collider currentCollider)
     {
+        
         if (selectionZone != true) //Preventing multiple zone selections 
         {
             //Checking to see if controller touched near a waypoint 
@@ -163,14 +169,24 @@ public class ControllerInteractions : MonoBehaviour {
             {
                 //Telling Unity that the Controller is in range to delete
                 selectionZone = true;
-                Debug.Log("setting deletion Zone");
                 currentWaypointZone = currentCollider.gameObject;
+                nearWaypoint = true;
             }
 
-            else if (currentCollider.tag == "Line Collider")
+            else if (currentCollider.tag == "Line Collider" && !SetWaypoint.IsCurrentlySetting() && !nearWaypoint)
             {
-                Debug.Log("eyey");
-                
+               selectionZone = true;
+               GameObject interWaypointLine = currentCollider.GetComponent<WaypointLine>().waypoint;
+               WaypointProperties properties = interWaypointLine.GetComponent<WaypointProperties>();
+           
+               properties.referenceDrone.GetComponent<SetWaypoint>().settingInterWaypoint = true;
+               lineCollided = true;
+               interWaypoint = properties.gameObject;
+               Debug.Log("yo" + interWaypoint);
+
+
+
+
             }
         }   
     }
@@ -182,7 +198,15 @@ public class ControllerInteractions : MonoBehaviour {
         {
             Debug.Log("Leaving Deletion Zone");
             selectionZone = false;
-           
+            nearWaypoint = false;
+        }
+        if (currentCollider.tag == "Line Collider")
+        {
+            selectionZone = false;
+            GameObject interWaypointLine = currentCollider.GetComponent<WaypointLine>().waypoint;
+            WaypointProperties properties = interWaypointLine.GetComponent<WaypointProperties>();
+            properties.referenceDrone.GetComponent<SetWaypoint>().settingInterWaypoint = false;
+            lineCollided = false;
         }
 
     }
@@ -231,5 +255,15 @@ public class ControllerInteractions : MonoBehaviour {
     public static bool IsGrabbing()
     {
         return isGrabbing;
+    }
+
+    public bool LineCollided()
+    {
+        return lineCollided;
+    }
+
+    public GameObject GetInterWaypoint()
+    {
+        return interWaypoint;
     }
 }
