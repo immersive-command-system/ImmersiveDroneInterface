@@ -183,6 +183,7 @@ namespace VRTK
             {
                 VRTK_ObjectAppearance.HighlightObject(element.gameObject, color, fadeDuration);
                 SetColourParameter(elementType, color);
+                //element.gameObject.GetComponent<Renderer>().material.SetColor("red", Color.red);
             }
         }
 
