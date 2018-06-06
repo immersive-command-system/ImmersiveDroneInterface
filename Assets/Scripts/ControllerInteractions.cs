@@ -57,12 +57,12 @@ public class ControllerInteractions : MonoBehaviour {
             indexReleased = true;
         }
 
-        if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
-        {
-            haloStyleZoomToggleButton = !haloStyleZoomToggleButton;
-            toggleSparkle.SetActive(!toggleSparkle.activeSelf);
-            Debug.Log("toggleboi");
-        }
+        // Adjusting grab zone size.
+        //if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
+        //{
+        //    haloStyleZoomToggleButton = !haloStyleZoomToggleButton;
+        //    toggleSparkle.SetActive(!toggleSparkle.activeSelf);
+        //}
 
         if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] != 0 && haloStyleZoomToggleButton == true)
         {
@@ -79,7 +79,6 @@ public class ControllerInteractions : MonoBehaviour {
                 Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
                 sphereVRTK.transform.localScale = tempVector - additionVector;
             }
-
         }
         
 
