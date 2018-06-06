@@ -167,32 +167,6 @@ namespace VRTK
             ResetTooltip();
         }
 
-        public virtual void UpdateColor(TooltipButtons element, string newText)
-        {
-            switch (element)
-            {
-                case TooltipButtons.ButtonOneTooltip:
-                    buttonOneText = newText;
-                    break;
-                case TooltipButtons.ButtonTwoTooltip:
-                    buttonTwoText = newText;
-                    break;
-                case TooltipButtons.StartMenuTooltip:
-                    startMenuText = newText;
-                    break;
-                case TooltipButtons.GripTooltip:
-                    gripText = newText;
-                    break;
-                case TooltipButtons.TouchpadTooltip:
-                    touchpadText = newText;
-                    break;
-                case TooltipButtons.TriggerTooltip:
-                    triggerText = newText;
-                    break;
-            }
-            ResetTooltip();
-        }
-
         /// <summary>
         /// The ToggleTips method will display the controller tooltips if the state is `true` and will hide the controller tooltips if the state is `false`. An optional `element` can be passed to target a specific controller tooltip to toggle otherwise all tooltips are toggled.
         /// </summary>

@@ -1332,6 +1332,7 @@ GameObject:
   - component: {fileID: 1347866318}
   - component: {fileID: 1347866319}
   - component: {fileID: 1347866320}
+  - component: {fileID: 1347866321}
   m_Layer: 0
   m_Name: RightController
   m_TagString: GameController
@@ -1375,7 +1376,7 @@ MonoBehaviour:
   maximumCursorScale: {x: Infinity, y: Infinity, z: Infinity}
   customTracer: {fileID: 0}
   customCursor: {fileID: 0}
-  drone: {fileID: 1939239897759598, guid: c543358ab193cb248bb7cda26a1be3b3, type: 2}
+  drone: {fileID: 0}
   setDrone: 0
   waypoint: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801, type: 2}
   menu: {fileID: 0}
@@ -1546,7 +1547,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1347866310}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d140780543907549b458324fe7be48b, type: 3}
   m_Name: 
@@ -1560,6 +1561,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 16d250abd80dcce4c99f191a79e4e637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  introTiming: 2
+  indexTriggerTiming: 0
+  gripTriggerTiming: 0
+  joystickTiming: 0
+  A_SelectTiming: 0
+  B_DeleteTiming: 0
+  tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
+  tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
+  tipBackgroundColor_AfterPressed: {r: 1, g: 0, b: 0, a: 1}
+  tipTextColor_AfterPressed: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_AfterPressed: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1347866321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1347866310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c50f5a629362c64fb127c964c2f5f2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1374398252
@@ -1827,6 +1851,18 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.r
+      value: 0.11724138
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.b
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -2562,6 +2598,7 @@ GameObject:
   - component: {fileID: 2053542337}
   - component: {fileID: 2053542338}
   - component: {fileID: 2053542339}
+  - component: {fileID: 2053542340}
   m_Layer: 0
   m_Name: LeftController
   m_TagString: Untagged
@@ -2685,5 +2722,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d140780543907549b458324fe7be48b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2053542340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2053542333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d43fb0f5fadc14d42a764f10d4a40550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
