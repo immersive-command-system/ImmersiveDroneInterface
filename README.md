@@ -5,12 +5,15 @@ We are using Unity 2017.2. Launch using that and then run the following commands
 folder. These commands will handle updating of the ROS submodules.
 
 > git submodule update --init
+
 > cd Assets/ROSBridgeLib
+
 > git reset --hard HEAD
 
 > printf '[submodule "Pointcloud"]\n\tpath = Pointcloud\n\turl = https://github.com/srv/Pointcloud.git'>.gitmodules
 
 > git submodule sync
+
 > git submodule update --init
 
 Finally, double click the remaining error in the Unity console and replace all instances of camera with m_Camera in AvatarMaterialEditor.cs (This was a quirk of the most recent update to the Oculus SDK that was relevant in Unity 5.6).
