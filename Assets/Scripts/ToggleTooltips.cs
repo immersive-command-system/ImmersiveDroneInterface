@@ -7,7 +7,7 @@ public class ToggleTooltips : MonoBehaviour {
 
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ObjectTooltip[] individualTooltips;
-    private VRTK_ObjectTooltip triggerTooltip, gripTooltip, joystickTooltip, ATooltip, BTooltip;
+    public VRTK_ObjectTooltip triggerTooltip, gripTooltip, joystickTooltip, ATooltip, BTooltip;
 
 
     void Start ()
@@ -44,4 +44,21 @@ public class ToggleTooltips : MonoBehaviour {
             }
         }
     }
+
+    public void ChangeContainerColor(VRTK_ObjectTooltip tooltip, Color newColor)
+    {
+        tooltip.containerColor = newColor;
+    }
+
+    public void ChangeFontColor(VRTK_ObjectTooltip tooltip, Color newColor)
+    {
+        tooltip.fontColor = newColor;
+    }
+
+    public void ChangeLineColor(VRTK_ObjectTooltip tooltip, Color newColor)
+    {
+        tooltip.lineColor = newColor;
+    }
+
+
 }

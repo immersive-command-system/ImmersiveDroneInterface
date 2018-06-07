@@ -7,16 +7,17 @@ using VRTK;
 
 public class TimedTutorialRight : MonoBehaviour {
 
+    private GameObject audio;
+    private ToggleTooltips individualTooltips;
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ControllerEvents events;
-    private VRTK_ObjectTooltip[] individualTooltips;
-    private VRTK_ObjectTooltip triggerTooltip, gripTooltip, joystickTooltip, ATooltip, BTooltip;
-   
+    private bool pressedIndexTrigger = false, pressedGripTrigger = false, pressedJoystick = false, pressedA_Select = false, pressedB_Select = false;
 
+    
     [Header("Tooltip Timing Settings")]
 
     [Tooltip("The number of seconds of the intro before displaying any tooltips.")]
-    public float introTiming = 2.0f; //audioSource.clip.length
+    public float introTiming; //audioSource.clip.length
     [Tooltip("The number of seconds to display the IndexTrigger tooltip.")]
     public float indexTriggerTiming;
     [Tooltip("The number of seconds to display the GripTrigger tooltip.")]
@@ -48,48 +49,24 @@ public class TimedTutorialRight : MonoBehaviour {
     public Color tipLineColor_AfterPressed = Color.gray;
 
 
-    private bool pressedIndexTrigger = false, pressedGripTrigger = false, pressedJoystick = false, pressedA_Select = false, pressedB_Select = false;
 
 
     void Start()
     {
         events = GetComponent<VRTK_ControllerEvents>();
+        individualTooltips = GetComponent<ToggleTooltips>();
         tooltips = GetComponentInChildren<VRTK_ControllerTooltips>();
-        individualTooltips = GetComponentsInChildren<VRTK_ObjectTooltip>(true);
+        audio = GetComponentInParent<GameObject>();
 
-        InitializeIndividualTooltips();
         tooltips.ToggleTips(false);
         SetupControllerEventListeners();
 
+
+        //introTiming = this.transform.parent.Find("TutorialAudio").GetComponent<GameObject>();
+        
         StartCoroutine(TutorialCoroutine());
     }
 
-    private void InitializeIndividualTooltips()
-    {
-        for (int i = 0; i < individualTooltips.Length; i++)
-        {
-            VRTK_ObjectTooltip tooltip = individualTooltips[i];
-
-            switch (tooltip.name.Replace("Tooltip", "").ToLower())
-            {
-                case "trigger":
-                    triggerTooltip = tooltip;
-                    break;
-                case "grip":
-                    gripTooltip = tooltip;
-                    break;
-                case "touchpad":
-                    joystickTooltip = tooltip;
-                    break;
-                case "buttonone":
-                    ATooltip = tooltip;
-                    break;
-                case "buttontwo":
-                    BTooltip = tooltip;
-                    break;
-            }
-        }
-    }
 
     private void SetupControllerEventListeners()
     {
@@ -118,29 +95,33 @@ public class TimedTutorialRight : MonoBehaviour {
 
     }
 
-    private void changeTooltipColorWhenPressed(VRTK_ObjectTooltip tooltip, Color tooptipPart)
+    private void changeTooltipColorWhenPressed(VRTK_ObjectTooltip tooltip)
     {
-        tooltip.containerColor = tipBackgroundColor_WhenPressed;
-        tooltip.fontColor = tipTextColor_WhenPressed;
-        tooltip.lineColor = tipLineColor_WhenPressed;
+        individualTooltips.ChangeContainerColor(tooltip, tipBackgroundColor_WhenPressed);
+        individualTooltips.ChangeLineColor(tooltip, tipLineColor_WhenPressed);
+        individualTooltips.ChangeFontColor(tooltip, tipTextColor_WhenPressed);
         tooltip.ResetTooltip();
     }
 
-    private void ChangeContainerColor() { }
-    private void ChangeFontColor() { }
-    private void ChangeLineColor() { }
+    private void changeTooltipColorAfterPressed(VRTK_ObjectTooltip tooltip)
+    {
+        individualTooltips.ChangeContainerColor(tooltip, tipBackgroundColor_AfterPressed);
+        individualTooltips.ChangeLineColor(tooltip, tipLineColor_AfterPressed);
+        individualTooltips.ChangeFontColor(tooltip, tipTextColor_AfterPressed);
+    }
 
     private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
     { 
         if (!pressedIndexTrigger)
         {
-          //  changeTooltipColor(triggerTooltip);
+            changeTooltipColorWhenPressed(individualTooltips.triggerTooltip);
             pressedIndexTrigger = true;
+            changeTooltipColorAfterPressed(individualTooltips.triggerTooltip);
         }
         else
         {
-
-            tooltips.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
+            individualTooltips.triggerTooltip.ResetTooltip();
+            tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
         }
 
         
