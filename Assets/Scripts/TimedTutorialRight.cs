@@ -7,12 +7,13 @@ using VRTK;
 
 public class TimedTutorialRight : MonoBehaviour {
 
-    private GameObject audio;
     private ToggleTooltips individualTooltips;
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ControllerEvents events;
     private bool pressedIndexTrigger = false, pressedGripTrigger = false, pressedJoystick = false, pressedA_Select = false, pressedB_Select = false;
 
+    public AudioSource introAudio;
+    
     
     [Header("Tooltip Timing Settings")]
 
@@ -56,17 +57,15 @@ public class TimedTutorialRight : MonoBehaviour {
         events = GetComponent<VRTK_ControllerEvents>();
         individualTooltips = GetComponent<ToggleTooltips>();
         tooltips = GetComponentInChildren<VRTK_ControllerTooltips>();
-        audio = GetComponentInParent<GameObject>();
 
         tooltips.ToggleTips(false);
         SetupControllerEventListeners();
 
+        introTiming = introAudio.clip.length;
 
-        //introTiming = this.transform.parent.Find("TutorialAudio").GetComponent<GameObject>();
-        
         StartCoroutine(TutorialCoroutine());
     }
-
+    
 
     private void SetupControllerEventListeners()
     {
@@ -123,8 +122,6 @@ public class TimedTutorialRight : MonoBehaviour {
             individualTooltips.triggerTooltip.ResetTooltip();
             tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
         }
-
-        
     }
 
     private void DoTriggerReleased(object sender, ControllerInteractionEventArgs e)

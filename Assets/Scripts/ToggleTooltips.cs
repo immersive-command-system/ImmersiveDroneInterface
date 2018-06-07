@@ -60,5 +60,4 @@ public class ToggleTooltips : MonoBehaviour {
         tooltip.lineColor = newColor;
     }
 
-
 }
