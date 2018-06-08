@@ -7,7 +7,7 @@ public class ToggleTooltips : MonoBehaviour {
 
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ObjectTooltip[] individualTooltips;
-    public VRTK_ObjectTooltip triggerTooltip, gripTooltip, joystickTooltip, ATooltip, BTooltip;
+    public VRTK_ObjectTooltip triggerTooltip, gripTooltip, touchpadTooltip, buttonOne, buttonTwo;
 
 
     void Start ()
@@ -33,13 +33,13 @@ public class ToggleTooltips : MonoBehaviour {
                     gripTooltip = tooltip;
                     break;
                 case "touchpad":
-                    joystickTooltip = tooltip;
+                    touchpadTooltip = tooltip;
                     break;
                 case "buttonone":
-                    ATooltip = tooltip;
+                    buttonOne = tooltip;
                     break;
                 case "buttontwo":
-                    BTooltip = tooltip;
+                    buttonTwo = tooltip;
                     break;
             }
         }

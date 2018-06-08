@@ -10,9 +10,9 @@ public class TimedTutorialRight : MonoBehaviour {
     private ToggleTooltips individualTooltips;
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ControllerEvents events;
-    private bool pressedIndexTrigger = false, pressedGripTrigger = false, pressedJoystick = false, pressedA_Select = false, pressedB_Select = false;
+    private bool pressedTrigger = false, pressedGrip = false, pressedTouchpad = false, pressedButtonOne = false, pressedButtonTwo = false;
 
-    public AudioSource introAudio;
+    public AudioSource introAudio, triggerAudio, gripAudio, touchpadAudio, buttonOneAudio, buttonTwoAudio;
     
     
     [Header("Tooltip Timing Settings")]
@@ -20,15 +20,15 @@ public class TimedTutorialRight : MonoBehaviour {
     [Tooltip("The number of seconds of the intro before displaying any tooltips.")]
     public float introTiming; //audioSource.clip.length
     [Tooltip("The number of seconds to display the IndexTrigger tooltip.")]
-    public float indexTriggerTiming;
+    public float triggerTiming;
     [Tooltip("The number of seconds to display the GripTrigger tooltip.")]
-    public float gripTriggerTiming;
+    public float gripTiming;
     [Tooltip("The number of seconds to display the Joystick tooltip.")]
-    public float joystickTiming;
+    public float touchpadTiming;
     [Tooltip("The number of seconds to display the A_Select tooltip.")]
-    public float A_SelectTiming; //aka Button One Timing
+    public float buttonOneTiming; //aka Button One Timing
     [Tooltip("The number of seconds to display the B_Delete tooltip.")]
-    public float B_DeleteTiming; //aka Button Two Timing
+    public float buttonTwoTiming; //aka Button Two Timing
 
 
     [Header("PRESSED Tooltip Colour Settings")]
@@ -62,6 +62,9 @@ public class TimedTutorialRight : MonoBehaviour {
         SetupControllerEventListeners();
 
         introTiming = introAudio.clip.length;
+        print(introTiming);
+        triggerTiming = triggerAudio.clip.length;
+        touchpadTiming = touchpadAudio.clip.length;
 
         StartCoroutine(TutorialCoroutine());
     }
@@ -80,17 +83,28 @@ public class TimedTutorialRight : MonoBehaviour {
 
         events.GripPressed += new ControllerInteractionEventHandler(DoGripPressed);
         events.GripReleased += new ControllerInteractionEventHandler(DoGripReleased);
-
+        */
         events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPressed);
         events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadReleased);
-        */
+        
     }
 
     IEnumerator TutorialCoroutine()
     {
+        introAudio.Play();
         yield return new WaitForSecondsRealtime(introTiming);
+
+        triggerAudio.Play();
         tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
-        yield return new WaitForSecondsRealtime(indexTriggerTiming);
+        yield return new WaitForSecondsRealtime(triggerTiming);
+
+        if (pressedTrigger)
+        {
+            touchpadAudio.Play();
+            tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
+        }
+        
+        //yield return new WaitForSecondsRealtime(indexTriggerTiming);
 
     }
 
@@ -108,13 +122,13 @@ public class TimedTutorialRight : MonoBehaviour {
         individualTooltips.ChangeLineColor(tooltip, tipLineColor_AfterPressed);
         individualTooltips.ChangeFontColor(tooltip, tipTextColor_AfterPressed);
     }
-
+    
     private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
     { 
-        if (!pressedIndexTrigger)
+        if (!pressedTrigger)
         {
             changeTooltipColorWhenPressed(individualTooltips.triggerTooltip);
-            pressedIndexTrigger = true;
+            pressedTrigger = true;
             changeTooltipColorAfterPressed(individualTooltips.triggerTooltip);
         }
         else
@@ -161,7 +175,17 @@ public class TimedTutorialRight : MonoBehaviour {
 
     private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-     //   changeTooltipColor(joystickTooltip);
+        if (!pressedTouchpad)
+        {
+            changeTooltipColorWhenPressed(individualTooltips.touchpadTooltip);
+            pressedTouchpad = true;
+            changeTooltipColorAfterPressed(individualTooltips.touchpadTooltip);
+        }
+        else
+        {
+            individualTooltips.touchpadTooltip.ResetTooltip();
+            tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
+        }
     }
 
     private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
