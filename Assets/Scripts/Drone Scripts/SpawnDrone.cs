@@ -16,13 +16,10 @@
 
 
         public GameObject drone;
-
         public GameObject mainMenu;
 
 
-
         private GameObject world;
-
         private GameObject controller;
 
         //menuState stores if the main menu is currently active
@@ -32,9 +29,7 @@
         //toggleMenuStopper
 
         private bool toggleMenuStopper;
-
         private bool placingDrone;
-
         private Vector3 groundPoint;
 
 
@@ -63,8 +58,6 @@
         void Update()
         {
 
-
-
             if (OVRInput.Get(OVRInput.Button.One))
 
             {
@@ -90,8 +83,6 @@
 
             }
 
-
-
             if (placingDrone && controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround() && OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) != 0)
 
             {
@@ -105,7 +96,7 @@
         }
 
 
-
+        // This script is put on a drone placement button
         public void OnClick()
 
         {
@@ -126,12 +117,11 @@
 
                 i.GetComponent<SetWaypoint>().selected = false;
 
-                i.GetComponent<DroneMenuActivator>().selected = false;
-
             }
 
         }
 
+        // Select the location the drone is placed at
         private void ChooseGroundPoint()
 
         {

@@ -216,16 +216,6 @@
             }
         }
 
-        // DRONE MENU
-        protected virtual void ActivateDroneMenu(bool rayHit, RaycastHit pointerCollidedWith)
-        {
-            if (rayHit && pointerCollidedWith.collider.tag == "Drone")
-            {
-                pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().ActivateDroneMenu();
-                //get object with tag
-            }
-        }
-
         protected virtual float CastRayForward()
         {
             Transform origin = GetOrigin();
@@ -237,10 +227,6 @@
             OnGround(rayHit, pointerCollidedWith);
             CheckRayMiss(rayHit, pointerCollidedWith);
             CheckRayHit(rayHit, pointerCollidedWith);
-
-            // DRONE MENU
-            ActivateDroneMenu(rayHit, pointerCollidedWith);
-            // DRONE MENU
 
             // SETTING WAYPOINT            
             MarkGroundPoint(rayHit, pointerCollidedWith);
@@ -395,7 +381,6 @@
                     {
                         pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected = !pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected;
                         pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().toggleDeselectOtherDrones = true;
-                        pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().selected = !pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().selected;
                         if (pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected)
                         {
                             Debug.Log("Selected!");

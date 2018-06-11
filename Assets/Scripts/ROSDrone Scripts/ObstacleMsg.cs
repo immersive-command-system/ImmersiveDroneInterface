@@ -4,7 +4,7 @@ using SimpleJSON;
 using ROSBridgeLib.std_msgs;
 
 namespace ROSBridgeLib {
-	namespace std_msgs {
+	namespace interface_msgs {
 		public class ObstacleMsg : ROSBridgeMsg {
 			public float _x, _y, _z, scale_x;
             public int id;

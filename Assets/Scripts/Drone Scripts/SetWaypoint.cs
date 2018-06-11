@@ -216,7 +216,6 @@
             Destroy(latestWayPoint);
             waypoints.RemoveAt(waypoints.Count - 1); //removing latest waypoint from both lists
             waypointOrder.RemoveAt(tempIndex2);//^
-
         }
 
         // REMOVE - ROS
@@ -358,7 +357,6 @@
                 if (i.gameObject != this.gameObject)
                 {
                     i.GetComponent<SetWaypoint>().selected = false;
-                    i.GetComponent<DroneMenuActivator>().selected = false;
                 }
             }
 

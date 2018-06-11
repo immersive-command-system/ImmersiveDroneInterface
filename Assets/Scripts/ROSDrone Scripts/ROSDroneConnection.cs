@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ROSBridgeLib;
+using ROSBridgeLib.std_msgs;
+using ROSBridgeLib.interface_msgs;
 using UnityEditor;
 using System.IO;
 
@@ -14,8 +16,10 @@ public class ROSDroneConnection : MonoBehaviour {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.0.107", 9090);
         ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
+        ros.AddPublisher(typeof(ROSDronePublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
+        Debug.Log("Should be connected");
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
@@ -35,21 +39,27 @@ public class ROSDroneConnection : MonoBehaviour {
     }
 
     //WriteData will write the location of the gameObject passed to it to a text file
-    [MenuItem("Tools/Write file")]
-    static void WriteData(GameObject robot)
+    //[MenuItem("Tools/Write file")]
+    //static void WriteData(GameObject robot)
+    //{
+    //    string path = "Assets/Results/user_test.txt";
+
+    //    //Write some text to the test.txt file
+    //    StreamWriter writer = new StreamWriter(path, true);
+    //    writer.WriteLine(robot.transform.position);
+    //    writer.Close();
+
+    //    //Re-import the file to update the reference in the editor
+    //    AssetDatabase.ImportAsset(path);
+    //    TextAsset asset = (TextAsset) Resources.Load("test");
+
+    //    //Print the text from the file
+    //    Debug.Log(asset.text);
+    //}
+
+    public void PublishWaypointUpdateMessage(WaypointUpdateMsg msg)
     {
-        string path = "Assets/Results/user_test.txt";
-
-        //Write some text to the test.txt file
-        StreamWriter writer = new StreamWriter(path, true);
-        writer.WriteLine(robot.transform.position);
-        writer.Close();
-
-        //Re-import the file to update the reference in the editor
-        AssetDatabase.ImportAsset(path);
-        TextAsset asset = (TextAsset) Resources.Load("test");
-
-        //Print the text from the file
-        Debug.Log(asset.text);
+        Debug.Log("Published new waypoint message: "+ msg.ToYAMLString());
+        ros.Publish("/waypoints", msg);
     }
 }
