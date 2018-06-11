@@ -1,25 +1,26 @@
-﻿namespace VRTK
+﻿namespace ISAACS
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using VRTK;
+    using ROSBridgeLib;
+    using ROSBridgeLib.interface_msgs;
+    using SimpleJSON;
 
     public class SetWaypoint : MonoBehaviour {
 
-        public static GameObject currentDrone;
-        public GameObject drone; // Drone object
+        public Drone thisDrone; // Drone classObject
+
         public GameObject waypoint; // Waypoint object
         public static GameObject controller_right;
-     
 
         public float maxHeight; // maximum height waypoint can be at when adjusting
         public bool selected; // Indicated if the drone is selected
         public bool toggleDeselectOtherDrones;
         public Material selectedMaterial;
         public Material deselectedMaterial;
-        public static ArrayList waypointOrder; //Keeps Track of Waypoints in the Order they were created for the undo function
-        public static ArrayList waypoints;
         public int order;
         public Material startWaypointMaterial;
 
@@ -47,13 +48,13 @@
 
         void Start()
         {
+            thisDrone = gameObject.GetComponent<DroneProperties>().classPointer;
+
             controller_right = GameObject.Find("controller_right");
             selected = true;
             adjustingHeight = false;
             actualScale = new Vector3(0, 0, 0);
             currentScale = new Vector3(0, 0, 0);
-            waypoints = new ArrayList(0);
-            waypointOrder = new ArrayList(0);
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
             settingInterWaypoint = false;
@@ -68,7 +69,6 @@
         
         void Update()
         {
-            currentDrone = drone;
             if (selected)
             {
                 // Changes the color of the drone to indicate that it has been selected
@@ -149,7 +149,7 @@
         private GameObject CreateWaypoint(Vector3 groundPoint)
         {
             // Sets the first waypoint at drone's position if none exist yet.
-            if (waypoints.Count == 0) 
+            if (thisDrone.waypoints.Count == 0) 
             {
                 GameObject startWaypoint = Instantiate(waypoint, this.transform.position, Quaternion.identity);
                 startWaypoint.tag = "waypoint";
@@ -159,8 +159,8 @@
                 startWaypoint.GetComponent<WaypointProperties>().referenceDrone = this.gameObject;
                 startWaypoint.GetComponent<MeshRenderer>().material = startWaypointMaterial;
                 this.GetComponentInParent<MoveDrone>().prevPoint = startWaypoint;
-                waypoints.Add(startWaypoint);
-                waypointOrder.Add(startWaypoint);
+                thisDrone.waypoints.Add(startWaypoint);
+                thisDrone.waypointOrder.Add(startWaypoint);
             }
 
             // Now we set the actual waypoint at the ghostPoint position.
@@ -181,23 +181,27 @@
                     Debug.Log(interWaypoint);
                 }
 
-                int index = waypoints.IndexOf(interWaypoint);
+                int index = thisDrone.waypoints.IndexOf(interWaypoint);
                 if (index < 0)
                 {
                     index = 0;
                 }
-                waypoints.Insert(index, newWaypoint);
-                waypointOrder.Add(newWaypoint);
+                thisDrone.waypoints.Insert(index, newWaypoint);
+                thisDrone.waypointOrder.Add(newWaypoint);
                 interWaypoint.GetComponent<WaypointProperties>().prevPoint = newWaypoint;
-                newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) waypoints[index - 1];
+                newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) thisDrone.waypoints[index - 1];
             }
             // ADD - ROS
             // If we don't have a line selected, we default to placing the new waypoint at the end of the path
             else
             {
-                waypoints.Add(newWaypoint);
-                waypointOrder.Add(newWaypoint);
-                newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) waypoints[waypoints.Count - 2];
+                thisDrone.waypoints.Add(newWaypoint);
+                thisDrone.waypointOrder.Add(newWaypoint);
+                newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) thisDrone.waypoints[thisDrone.waypoints.Count - 2];
+
+                //Sending a ROS Update
+                WaypointUpdateMsg msg = new WaypointUpdateMsg(newWaypoint.transform.localPosition.x, newWaypoint.transform.localPosition.y, newWaypoint.transform.localPosition.z);
+                world.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
             }
 
             return newWaypoint;
@@ -205,30 +209,29 @@
 
         // REMOVE - ROS
         // Removes the most recently placed waypoint
-        public static void ClearWaypoint()
+        public void ClearWaypoint()
         {
-            
             Debug.Log("removing latest waypoint");
-            GameObject latestWayPoint = (GameObject)waypoints[waypoints.Count - 1];
-            int tempIndex2 = waypointOrder.IndexOf(latestWayPoint);
+            GameObject latestWayPoint = (GameObject) thisDrone.waypoints[thisDrone.waypoints.Count - 1];
+            int tempIndex2 = thisDrone.waypointOrder.IndexOf(latestWayPoint);
             WaypointProperties tempProperties = latestWayPoint.GetComponent<WaypointProperties>();
             tempProperties.deleteLineCollider();
             Destroy(latestWayPoint);
-            waypoints.RemoveAt(waypoints.Count - 1); //removing latest waypoint from both lists
-            waypointOrder.RemoveAt(tempIndex2);//^
+            thisDrone.waypoints.RemoveAt(thisDrone.waypoints.Count - 1); //removing latest waypoint from both lists
+            thisDrone.waypointOrder.RemoveAt(tempIndex2);//^
         }
 
         // REMOVE - ROS
         // Removes a highlighted waypoint
-        public static void ClearSpecificWayPoint(GameObject currentWayPoint)
+        public void ClearSpecificWayPoint(GameObject currentWayPoint)
         {
             WaypointProperties tempProperties = currentWayPoint.GetComponent<WaypointProperties>();
-            int tempIndex = waypoints.IndexOf(currentWayPoint); //Gets index of Waypoint in waypoint list 
-            int tempIndex2 = waypointOrder.IndexOf(currentWayPoint);//Gets index of Waypoint in waypoint Order
-            if (waypoints.Count > 0)
+            int tempIndex = thisDrone.waypoints.IndexOf(currentWayPoint); //Gets index of Waypoint in waypoint list 
+            int tempIndex2 = thisDrone.waypointOrder.IndexOf(currentWayPoint);//Gets index of Waypoint in waypoint Order
+            if (thisDrone.waypoints.Count > 0)
             {
                 // Checking to see if it is the latest waypoint and calling ClearWaypoint if so...
-                if (tempIndex == waypoints.Count - 1 && tempIndex != 0)
+                if (tempIndex == thisDrone.waypoints.Count - 1 && tempIndex != 0)
                 {
                     Debug.Log("Specific Waypoint happened to be the latest");
                     ClearWaypoint();
@@ -239,34 +242,31 @@
                 {
                     // If there are no waypoints remaining, we remove the drone.
                     Debug.Log("Destroying drone as last resort");
-                    for (int i = 0; i < waypoints.Count; i++)
+                    for (int i = 0; i < thisDrone.waypoints.Count; i++)
                     {
-                        GameObject forLoopWayPoint = (GameObject)waypoints[i]; //Getting each waypoints
+                        GameObject forLoopWayPoint = (GameObject) thisDrone.waypoints[i]; //Getting each waypoints
                         tempProperties = forLoopWayPoint.GetComponent<WaypointProperties>(); //Getting each wayPoints properties
                         tempProperties.deleteLineCollider(); // Deleting Line collider attached to waypoint
                         Destroy(forLoopWayPoint); //Deleting waypoint itself 
                     }
                     //Destroy((GameObject) waypoints[0]); // Getting rid of last Waypoint gameObject before destroying Drone
                     Destroy(tempProperties.referenceDrone);
-                    waypoints = new ArrayList(0); // resetting both lists 
-                    waypointOrder = new ArrayList(0); // ^
+                    thisDrone.waypoints = new ArrayList(0); // resetting both lists 
+                    thisDrone.waypointOrder = new ArrayList(0); // ^
                     deactivateGhost();
                 }
                 else
                 {
-                    GameObject nextDrone = (GameObject)waypoints[(tempIndex + 1)];
+                    GameObject nextDrone = (GameObject) thisDrone.waypoints[(tempIndex + 1)];
 
                     Debug.Log("Removing specific waypoint");
                     nextDrone.GetComponent<WaypointProperties>().prevPoint = tempProperties.prevPoint;
                     tempProperties.deleteLineCollider();
-                    Destroy((GameObject)waypoints[tempIndex]);
-                    waypoints.RemoveAt(tempIndex);
-                    waypointOrder.RemoveAt(tempIndex2);
+                    Destroy((GameObject) thisDrone.waypoints[tempIndex]);
+                    thisDrone.waypoints.RemoveAt(tempIndex);
+                    thisDrone.waypointOrder.RemoveAt(tempIndex2);
                 }
-                
             }
-
-
         }
 
         // SECONDARY PLACEMENT METHOD
@@ -366,15 +366,10 @@
         // Destroys the waypoints associated with this drone
         private void OnDestroy()
         {
-            foreach (GameObject i in waypoints)
+            foreach (GameObject i in thisDrone.waypoints)
             {
                 Destroy(i);
             }
-        }
-
-        public static GameObject getCurrentDrone()
-        {
-            return currentDrone;
         }
 
         //Set setWaypointState to true

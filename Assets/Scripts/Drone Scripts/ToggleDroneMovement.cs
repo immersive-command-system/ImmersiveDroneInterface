@@ -1,18 +1,21 @@
-﻿namespace VRTK
+﻿namespace ISAACS
 {
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.UI;
+    using VRTK;
 
     public class ToggleDroneMovement : MonoBehaviour
     {
 
-        public GameObject referenceDrone;
+        public Drone thisDrone; // instance of Drone classObject
+        public GameObject thisDroneGameObject; // associated Drone gameObject
         private Vector3 size;
 
         void Start()
         {
+            thisDrone = WorldProperties.selectedDrone;
             size = new Vector3(0, 0, 0);
             ActivateButton();
         }
@@ -36,7 +39,7 @@
 
         private bool HasWaypoints()
         {
-            return (SetWaypoint.waypoints.Count > 1);
+            return (thisDrone.waypoints.Count > 1);
         }
 
         private void ActivateButton()
@@ -46,7 +49,7 @@
 
         private void ChangeText()
         {
-            if (referenceDrone.GetComponent<MoveDrone>().move)
+            if (thisDrone.gameObjectPointer.GetComponent<MoveDrone>().move)
             {
                 this.GetComponentInChildren<Text>().text = "Stop";
             }
@@ -58,8 +61,7 @@
 
         public void OnClick()
         {
-            referenceDrone.GetComponent<MoveDrone>().move = !referenceDrone.GetComponent<MoveDrone>().move;
-
+            thisDrone.gameObjectPointer.GetComponent<MoveDrone>().move = !thisDrone.gameObjectPointer.GetComponent<MoveDrone>().move;
         }
     }
 }

@@ -3,6 +3,7 @@
     using UnityEngine;
     using System.Collections;
     using System;
+    using ISAACS;
 
     /// <summary>
     /// The Straight Pointer Renderer emits a coloured beam from the end of the object it is attached to and simulates a laser beam.

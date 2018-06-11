@@ -1,4 +1,4 @@
-﻿namespace VRTK
+﻿namespace ISAACS
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -16,9 +16,11 @@
         private LineRenderer line;
         public GameObject prevPoint;
         private GameObject world;
+        private Drone thisDrone;
 
         void Start()
         {
+            thisDrone = gameObject.GetComponent<DroneProperties>().classPointer;
             currentWaypoint = 0;
             move = false;
             line = this.GetComponentInParent<LineRenderer>();
@@ -28,7 +30,7 @@
 
         void Update()
         {
-            totalWaypoints = SetWaypoint.waypoints.Count - 1;
+            totalWaypoints = thisDrone.waypoints.Count - 1;
 
             if (prevPoint != null)
             {
@@ -46,7 +48,7 @@
         private void DisplayPastPath()
         {
             line.SetPosition(0, this.transform.position);
-            if (SetWaypoint.waypoints.Count == 0)
+            if (thisDrone.waypoints.Count == 0)
             {
                 line.SetPosition(1, this.transform.position);
             } else
@@ -66,14 +68,14 @@
 
         private void SelectTarget()
         {
-            if (SetWaypoint.waypoints.Count != 0)
+            if (thisDrone.waypoints.Count != 0)
             {
                 if (totalWaypoints > currentWaypoint)
                 {
-                    targetWaypoint = (GameObject)SetWaypoint.waypoints[currentWaypoint + 1];
+                    targetWaypoint = (GameObject)thisDrone.waypoints[currentWaypoint + 1];
                     if (this.transform.position == targetWaypoint.transform.position)
                     {
-                        prevPoint = (GameObject)SetWaypoint.waypoints[currentWaypoint + 1];
+                        prevPoint = (GameObject)thisDrone.waypoints[currentWaypoint + 1];
                         currentWaypoint++;
                     }
                 }
@@ -86,7 +88,7 @@
                     //    currentWaypoint = totalWaypoints;
                     //}
                     currentWaypoint = totalWaypoints;
-                    prevPoint = (GameObject)SetWaypoint.waypoints[totalWaypoints];
+                    prevPoint = (GameObject)thisDrone.waypoints[totalWaypoints];
                 }
                 else
                 {
