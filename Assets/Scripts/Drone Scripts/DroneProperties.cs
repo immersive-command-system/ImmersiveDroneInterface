@@ -4,15 +4,18 @@
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class DroneProperties : MonoBehaviour
-    {
-        // DroneProperties acts as a component connection between the Drone classObject and the Drone gameObject.
+    public class DroneProperties : MonoBehaviour {
+
         public Drone classPointer;
 
-        void Start()
-        {
-            // We create a new instance of the Drone classObject
+        // Use this for initialization
+        void Start() {
             classPointer = new Drone(gameObject);
+        }
+
+        // Update is called once per frame
+        void Update() {
+
         }
     }
 }

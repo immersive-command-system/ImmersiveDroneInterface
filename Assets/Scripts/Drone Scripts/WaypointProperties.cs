@@ -35,6 +35,9 @@
 
         public bool setInterwaypointToggle;
         public static GameObject controller_right;
+
+        public string id;
+
         void Start()
         {
             passed = false;

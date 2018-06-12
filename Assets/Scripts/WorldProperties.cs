@@ -15,13 +15,7 @@
         void Start()
         {
             dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
-            nextDroneId = 'A'; // Used as the key for the dronesDict and for communication across the ROSBridge
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            nextDroneId = 'A'; // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
         }
     }
 }

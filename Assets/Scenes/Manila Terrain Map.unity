@@ -417,6 +417,8 @@ GameObject:
   - component: {fileID: 146794963}
   - component: {fileID: 146794964}
   - component: {fileID: 146794965}
+  - component: {fileID: 146794966}
+  - component: {fileID: 146794967}
   m_Layer: 0
   m_Name: World
   m_TagString: World
@@ -481,6 +483,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   drone: {fileID: 1497704686498948, guid: 23ccd6cb144b5f54db5836aa8a1f377b, type: 2}
   mainMenu: {fileID: 1959261476}
+  world: {fileID: 0}
+  controller: {fileID: 0}
+  menuState: 0
+  toggleMenuStopper: 0
+  placingDrone: 0
+  groundPoint: {x: 0, y: 0, z: 0}
+--- !u!114 &146794966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 146794962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca9d0ba830a405941937d80884a54e0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &146794967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 146794962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd25a2c5bd1119744b97e85c7643d505, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &170587474 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1120882164139808, guid: 600b706cd94b8cb41828739494015818,
@@ -724,8 +754,10 @@ MonoBehaviour:
   defaultMaterial: {fileID: 0}
   controller_right: {fileID: 0}
   sphereVRTK: {fileID: 0}
+  sparklePrefab: {fileID: 0}
   selectedMaterial: {fileID: 0}
   opaqueMaterial: {fileID: 2100000, guid: a383a4f34003b2f4cbb29ddc207fc6ca, type: 2}
+  properties: {fileID: 0}
 --- !u!114 &665289480
 MonoBehaviour:
   m_ObjectHideFlags: 0
