@@ -73,7 +73,7 @@ public class TimedTutorialRight : MonoBehaviour {
     {
         events.TriggerPressed += new ControllerInteractionEventHandler(DoTriggerPressed);
         events.TriggerReleased += new ControllerInteractionEventHandler(DoTriggerReleased);
-        /*
+        
         events.ButtonOnePressed += new ControllerInteractionEventHandler(DoButtonOnePressed);
         events.ButtonOneReleased += new ControllerInteractionEventHandler(DoButtonOneReleased);
 
@@ -82,7 +82,7 @@ public class TimedTutorialRight : MonoBehaviour {
 
         events.GripPressed += new ControllerInteractionEventHandler(DoGripPressed);
         events.GripReleased += new ControllerInteractionEventHandler(DoGripReleased);
-        */
+        
         events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPressed);
         events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadReleased);
         
@@ -93,10 +93,7 @@ public class TimedTutorialRight : MonoBehaviour {
         introAudio.Play();
         yield return new WaitForSecondsRealtime(introTiming);
 
-        triggerAudio.Play();
-        tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
-        yield return new WaitForSecondsRealtime(triggerTiming);
-        triggerAudioDone = true;
+        TutorialStep(individualTooltips.triggerTooltip, triggerAudio, ref triggerAudioDone, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
 
         if (pressedTrigger && triggerAudioDone)
         {
@@ -108,30 +105,18 @@ public class TimedTutorialRight : MonoBehaviour {
 
     }
 
-/*
-    IEnumerator TutorialStep(VRTK_ObjectTooltip tooltip, AudioSource tooltipAudio, bool tooltipPressed)
+    public void TutorialStep(VRTK_ObjectTooltip tooltip, AudioSource tooltipAudio, ref bool audioDone, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
     {
         tooltipAudio.Play();
-        switch (tooltip.name.Replace("Tooltip", "").ToLower())
-        {
-            case "trigger":
-                tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
-                break;
-            case "grip":
-                tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.GripTooltip);
-                break;
-            case "touchpad":
-                tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
-                break;
-            case "buttonone":
-                tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.ButtonOneTooltip);
-                break;
-            case "buttontwo":
-                tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip);
-                break;
-        }
-        yield return new WaitForSecondsRealtime(tooltipAudio.clip.length);
-    }*/
+        tooltips.ToggleTips(true, tooltipButton);
+        StartCoroutine(Wait(tooltipAudio.clip.length));
+        audioDone = true;
+    }
+
+    IEnumerator Wait(float seconds)
+    {
+        yield return new WaitForSecondsRealtime(seconds);
+    }
 
     private void changeTooltipColorWhenPressed(VRTK_ObjectTooltip tooltip)
     {
