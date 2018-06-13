@@ -17,26 +17,20 @@
         public Material selectedGroundpointLine;
         public Material unselectedGroundpointLine;
 
-        public GameObject prevPoint; // Refers to previous waypoint/ drone
-        public GameObject referenceDrone; // Refers to drone waypoint is attached to
-        private GameObject thisGroundpoint; // groundpoint instantiated under current waypoint
-
         public bool passed; // Indicates whether this waypoint has been passed by the drone
 
         public GameObject modelGroundpoint; // Refers to the groundpoint object being instantiated
+        private GameObject thisGroundpoint; // groundpoint instantiated under current waypoint
+        private LineRenderer groundpointLine; // Connects the groundpoint to the waypoint
 
-        private LineRenderer waypointLine;
+        private LineRenderer LineProperties;
         private CapsuleCollider lineCollider;
 
         private GameObject world;
         private GameObject controller;
 
-        private LineRenderer groundpointLine; // Connects the groundpoint to the waypoint
-
-        public bool setInterwaypointToggle;
+        public bool setLineOriginWaypointToggle;
         public static GameObject controller_right;
-
-        public string id;
 
         void Start()
         {
@@ -46,7 +40,7 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
-            waypointLine = this.GetComponentInParent<LineRenderer>();
+            LineProperties = this.GetComponentInParent<LineRenderer>();
             if (prevPoint != null)
             {
                 referenceDrone = prevPoint.GetComponent<WaypointProperties>().referenceDrone;
@@ -56,12 +50,12 @@
             lineCollider.tag = "Line Collider";
             lineCollider.isTrigger = true;
             lineCollider.radius = 0.1f;
-            lineCollider.gameObject.AddComponent<WaypointLine>().waypoint = gameObject;
+            lineCollider.gameObject.AddComponent<LineProperties>().waypoint = gameObject;
             
             // Commented out due to child collider conflicts with parent collider.
-            //lineCollider.transform.parent = waypointLine.transform;
+            //lineCollider.transform.parent = LineProperties.transform;
 
-            setInterwaypointToggle = true;
+            setLineOriginWaypointToggle = true;
 
             // Sets up interaction events
             GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += new InteractableObjectEventHandler(InteractableObjectUngrabbed);
@@ -95,41 +89,41 @@
         {
             if (prevPoint != null) // For all waypoints past the first one;
             {
-                waypointLine.SetPosition(0, this.transform.position);
+                LineProperties.SetPosition(0, this.transform.position);
 
                 Vector3 endpoint = new Vector3();
                 if (referenceDrone.GetComponent<MoveDrone>().targetWaypoint != this.gameObject || passed)
                 {
                     endpoint = prevPoint.transform.position;
-                    waypointLine.SetPosition(1, endpoint);
+                    LineProperties.SetPosition(1, endpoint);
                 } else
                 {
                     endpoint = referenceDrone.transform.position;
-                    waypointLine.SetPosition(1, endpoint);
+                    LineProperties.SetPosition(1, endpoint);
                 }
                 SetLineCollider(endpoint);
 
                 // If line being selected by controller
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject && referenceDrone.GetComponent<SetWaypoint>().selected)
                 {
-                    waypointLine.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
-                    waypointLine.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
+                    LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
+                    LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
 
                     if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
                     {
-                        if (setInterwaypointToggle)
+                        if (setLineOriginWaypointToggle)
                         {
-                            SetInterwaypoint();
+                            SetLineOriginWaypoint();
                         }
                     } else
                     {
-                        setInterwaypointToggle = true;
+                        setLineOriginWaypointToggle = true;
                     }
                 }
                 else
                 {
-                    waypointLine.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
-                    waypointLine.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                    LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                    LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
                 }
             }
         }
@@ -142,7 +136,7 @@
                 Destroy(lineCollider);
             } else if (referenceDrone.GetComponent<SetWaypoint>().selected)
             {
-                lineCollider.transform.parent = waypointLine.transform;
+                lineCollider.transform.parent = LineProperties.transform;
                 lineCollider.radius = world.GetComponent<MapInteractions>().actualScale.y / 50;
                 lineCollider.center = Vector3.zero;
                 lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
@@ -190,25 +184,25 @@
                 this.GetComponent<MeshRenderer>().material = passedWaypoint;
                 if (referenceDrone.GetComponent<SetWaypoint>().selected)
                 {
-                    waypointLine.material = selectedPassedLine;
+                    LineProperties.material = selectedPassedLine;
                 }
                 else
                 {
-                    waypointLine.material = unselectedPassedLine;
+                    LineProperties.material = unselectedPassedLine;
                 }
-            } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || controller_right.GetComponent<ControllerInteractions>().GetInterWaypoint() == this.gameObject) && referenceDrone.GetComponent<SetWaypoint>().selected)
+            } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || controller_right.GetComponent<ControllerInteractions>().GetLineOriginWaypoint() == this.gameObject) && referenceDrone.GetComponent<SetWaypoint>().selected)
             {
-                waypointLine.material = unpassedWaypoint;
+                LineProperties.material = unpassedWaypoint;
             } else
             {
                 this.GetComponent<MeshRenderer>().material = unpassedWaypoint;
                 if (referenceDrone.GetComponent<SetWaypoint>().selected)
                 {
-                    waypointLine.material = selectedUnpassedLine;
+                    LineProperties.material = selectedUnpassedLine;
                 }
                 else
                 {
-                    waypointLine.material = unselectedUnpassedLine;
+                    LineProperties.material = unselectedUnpassedLine;
                 }
             }
         }
@@ -229,12 +223,12 @@
         }
 
         // Sets a new waypoint in between two old ones
-        public void SetInterwaypoint()
+        public void SetLineOriginWaypoint()
         {
             controller.GetComponent<VRTK_StraightPointerRenderer>().OnClick();
-            referenceDrone.GetComponent<SetWaypoint>().settingInterWaypoint = true;
-            referenceDrone.GetComponent<SetWaypoint>().interWaypoint = this.gameObject;
-            setInterwaypointToggle = false;
+            referenceDrone.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
+            referenceDrone.GetComponent<SetWaypoint>().LineOriginWaypoint = this.gameObject;
+            setLineOriginWaypointToggle = false;
             
         }
 

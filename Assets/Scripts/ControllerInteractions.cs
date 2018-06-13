@@ -33,8 +33,37 @@
         private GameObject toggleSparkle;
         public WaypointProperties properties;
         private bool nearWaypoint = false;
-        private GameObject interWaypoint;
+        private GameObject lineOriginWaypoint;
         private bool lineCollided;
+
+        public void Start()
+        {
+            controller_right = GameObject.Find("controller_right");
+
+
+            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
+            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
+            controller = GameObject.FindGameObjectWithTag("GameController");
+
+
+            GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
+            tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
+            tempSphere.transform.parent = this.gameObject.transform;
+            tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
+            this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
+            tempSphere.gameObject.name = "sphereVRTK";
+            Renderer tempRend = tempSphere.GetComponent<Renderer>();
+            tempRend.material = opaqueMaterial;
+
+
+            sphereVRTK = tempSphere;
+            originalSphereScale = sphereVRTK.transform.localScale;
+            toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
+            toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
+            toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
+            toggleSparkle.SetActive(false);
+        }
 
         // Update is called once per frame
         void Update()
@@ -120,79 +149,45 @@
             {
                 GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
             }
-
-
-
         }
 
-
-
-        public void stopGrab()//GETS CALLED WHEN YOU STOP GRABBING ON 
+        // Called when you let go of the right grip
+        public void stopGrab()
         {
             toggleRaycastOff();
         }
 
-        public void Start()
-        {
-            controller_right = GameObject.Find("controller_right");
-
-
-            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
-            controller = GameObject.FindGameObjectWithTag("GameController");
-
-
-            GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
-            tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
-            tempSphere.transform.parent = this.gameObject.transform;
-            tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
-            this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
-            tempSphere.gameObject.name = "sphereVRTK";
-            Renderer tempRend = tempSphere.GetComponent<Renderer>();
-            tempRend.material = opaqueMaterial;
-
-
-            sphereVRTK = tempSphere;
-            originalSphereScale = sphereVRTK.transform.localScale;
-            toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
-            toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
-            toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
-            toggleSparkle.SetActive(false);
-
-
-        }
-
-
-
+        // This function handles collisions with the selection zone for adapative interactions
+        // currentCollider is the object that we have collided with
         void OnTriggerEnter(Collider currentCollider)
         {
-
-            if (selectionZone != true) //Preventing multiple zone selections 
+            // This helps prevent multiple zone selections
+            if (selectionZone != true)  
             {
                 //Checking to see if controller touched near a waypoint 
                 if (currentCollider.gameObject.CompareTag("waypoint"))
                 {
-                    //Telling Unity that the Controller is in range to delete
-                    selectionZone = true;
+                    // Noting that we are in range to delete
+                    selectionZone = true; // This tells us that there is something in the selection zone
+                    nearWaypoint = true; // This tells us that the selection zone has a waypoint in it
+
                     currentWaypointZone = currentCollider.gameObject;
-                    nearWaypoint = true;
                 }
 
+                // This checks for collision with a line when we are placing a waypoint -- results in placing an intermediate Waypoint.
                 else if (currentCollider.tag == "Line Collider" && !SetWaypoint.IsCurrentlySetting() && !nearWaypoint)
                 {
-                    selectionZone = true;
-                    GameObject interWaypointLine = currentCollider.GetComponent<WaypointLine>().waypoint;
-                    WaypointProperties properties = interWaypointLine.GetComponent<WaypointProperties>();
+                    selectionZone = true; // This tells us that there is something in the selection zone
 
-                    properties.referenceDrone.GetComponent<SetWaypoint>().settingInterWaypoint = true;
+                    // This is the waypoint class instance that the line is attached to
+                    Waypoint lineOriginWaypointClass = currentCollider.GetComponent<LineProperties>().originWaypoint;
+
+                    lineOriginWaypointClass.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
                     lineCollided = true;
-                    interWaypoint = properties.gameObject;
-                    Debug.Log("yo" + interWaypoint);
 
+                    lineOriginWaypoint = lineOriginWaypointClass.gameObjectPointer;
 
-
-
+                    Debug.Log("Collided with line while placing waypoint: " + lineOriginWaypoint);
                 }
             }
         }
@@ -209,9 +204,8 @@
             if (currentCollider.tag == "Line Collider")
             {
                 selectionZone = false;
-                GameObject interWaypointLine = currentCollider.GetComponent<WaypointLine>().waypoint;
-                WaypointProperties properties = interWaypointLine.GetComponent<WaypointProperties>();
-                properties.referenceDrone.GetComponent<SetWaypoint>().settingInterWaypoint = false;
+                Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                lineOriginWaypoint.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = false;
                 lineCollided = false;
             }
 
@@ -268,9 +262,9 @@
             return lineCollided;
         }
 
-        public GameObject GetInterWaypoint()
+        public GameObject GetLineOriginWaypoint()
         {
-            return interWaypoint;
+            return lineOriginWaypoint;
         }
     }
 }

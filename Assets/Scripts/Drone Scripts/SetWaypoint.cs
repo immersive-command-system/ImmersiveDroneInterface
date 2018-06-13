@@ -17,7 +17,6 @@
         public static GameObject controller_right;
 
         public float maxHeight; // maximum height waypoint can be at when adjusting
-        public bool selected; // Indicated if the drone is selected
         public bool toggleDeselectOtherDrones;
         public Material selectedMaterial;
         public Material deselectedMaterial;
@@ -35,9 +34,9 @@
         public Vector3 actualScale; // currentScale / OriginalScale
         private static bool clearWaypointsToggle;
 
-        public bool settingInterWaypoint;
+        public bool settingIntermediateWaypoint;
         private static bool currentlySetting = false;
-        public GameObject interWaypoint;
+        public GameObject LineOriginWaypoint;
 
         private static GameObject ghostPoint; // Place waypoint in front of controller
         private GameObject currentWaypoint; // The current waypoint we are trying to place
@@ -51,14 +50,12 @@
             thisDrone = gameObject.GetComponent<DroneProperties>().classPointer;
 
             controller_right = GameObject.Find("controller_right");
-            selected = true;
             adjustingHeight = false;
             actualScale = new Vector3(0, 0, 0);
             currentScale = new Vector3(0, 0, 0);
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
-            settingInterWaypoint = false;
-
+            settingIntermediateWaypoint = false;
             ghostPoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             ghostPoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             ghostPoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
@@ -69,7 +66,7 @@
         
         void Update()
         {
-            if (selected)
+            if (thisDrone.selected)
             {
                 // Changes the color of the drone to indicate that it has been selected
                 transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = selectedMaterial;
@@ -131,7 +128,7 @@
                 {
                     firstClickFinished = false;
                     activateSetWaypointState();
-                    settingInterWaypoint = false;
+                    settingIntermediateWaypoint = false;
                     currentlySetting = false;
                     placeAtHand = false; 
                 }
@@ -148,63 +145,31 @@
         // Instantiates and returns a new waypoint at the ghostPoint position
         private GameObject CreateWaypoint(Vector3 groundPoint)
         {
-            // Sets the first waypoint at drone's position if none exist yet.
-            if (thisDrone.waypoints.Count == 0) 
+            // We will use the ghostpoint location.
+            Vector3 newLocation = Vector3(groundPoint.x, ghostPoint.transform.position.y, groundPoint.z);
+
+            // Create a new waypoint at that location
+            Waypoint newWaypoint = new Waypoint(thisDrone, newLocation);
+
+            // INSERT
+            // Placing a new waypoint in between old ones - triggers if a line is in the grab zone
+            if (settingIntermediateWaypoint && controller_right.GetComponent<ControllerInteractions>().LineCollided()) 
             {
-                GameObject startWaypoint = Instantiate(waypoint, this.transform.position, Quaternion.identity);
-                startWaypoint.tag = "waypoint";
-                startWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
-                startWaypoint.transform.localScale = actualScale / 100;
-                startWaypoint.transform.parent = world.transform;
-                startWaypoint.GetComponent<WaypointProperties>().referenceDrone = this.gameObject;
-                startWaypoint.GetComponent<MeshRenderer>().material = startWaypointMaterial;
-                this.GetComponentInParent<MoveDrone>().prevPoint = startWaypoint;
-                thisDrone.waypoints.Add(startWaypoint);
-                thisDrone.waypointOrder.Add(startWaypoint);
+                // Grabbing the waypoint at the origin of the line
+                Waypoint lineOriginWaypoint = controller_right.GetComponent<ControllerInteractions>().GetLineOriginWaypoint();
+
+                // Insert the waypoint into the drone path
+                thisDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint);
             }
-
-            // Now we set the actual waypoint at the ghostPoint position.
-            groundPoint.y = ghostPoint.transform.position.y;
-            GameObject newWaypoint = Instantiate(waypoint, groundPoint, Quaternion.identity);
-            newWaypoint.tag = "waypoint";
-            newWaypoint.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
-            newWaypoint.transform.localScale = actualScale / 100;
-            newWaypoint.transform.parent = world.transform;
-
-            // INSERT - ROS
-            // Placing a new waypoint in between old ones - triggers if a line is selected
-            if (settingInterWaypoint) 
-            {
-                if (controller_right.GetComponent<ControllerInteractions>().LineCollided())
-                {
-                    interWaypoint = controller_right.GetComponent<ControllerInteractions>().GetInterWaypoint();
-                    Debug.Log(interWaypoint);
-                }
-
-                int index = thisDrone.waypoints.IndexOf(interWaypoint);
-                if (index < 0)
-                {
-                    index = 0;
-                }
-                thisDrone.waypoints.Insert(index, newWaypoint);
-                thisDrone.waypointOrder.Add(newWaypoint);
-                interWaypoint.GetComponent<WaypointProperties>().prevPoint = newWaypoint;
-                newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) thisDrone.waypoints[index - 1];
-            }
-            // ADD - ROS
+            
+            // ADD
             // If we don't have a line selected, we default to placing the new waypoint at the end of the path
             else
             {
-                thisDrone.waypoints.Add(newWaypoint);
-                thisDrone.waypointOrder.Add(newWaypoint);
-                newWaypoint.GetComponent<WaypointProperties>().prevPoint = (GameObject) thisDrone.waypoints[thisDrone.waypoints.Count - 2];
-
-                //Sending a ROS Update
-                WaypointUpdateMsg msg = new WaypointUpdateMsg(newWaypoint.transform.localPosition.x, newWaypoint.transform.localPosition.y, newWaypoint.transform.localPosition.z);
-                world.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+                // Create a new waypoint and add it to the end of the drone path
+                thisDrone.AddWaypoint(newWaypoint);
             }
-
-            return newWaypoint;
+            return newWaypoint.gameObjectPointer;
         }
 
         // REMOVE - ROS
@@ -315,7 +280,7 @@
 
             adjustingHeight = !ControllerInteractions.secondIndexPressed();
             firstClickFinished = !ControllerInteractions.secondIndexPressed();
-            settingInterWaypoint = !ControllerInteractions.secondIndexPressed();
+            settingIntermediateWaypoint = !ControllerInteractions.secondIndexPressed();
             currentlySetting = !ControllerInteractions.secondIndexPressed();
             if (!adjustingHeight)
             {
