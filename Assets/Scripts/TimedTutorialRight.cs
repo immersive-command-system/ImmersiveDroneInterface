@@ -5,6 +5,17 @@ using VRTK;
 
 //implement clicking on joystick to turn on labels afterwards
 
+public class Ref
+{
+    private bool backing;
+    public bool Value { get { return backing; } set { backing = value; } }
+    public Ref()
+    {
+        backing = false;
+    }
+}
+
+
 public class TimedTutorialRight : MonoBehaviour {
 
     private ToggleTooltips individualTooltips;
@@ -14,7 +25,8 @@ public class TimedTutorialRight : MonoBehaviour {
     private VRTK_ControllerTooltips.TooltipButtons triggerButton, gripButton, touchpadButton, buttonOneButton, buttonTwoButton;
 
     private bool pressedTrigger = false, pressedGrip = false, pressedTouchpad = false, pressedButtonOne = false, pressedButtonTwo = false;
-    private bool triggerAudioDone = false, gripAudioDone = false, touchpadAudioDone = false, buttonOneAudioDone = false, buttonTwoAudioDone = false;
+    private Ref triggerAudioDone = new Ref(), gripAudioDone = new Ref(), touchpadAudioDone = new Ref(), buttonOneAudioDone = new Ref(), buttonTwoAudioDone = new Ref();
+    //private bool triggerAudioDone = false, gripAudioDone = false, touchpadAudioDone = false, buttonOneAudioDone = false, buttonTwoAudioDone = false;
     public AudioSource introAudio, triggerAudio, gripAudio, touchpadAudio, buttonOneAudio, buttonTwoAudio;
 
     public float introTiming;
@@ -74,6 +86,7 @@ public class TimedTutorialRight : MonoBehaviour {
         buttonTwoButton = VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip;
 
         StartCoroutine(TutorialCoroutine());
+        touchpadAudio.Play();
     }
 
     IEnumerator TutorialCoroutine()
@@ -81,28 +94,24 @@ public class TimedTutorialRight : MonoBehaviour {
         introAudio.Play();
         yield return new WaitForSecondsRealtime(introTiming);
 
-        TutorialStep(individualTooltips.triggerTooltip, triggerAudio, ref triggerAudioDone, triggerButton);
-        TutorialStep(individualTooltips.touchpadTooltip, touchpadAudio, ref touchpadAudioDone, touchpadButton);
-
-       /* if (pressedTrigger && triggerAudioDone)
-        {
-            touchpadAudio.Play();
-            tooltips.ToggleTips(true, touchpadButton);
-        }*/
-        
-        //yield return new WaitForSecondsRealtime(indexTriggerTiming);
+        yield return TutorialStep(individualTooltips.triggerTooltip, triggerAudio, triggerAudioDone, triggerButton);
+        yield return TutorialStep(individualTooltips.touchpadTooltip, touchpadAudio, touchpadAudioDone, touchpadButton);
+        yield return TutorialStep(individualTooltips.gripTooltip, gripAudio, gripAudioDone, gripButton);
+        yield return TutorialStep(individualTooltips.buttonOne, buttonOneAudio, buttonOneAudioDone, buttonOneButton);
+        yield return TutorialStep(individualTooltips.buttonTwo, buttonTwoAudio, buttonTwoAudioDone, buttonTwoButton);
 
     }
 
-    public void TutorialStep(VRTK_ObjectTooltip tooltip, AudioSource tooltipAudio, ref bool audioDone, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
+    IEnumerator TutorialStep(VRTK_ObjectTooltip tooltip, AudioSource tooltipAudio, Ref audioDone, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
     {
         tooltipAudio.Play();
         tooltips.ToggleTips(true, tooltipButton);
-        StartCoroutine(Wait(tooltipAudio.clip.length));
-        audioDone = true;
+        yield return new WaitForSecondsRealtime(tooltipAudio.clip.length);
+        audioDone.Value = true;
+        yield return new WaitUntil(() => pressedTrigger == true);
     }
 
-    private void changeTooltipColorWhenPressed(VRTK_ObjectTooltip tooltip)
+    private void ChangeTooltipColorWhenPressed(VRTK_ObjectTooltip tooltip)
     {
         individualTooltips.ChangeContainerColor(tooltip, tipBackgroundColor_WhenPressed);
         individualTooltips.ChangeLineColor(tooltip, tipLineColor_WhenPressed);
@@ -110,7 +119,7 @@ public class TimedTutorialRight : MonoBehaviour {
         tooltip.ResetTooltip();
     }
 
-    private void changeTooltipColorAfterPressed(VRTK_ObjectTooltip tooltip)
+    private void ChangeTooltipColorAfterPressed(VRTK_ObjectTooltip tooltip)
     {
         individualTooltips.ChangeContainerColor(tooltip, tipBackgroundColor_AfterPressed);
         individualTooltips.ChangeLineColor(tooltip, tipLineColor_AfterPressed);
@@ -123,9 +132,9 @@ public class TimedTutorialRight : MonoBehaviour {
         {
             if (!pressedTooltip)
             {
-                changeTooltipColorWhenPressed(tooltip);
+                ChangeTooltipColorWhenPressed(tooltip);
                 pressedTooltip = true;
-                changeTooltipColorAfterPressed(tooltip);
+                ChangeTooltipColorAfterPressed(tooltip);
             }
             else
             {
@@ -145,52 +154,52 @@ public class TimedTutorialRight : MonoBehaviour {
 
     private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(triggerAudioDone, ref pressedTrigger, individualTooltips.triggerTooltip, triggerButton);
+        DoTooltipPressed(triggerAudioDone.Value, ref pressedTrigger, individualTooltips.triggerTooltip, triggerButton);
     }
 
     private void DoTriggerReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(triggerAudioDone, individualTooltips.triggerTooltip, triggerButton);
+        DoTooltipReleased(triggerAudioDone.Value, individualTooltips.triggerTooltip, triggerButton);
     }
 
     private void DoButtonOnePressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(buttonOneAudioDone, ref pressedButtonOne, individualTooltips.buttonOne, buttonOneButton);
+        DoTooltipPressed(buttonOneAudioDone.Value, ref pressedButtonOne, individualTooltips.buttonOne, buttonOneButton);
     }
 
     private void DoButtonOneReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(buttonOneAudioDone, individualTooltips.buttonOne, buttonOneButton);
+        DoTooltipReleased(buttonOneAudioDone.Value, individualTooltips.buttonOne, buttonOneButton);
     }
 
     private void DoButtonTwoPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(buttonTwoAudioDone, ref pressedButtonTwo, individualTooltips.buttonTwo, buttonTwoButton);
+        DoTooltipPressed(buttonTwoAudioDone.Value, ref pressedButtonTwo, individualTooltips.buttonTwo, buttonTwoButton);
     }
 
     private void DoButtonTwoReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(buttonTwoAudioDone, individualTooltips.buttonTwo, buttonTwoButton);
+        DoTooltipReleased(buttonTwoAudioDone.Value, individualTooltips.buttonTwo, buttonTwoButton);
     }
 
     private void DoGripPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(gripAudioDone, ref pressedGrip, individualTooltips.gripTooltip, gripButton);
+        DoTooltipPressed(gripAudioDone.Value, ref pressedGrip, individualTooltips.gripTooltip, gripButton);
     }
 
     private void DoGripReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(gripAudioDone, individualTooltips.gripTooltip, gripButton);
+        DoTooltipReleased(gripAudioDone.Value, individualTooltips.gripTooltip, gripButton);
     }
 
     private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(touchpadAudioDone, ref pressedTouchpad, individualTooltips.touchpadTooltip, touchpadButton);
+        DoTooltipPressed(touchpadAudioDone.Value, ref pressedTouchpad, individualTooltips.touchpadTooltip, touchpadButton);
     }
 
     private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(touchpadAudioDone, individualTooltips.touchpadTooltip, touchpadButton);
+        DoTooltipReleased(touchpadAudioDone.Value, individualTooltips.touchpadTooltip, touchpadButton);
     }
 
     private void SetupControllerEventListeners()
@@ -210,10 +219,5 @@ public class TimedTutorialRight : MonoBehaviour {
         events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPressed);
         events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadReleased);
 
-    }
-
-    IEnumerator Wait(float seconds)
-    {
-        yield return new WaitForSecondsRealtime(seconds);
     }
 }
