@@ -20,10 +20,12 @@ namespace ROSBridgeLib
 
                 curr_id = curr_id_;
                 prev_id = prev_id_;
+
                 // Translation into ROS space
                 x = (double) x;
                 y = (double) -z;
                 z = (double) (y - 0.148f);
+
                 action = action_;
             }
 

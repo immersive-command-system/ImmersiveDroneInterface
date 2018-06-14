@@ -11,49 +11,35 @@
 
     public class SpawnDrone : MonoBehaviour
     {
-
-
-
         public GameObject drone;
         public GameObject mainMenu;
-
 
         private GameObject world;
         private GameObject controller;
 
         //menuState stores if the main menu is currently active
-
         private bool menuState;
 
         //toggleMenuStopper
-
         private bool toggleMenuStopper;
         private bool placingDrone;
         private Vector3 groundPoint;
-
-
 
         // Use this for initialization
 
         void Start()
         {
-
             world = GameObject.FindGameObjectWithTag("World");
-
             controller = GameObject.FindGameObjectWithTag("GameController");
 
             menuState = false;
-
             toggleMenuStopper = true;
-
             mainMenu.SetActive(menuState);
-
         }
 
 
 
         // Update is called once per frame
-
         void Update()
         {
 
@@ -94,8 +80,9 @@
 
         }
 
-
-        // This script is put on a drone placement button
+        /// <summary>
+        /// This script is put on a drone placement button
+        /// </summary>
         public void OnClick()
 
         {
@@ -114,13 +101,14 @@
 
             {
 
-                i.GetComponent<SetWaypoint>().selected = false;
+                i.GetComponent<DroneProperties>().classPointer.selected = false;
 
             }
 
         }
-
-        // Select the location the drone is placed at
+        /// <summary>
+        /// Select the location the drone is placed at
+        /// </summary>
         private void ChooseGroundPoint()
 
         {
@@ -135,16 +123,13 @@
 
         }
 
-
-
-        // Returns the height taking the scale into account
-
+        /// <summary>
+        /// Max Height Calculator
+        /// </summary>
+        /// <returns> Returns the maximum height taking the scale into account </returns>
         private float MaxHeight()
-
         {
-
             return 1 + (float)((1.0008874438 * 1.5 - 0.7616114718) * world.GetComponent<MapInteractions>().actualScale.y + .703);
-
         }
 
     }

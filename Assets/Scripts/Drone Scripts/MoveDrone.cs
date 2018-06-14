@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using UnityEngine;
 
+    // This is a component of the basic drone gameObject
+
     public class MoveDrone : MonoBehaviour
     {
         public Material selectedPassedLine;
@@ -12,9 +14,10 @@
         public bool move;
         public GameObject targetWaypoint;
         public int currentWaypoint;
+        public GameObject prevPoint;
+
         private int totalWaypoints;
         private LineRenderer line;
-        public GameObject prevPoint;
         private GameObject world;
         private Drone thisDrone;
 
@@ -57,7 +60,7 @@
             }
             line.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
             line.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
-            if (this.GetComponentInParent<SetWaypoint>().selected)
+            if (thisDrone.selected)
             {
                 line.material = selectedPassedLine;
             } else
@@ -72,7 +75,7 @@
             {
                 if (totalWaypoints > currentWaypoint)
                 {
-                    targetWaypoint = (GameObject)thisDrone.waypoints[currentWaypoint + 1];
+                    targetWaypoint = ((Waypoint) thisDrone.waypoints[currentWaypoint + 1]).gameObjectPointer;
                     if (this.transform.position == targetWaypoint.transform.position)
                     {
                         prevPoint = (GameObject)thisDrone.waypoints[currentWaypoint + 1];

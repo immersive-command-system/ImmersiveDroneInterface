@@ -27,7 +27,7 @@
                 else
                 {
                     Debug.Log("removing latest waypoint from action array");
-                    thisDrone.gameObjectPointer.GetComponent<SetWaypoint>().ClearSpecificWayPoint((GameObject)thisDrone.waypointOrder[thisDrone.waypointOrder.Count - 1]);
+                    thisDrone.gameObjectPointer.GetComponent<SetWaypoint>().ClearSpecificWayPoint((GameObject)thisDrone.waypointsOrder[thisDrone.waypointsOrder.Count - 1]);
                 }
 
             }

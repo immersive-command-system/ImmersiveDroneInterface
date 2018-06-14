@@ -56,13 +56,12 @@
             Renderer tempRend = tempSphere.GetComponent<Renderer>();
             tempRend.material = opaqueMaterial;
 
-
             sphereVRTK = tempSphere;
             originalSphereScale = sphereVRTK.transform.localScale;
-            toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
-            toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
-            toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
-            toggleSparkle.SetActive(false);
+            //toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
+            //toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
+            //toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
+            //toggleSparkle.SetActive(false);
         }
 
         // Update is called once per frame
@@ -157,14 +156,16 @@
             toggleRaycastOff();
         }
 
-        // This function handles collisions with the selection zone for adapative interactions
-        // currentCollider is the object that we have collided with
+        /// <summary>
+        /// This function handles collisions with the selection zone for adapative interactions
+        /// </summary>
+        /// <param name="currentCollider"> This is the object that we have collided with </param>
         void OnTriggerEnter(Collider currentCollider)
         {
             // This helps prevent multiple zone selections
             if (selectionZone != true)  
             {
-                //Checking to see if controller touched near a waypoint 
+                // Checking to see if controller touched near a waypoint 
                 if (currentCollider.gameObject.CompareTag("waypoint"))
                 {
                     // Noting that we are in range to delete
@@ -185,7 +186,8 @@
                     lineOriginWaypointClass.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
                     lineCollided = true;
 
-                    lineOriginWaypoint = lineOriginWaypointClass.gameObjectPointer;
+                    // Setting the lineOriginWaypoint.
+                    lineOriginWaypoint = lineOriginWaypointClass.prevPathPoint.gameObjectPointer;
 
                     Debug.Log("Collided with line while placing waypoint: " + lineOriginWaypoint);
                 }
@@ -262,9 +264,9 @@
             return lineCollided;
         }
 
-        public GameObject GetLineOriginWaypoint()
+        public Waypoint GetLineOriginWaypoint()
         {
-            return lineOriginWaypoint;
+            return lineOriginWaypoint.GetComponent<WaypointProperties>().classPointer;
         }
     }
 }

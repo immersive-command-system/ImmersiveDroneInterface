@@ -3,6 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using VRTK;
 
     public class Waypoint
     {
@@ -13,8 +14,8 @@
 
         // The PathPoints are used by the line renderer to connect the full path.
         // NOTE: The assignment of these variables is handled by the drone based on how the waypoint is added/removed from the path
-        public GameObject prevPathPoint; // Refers to previous waypoint or the drone
-        public GameObject nextPathPoint; // Refers to next waypoint or the drone
+        public Waypoint prevPathPoint; // Refers to previous waypoint
+        public Waypoint nextPathPoint; // Refers to next waypoint
 
         public Waypoint(Drone myDrone, Vector3 position)
         {
@@ -22,12 +23,13 @@
             referenceDrone = myDrone;
 
             // Setting up all the related gameObject parameters
-            GameObject baseObject = Resources.Load("GameObjects/waypoint");
-            gameObjectPointer = Instantiate(baseObject, position, Quaternion.identity);
+            GameObject baseObject = (GameObject) Resources.Load("GameObjects/waypoint");
+            gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
+            gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = GameObject.Find("controller_right").GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
+            gameObjectPointer.GetComponent<WaypointProperties>().classPointer = this; // Connect the gameObject back to the classObject
             gameObjectPointer.tag = "waypoint";
-            gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = controller_right.GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
-            gameObjectPointer.transform.localScale = actualScale / 100; // ?
-            gameObjectPointer.transform.parent = world.transform; // ?
+            gameObjectPointer.transform.localScale = WorldProperties.actualScale / 100;
+            gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
 
             // Initializing the ROSpoints Arraylist
             ROSpoints = new ArrayList(0);

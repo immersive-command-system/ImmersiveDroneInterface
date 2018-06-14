@@ -359,7 +359,7 @@
             {
                 //return pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().waypoints.IndexOf(pointerCollidedWith.collider.gameObject);
                 //GameObject selectedWaypoint = pointerCollidedWith.collider.transform.parent.gameObject;
-                GameObject selectedWaypoint = pointerCollidedWith.collider.gameObject.GetComponent<WaypointLine>().waypoint;
+                GameObject selectedWaypoint = pointerCollidedWith.collider.gameObject.GetComponent<LineProperties>().originWaypoint.gameObjectPointer;
                 //ArrayList temp1 = selectedWaypoint.GetComponent<SetWaypoint>().waypoints;
                 //return selectedWaypoint.GetComponent<SetWaypoint>().waypoints.IndexOf(selectedWaypoint);
                 return selectedWaypoint;
@@ -380,9 +380,9 @@
                 {
                     if (selectDroneToggle)
                     {
-                        pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected = !pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected;
+                        pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected = !pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected;
                         pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().toggleDeselectOtherDrones = true;
-                        if (pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected)
+                        if (pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected)
                         {
                             Debug.Log("Selected!");
                         }
