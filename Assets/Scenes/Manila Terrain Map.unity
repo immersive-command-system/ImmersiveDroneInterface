@@ -1602,11 +1602,6 @@ MonoBehaviour:
   buttonOneAudio: {fileID: 0}
   buttonTwoAudio: {fileID: 0}
   introTiming: 5
-  triggerTiming: 0
-  gripTiming: 0
-  touchpadTiming: 0
-  buttonOneTiming: 0
-  buttonTwoTiming: 0
   tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
   tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
   tipLineColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
@@ -1638,7 +1633,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: c0072e8696e42974f989331ead910575, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 1553840595aed194799f4295ab1bc6af, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -1718,7 +1713,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 763b87f47b4127a4a93c09fe6383fc1d, type: 3}
+  m_audioClip: {fileID: 8300000, guid: fca5c8b98ae02d14494a5b5f8209b1fd, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
