@@ -7,6 +7,8 @@
     public class DroneProperties : MonoBehaviour {
 
         public Drone classPointer;
+        public Material selectedMaterial;
+        public Material deselectedMaterial;
 
         // Use this for initialization
         void Start() {

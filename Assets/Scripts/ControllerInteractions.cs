@@ -7,45 +7,43 @@
     using VRTK.UnityEventHelper;
     using VRTK;
 
+    // THis class handles all controller interactions with the waypoints and drone
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public static bool selectionZone = false; // Is the controller in a waypoint zone?
-        public GameObject currentWaypointZone = null; //Waypoint of zone that controller is in
-        public Material defaultMaterial;
-        public GameObject controller_right;
+        public enum ControllerState {IDLE, GRABBING, PLACING, POINTING, SETTING_HEIGHT}; // These are the possible values for the controller's state
+        public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
+        public CollisionType inSelectionZone; // This tells us if we are colliding with something and what that thing is
+        public GameObject lastSelectedObject; // This is the last object that we collided with
+
+        public GameObject controller_right; // Our right controller
+        private GameObject controller; //needed to access pointer
+
         public GameObject sphereVRTK;
         public GameObject sparklePrefab;
+
+        public Material defaultMaterial;
         public Material selectedMaterial;
         public Material opaqueMaterial;
-        //private GameObject sphereVRTK;
-        private GameObject controller; //needed to access pointer
+
         private static bool raycastOn; //raycast state
         private static bool indexPressed;
         private static bool indexReleased;
         private static bool isGrabbing;
-        private static bool haloStyleZoomToggleButton = false; //Yes i know it's a shitty name but I dont know what its actually called
-        private float minScale;
-        private float maxScale;
-        private float fakeTime;
-        private float timerScale;
-        private Vector3 originalSphereScale;
-        private GameObject toggleSparkle;
-        public WaypointProperties properties;
-        private bool nearWaypoint = false;
-        private GameObject lineOriginWaypoint;
-        private bool lineCollided;
 
         public void Start()
         {
+            // Defining the selection zone variables
+            inSelectionZone = CollisionType.NOTHING;
+            lastSelectedObject = null;
+
+            // Assigning the controller
             controller_right = GameObject.Find("controller_right");
-
-
-            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
             controller = GameObject.FindGameObjectWithTag("GameController");
 
-
+            // Creating the sphereVRTK
+            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
+            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
             GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
             tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
@@ -55,16 +53,12 @@
             tempSphere.gameObject.name = "sphereVRTK";
             Renderer tempRend = tempSphere.GetComponent<Renderer>();
             tempRend.material = opaqueMaterial;
-
             sphereVRTK = tempSphere;
-            originalSphereScale = sphereVRTK.transform.localScale;
-            //toggleSparkle = GameObject.Instantiate(sparklePrefab, tempSphere.transform);
-            //toggleSparkle.transform.position = new Vector3(0F, 0F, 0.1F);
-            //toggleSparkle.transform.localScale = new Vector3(1F, 1F, 1F);
-            //toggleSparkle.SetActive(false);
         }
 
-        // Update is called once per frame
+        /// <summary>
+        /// The Update method handles the state of the index trigger, undo / delete activation, and selection pointer toggling
+        /// </summary>
         void Update()
         {
             indexPressed = false;
@@ -72,146 +66,236 @@
 
             isGrabbing = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null;
 
-            //Checks to see if B button was pressed the previous frame
+            // Handles B button - Undo and Delete Functionality
             if (OVRInput.GetDown(OVRInput.Button.Two))
             {
-                UndoWayPoints.UndoAndDeleteWaypoints(selectionZone, currentWaypointZone);
+                UndoAndDeleteWaypoints();
             }
 
-
+            // Checks for index button press
             if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
                 indexPressed = true;
             }
 
+            // Checks for index button release
             if (OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
                 indexReleased = true;
             }
 
-            // Adjusting grab zone size.
-            //if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
-            //{
-            //    haloStyleZoomToggleButton = !haloStyleZoomToggleButton;
-            //    toggleSparkle.SetActive(!toggleSparkle.activeSelf);
-            //}
-
-            if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] != 0 && haloStyleZoomToggleButton == true)
-            {
-                if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] > 0 && sphereVRTK.transform.localScale[0] < 0.14F)
-                {
-                    Vector3 tempVector = sphereVRTK.transform.localScale;
-                    Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
-                    sphereVRTK.transform.localScale = additionVector + tempVector;
-                }
-
-                if (OVRInput.Get(OVRInput.RawAxis2D.RThumbstick)[1] < 0 && sphereVRTK.transform.localScale[0] > 0.02F)
-                {
-                    Vector3 tempVector = sphereVRTK.transform.localScale;
-                    Vector3 additionVector = new Vector3(0.001f, 0.001f, 0.001f);
-                    sphereVRTK.transform.localScale = tempVector - additionVector;
-                }
-            }
-
-
-            //Stopping Sphere Collision with the RayCast 
-            if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
-            {
-                sphereVRTK.GetComponent<SphereCollider>().enabled = false;
-            }
-            else
-            {
-                sphereVRTK.GetComponent<SphereCollider>().enabled = true;
-            }
-
-            //Checks grip trigger for raycast toggle. Deactivates during height adjustment && !SetWaypoint.IsAdjustingHeight())
+            // Handles selection pointer toggling 
+            // Activated by the right grip trigger
             if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && !isGrabbing)
             {
-                selectionZone = true; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
+                GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
                 toggleRaycastOn();
             }
             else
             {
-                if (raycastOn == true) //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
-                {
-                    selectionZone = false; //ULTRA TEMPORARY SOLUTION TO VRTK GRABBABLE WAYPOINT ISSUE 
-                }
+                GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
                 toggleRaycastOff();
-
             }
 
-            if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f)
+            /////////////////////////////
+            // STOLEN FROM SETWAYPOINT //
+            /////////////////////////////
+
+            UpdateScale();
+
+            // Prevents the placePoint from blocking the raycast.
+            if (ControllerInteractions.IsRaycastOn())
             {
-                GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false;
+                deactivatePlacePoint();
             }
             else
             {
-                GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+                activatePlacePoint();
+            }
+
+            // Allows user to select a groundpoint which a new waypoint will appear above
+            if (setWaypointState && ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
+            {
+                adjustingWaypoint = SetGroundpoint();
+                if (adjustingWaypoint == null)
+                {
+                    return;
+                }
+                currentlySetting = true;
+                deactivateSetWaypointState();
+
+            }
+            else if (ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
+            {
+                activateSetWaypointState();
+            }
+
+            // Checking to see if you have let go
+            if (currentlySetting && !firstClickFinished && ControllerInteractions.IsIndexReleased())
+            {
+                firstClickFinished = true;
+            }
+            else if (currentlySetting && !firstClickFinished && placeAtHand)
+            {
+                currentWaypoint.transform.position = placePoint.transform.position;
+                currentWaypoint.GetComponent<WaypointProperties>().UpdateLine();
+
+            }
+
+            // Allows user to adjust the newly placed waypoints height
+            if (adjustingHeight && firstClickFinished)
+            {
+                if (ControllerInteractions.IsIndexPressed())
+                {
+                    activateSetWaypointState();
+                }
+                deactivatePlacePoint();
+                AdjustHeight(adjustingWaypoint);
+
+            }
+            else if (firstClickFinished)
+            {
+                firstClickFinished = false;
+                activateSetWaypointState();
+                settingIntermediateWaypoint = false;
+                currentlySetting = false;
+                placeAtHand = false;
             }
         }
 
-        // Called when you let go of the right grip
-        public void stopGrab()
+        /// <summary>
+        /// Instantiates and returns a new waypoint at the placePoint position.
+        /// </summary>
+        /// <param name="groundPoint"> This is the location on the ground that the waypoint will be directly above. </param>
+        /// <returns></returns>
+        private GameObject CreateWaypoint(Vector3 groundPoint)
         {
-            toggleRaycastOff();
+            // We will use the placePoint location.
+            Vector3 newLocation = new Vector3(groundPoint.x, placePoint.transform.position.y, groundPoint.z);
+
+            // Create a new waypoint at that location
+            Waypoint newWaypoint = new Waypoint(thisDrone, newLocation);
+
+            // INSERT
+            // Placing a new waypoint in between old ones - triggers if a line is in the selection zone
+            if (inSelectionZone == CollisionType.LINE)
+            {
+                // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
+                Waypoint lineOriginWaypoint = lastSelectedObject.GetComponent<WaypointProperties>.classPointer;
+
+                // Insert the new waypoint into the drone path just behind the lineOriginWaypoint
+                thisDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
+            }
+
+            // ADD
+            // If we don't have a line selected, we default to placing the new waypoint at the end of the path
+            else
+            {
+                // Create a new waypoint and add it to the end of the drone path
+                thisDrone.AddWaypoint(newWaypoint);
+            }
+            return newWaypoint.gameObjectPointer;
+        }
+
+        /// <summary>
+        /// This method handles the undo and delete functionality
+        /// </summary>
+        public void UndoAndDeleteWaypoints()
+        {
+            Drone currentlySelectedDrone = WorldProperties.selectedDrone;
+
+            // Make sure the currently selected drone has waypoints
+            if (currentlySelectedDrone.waypoints != null && currentlySelectedDrone.waypoints.Count > 0)
+            {
+                //Checking to see if we are colliding with one of those
+                if (inSelectionZone == CollisionType.WAYPOINT && currentlySelectedDrone.waypoints.Contains(lastSelectedObject))
+                {
+                    // Remove the highlighted waypoint (DELETE)
+                    Debug.Log("Removing waypoint in grab zone");
+
+                    inSelectionZone = CollisionType.NOTHING;
+                    lastSelectedObject = null;
+
+                    Waypoint selectedWaypoint = lastSelectedObject.GetComponent<WaypointProperties>().classPointer;
+                    currentlySelectedDrone.DeleteWaypoint(selectedWaypoint);
+                }
+                else
+                {
+                    // Otherwise we default to removing the last waypoint (UNDO)
+                    Debug.Log("Removing last waypoint");
+
+                    Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypoints[currentlySelectedDrone.waypoints.Count - 1];
+
+                    if(lastWaypoint.gameObjectPointer == lastSelectedObject)
+                    {
+                        inSelectionZone = CollisionType.NOTHING;
+                        lastSelectedObject = null;
+                    }
+
+                    currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
+                }
+            }
         }
 
         /// <summary>
         /// This function handles collisions with the selection zone for adapative interactions
         /// </summary>
-        /// <param name="currentCollider"> This is the object that we have collided with </param>
+        /// <param name="currentCollider"> This is the collider that our selection zone is intersecting with </param>
         void OnTriggerEnter(Collider currentCollider)
         {
-            // This helps prevent multiple zone selections
-            if (selectionZone != true)  
+            Debug.Log("Controller has collided with something");
+
+            // Checking to see if the grab zone collided with a waypoint
+            if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                // Checking to see if controller touched near a waypoint 
-                if (currentCollider.gameObject.CompareTag("waypoint"))
-                {
-                    // Noting that we are in range to delete
-                    selectionZone = true; // This tells us that there is something in the selection zone
-                    nearWaypoint = true; // This tells us that the selection zone has a waypoint in it
+                Debug.Log("Controller has collided with a waypoint");
 
-                    currentWaypointZone = currentCollider.gameObject;
-                }
+                inSelectionZone = CollisionType.WAYPOINT; // Noting that we collided with a waypoint
+                lastSelectedObject = currentCollider.gameObject; // This gives us the gameObject that was most recently in the selectionZone.
+            }
 
-                // This checks for collision with a line when we are placing a waypoint -- results in placing an intermediate Waypoint.
-                else if (currentCollider.tag == "Line Collider" && !SetWaypoint.IsCurrentlySetting() && !nearWaypoint)
-                {
-                    selectionZone = true; // This tells us that there is something in the selection zone
+            // Checking to see if the grab zone collided with a line instead
+            // We must have left a waypoint (and had our inSelectionZone set to NOTHING) in order to switch to selecting a line
+            else if (currentCollider.tag == "Line Collider" && inSelectionZone != CollisionType.WAYPOINT)
+            {
+                // This is the waypoint class instance that the line is attached to
+                inSelectionZone = CollisionType.LINE; // Noting that we are only colliding with a line right now
 
-                    // This is the waypoint class instance that the line is attached to
-                    Waypoint lineOriginWaypointClass = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                Waypoint lineOriginWaypointClass = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                lastSelectedObject = currentCollider.gameObject; // This gives us the gameObject that was most recently in the selectionZone.
 
-                    lineOriginWaypointClass.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
-                    lineCollided = true;
+                // OUTDATED
+                lineOriginWaypointClass.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
+                
+                Debug.Log("Collided with a line whose origin point is at " + lineOriginWaypointClass.id);
+            }
 
-                    // Setting the lineOriginWaypoint.
-                    lineOriginWaypoint = lineOriginWaypointClass.prevPathPoint.gameObjectPointer;
-
-                    Debug.Log("Collided with line while placing waypoint: " + lineOriginWaypoint);
-                }
+            else
+            {
+                inSelectionZone = CollisionType.OTHER; // Noting that we collided with something other than a waypoint or line
+                lastSelectedObject = null; // we can't select other kinds of objects
             }
         }
 
+        /// <summary>
+        /// This function handles objects leaving the selection zone for adapative interactions
+        /// </summary>
+        /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
         void OnTriggerExit(Collider currentCollider)
         {
-            //Letting Unity know that the Object has left the 'deletion zone' of the waypoint 
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Debug.Log("Leaving Deletion Zone");
-                selectionZone = false;
-                nearWaypoint = false;
+                Debug.Log("A waypoint is leaving the grab zone");
+                inSelectionZone = CollisionType.NOTHING; // We may still have something in our collision zone, but we need to note that it is not what we had there before.
             }
             if (currentCollider.tag == "Line Collider")
             {
-                selectionZone = false;
-                Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                lineOriginWaypoint.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = false;
-                lineCollided = false;
+                Debug.Log("A line is leaving the grab zone");
+                inSelectionZone = CollisionType.NOTHING; // We may still have something in our collision zone, but we need to note that it is not what we had there before.
             }
-
         }
+
+        // UTILITY FUNCTIONS
 
         //Checks if index pressed a second time, after it was pressed in Update()
         public static bool secondIndexPressed()
@@ -242,10 +326,8 @@
 
         private void toggleRaycastOn()
         {
-
             controller.GetComponent<VRTK_Pointer>().Toggle(true);
             raycastOn = true;
-
         }
 
         private void toggleRaycastOff()
@@ -254,19 +336,15 @@
             raycastOn = false;
         }
 
+        // Called when you let go of the right grip
+        public void stopGrab()
+        {
+            toggleRaycastOff();
+        }
+
         public static bool IsGrabbing()
         {
             return isGrabbing;
-        }
-
-        public bool LineCollided()
-        {
-            return lineCollided;
-        }
-
-        public Waypoint GetLineOriginWaypoint()
-        {
-            return lineOriginWaypoint.GetComponent<WaypointProperties>().classPointer;
         }
     }
 }

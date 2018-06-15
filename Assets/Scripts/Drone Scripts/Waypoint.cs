@@ -17,6 +17,11 @@
         public Waypoint prevPathPoint; // Refers to previous waypoint
         public Waypoint nextPathPoint; // Refers to next waypoint
 
+        /// <summary>
+        /// Waypoint class object constructor
+        /// </summary>
+        /// <param name="myDrone"> This is the drone that the new waypoint should belong to (remember that you still need to add the waypoint to the path using this drone's methods) </param>
+        /// <param name="position"> This is the 3d location at which the new waypoint gameObject should be placed. </param>
         public Waypoint(Drone myDrone, Vector3 position)
         {
             // Linking this waypoint to its drone

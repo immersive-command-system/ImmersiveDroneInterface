@@ -19,13 +19,16 @@
         public int nextWaypointId; // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
         public static Dictionary<string, Waypoint> waypointsDict; // Collection of the waypoints in this drone's path
 
-        // Constructor
+        /// <summary>
+        /// Constructor method for Drone class objects
+        /// </summary>
+        /// <param name="drone_obj"> We pass in a Gameobject for the drone -- this will be phased out and the new drone_obj gameObject will be instantiated in this method </param>
         public Drone(GameObject drone_obj)
         {
             // Initializing variables
             gameObjectPointer = drone_obj;
             id = WorldProperties.nextDroneId;
-            selected = true;
+            this.Select();
 
             waypoints = new ArrayList(0);
             waypointsOrder = new ArrayList(0);
@@ -47,7 +50,7 @@
         /// <summary>
         /// Use this to add a new Waypoint to the end of the drone's path
         /// </summary>
-        /// <param name="newWaypoint"> The Waypoint which is to be added to the path </param>        
+        /// <param name="newWaypoint"> The Waypoint which is to be added to the end of path </param>        
         public void AddWaypoint(Waypoint newWaypoint)
         {
             string prev_id;
@@ -89,7 +92,7 @@
         }
 
         /// <summary>
-        /// Use this to insert a new waypoint into the path
+        /// Use this to insert a new waypoint into the path (between two existing waypoints)
         /// </summary>
         /// <param name="newWaypoint"> The Waypoint which is to be added to the path </param>
         /// <param name="prevWaypoint"> The existing Waypoint just before the one which is to be added to the path </param>
@@ -101,7 +104,7 @@
 
             // Adding the waypoint to the array
             int previousIndex = Mathf.Max(0, waypoints.IndexOf(prevWaypoint));
-            int newIndex = previousIndex;
+            int newIndex = previousIndex + 1;
             waypoints.Insert(newIndex, newWaypoint);
 
             // Inserting into the path linked list by adjusting the next and previous pointers of the surrounding waypoints
@@ -122,7 +125,10 @@
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
         }
 
-        // Use this to remove a waypoint from the path and from the scene
+        /// <summary>
+        /// Use this to remove a waypoint from the path and from the scene
+        /// </summary>
+        /// <param name="deletedWaypoint"> The waypoint which is to be deleted </param>
         public void DeleteWaypoint(Waypoint deletedWaypoint)
         {
             //Sending a ROS DELETE Update
@@ -142,7 +148,11 @@
 
             // Removing from the path linked list by adjusting the next and previous pointers of the surrounding waypoints
             deletedWaypoint.prevPathPoint.nextPathPoint = deletedWaypoint.nextPathPoint;
-            deletedWaypoint.nextPathPoint.prevPathPoint = deletedWaypoint.prevPathPoint;
+            // Need to check if this is the last waypoint in the list -- if it has a next or not
+            if (deletedWaypoint.nextPathPoint != null)
+            {
+                deletedWaypoint.nextPathPoint.prevPathPoint = deletedWaypoint.prevPathPoint;
+            }
 
             // Removing line collider
             WaypointProperties tempProperties = deletedWaypoint.gameObjectPointer.GetComponent<WaypointProperties>();
@@ -150,6 +160,29 @@
 
             // Deleting the waypoint gameObject
             Object.Destroy(deletedWaypoint.gameObjectPointer);
+        }
+
+        /// <summary>
+        /// Use this to change which drone is selected in the world.
+        /// This also changes all drone aura materials so this drone is the only yellow one.
+        /// </summary>
+        public void Select() {
+            // Changes the color of the drone to indicate that it has been selected
+            this.gameObjectPointer.transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material =
+                this.gameObjectPointer.GetComponent<DroneProperties>.selectedMaterial;
+            this.selected = true;
+
+            WorldProperties.selectedDrone = this;
+
+            foreach (Drone otherDrone in WorldProperties.dronesDict)
+            {
+                if (otherDrone != this)
+                {
+                    otherDrone.gameObjectPointer.transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = 
+                        this.gameObjectPointer.GetComponent<DroneProperties>.deselectedMaterial;
+                    otherDrone.selected = false;
+                }
+            }
         }
     }
 }

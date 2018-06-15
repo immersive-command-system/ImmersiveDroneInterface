@@ -13,6 +13,7 @@
         public static GameObject worldObject; // Refers to the ground
         public static Vector3 actualScale;
         public static Vector3 currentScale;
+        private float maxHeight;
 
         // Use this for initialization
         void Start()
@@ -22,6 +23,16 @@
             worldObject = gameObject;
             actualScale = new Vector3(1, 1, 1);
             currentScale = new Vector3(1, 1, 1);
+            maxHeight = 5;
+        }
+
+        /// <summary>
+        /// Returns the maximum height that a waypoint can be placed at
+        /// </summary>
+        /// <returns></returns>
+        public float GetMaxHeight()
+        {
+            return (maxHeight * (actualScale.y)) + world.transform.position.y;
         }
     }
 }
