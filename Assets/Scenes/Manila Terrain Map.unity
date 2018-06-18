@@ -483,12 +483,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   drone: {fileID: 1497704686498948, guid: 23ccd6cb144b5f54db5836aa8a1f377b, type: 2}
   mainMenu: {fileID: 1959261476}
-  world: {fileID: 0}
-  controller: {fileID: 0}
-  menuState: 0
-  toggleMenuStopper: 0
-  placingDrone: 0
-  groundPoint: {x: 0, y: 0, z: 0}
 --- !u!114 &146794966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -750,14 +744,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a6b3d5534d58a1458d4e900f116c673, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWaypointZone: {fileID: 0}
-  defaultMaterial: {fileID: 0}
+  currentControllerState: 0
+  inSelectionZone: 0
+  lastSelectedObject: {fileID: 0}
   controller_right: {fileID: 0}
   sphereVRTK: {fileID: 0}
-  sparklePrefab: {fileID: 0}
+  defaultMaterial: {fileID: 0}
   selectedMaterial: {fileID: 0}
   opaqueMaterial: {fileID: 2100000, guid: a383a4f34003b2f4cbb29ddc207fc6ca, type: 2}
-  properties: {fileID: 0}
+  adjustMaterial: {fileID: 0}
+  placePointMaterial: {fileID: 0}
 --- !u!114 &665289480
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1241,11 +1237,11 @@ MonoBehaviour:
   enableTeleport: 1
   targetListPolicy: {fileID: 0}
   pointerRenderer: {fileID: 1347866311}
-  activationButton: 10
-  holdButtonToActivate: 0
+  activationButton: 7
+  holdButtonToActivate: 1
   activateOnEnable: 0
   activationDelay: 0
-  selectionButton: 10
+  selectionButton: 4
   selectOnPress: 1
   selectionDelay: 0
   selectAfterHoverDuration: 0

@@ -169,17 +169,18 @@
         public void Select() {
             // Changes the color of the drone to indicate that it has been selected
             this.gameObjectPointer.transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material =
-                this.gameObjectPointer.GetComponent<DroneProperties>.selectedMaterial;
+                this.gameObjectPointer.GetComponent<DroneProperties>().selectedMaterial;
             this.selected = true;
 
             WorldProperties.selectedDrone = this;
 
-            foreach (Drone otherDrone in WorldProperties.dronesDict)
+            // Check through all other drones and change their materials to deselected
+            foreach (Drone otherDrone in WorldProperties.dronesDict.Values)
             {
                 if (otherDrone != this)
                 {
                     otherDrone.gameObjectPointer.transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = 
-                        this.gameObjectPointer.GetComponent<DroneProperties>.deselectedMaterial;
+                        this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
                     otherDrone.selected = false;
                 }
             }

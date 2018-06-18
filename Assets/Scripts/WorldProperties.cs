@@ -13,7 +13,7 @@
         public static GameObject worldObject; // Refers to the ground
         public static Vector3 actualScale;
         public static Vector3 currentScale;
-        private float maxHeight;
+        private static float maxHeight;
 
         // Use this for initialization
         void Start()
@@ -32,7 +32,7 @@
         /// <returns></returns>
         public static float GetMaxHeight()
         {
-            return (maxHeight * (actualScale.y)) + world.transform.position.y;
+            return (maxHeight * (actualScale.y)) + worldObject.transform.position.y;
         }
     }
 }

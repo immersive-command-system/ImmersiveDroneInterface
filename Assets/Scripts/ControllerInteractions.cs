@@ -23,21 +23,15 @@
         private GameObject controller; //needed to access pointer
 
         public GameObject sphereVRTK;
-        public GameObject sparklePrefab;
+        private static GameObject placePoint; // Place waypoint in front of controller
+
+        private Waypoint currentWaypoint; // The current waypoint we are trying to place
 
         public Material defaultMaterial;
         public Material selectedMaterial;
         public Material opaqueMaterial;
         public Material adjustMaterial;
-
-        private static bool indexPressed;
-        private static bool indexReleased;
-        private static bool isGrabbing;
-
-        private static GameObject placePoint; // Place waypoint in front of controller
         public Material placePointMaterial;
-
-        private Waypoint currentWaypoint; // The current waypoint we are trying to place
 
         public void Start()
         {
@@ -65,6 +59,7 @@
             sphereVRTK = tempSphere;
             
             // Creating the placePoint
+            Debug.Log("Starting the scene and setting the placement point to active");
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             placePoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             placePoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
@@ -73,27 +68,22 @@
         }
 
         /// <summary>
-        /// The Update method handles changing the controller state and waypoint placement/deletion
+        /// The Update method calls all the various state checks
         /// </summary>
         void Update()
         {
-            indexPressed = false;
-            indexReleased = false;
-
-            isGrabbing = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null;
-
-            // Checks for index button press
-            if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+            if (currentControllerState == ControllerState.IDLE && 
+                controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null)
             {
-                indexPressed = true;
+                currentControllerState = ControllerState.GRABBING;
+            } else if (currentControllerState == ControllerState.GRABBING &&
+                controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
+            {
+                currentControllerState = ControllerState.IDLE;
             }
 
-            // Checks for index button release
-            if (OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
-            {
-                indexPressed = false;
-                indexReleased = true;
-            }
+            // SELECTION POINTER  
+            SelectionPointerChecks();
 
             // UNDO AND DELETE (B - BUTTON)
             if (OVRInput.GetDown(OVRInput.Button.Two))
@@ -101,51 +91,108 @@
                 UndoAndDeleteWaypoints();
             }
 
-            // SELECTION POINTER
-            // Activated by the right grip trigger
-            if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && !isGrabbing)
+            //PRIMARY PLACEMENT
+            PrimaryPlacementChecks();
+
+            // SECONDARY PLACEMENT
+            SecondaryPlacementChecks();
+            
+        }
+
+        /// <summary>
+        /// This handles the Selection Pointer toggling
+        /// </summary>
+        private void SelectionPointerChecks()
+        {
+            if (currentControllerState == ControllerState.IDLE && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
             {
+                // Activated by the right grip trigger
                 toggleRaycastOn();
-            }
-            else if(currentControllerState == ControllerState.POINTING)
-            {
-                toggleRaycastOff();
+
+                currentControllerState = ControllerState.POINTING; // Switch to the controller's pointing state
+                Debug.Log(currentControllerState);
             }
 
-            //PRIMARY PLACEMENT
-            if (currentControllerState == ControllerState.IDLE && indexPressed)
+            if (currentControllerState == ControllerState.POINTING && OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger))
+            {
+                toggleRaycastOff();
+
+                currentControllerState = ControllerState.IDLE; // Switch to the controller's pointing state
+                Debug.Log(currentControllerState);
+            }
+        }
+
+        /// <summary>
+        /// Turn the raycast on and the place point off
+        /// </summary>
+        private void toggleRaycastOn()
+        {
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            placePoint.SetActive(false); // Prevents placePoint from blocking raycast
+            controller.GetComponent<VRTK_Pointer>().Toggle(true);
+        }
+
+        /// <summary>
+        /// Turn the raycast off and the place point on
+        /// </summary>
+        private void toggleRaycastOff()
+        {
+            controller.GetComponent<VRTK_Pointer>().Toggle(false);
+            placePoint.SetActive(true); // turn placePoint back on
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+        }
+
+        /// <summary>
+        /// This handles the primary placement states
+        /// </summary>
+        private void PrimaryPlacementChecks()
+        {
+            // Checks for right index Pressed
+            if (currentControllerState == ControllerState.IDLE && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
                 currentWaypoint = CreateWaypoint(placePoint.transform.position);
-                currentControllerState = ControllerState.PLACING_WAYPOINT;
+
+                //Check to make sure we have successfully placed a waypoint
+                if (currentWaypoint != null)
+                {
+                    currentControllerState = ControllerState.PLACING_WAYPOINT;
+                }
             }
+            // Updates new waypoint location as long as the index is held
             if (currentControllerState == ControllerState.PLACING_WAYPOINT)
             {
                 currentWaypoint.gameObjectPointer.transform.position = placePoint.transform.position;
                 currentWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateLine();
             }
-            if (currentControllerState == ControllerState.PLACING_WAYPOINT && indexReleased)
+            // Releases the waypoint when the right index is released
+            if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
                 currentControllerState = ControllerState.IDLE;
             }
+        }
 
-            // SECONDARY PLACEMENT
-            // Initializing groundPoint
-            if (currentControllerState == ControllerState.POINTING && indexPressed==true)
+        /// <summary>
+        /// This handles the secondary placement states
+        /// </summary>
+        private void SecondaryPlacementChecks()
+        {
+            // Ending the height adjustment by pressing index after setting ground point 
+            // Need to check this first so that it does not get triggered immediately after setting the ground sdfpoint
+            if (currentControllerState == ControllerState.SETTING_HEIGHT && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+            {
+                currentControllerState = ControllerState.IDLE;
+            }
+            // Initializing groundPoint when pointing and pressing index trigger
+            if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
                 Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
-                currentWaypoint = (Waypoint) CreateWaypoint(groundPoint);
+                currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
                 currentControllerState = ControllerState.SETTING_HEIGHT;
-                indexPressed = false;
             }
             // Adjusting the height for secondary placement
-            if(currentControllerState == ControllerState.SETTING_HEIGHT)
+            if (currentControllerState == ControllerState.SETTING_HEIGHT)
             {
                 AdjustHeight(currentWaypoint);
-            }
-            // Ending the height adjustment
-            if (currentControllerState == ControllerState.SETTING_HEIGHT && indexPressed)
-            {
-                currentControllerState = ControllerState.IDLE;
             }
         }
 
@@ -181,28 +228,43 @@
             Vector3 newLocation = new Vector3(groundPoint.x, placePoint.transform.position.y, groundPoint.z);
             Drone currentlySelectedDrone = WorldProperties.selectedDrone; // Grabbing the drone that we are creating this waypoint for
 
-            // Create a new waypoint at that location
-            Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
-
-            // INSERT
-            // Placing a new waypoint in between old ones - triggers if a line is in the selection zone
-            if (inSelectionZone == CollisionType.LINE)
+            // Make sure our drone exists
+            if (currentlySelectedDrone != null)
             {
-                // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
-                Waypoint lineOriginWaypoint = lastSelectedObject.GetComponent<WaypointProperties>().classPointer;
+                // INSERT
+                // Placing a new waypoint in between old ones - triggers if a line is in the selection zone
+                if (inSelectionZone == CollisionType.LINE)
+                {
+                    // Create a new waypoint at that location
+                    Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
 
-                // Insert the new waypoint into the drone path just behind the lineOriginWaypoint
-                currentlySelectedDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
+                    // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
+                    Waypoint lineOriginWaypoint = lastSelectedObject.GetComponent<WaypointProperties>().classPointer;
+
+                    // Insert the new waypoint into the drone path just behind the lineOriginWaypoint
+                    currentlySelectedDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
+
+                    // Return the waypoint to announce that we successfully created one
+                    return newWaypoint;
+                }
+
+                // ADD
+                // If we don't have a line selected, we default to placing the new waypoint at the end of the path
+                else
+                {
+                    // Create a new waypoint at that location
+                    Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
+
+                    // Add the new waypoint to the drone's path
+                    currentlySelectedDrone.AddWaypoint(newWaypoint);
+
+                    // Return the waypoint to announce that we successfully created one
+                    return newWaypoint;
+                }
             }
 
-            // ADD
-            // If we don't have a line selected, we default to placing the new waypoint at the end of the path
-            else
-            {
-                // Create a new waypoint and add it to the end of the drone path
-                currentlySelectedDrone.AddWaypoint(newWaypoint);
-            }
-            return newWaypoint;
+            // If we have not added or inserted a waypoint, we need to return null
+            return null;
         }
 
         /// <summary>
@@ -252,7 +314,6 @@
         /// <param name="currentCollider"> This is the collider that our selection zone is intersecting with </param>
         void OnTriggerEnter(Collider currentCollider)
         {
-            Debug.Log("Controller has collided with something");
 
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
@@ -298,33 +359,26 @@
             }
         }
 
-        // Turn the raycast on and the place point off
-        private void toggleRaycastOn()
-        {
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
-            placePoint.SetActive(false); // Prevents placePoint from blocking raycast
-            controller.GetComponent<VRTK_Pointer>().Toggle(true);
-
-            currentControllerState = ControllerState.POINTING; // Switch to the controller's pointing state
-        }
-
-        // Turn the raycast off and the place point on
-        private void toggleRaycastOff()
-        {
-            controller.GetComponent<VRTK_Pointer>().Toggle(false);
-            placePoint.SetActive(true); // turn placePoint back on
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
-
-            currentControllerState = ControllerState.IDLE; // Switch to the controller's idle state
-        }
-
-        //Get local rotation of controller
+        /// <summary>
+        /// Get local rotation of controller
+        /// </summary>
+        /// <param name="buttonType"></param>
+        /// <returns></returns>
         public static Quaternion getLocalControllerRotation(OVRInput.Controller buttonType)
         {
             return OVRInput.GetLocalControllerRotation(buttonType);
         }
 
-        // Finds the distance between the controller and the ground
+        /// <summary>
+        /// Finds the distance between the controller and the ground
+        /// </summary>
+        /// <param name="groundX"></param>
+        /// <param name="groundZ"></param>
+        /// <param name="groundY"></param>
+        /// <param name="controllerY"></param>
+        /// <param name="controllerX"></param>
+        /// <param name="controllerZ"></param>
+        /// <returns></returns>
         private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
         {
             return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));

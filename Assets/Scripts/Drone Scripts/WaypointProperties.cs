@@ -201,7 +201,9 @@
                 {
                     LineProperties.material = unselectedPassedLine;
                 }
-            } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || controller_right.GetComponent<ControllerInteractions>().GetLineOriginWaypoint().gameObjectPointer == this.gameObject) && referenceDrone.selected)
+            } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || 
+                controller_right.GetComponent<ControllerInteractions>().lastSelectedObject == this.gameObject) && 
+                referenceDrone.selected)
             {
                 LineProperties.material = unpassedWaypoint;
             } else
