@@ -30,7 +30,7 @@
         /// Returns the maximum height that a waypoint can be placed at
         /// </summary>
         /// <returns></returns>
-        public float GetMaxHeight()
+        public static float GetMaxHeight()
         {
             return (maxHeight * (actualScale.y)) + world.transform.position.y;
         }

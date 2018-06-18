@@ -1,5 +1,6 @@
 ﻿namespace ISAACS
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
@@ -11,7 +12,9 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING, POINTING, SETTING_HEIGHT}; // These are the possible values for the controller's state
+        public enum ControllerState {IDLE, GRABBING, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT}; // These are the possible values for the controller's state
+        public ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
+
         public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
         public CollisionType inSelectionZone; // This tells us if we are colliding with something and what that thing is
         public GameObject lastSelectedObject; // This is the last object that we collided with
@@ -25,11 +28,16 @@
         public Material defaultMaterial;
         public Material selectedMaterial;
         public Material opaqueMaterial;
+        public Material adjustMaterial;
 
-        private static bool raycastOn; //raycast state
         private static bool indexPressed;
         private static bool indexReleased;
         private static bool isGrabbing;
+
+        private static GameObject placePoint; // Place waypoint in front of controller
+        public Material placePointMaterial;
+
+        private Waypoint currentWaypoint; // The current waypoint we are trying to place
 
         public void Start()
         {
@@ -37,9 +45,10 @@
             inSelectionZone = CollisionType.NOTHING;
             lastSelectedObject = null;
 
-            // Assigning the controller
+            // Assigning the controller and setting the controller state
             controller_right = GameObject.Find("controller_right");
             controller = GameObject.FindGameObjectWithTag("GameController");
+            currentControllerState = ControllerState.IDLE;
 
             // Creating the sphereVRTK
             this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
@@ -54,10 +63,17 @@
             Renderer tempRend = tempSphere.GetComponent<Renderer>();
             tempRend.material = opaqueMaterial;
             sphereVRTK = tempSphere;
+            
+            // Creating the placePoint
+            placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            placePoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
+            placePoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
+            placePoint.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+            placePoint.SetActive(true);
         }
 
         /// <summary>
-        /// The Update method handles the state of the index trigger, undo / delete activation, and selection pointer toggling
+        /// The Update method handles changing the controller state and waypoint placement/deletion
         /// </summary>
         void Update()
         {
@@ -65,12 +81,6 @@
             indexReleased = false;
 
             isGrabbing = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null;
-
-            // Handles B button - Undo and Delete Functionality
-            if (OVRInput.GetDown(OVRInput.Button.Two))
-            {
-                UndoAndDeleteWaypoints();
-            }
 
             // Checks for index button press
             if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
@@ -81,110 +91,108 @@
             // Checks for index button release
             if (OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
+                indexPressed = false;
                 indexReleased = true;
             }
 
-            // Handles selection pointer toggling 
+            // UNDO AND DELETE (B - BUTTON)
+            if (OVRInput.GetDown(OVRInput.Button.Two))
+            {
+                UndoAndDeleteWaypoints();
+            }
+
+            // SELECTION POINTER
             // Activated by the right grip trigger
             if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, OVRInput.Controller.Touch) > 0.8f && !isGrabbing)
             {
-                GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
                 toggleRaycastOn();
             }
-            else
+            else if(currentControllerState == ControllerState.POINTING)
             {
-                GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
                 toggleRaycastOff();
             }
 
-            /////////////////////////////
-            // STOLEN FROM SETWAYPOINT //
-            /////////////////////////////
-
-            UpdateScale();
-
-            // Prevents the placePoint from blocking the raycast.
-            if (ControllerInteractions.IsRaycastOn())
+            //PRIMARY PLACEMENT
+            if (currentControllerState == ControllerState.IDLE && indexPressed)
             {
-                deactivatePlacePoint();
+                currentWaypoint = CreateWaypoint(placePoint.transform.position);
+                currentControllerState = ControllerState.PLACING_WAYPOINT;
             }
-            else
+            if (currentControllerState == ControllerState.PLACING_WAYPOINT)
             {
-                activatePlacePoint();
+                currentWaypoint.gameObjectPointer.transform.position = placePoint.transform.position;
+                currentWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateLine();
             }
-
-            // Allows user to select a groundpoint which a new waypoint will appear above
-            if (setWaypointState && ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
+            if (currentControllerState == ControllerState.PLACING_WAYPOINT && indexReleased)
             {
-                adjustingWaypoint = SetGroundpoint();
-                if (adjustingWaypoint == null)
-                {
-                    return;
-                }
-                currentlySetting = true;
-                deactivateSetWaypointState();
-
-            }
-            else if (ControllerInteractions.IsIndexPressed() && !ControllerInteractions.IsGrabbing())
-            {
-                activateSetWaypointState();
+                currentControllerState = ControllerState.IDLE;
             }
 
-            // Checking to see if you have let go
-            if (currentlySetting && !firstClickFinished && ControllerInteractions.IsIndexReleased())
+            // SECONDARY PLACEMENT
+            // Initializing groundPoint
+            if (currentControllerState == ControllerState.POINTING && indexPressed==true)
             {
-                firstClickFinished = true;
+                Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+                currentWaypoint = (Waypoint) CreateWaypoint(groundPoint);
+                currentControllerState = ControllerState.SETTING_HEIGHT;
+                indexPressed = false;
             }
-            else if (currentlySetting && !firstClickFinished && placeAtHand)
+            // Adjusting the height for secondary placement
+            if(currentControllerState == ControllerState.SETTING_HEIGHT)
             {
-                currentWaypoint.transform.position = placePoint.transform.position;
-                currentWaypoint.GetComponent<WaypointProperties>().UpdateLine();
-
+                AdjustHeight(currentWaypoint);
             }
-
-            // Allows user to adjust the newly placed waypoints height
-            if (adjustingHeight && firstClickFinished)
+            // Ending the height adjustment
+            if (currentControllerState == ControllerState.SETTING_HEIGHT && indexPressed)
             {
-                if (ControllerInteractions.IsIndexPressed())
-                {
-                    activateSetWaypointState();
-                }
-                deactivatePlacePoint();
-                AdjustHeight(adjustingWaypoint);
-
-            }
-            else if (firstClickFinished)
-            {
-                firstClickFinished = false;
-                activateSetWaypointState();
-                settingIntermediateWaypoint = false;
-                currentlySetting = false;
-                placeAtHand = false;
+                currentControllerState = ControllerState.IDLE;
             }
         }
 
         /// <summary>
+        /// This handles setting the height of the new waypoint
+        /// </summary>
+        /// <param name="newWaypoint"></param>
+        private void AdjustHeight(Waypoint newWaypoint)
+        {
+            GameObject newWaypointGameObject = newWaypoint.gameObjectPointer;
+            float groundX = newWaypointGameObject.transform.position.x;
+            float groundY = newWaypointGameObject.transform.position.y;
+            float groundZ = newWaypointGameObject.transform.position.z;
+            float localX = controller.transform.position.x;
+            float localY = controller.transform.position.y;
+            float localZ = controller.transform.position.z;
+            float height = 2.147f + (float)Distance(groundX, groundZ, 0f, 0f, localX, localZ) * (float)Math.Tan(Math.PI * (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x));
+            float heightMin = 2.3f + WorldProperties.actualScale.y / 200; //mesh height = 2.147
+
+            height = Math.Min(WorldProperties.GetMaxHeight(), Math.Max(heightMin, height));
+            newWaypointGameObject.transform.position = new Vector3(groundX, height, groundZ);
+        }
+
+        /// <summary>
         /// Instantiates and returns a new waypoint at the placePoint position.
+        /// Modifies behavior to add or insert based on current collisions
         /// </summary>
         /// <param name="groundPoint"> This is the location on the ground that the waypoint will be directly above. </param>
         /// <returns></returns>
-        private GameObject CreateWaypoint(Vector3 groundPoint)
+        private Waypoint CreateWaypoint(Vector3 groundPoint)
         {
             // We will use the placePoint location.
             Vector3 newLocation = new Vector3(groundPoint.x, placePoint.transform.position.y, groundPoint.z);
+            Drone currentlySelectedDrone = WorldProperties.selectedDrone; // Grabbing the drone that we are creating this waypoint for
 
             // Create a new waypoint at that location
-            Waypoint newWaypoint = new Waypoint(thisDrone, newLocation);
+            Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
 
             // INSERT
             // Placing a new waypoint in between old ones - triggers if a line is in the selection zone
             if (inSelectionZone == CollisionType.LINE)
             {
                 // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
-                Waypoint lineOriginWaypoint = lastSelectedObject.GetComponent<WaypointProperties>.classPointer;
+                Waypoint lineOriginWaypoint = lastSelectedObject.GetComponent<WaypointProperties>().classPointer;
 
                 // Insert the new waypoint into the drone path just behind the lineOriginWaypoint
-                thisDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
+                currentlySelectedDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
             }
 
             // ADD
@@ -192,13 +200,14 @@
             else
             {
                 // Create a new waypoint and add it to the end of the drone path
-                thisDrone.AddWaypoint(newWaypoint);
+                currentlySelectedDrone.AddWaypoint(newWaypoint);
             }
-            return newWaypoint.gameObjectPointer;
+            return newWaypoint;
         }
 
         /// <summary>
         /// This method handles the undo and delete functionality
+        /// Removes the waypoint from the scene and from the drone's path
         /// </summary>
         public void UndoAndDeleteWaypoints()
         {
@@ -238,14 +247,14 @@
         }
 
         /// <summary>
-        /// This function handles collisions with the selection zone for adapative interactions
+        /// This function handles objects entering the selection zone for adapative interactions
         /// </summary>
         /// <param name="currentCollider"> This is the collider that our selection zone is intersecting with </param>
         void OnTriggerEnter(Collider currentCollider)
         {
             Debug.Log("Controller has collided with something");
 
-            // Checking to see if the grab zone collided with a waypoint
+            // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
                 Debug.Log("Controller has collided with a waypoint");
@@ -254,7 +263,7 @@
                 lastSelectedObject = currentCollider.gameObject; // This gives us the gameObject that was most recently in the selectionZone.
             }
 
-            // Checking to see if the grab zone collided with a line instead
+            // LINE COLLISION
             // We must have left a waypoint (and had our inSelectionZone set to NOTHING) in order to switch to selecting a line
             else if (currentCollider.tag == "Line Collider" && inSelectionZone != CollisionType.WAYPOINT)
             {
@@ -268,12 +277,6 @@
                 lineOriginWaypointClass.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
                 
                 Debug.Log("Collided with a line whose origin point is at " + lineOriginWaypointClass.id);
-            }
-
-            else
-            {
-                inSelectionZone = CollisionType.OTHER; // Noting that we collided with something other than a waypoint or line
-                lastSelectedObject = null; // we can't select other kinds of objects
             }
         }
 
@@ -295,12 +298,24 @@
             }
         }
 
-        // UTILITY FUNCTIONS
-
-        //Checks if index pressed a second time, after it was pressed in Update()
-        public static bool secondIndexPressed()
+        // Turn the raycast on and the place point off
+        private void toggleRaycastOn()
         {
-            return OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            placePoint.SetActive(false); // Prevents placePoint from blocking raycast
+            controller.GetComponent<VRTK_Pointer>().Toggle(true);
+
+            currentControllerState = ControllerState.POINTING; // Switch to the controller's pointing state
+        }
+
+        // Turn the raycast off and the place point on
+        private void toggleRaycastOff()
+        {
+            controller.GetComponent<VRTK_Pointer>().Toggle(false);
+            placePoint.SetActive(true); // turn placePoint back on
+            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+
+            currentControllerState = ControllerState.IDLE; // Switch to the controller's idle state
         }
 
         //Get local rotation of controller
@@ -309,42 +324,10 @@
             return OVRInput.GetLocalControllerRotation(buttonType);
         }
 
-        public static bool IsRaycastOn()
+        // Finds the distance between the controller and the ground
+        private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
         {
-            return raycastOn;
-        }
-
-        public static bool IsIndexPressed()
-        {
-            return indexPressed;
-        }
-
-        public static bool IsIndexReleased()
-        {
-            return indexReleased;
-        }
-
-        private void toggleRaycastOn()
-        {
-            controller.GetComponent<VRTK_Pointer>().Toggle(true);
-            raycastOn = true;
-        }
-
-        private void toggleRaycastOff()
-        {
-            controller.GetComponent<VRTK_Pointer>().Toggle(false);
-            raycastOn = false;
-        }
-
-        // Called when you let go of the right grip
-        public void stopGrab()
-        {
-            toggleRaycastOff();
-        }
-
-        public static bool IsGrabbing()
-        {
-            return isGrabbing;
+            return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));
         }
     }
 }
