@@ -28,17 +28,19 @@
             // Initializing variables
             gameObjectPointer = drone_obj;
             id = WorldProperties.nextDroneId;
-            this.Select();
 
             waypoints = new ArrayList(0);
             waypointsOrder = new ArrayList(0);
 
             nextWaypointId = 0;
-            waypointsDict = new Dictionary<string, Waypoint>(); 
+            waypointsDict = new Dictionary<string, Waypoint>();
         
             // Updating the world properties to reflect a new drone being added
             WorldProperties.dronesDict.Add(id, this);
             WorldProperties.nextDroneId++;
+
+            // Select this drone
+            this.Select();
 
             //Creating the starter waypoint
             Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.position);

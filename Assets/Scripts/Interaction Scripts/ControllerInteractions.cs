@@ -12,12 +12,12 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT}; // These are the possible values for the controller's state
+        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT}; // These are the possible values for the controller's state
         public ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
         public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
-        public CollisionType inSelectionZone; // This tells us if we are colliding with something and what that thing is
-        public GameObject lastSelectedObject; // This is the last object that we collided with
+        public CollisionPair mostRecentCollision;
+        private List<CollisionPair> currentCollisions;
 
         public GameObject controller_right; // Our right controller
         private GameObject controller; //needed to access pointer
@@ -36,8 +36,9 @@
         public void Start()
         {
             // Defining the selection zone variables
-            inSelectionZone = CollisionType.NOTHING;
-            lastSelectedObject = null;
+            mostRecentCollision.type = CollisionType.NOTHING;
+            mostRecentCollision.waypoint = null;
+            currentCollisions = new List<CollisionPair>();
 
             // Assigning the controller and setting the controller state
             controller_right = GameObject.Find("controller_right");
@@ -68,35 +69,129 @@
         }
 
         /// <summary>
-        /// The Update method calls all the various state checks
+        /// The Update method calls all the various state and collision checks
         /// </summary>
         void Update()
         {
-            if (currentControllerState == ControllerState.IDLE && 
-                controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null)
-            {
-                currentControllerState = ControllerState.GRABBING;
-            } else if (currentControllerState == ControllerState.GRABBING &&
-                controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
-            {
-                currentControllerState = ControllerState.IDLE;
-            }
+            // COLLISIONS UPDATE
+            CollisionsUpdate();
 
             // SELECTION POINTER  
             SelectionPointerChecks();
 
-            // UNDO AND DELETE (B - BUTTON)
-            if (OVRInput.GetDown(OVRInput.Button.Two))
+            if (WorldProperties.selectedDrone != null)
             {
-                UndoAndDeleteWaypoints();
+                // WAYPOINT GRABBING
+                GrabbingChecks();
+
+                // UNDO AND DELETE (B - BUTTON)
+                if (OVRInput.GetDown(OVRInput.Button.Two))
+                {
+                    UndoAndDeleteWaypoints();
+                }
+
+                //PRIMARY PLACEMENT
+                PrimaryPlacementChecks();
+
+                // SECONDARY PLACEMENT
+                SecondaryPlacementChecks();
+            }
+        }
+
+        private void CollisionsUpdate()
+        {
+            // Check if there are no objects in the selection zone
+            if (currentCollisions.Count == 0)
+            {
+                // We note that there is nothing in the selection zone
+                if (mostRecentCollision.waypoint != null || mostRecentCollision.type != CollisionType.NOTHING)
+                {
+                    mostRecentCollision.waypoint = null;
+                    mostRecentCollision.type = CollisionType.NOTHING;
+                }
             }
 
-            //PRIMARY PLACEMENT
-            PrimaryPlacementChecks();
+            // Otherwise, we check if the lastSelected Object is still in the selection zone
+            else if (!currentCollisions.Contains(mostRecentCollision))
+            {
+                // If the mostRecentCollision.waypoint isn't in the selection zone anymore, we need to grab the next most recent collision
+                // We want to loop through our list in reverse order because we are always adding to the end of it.
+                for (int i = currentCollisions.Count - 1; i >= 0; i--)
+                {
+                    if(currentCollisions[i].type == CollisionType.WAYPOINT)
+                    {
+                        // We have found the most recent waypoint that we are still colliding with
+                        mostRecentCollision = currentCollisions[i];
+                        return;
+                    }
+                }
 
-            // SECONDARY PLACEMENT
-            SecondaryPlacementChecks();
-            
+                // If we did not find any waypoints, we look for the first line collision
+                mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
+            }
+        }
+
+        /// <summary>
+        /// This function handles objects entering the selection zone for adapative interactions
+        /// </summary>
+        /// <param name="currentCollider"> This is the collider that our selection zone is intersecting with </param>
+        void OnTriggerEnter(Collider currentCollider)
+        {
+            // WAYPOINT COLLISION
+            if (currentCollider.gameObject.CompareTag("waypoint"))
+            {
+                Debug.Log("Controller has collided with a waypoint");
+                Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
+                currentCollisions.Add(new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT));
+            }
+
+            // LINE COLLISION
+            // We must have left a waypoint (and had our mostRecentCollision.type set to NOTHING) in order to switch to selecting a line
+            else if (currentCollider.tag == "Line Collider")
+            {
+                // This is the waypoint at the end of the line (the line points back toward the path origin / previous waypoint)
+                Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
+            }
+        }
+
+        /// <summary>
+        /// This function handles objects leaving the selection zone for adapative interactions
+        /// </summary>
+        /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
+        void OnTriggerExit(Collider currentCollider)
+        {
+            if (currentCollider.gameObject.CompareTag("waypoint"))
+            {
+                Debug.Log("A waypoint is leaving the grab zone");
+                Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
+                CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == collidedWaypoint);
+                currentCollisions.Remove(toBeRemoved);
+            }
+            if (currentCollider.tag == "Line Collider")
+            {
+                Debug.Log("A line is leaving the grab zone");
+                Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == lineOriginWaypoint);
+                currentCollisions.Remove(toBeRemoved);
+            }
+        }
+
+        /// <summary>
+        /// Handles the controller state switch to grabbing
+        /// </summary>
+        private void GrabbingChecks()
+        {
+            if (currentControllerState == ControllerState.IDLE &&
+                controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null)
+            {
+                currentControllerState = ControllerState.GRABBING;
+            }
+            else if (currentControllerState == ControllerState.GRABBING &&
+              controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
+            {
+                currentControllerState = ControllerState.IDLE;
+            }
         }
 
         /// <summary>
@@ -158,12 +253,14 @@
                     currentControllerState = ControllerState.PLACING_WAYPOINT;
                 }
             }
+
             // Updates new waypoint location as long as the index is held
             if (currentControllerState == ControllerState.PLACING_WAYPOINT)
             {
                 currentWaypoint.gameObjectPointer.transform.position = placePoint.transform.position;
                 currentWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateLine();
             }
+
             // Releases the waypoint when the right index is released
             if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
@@ -218,7 +315,7 @@
 
         /// <summary>
         /// Instantiates and returns a new waypoint at the placePoint position.
-        /// Modifies behavior to add or insert based on current collisions
+        /// Modifies behavior to add or insert if we are currently colliding with a line
         /// </summary>
         /// <param name="groundPoint"> This is the location on the ground that the waypoint will be directly above. </param>
         /// <returns></returns>
@@ -233,13 +330,13 @@
             {
                 // INSERT
                 // Placing a new waypoint in between old ones - triggers if a line is in the selection zone
-                if (inSelectionZone == CollisionType.LINE)
+                if (mostRecentCollision.type == CollisionType.LINE)
                 {
                     // Create a new waypoint at that location
                     Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
 
                     // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
-                    Waypoint lineOriginWaypoint = lastSelectedObject.GetComponent<WaypointProperties>().classPointer;
+                    Waypoint lineOriginWaypoint = mostRecentCollision.waypoint;
 
                     // Insert the new waypoint into the drone path just behind the lineOriginWaypoint
                     currentlySelectedDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
@@ -279,15 +376,15 @@
             if (currentlySelectedDrone.waypoints != null && currentlySelectedDrone.waypoints.Count > 0)
             {
                 //Checking to see if we are colliding with one of those
-                if (inSelectionZone == CollisionType.WAYPOINT && currentlySelectedDrone.waypoints.Contains(lastSelectedObject))
+                if (mostRecentCollision.type == CollisionType.WAYPOINT && currentlySelectedDrone.waypoints.Contains(mostRecentCollision.waypoint))
                 {
                     // Remove the highlighted waypoint (DELETE)
                     Debug.Log("Removing waypoint in grab zone");
 
-                    inSelectionZone = CollisionType.NOTHING;
-                    lastSelectedObject = null;
+                    mostRecentCollision.type = CollisionType.NOTHING;
+                    mostRecentCollision.waypoint = null;
 
-                    Waypoint selectedWaypoint = lastSelectedObject.GetComponent<WaypointProperties>().classPointer;
+                    Waypoint selectedWaypoint = mostRecentCollision.waypoint;
                     currentlySelectedDrone.DeleteWaypoint(selectedWaypoint);
                 }
                 else
@@ -297,65 +394,15 @@
 
                     Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypoints[currentlySelectedDrone.waypoints.Count - 1];
 
-                    if(lastWaypoint.gameObjectPointer == lastSelectedObject)
+                    // Catching edge case in which most recent collision was the last waypoint
+                    if(lastWaypoint == mostRecentCollision.waypoint)
                     {
-                        inSelectionZone = CollisionType.NOTHING;
-                        lastSelectedObject = null;
+                        mostRecentCollision.type = CollisionType.NOTHING;
+                        mostRecentCollision.waypoint = null;
                     }
 
                     currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
                 }
-            }
-        }
-
-        /// <summary>
-        /// This function handles objects entering the selection zone for adapative interactions
-        /// </summary>
-        /// <param name="currentCollider"> This is the collider that our selection zone is intersecting with </param>
-        void OnTriggerEnter(Collider currentCollider)
-        {
-
-            // WAYPOINT COLLISION
-            if (currentCollider.gameObject.CompareTag("waypoint"))
-            {
-                Debug.Log("Controller has collided with a waypoint");
-
-                inSelectionZone = CollisionType.WAYPOINT; // Noting that we collided with a waypoint
-                lastSelectedObject = currentCollider.gameObject; // This gives us the gameObject that was most recently in the selectionZone.
-            }
-
-            // LINE COLLISION
-            // We must have left a waypoint (and had our inSelectionZone set to NOTHING) in order to switch to selecting a line
-            else if (currentCollider.tag == "Line Collider" && inSelectionZone != CollisionType.WAYPOINT)
-            {
-                // This is the waypoint class instance that the line is attached to
-                inSelectionZone = CollisionType.LINE; // Noting that we are only colliding with a line right now
-
-                Waypoint lineOriginWaypointClass = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                lastSelectedObject = currentCollider.gameObject; // This gives us the gameObject that was most recently in the selectionZone.
-
-                // OUTDATED
-                lineOriginWaypointClass.referenceDrone.gameObjectPointer.GetComponent<SetWaypoint>().settingIntermediateWaypoint = true;
-                
-                Debug.Log("Collided with a line whose origin point is at " + lineOriginWaypointClass.id);
-            }
-        }
-
-        /// <summary>
-        /// This function handles objects leaving the selection zone for adapative interactions
-        /// </summary>
-        /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
-        void OnTriggerExit(Collider currentCollider)
-        {
-            if (currentCollider.gameObject.CompareTag("waypoint"))
-            {
-                Debug.Log("A waypoint is leaving the grab zone");
-                inSelectionZone = CollisionType.NOTHING; // We may still have something in our collision zone, but we need to note that it is not what we had there before.
-            }
-            if (currentCollider.tag == "Line Collider")
-            {
-                Debug.Log("A line is leaving the grab zone");
-                inSelectionZone = CollisionType.NOTHING; // We may still have something in our collision zone, but we need to note that it is not what we had there before.
             }
         }
 
@@ -382,6 +429,18 @@
         private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
         {
             return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));
+        }
+
+        public struct CollisionPair
+        {
+            public Waypoint waypoint;
+            public CollisionType type;
+
+            public CollisionPair(Waypoint waypoint, CollisionType type)
+            {
+                this.waypoint = waypoint;
+                this.type = type;
+            }
         }
     }
 }

@@ -370,7 +370,7 @@
             }
         }
 
-        // SETTING WAYPOINT
+        // Selecting Drone
 
         public void SelectDrone(bool rayhit, RaycastHit pointerCollidedWith)
         {
@@ -380,8 +380,9 @@
                 {
                     if (selectDroneToggle)
                     {
+                        pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.Select();
                         pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected = !pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected;
-                        pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().toggleDeselectOtherDrones = true;
+
                         if (pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected)
                         {
                             Debug.Log("Selected!");
