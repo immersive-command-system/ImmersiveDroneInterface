@@ -1,6 +1,7 @@
 ﻿using SimpleJSON;
 using System.Text;
 using UnityEngine;
+using ISAACS;
 
 namespace ROSBridgeLib
 {
@@ -26,6 +27,16 @@ namespace ROSBridgeLib
                 y = (double) -z;
                 z = (double) (y - 0.148f);
 
+                action = action_;
+            }
+
+            public UserpointInstruction(Waypoint sendPoint, string action_)
+            {
+                curr_id = sendPoint.id;
+                prev_id = sendPoint.prevPathPoint.id;
+                x = sendPoint.gameObjectPointer.transform.localPosition.x;
+                y = sendPoint.gameObjectPointer.transform.localPosition.y;
+                z = sendPoint.gameObjectPointer.transform.localPosition.z;
                 action = action_;
             }
 

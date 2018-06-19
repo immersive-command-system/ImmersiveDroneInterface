@@ -12,7 +12,6 @@ public class ROSDroneConnection : MonoBehaviour {
 
     void Start()
     {
-        Debug.Log("Attempting to create ROS connection");
         // This is the IP of the linux computer that is connected to the drone.  
         ros = new ROSBridgeWebSocketConnection("ws://192.168.0.185", 9090);
         ros.AddSubscriber(typeof(ObstacleSubscriber));
@@ -20,13 +19,13 @@ public class ROSDroneConnection : MonoBehaviour {
         ros.AddPublisher(typeof(ROSDronePublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
-        Debug.Log("Should be connected");
+        Debug.Log("Connected to ROS");
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
     void OnApplicationQuit()
     {
-        Debug.Log("Quiting application");
+        Debug.Log("Disconnecting from ROS");
         if (ros != null)
         {
             ros.Disconnect();

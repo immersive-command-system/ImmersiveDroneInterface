@@ -7,6 +7,7 @@
     using UnityEngine.Events;
     using VRTK.UnityEventHelper;
     using VRTK;
+    using ROSBridgeLib.interface_msgs;
 
     // THis class handles all controller interactions with the waypoints and drone
 
@@ -26,6 +27,7 @@
         private static GameObject placePoint; // Place waypoint in front of controller
 
         private Waypoint currentWaypoint; // The current waypoint we are trying to place
+        private Waypoint grabbedWaypoint; // The current waypoint we are grabbing and moving
 
         public Material defaultMaterial;
         public Material selectedMaterial;
@@ -36,8 +38,7 @@
         public void Start()
         {
             // Defining the selection zone variables
-            mostRecentCollision.type = CollisionType.NOTHING;
-            mostRecentCollision.waypoint = null;
+            mostRecentCollision = new CollisionPair(null, CollisionType.NOTHING);
             currentCollisions = new List<CollisionPair>();
 
             // Assigning the controller and setting the controller state
@@ -60,7 +61,6 @@
             sphereVRTK = tempSphere;
             
             // Creating the placePoint
-            Debug.Log("Starting the scene and setting the placement point to active");
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             placePoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             placePoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
@@ -98,6 +98,9 @@
             }
         }
 
+        /// <summary>
+        /// This method updates the mostRecentCollision, used for adaptive controller interactions
+        /// </summary>
         private void CollisionsUpdate()
         {
             // Check if there are no objects in the selection zone
@@ -122,12 +125,14 @@
                     {
                         // We have found the most recent waypoint that we are still colliding with
                         mostRecentCollision = currentCollisions[i];
+                        Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision);
                         return;
                     }
                 }
 
                 // If we did not find any waypoints, we look for the first line collision
                 mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
+                Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision);
             }
         }
 
@@ -140,7 +145,6 @@
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Debug.Log("Controller has collided with a waypoint");
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 currentCollisions.Add(new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT));
             }
@@ -163,14 +167,14 @@
         {
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Debug.Log("A waypoint is leaving the grab zone");
+                //Debug.Log("A waypoint is leaving the grab zone");
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == collidedWaypoint);
                 currentCollisions.Remove(toBeRemoved);
             }
             if (currentCollider.tag == "Line Collider")
             {
-                Debug.Log("A line is leaving the grab zone");
+                //Debug.Log("A line is leaving the grab zone");
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
                 CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == lineOriginWaypoint);
                 currentCollisions.Remove(toBeRemoved);
@@ -185,11 +189,19 @@
             if (currentControllerState == ControllerState.IDLE &&
                 controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null)
             {
+                // Updating to note that we are currently grabbing a waypoint
+                grabbedWaypoint = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject().GetComponent<WaypointProperties>().classPointer;
                 currentControllerState = ControllerState.GRABBING;
             }
             else if (currentControllerState == ControllerState.GRABBING &&
               controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
             {
+                //Sending a ROS MODIFY Update
+                UserpointInstruction msg = new UserpointInstruction(grabbedWaypoint, "MODIFY");
+                WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+                
+                // Updating the controller state and noting that we are not grabbing anything
+                grabbedWaypoint = null;
                 currentControllerState = ControllerState.IDLE;
             }
         }

@@ -203,7 +203,8 @@
                     LineProperties.material = unselectedPassedLine;
                 }
             } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || 
-                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == this.gameObject) && 
+                (controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint != null && 
+                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == this.gameObject)) && 
                 referenceDrone.selected)
             {
                 LineProperties.material = unpassedWaypoint;

@@ -741,12 +741,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 665289476}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a6b3d5534d58a1458d4e900f116c673, type: 3}
+  m_Script: {fileID: 11500000, guid: 9f49619ac12cb7a468a1466cba12e3fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   currentControllerState: 0
-  inSelectionZone: 0
-  lastSelectedObject: {fileID: 0}
   controller_right: {fileID: 0}
   sphereVRTK: {fileID: 0}
   defaultMaterial: {fileID: 0}
