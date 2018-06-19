@@ -12,7 +12,6 @@
 
         // Use this for initialization
         void Start() {
-            classPointer = new Drone(gameObject);
         }
 
         // Update is called once per frame

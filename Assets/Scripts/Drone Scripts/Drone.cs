@@ -23,10 +23,17 @@
         /// Constructor method for Drone class objects
         /// </summary>
         /// <param name="drone_obj"> We pass in a Gameobject for the drone -- this will be phased out and the new drone_obj gameObject will be instantiated in this method </param>
-        public Drone(GameObject drone_obj)
+        public Drone(Vector3 position, GameObject baseObject)
         {
+            // Create gameObject at position
+            // GameObject baseObject = (GameObject)Resources.Load("GameObjects/drone_obj");
+            gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
+            gameObjectPointer.GetComponent<DroneProperties>().classPointer = this; // Connect the gameObject back to the classObject
+            gameObjectPointer.tag = "Drone";
+            gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
+            gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
+
             // Initializing variables
-            gameObjectPointer = drone_obj;
             id = WorldProperties.nextDroneId;
 
             waypoints = new ArrayList(0);

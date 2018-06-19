@@ -45,14 +45,6 @@
 
         protected Vector3 cursorOriginalScale = Vector3.one;
 
-        // DRONE MENU
-        public GameObject drone;
-        // DRONE MENU
-
-        // SETTING DRONE
-        public bool setDrone = false;
-        // SETTING DRONE
-
         // SETTING WAYPOINT
         public GameObject waypoint;
         public GameObject menu;
@@ -294,12 +286,6 @@
             }
         }
 
-        // SETTING DRONE
-        public void placingDrone()
-        {
-            setDrone = !setDrone;
-        }
-
         // SETTING WAYPOINT
         public void OnClick()
         {
@@ -357,11 +343,7 @@
         {
             if (rayHit && pointerCollidedWith.collider.tag == "Line Collider")
             {
-                //return pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().waypoints.IndexOf(pointerCollidedWith.collider.gameObject);
-                //GameObject selectedWaypoint = pointerCollidedWith.collider.transform.parent.gameObject;
                 GameObject selectedWaypoint = pointerCollidedWith.collider.gameObject.GetComponent<LineProperties>().originWaypoint.gameObjectPointer;
-                //ArrayList temp1 = selectedWaypoint.GetComponent<SetWaypoint>().waypoints;
-                //return selectedWaypoint.GetComponent<SetWaypoint>().waypoints.IndexOf(selectedWaypoint);
                 return selectedWaypoint;
             }
             else
@@ -378,25 +360,8 @@
             {
                 if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
                 {
-                    if (selectDroneToggle)
-                    {
-                        pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.Select();
-                        pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected = !pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected;
-
-                        if (pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.selected)
-                        {
-                            Debug.Log("Selected!");
-                        }
-                        else
-                        {
-                            Debug.Log("Deselected!");
-                        }
-                        selectDroneToggle = false;
-                    }
-                }
-                else
-                {
-                    selectDroneToggle = true;
+                    pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.Select();
+                    Debug.Log("Selected!");
                 }
             }
         }
