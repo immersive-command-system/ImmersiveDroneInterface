@@ -28,8 +28,8 @@ public class AutomaticTooltips : MonoBehaviour
         events.ButtonTwoPressed += new ControllerInteractionEventHandler(DoButtonTwoPressed);
         events.ButtonTwoReleased += new ControllerInteractionEventHandler(DoButtonTwoReleased);
 
-        events.StartMenuPressed += new ControllerInteractionEventHandler(DoStartMenuPressed);
-        events.StartMenuReleased += new ControllerInteractionEventHandler(DoStartMenuReleased);
+        events.TouchpadTouchStart += new ControllerInteractionEventHandler(DoTouchpadTouchStart);
+        events.TouchpadTouchEnd += new ControllerInteractionEventHandler(DoTouchpadTouchEnd);
 
         events.GripPressed += new ControllerInteractionEventHandler(DoGripPressed);
         events.GripReleased += new ControllerInteractionEventHandler(DoGripReleased);
@@ -71,14 +71,14 @@ public class AutomaticTooltips : MonoBehaviour
         tooltips.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip);
     }
 
-    private void DoStartMenuPressed(object sender, ControllerInteractionEventArgs e)
+    private void DoTouchpadTouchStart(object sender, ControllerInteractionEventArgs e)
     {
-        tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.StartMenuTooltip);
+        tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
     }
 
-    private void DoStartMenuReleased(object sender, ControllerInteractionEventArgs e)
+    private void DoTouchpadTouchEnd(object sender, ControllerInteractionEventArgs e)
     {
-        tooltips.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.StartMenuTooltip);
+        tooltips.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
     }
 
     private void DoGripPressed(object sender, ControllerInteractionEventArgs e)
@@ -93,12 +93,14 @@ public class AutomaticTooltips : MonoBehaviour
 
     private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-        tooltips.ToggleTips(true, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
+        GetComponent<TimedTutorialRight>().enabled = true;
     }
 
     private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
     {
-        tooltips.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
+        enabled = false;
     }
+
+
 
 }

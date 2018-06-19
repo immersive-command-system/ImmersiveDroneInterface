@@ -209,12 +209,12 @@ public class TimedTutorialRight : MonoBehaviour {
 
     private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-        //DoTooltipPressed(touchpadAudioDone.Value, ref pressedTouchpad, individualTooltips.touchpadTooltip, touchpadButton);
+        GetComponent<AutomaticTooltips>().enabled = true;
     }
 
     private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
     {
-       // DoTooltipReleased(touchpadAudioDone.Value, individualTooltips.touchpadTooltip, touchpadButton);
+        enabled = false;
     }
 
     private void SetupControllerEventListeners()
