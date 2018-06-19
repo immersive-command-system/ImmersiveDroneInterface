@@ -23,13 +23,14 @@
         /// Constructor method for Drone class objects
         /// </summary>
         /// <param name="drone_obj"> We pass in a Gameobject for the drone -- this will be phased out and the new drone_obj gameObject will be instantiated in this method </param>
-        public Drone(Vector3 position, GameObject baseObject)
+        public Drone(Vector3 position)
         {
             // Create gameObject at position
-            // GameObject baseObject = (GameObject)Resources.Load("GameObjects/drone_obj");
+            GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().droneBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             gameObjectPointer.GetComponent<DroneProperties>().classPointer = this; // Connect the gameObject back to the classObject
             gameObjectPointer.tag = "Drone";
+            gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
 
@@ -159,7 +160,7 @@
         /// </summary>
         public void Select() {
             // Changes the color of the drone to indicate that it has been selected
-            this.gameObjectPointer.transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material =
+            this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().selectedMaterial;
             this.selected = true;
 

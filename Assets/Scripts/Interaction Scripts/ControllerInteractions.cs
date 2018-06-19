@@ -1,6 +1,7 @@
 ﻿namespace ISAACS
 {
     using System;
+    using System.Linq;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
@@ -111,28 +112,30 @@
                 {
                     mostRecentCollision.waypoint = null;
                     mostRecentCollision.type = CollisionType.NOTHING;
+                    Debug.Log("There is nothing in the grab zone - " + mostRecentCollision);
                 }
             }
 
             // Otherwise, we check if the lastSelected Object is still in the selection zone
-            else if (!currentCollisions.Contains(mostRecentCollision))
+            else if (!currentCollisions.Any(x => x.waypoint == mostRecentCollision.waypoint))
             {
                 // If the mostRecentCollision.waypoint isn't in the selection zone anymore, we need to grab the next most recent collision
-                // We want to loop through our list in reverse order because we are always adding to the end of it.
-                for (int i = currentCollisions.Count - 1; i >= 0; i--)
-                {
-                    if(currentCollisions[i].type == CollisionType.WAYPOINT)
-                    {
-                        // We have found the most recent waypoint that we are still colliding with
-                        mostRecentCollision = currentCollisions[i];
-                        Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision);
-                        return;
-                    }
-                }
 
-                // If we did not find any waypoints, we look for the first line collision
-                mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
-                Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision);
+                // We prioritize the most recent waypoint collision
+                // Because we add to the end of the list, we need to grab the last waypoint on the list
+                CollisionPair possibleWaypointCollision = currentCollisions.FindLast(collision => collision.type == CollisionType.WAYPOINT);
+
+                if (possibleWaypointCollision != null)
+                {
+                    mostRecentCollision = possibleWaypointCollision;
+                    Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                }
+                else
+                {
+                    // If we did not find any waypoints, we look for the first line collision
+                    mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
+                    Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
+                }
             }
         }
 
@@ -145,8 +148,12 @@
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
+                Debug.Log("A waypoint is entering the grab zone");
+                // We automatically default to the most recent waypointCollision
+                Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
-                currentCollisions.Add(new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT));
+                mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
+                currentCollisions.Add(mostRecentCollision);
             }
 
             // LINE COLLISION
@@ -155,7 +162,12 @@
             {
                 // This is the waypoint at the end of the line (the line points back toward the path origin / previous waypoint)
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
+                if (!currentCollisions.Any(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE)))
+                {
+                    Debug.Log("A line is entering the grab zone");
+                    currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
+                }
+                
             }
         }
 
@@ -167,17 +179,20 @@
         {
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                //Debug.Log("A waypoint is leaving the grab zone");
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == collidedWaypoint);
                 currentCollisions.Remove(toBeRemoved);
+                Debug.Log("A waypoint is leaving the grab zone");
             }
             if (currentCollider.tag == "Line Collider")
             {
-                //Debug.Log("A line is leaving the grab zone");
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == lineOriginWaypoint);
-                currentCollisions.Remove(toBeRemoved);
+                if (currentCollisions.Any(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE)))
+                {
+                    Debug.Log("A line is leaving the grab zone");
+                    CollisionPair toBeRemoved = currentCollisions.Find(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE));
+                    currentCollisions.Remove(toBeRemoved);
+                }
             }
         }
 
@@ -196,7 +211,10 @@
             else if (currentControllerState == ControllerState.GRABBING &&
               controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
             {
-                //Sending a ROS MODIFY Update
+                // Updating the line colliders
+                grabbedWaypoint.UpdateLineColliders();
+
+                // Sending a ROS MODIFY Update
                 UserpointInstruction msg = new UserpointInstruction(grabbedWaypoint, "MODIFY");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
                 
@@ -393,11 +411,11 @@
                     // Remove the highlighted waypoint (DELETE)
                     Debug.Log("Removing waypoint in grab zone");
 
-                    mostRecentCollision.type = CollisionType.NOTHING;
-                    mostRecentCollision.waypoint = null;
-
                     Waypoint selectedWaypoint = mostRecentCollision.waypoint;
                     currentlySelectedDrone.DeleteWaypoint(selectedWaypoint);
+                    
+                    mostRecentCollision.type = CollisionType.NOTHING;
+                    mostRecentCollision.waypoint = null;
                 }
                 else
                 {
@@ -443,7 +461,7 @@
             return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));
         }
 
-        public struct CollisionPair
+        public class CollisionPair : IEquatable<CollisionPair>
         {
             public Waypoint waypoint;
             public CollisionType type;
@@ -452,6 +470,31 @@
             {
                 this.waypoint = waypoint;
                 this.type = type;
+            }
+
+            public override bool Equals(object obj)
+            {
+                var other = obj as CollisionPair;
+                if (other == null) return false;
+                return Equals(other);
+            }
+
+            // This is the method that must be implemented to conform to the 
+            // IEquatable contract
+
+            public bool Equals(CollisionPair other)
+            {
+                if (other.waypoint == this.waypoint && other.type == this.type)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            public int GetHashcode()
+            {
+                return this.waypoint.GetHashCode() * 17 + this.type.GetHashCode();
             }
         }
     }

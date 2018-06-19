@@ -6,7 +6,8 @@
 
     public class WorldProperties : MonoBehaviour
     {
-
+        public GameObject droneBaseObject;
+        public GameObject waypointBaseObject;
         public static Dictionary<char, Drone> dronesDict;
         public static Drone selectedDrone;
         public static char nextDroneId;
@@ -33,6 +34,11 @@
         public static float GetMaxHeight()
         {
             return (maxHeight * (actualScale.y)) + worldObject.transform.position.y;
+        }
+
+        public void newDrone()
+        {
+            Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.5f, 0));
         }
     }
 }

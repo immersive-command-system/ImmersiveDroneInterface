@@ -49,14 +49,16 @@
             controller_right = GameObject.Find("controller_right");
 
             LineProperties = this.GetComponentInParent<LineRenderer>();
- 
-            lineCollider = new GameObject("Collider").AddComponent<CapsuleCollider>();
+            lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
             lineCollider.isTrigger = true;
             lineCollider.radius = 0.1f;
             lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
+            lineCollider.transform.parent = this.gameObject.transform;
 
             setLineOriginWaypointToggle = true;
+            prevPoint = classPointer.prevPathPoint.gameObjectPointer;
+            SetLineCollider();
 
             // Sets up interaction events
             GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += new InteractableObjectEventHandler(InteractableObjectUngrabbed);
@@ -71,8 +73,7 @@
             } else
             {
                 prevPoint = referenceDrone.gameObjectPointer;
-            }
-            
+            } 
             
             if (prevPoint != null)
             {
@@ -113,24 +114,12 @@
                     endpoint = referenceDroneGameObject.transform.position;
                     LineProperties.SetPosition(1, endpoint);
                 }
-                SetLineCollider(endpoint);
-
+                
                 // If line being selected by controller
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject && referenceDrone.selected)
                 {
                     LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
                     LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
-
-                    if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
-                    {
-                        //if (setLineOriginWaypointToggle)
-                        //{
-                        //    SetLineOriginWaypoint();
-                        //}
-                    } else
-                    {
-                        setLineOriginWaypointToggle = true;
-                    }
                 }
                 else
                 {
@@ -141,22 +130,18 @@
         }
         
         // Places a collider around the waypoint line
-        public void SetLineCollider(Vector3 endpoint)
+        public void SetLineCollider()
         {
-            if (passed)
-            {
-                Destroy(lineCollider);
-            } else if (referenceDrone.selected)
-            {
-                lineCollider.transform.parent = LineProperties.transform;
-                lineCollider.radius = world.GetComponent<MapInteractions>().actualScale.y / 50;
-                lineCollider.center = Vector3.zero;
-                lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
-                lineCollider.direction = 2;
-                lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
-                lineCollider.height = (endpoint - this.transform.position).magnitude;
-                lineCollider.transform.parent = world.transform;
-            }
+            Vector3 endpoint = prevPoint.transform.position;
+
+            lineCollider.transform.parent = LineProperties.transform;
+            lineCollider.radius = world.GetComponent<MapInteractions>().actualScale.y / 50;
+            lineCollider.center = Vector3.zero;
+            lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
+            lineCollider.direction = 2;
+            lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
+            lineCollider.height = (endpoint - this.transform.position).magnitude;
+            lineCollider.transform.parent = world.transform;
         }
 
         // Creates the groundpoint under waypoint

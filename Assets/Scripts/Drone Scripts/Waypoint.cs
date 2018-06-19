@@ -28,11 +28,12 @@
             referenceDrone = myDrone;
 
             // Setting up all the related gameObject parameters
-            GameObject baseObject = (GameObject) Resources.Load("GameObjects/waypoint");
+            GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = GameObject.Find("controller_right").GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             gameObjectPointer.GetComponent<WaypointProperties>().classPointer = this; // Connect the gameObject back to the classObject
             gameObjectPointer.tag = "waypoint";
+            gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 100;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
 
@@ -44,6 +45,15 @@
             referenceDrone.nextWaypointId ++;
 
             Debug.Log("Created new waypoint with id: " + id);
+        }
+
+        public void UpdateLineColliders()
+        {
+            gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
+            if (nextPathPoint != null)
+            {
+                nextPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
+            }
         }
     }
 }
