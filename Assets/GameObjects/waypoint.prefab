@@ -134,7 +134,6 @@ MonoBehaviour:
   passed: 0
   modelGroundpoint: {fileID: 1072266980392874, guid: fe9c4c5a263cc4144a730d848f5fd6ad,
     type: 2}
-  setLineOriginWaypointToggle: 0
 --- !u!114 &114629310516917166
 MonoBehaviour:
   m_ObjectHideFlags: 1

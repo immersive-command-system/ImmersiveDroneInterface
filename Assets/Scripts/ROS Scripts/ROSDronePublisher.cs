@@ -15,7 +15,7 @@ public class ROSDronePublisher : ROSBridgePublisher
 
     public static string GetMessageType()
     {
-        return "meta_planner_msgs/UserpointInstruction.msg";
+        return "meta_planner_msgs/UserpointInstruction";
     }
 
     public static string ToYAMLString(UserpointInstruction msg)

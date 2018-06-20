@@ -130,7 +130,12 @@
         public void DeleteWaypoint(Waypoint deletedWaypoint)
         {
             //Sending a ROS DELETE Update
-            UserpointInstruction msg = new UserpointInstruction(deletedWaypoint, "DELETE");
+            string curr_id = deletedWaypoint.id;
+            string prev_id = deletedWaypoint.prevPathPoint.id;
+            float x = deletedWaypoint.gameObjectPointer.transform.localPosition.x;
+            float y = deletedWaypoint.gameObjectPointer.transform.localPosition.y;
+            float z = deletedWaypoint.gameObjectPointer.transform.localPosition.z;
+            UserpointInstruction msg = new UserpointInstruction(curr_id, prev_id, x, y, z, "DELETE");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
 
             // Removing the new waypoint from the dictionary, waypoints array and placement order

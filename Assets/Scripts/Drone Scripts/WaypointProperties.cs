@@ -34,7 +34,6 @@
         private GameObject world;
         private GameObject controller;
 
-        public bool setLineOriginWaypointToggle;
         public static GameObject controller_right;
 
         void Start()
@@ -56,8 +55,17 @@
             lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
             lineCollider.transform.parent = this.gameObject.transform;
 
-            setLineOriginWaypointToggle = true;
-            prevPoint = classPointer.prevPathPoint.gameObjectPointer;
+            // Establishing the previous point in the path. (could be the drone)
+            if (classPointer.prevPathPoint != null)
+            {
+                prevPoint = classPointer.prevPathPoint.gameObjectPointer;
+            }
+            else
+            {
+                prevPoint = referenceDrone.gameObjectPointer;
+            }
+
+            // Create the collider around the line renderer
             SetLineCollider();
 
             // Sets up interaction events
@@ -77,8 +85,6 @@
             
             if (prevPoint != null)
             {
-                ResetWaypoint();
-
                 SetPassedState();
 
                 SetLine();
@@ -93,7 +99,9 @@
                 ChangeColor();
             }
 
-            UpdateLine();
+            UpdateGroundpointLine();
+
+            UpdateLineCollider();
         }
 
         // Positions line between waypoints and drones
@@ -142,6 +150,15 @@
             lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
             lineCollider.height = (endpoint - this.transform.position).magnitude;
             lineCollider.transform.parent = world.transform;
+        }
+
+        // Places a collider around the waypoint line
+        public void UpdateLineCollider()
+        {
+            Vector3 endpoint = prevPoint.transform.position;
+            lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
+            lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
+            lineCollider.height = (endpoint - this.transform.position).magnitude;
         }
 
         // Creates the groundpoint under waypoint
@@ -222,16 +239,6 @@
             }
         }
 
-        public void ResetWaypoint()
-        {
-            if (OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch) == this.transform.position)
-            {
-                Debug.Log("move");
-            }
-            //Debug.Log(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch));
-            //Debug.Log(this.transform.position);
-        }
-
         void InteractableObjectUngrabbed(object sender, VRTK.InteractableObjectEventArgs e)
         {
             CreateGroundpoint();
@@ -243,7 +250,7 @@
         }
 
         //Update groundpoint line 
-        public void UpdateLine()
+        public void UpdateGroundpointLine()
         { 
             if (thisGroundpoint == null) {
                 return;

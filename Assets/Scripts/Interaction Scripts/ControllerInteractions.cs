@@ -59,6 +59,7 @@
             tempSphere.gameObject.name = "sphereVRTK";
             Renderer tempRend = tempSphere.GetComponent<Renderer>();
             tempRend.material = opaqueMaterial;
+            tempSphere.GetComponent<SphereCollider>().isTrigger = true;
             sphereVRTK = tempSphere;
             
             // Creating the placePoint
@@ -77,9 +78,6 @@
             // COLLISIONS UPDATE
             CollisionsUpdate();
 
-            // SELECTION POINTER  
-            SelectionPointerChecks();
-
             if (WorldProperties.selectedDrone != null)
             {
                 // WAYPOINT GRABBING
@@ -94,9 +92,13 @@
                 //PRIMARY PLACEMENT
                 PrimaryPlacementChecks();
 
+                // SELECTION POINTER  
+                SelectionPointerChecks();
+
                 // SECONDARY PLACEMENT
                 SecondaryPlacementChecks();
             }
+            
         }
 
         /// <summary>
@@ -148,12 +150,16 @@
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Debug.Log("A waypoint is entering the grab zone");
-                // We automatically default to the most recent waypointCollision
-                Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
-                mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
-                currentCollisions.Add(mostRecentCollision);
+                if (!currentCollisions.Any(x => (x.waypoint == collidedWaypoint && x.type == CollisionType.WAYPOINT)))
+                {
+                    Debug.Log("A waypoint is entering the grab zone");
+                    
+                    // We automatically default to the most recent waypointCollision
+                    mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
+                    Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    currentCollisions.Add(mostRecentCollision);
+                }
             }
 
             // LINE COLLISION
@@ -180,19 +186,18 @@
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
-                CollisionPair toBeRemoved = currentCollisions.Find(collision => collision.waypoint == collidedWaypoint);
-                currentCollisions.Remove(toBeRemoved);
+                currentCollisions.RemoveAll(collision => collision.waypoint == collidedWaypoint &&
+                                            collision.type == CollisionType.WAYPOINT);
+
                 Debug.Log("A waypoint is leaving the grab zone");
             }
             if (currentCollider.tag == "Line Collider")
             {
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                if (currentCollisions.Any(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE)))
-                {
-                    Debug.Log("A line is leaving the grab zone");
-                    CollisionPair toBeRemoved = currentCollisions.Find(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE));
-                    currentCollisions.Remove(toBeRemoved);
-                }
+                currentCollisions.RemoveAll(collision => collision.waypoint == lineOriginWaypoint &&
+                                        collision.type == CollisionType.LINE);
+
+                Debug.Log("A line is leaving the grab zone");
             }
         }
 
@@ -238,13 +243,18 @@
                 Debug.Log(currentControllerState);
             }
 
-            if (currentControllerState == ControllerState.POINTING && OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger))
+            if ((currentControllerState == ControllerState.POINTING
+                && OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger)) ||
+                (currentControllerState == ControllerState.SETTING_HEIGHT
+                && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger)))
             {
                 toggleRaycastOff();
 
                 currentControllerState = ControllerState.IDLE; // Switch to the controller's pointing state
                 Debug.Log(currentControllerState);
             }
+
+
         }
 
         /// <summary>
@@ -288,7 +298,7 @@
             if (currentControllerState == ControllerState.PLACING_WAYPOINT)
             {
                 currentWaypoint.gameObjectPointer.transform.position = placePoint.transform.position;
-                currentWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateLine();
+                currentWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateGroundpointLine();
             }
 
             // Releases the waypoint when the right index is released
