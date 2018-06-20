@@ -28,7 +28,7 @@ public class TimedTutorialRight : MonoBehaviour {
     //private bool pressedTrigger = false, pressedGrip = false, pressedTouchpad = false, pressedButtonOne = false, pressedButtonTwo = false;
     private Ref triggerAudioDone = new Ref(), gripAudioDone = new Ref(), touchpadAudioDone = new Ref(), buttonOneAudioDone = new Ref(), buttonTwoAudioDone = new Ref();
     //private bool triggerAudioDone = false, gripAudioDone = false, touchpadAudioDone = false, buttonOneAudioDone = false, buttonTwoAudioDone = false;
-    public AudioSource introAudio, triggerAudio, gripAudio, touchpadAudio, buttonOneAudio, buttonTwoAudio;
+    public AudioSource introAudio,envAudio, leftJoystickAudio, triggerAudio, gripAudio, grabZoneAudio, IntermediatePlacementAudio, SelectionPointerAudio, SecondaryPlacementAudio, touchpadAudio, buttonOneAudio, buttonTwoAudio;
 
     public float introTiming;
     /* 
@@ -77,8 +77,6 @@ public class TimedTutorialRight : MonoBehaviour {
 
         SetupControllerEventListeners();
 
-        introTiming = introAudio.clip.length;
-
         triggerButton = VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip;
         gripButton = VRTK_ControllerTooltips.TooltipButtons.GripTooltip;
         touchpadButton = VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip;
@@ -91,16 +89,35 @@ public class TimedTutorialRight : MonoBehaviour {
     IEnumerator TutorialCoroutine()
     {
 
-        yield return new WaitForSecondsRealtime(2);
+        yield return new WaitForSecondsRealtime(4);
 
         introAudio.Play();
-        yield return new WaitForSecondsRealtime(introTiming);
+        yield return new WaitForSecondsRealtime(introAudio.clip.length);
+        envAudio.Play();
+        yield return new WaitForSecondsRealtime(envAudio.clip.length);
+
+        leftJoystickAudio.Play();
+        yield return new WaitForSecondsRealtime(leftJoystickAudio.clip.length);
 
 
-        yield return TutorialStep(individualTooltips.triggerTooltip, triggerAudio, triggerAudioDone, triggerButton, pressedTrigger);
         yield return TutorialStep(individualTooltips.touchpadTooltip, touchpadAudio, touchpadAudioDone, touchpadButton, pressedTouchpad);
         yield return TutorialStep(individualTooltips.gripTooltip, gripAudio, gripAudioDone, gripButton, pressedGrip);
-        yield return TutorialStep(individualTooltips.buttonOne, buttonOneAudio, buttonOneAudioDone, buttonOneButton, pressedButtonOne);
+        yield return TutorialStep(individualTooltips.triggerTooltip, triggerAudio, triggerAudioDone, triggerButton, pressedTrigger);
+
+        grabZoneAudio.Play();
+        yield return new WaitForSecondsRealtime(grabZoneAudio.clip.length);
+
+        IntermediatePlacementAudio.Play();
+        yield return new WaitForSecondsRealtime(IntermediatePlacementAudio.clip.length);
+
+        SelectionPointerAudio.Play();
+        yield return new WaitForSecondsRealtime(SelectionPointerAudio.clip.length);
+
+        SecondaryPlacementAudio.Play();
+        yield return new WaitForSecondsRealtime(SecondaryPlacementAudio.clip.length);
+
+
+      //  yield return TutorialStep(individualTooltips.buttonOne, buttonOneAudio, buttonOneAudioDone, buttonOneButton, pressedButtonOne);
         yield return TutorialStep(individualTooltips.buttonTwo, buttonTwoAudio, buttonTwoAudioDone, buttonTwoButton, pressedButtonTwo);
 
     }
@@ -209,12 +226,12 @@ public class TimedTutorialRight : MonoBehaviour {
 
     private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-        GetComponent<AutomaticTooltips>().enabled = true;
+      //  GetComponent<AutomaticTooltips>().enabled = true;
     }
 
     private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
     {
-        enabled = false;
+      //  enabled = false;
     }
 
     private void SetupControllerEventListeners()

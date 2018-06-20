@@ -1620,11 +1620,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   introAudio: {fileID: 1347866322}
-  triggerAudio: {fileID: 1347866323}
-  gripAudio: {fileID: 0}
-  touchpadAudio: {fileID: 1347866324}
+  envAudio: {fileID: 1347866323}
+  leftJoystickAudio: {fileID: 1347866324}
+  triggerAudio: {fileID: 1347866330}
+  gripAudio: {fileID: 1347866331}
+  grabZoneAudio: {fileID: 1347866329}
+  IntermediatePlacementAudio: {fileID: 1347866328}
+  SelectionPointerAudio: {fileID: 1347866327}
+  SecondaryPlacementAudio: {fileID: 1347866326}
+  touchpadAudio: {fileID: 1347866332}
   buttonOneAudio: {fileID: 0}
-  buttonTwoAudio: {fileID: 0}
+  buttonTwoAudio: {fileID: 1347866325}
   introTiming: 5
   tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
   tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
