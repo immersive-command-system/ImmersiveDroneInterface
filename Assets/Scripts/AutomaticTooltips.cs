@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using VRTK;
+using System.Collections;
 
 public class AutomaticTooltips : MonoBehaviour
 {
 
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ControllerEvents events;
+    public AudioSource a, b, c, d, e, f, g, h, i, j, k;
 
     private void Start()
     {
@@ -34,12 +36,39 @@ public class AutomaticTooltips : MonoBehaviour
         events.GripPressed += new ControllerInteractionEventHandler(DoGripPressed);
         events.GripReleased += new ControllerInteractionEventHandler(DoGripReleased);
 
-        events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPressed);
-        events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadReleased);
+        StartCoroutine(PlayAudio());
+      //  events.TouchpadPressed += new ControllerInteractionEventHandler(DoTouchpadPressed);
+      //  events.TouchpadReleased += new ControllerInteractionEventHandler(DoTouchpadReleased);
 
         tooltips.ToggleTips(false);
     }
 
+    IEnumerator PlayAudio()
+    {
+        yield return new WaitForSecondsRealtime(4);
+        a.Play();
+        yield return new WaitForSeconds(a.clip.length);
+        b.Play();
+        yield return new WaitForSeconds(b.clip.length);
+        c.Play();
+        yield return new WaitForSeconds(c.clip.length);
+        d.Play();
+        yield return new WaitForSeconds(d.clip.length);
+        e.Play();
+        yield return new WaitForSeconds(e.clip.length);
+        f.Play();
+        yield return new WaitForSeconds(f.clip.length);
+        g.Play();
+        yield return new WaitForSeconds(g.clip.length);
+        h.Play();
+        yield return new WaitForSeconds(h.clip.length);
+        i.Play();
+        yield return new WaitForSeconds(i.clip.length);
+        j.Play();
+        yield return new WaitForSeconds(j.clip.length);
+        k.Play();
+        yield return new WaitForSeconds(k.clip.length);
+    }
 
     private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
     {
@@ -91,16 +120,16 @@ public class AutomaticTooltips : MonoBehaviour
         tooltips.ToggleTips(false, VRTK_ControllerTooltips.TooltipButtons.GripTooltip);
     }
 
-    private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
+   /* private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {
-        GetComponent<TimedTutorialRight>().enabled = true;
+       
     }
 
     private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
     {
-        enabled = false;
+        GetComponentInChildren<VRTK_ControllerTooltips>().enabled = !GetComponentInChildren<VRTK_ControllerTooltips>().enabled;
     }
-
+    */
 
 
 }
