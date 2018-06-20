@@ -148,8 +148,8 @@ public class TimedTutorialRight : MonoBehaviour {
     
     private void DoTooltipPressed(bool audioDone, Ref pressedTooltip, VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
     {
-        if (audioDone)
-        {
+        //if (audioDone)
+       // {
             if (!pressedTooltip.Value)
             {
                 ChangeTooltipColorWhenPressed(tooltip);
@@ -161,7 +161,7 @@ public class TimedTutorialRight : MonoBehaviour {
             {
                 tooltips.ToggleTips(true, tooltipButton);
             }
-        }
+       // }
     }
     
     private void DoTooltipReleased(bool audioDone, VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
