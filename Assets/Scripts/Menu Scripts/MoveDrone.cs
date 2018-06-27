@@ -30,7 +30,6 @@
             world = GameObject.Find("World");
         }
 
-
         void Update()
         {
             totalWaypoints = thisDrone.waypoints.Count - 1;

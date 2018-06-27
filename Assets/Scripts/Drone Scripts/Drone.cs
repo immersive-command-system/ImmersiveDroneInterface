@@ -33,9 +33,7 @@
             gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
-
-            // Initializing variables
-            id = WorldProperties.nextDroneId;
+            WorldProperties.AddClipShader(gameObjectPointer.transform);
 
             waypoints = new ArrayList(0);
             waypointsOrder = new ArrayList(0);
@@ -50,10 +48,6 @@
             // Select this drone
             this.Select();
 
-            //Creating the starter waypoint
-            Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.position);
-            this.AddWaypoint(startWaypoint);
-
             Debug.Log("Created new drone with id: " + id);
         }
 
@@ -65,33 +59,48 @@
         {
             string prev_id;
 
-            // Adding to the end of the path linked list by adjusting the previous waypoint
-            if (waypoints.Count >= 1) {
-                // If there is already another waypoint, we can add as normal
-                Waypoint prevWaypoint = (Waypoint) waypoints[waypoints.Count -1]; // Grabbing the waypoint at the end of our waypoints path
+            // Check to see if we need to add the starter waypoint
+            if (waypoints.Count < 1)
+            {
+                //Creating the starter waypoint
+                Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.position);
+
+                // Otherwise, this is the first waypoint.
+                startWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
+
+                // Storing this for the ROS message
+                prev_id = "DRONE";
+
+                // Adding to dictionary, order, and path list
+                waypointsDict.Add(startWaypoint.id, newWaypoint);
+                waypoints.Add(startWaypoint);
+                waypointsOrder.Add(startWaypoint);
+            } else
+            {
+                // Otherwise we can add as normal
+                Waypoint prevWaypoint = (Waypoint)waypoints[waypoints.Count - 1]; // Grabbing the waypoint at the end of our waypoints path
                 newWaypoint.prevPathPoint = prevWaypoint; // setting the previous of the new waypoint
                 prevWaypoint.nextPathPoint = newWaypoint; // setting the next of the previous waypoint
 
                 // Storing this for the ROS message
                 prev_id = prevWaypoint.id;
-            } else
-            {
-                // Otherwise, this is the first waypoint.
-                newWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
 
-                // Storing this for the ROS message
-                prev_id = "DRONE";
+                // Adding to dictionary, order, and path list
+                waypointsDict.Add(newWaypoint.id, newWaypoint);
+                waypoints.Add(newWaypoint);
+                waypointsOrder.Add(newWaypoint);
             }
 
-            // Adding to dictionary, order, and path list
-            waypointsDict.Add(newWaypoint.id, newWaypoint);
-            waypoints.Add(newWaypoint);
-            waypointsOrder.Add(newWaypoint);
+            
 
             //Send a ROS ADD Update only if this is not the initial waypoint
             if (prev_id != "DRONE") {
                 UserpointInstruction msg = new UserpointInstruction(newWaypoint, "ADD");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+            } else
+            {
+                // Otherwise we just set the starter waypoint and still need to create the real waypoint
+                this.AddWaypoint(newWaypoint);
             }
         }
 

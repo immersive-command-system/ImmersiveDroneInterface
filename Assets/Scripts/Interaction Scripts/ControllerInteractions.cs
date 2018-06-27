@@ -237,7 +237,9 @@
         /// </summary>
         private void SelectionPointerChecks()
         {
-            if (currentControllerState == ControllerState.IDLE && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
+            if (currentControllerState == ControllerState.IDLE 
+                && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger)
+                && !OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
             {
                 // Activated by the right grip trigger
                 toggleRaycastOn();
@@ -248,6 +250,8 @@
 
             if ((currentControllerState == ControllerState.POINTING
                 && OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger)) ||
+                (currentControllerState == ControllerState.POINTING
+                && OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger)) ||
                 (currentControllerState == ControllerState.SETTING_HEIGHT
                 && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger)))
             {

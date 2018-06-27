@@ -36,6 +36,7 @@
             gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 100;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
+            WorldProperties.AddClipShader(gameObjectPointer.transform);
 
             // Initializing the ROSpoints Arraylist
             ROSpoints = new ArrayList(0);
