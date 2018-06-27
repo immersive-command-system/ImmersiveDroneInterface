@@ -423,6 +423,12 @@
 
                     Waypoint selectedWaypoint = mostRecentCollision.waypoint;
                     currentlySelectedDrone.DeleteWaypoint(selectedWaypoint);
+
+                    // Remove from collisions zone list and variables
+                    currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
+                                                collision.type == CollisionType.WAYPOINT);
+                    currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
+                                            collision.type == CollisionType.LINE);
                     
                     mostRecentCollision.type = CollisionType.NOTHING;
                     mostRecentCollision.waypoint = null;
@@ -430,17 +436,24 @@
                 else
                 {
                     // Otherwise we default to removing the last waypoint (UNDO)
-                    Debug.Log("Removing last waypoint");
+                    Debug.Log("Removing most recently placed waypoint");
 
-                    Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypoints[currentlySelectedDrone.waypoints.Count - 1];
+                    Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypointsOrder[currentlySelectedDrone.waypointsOrder.Count - 1];
+
+                    // Remove from collisions list
+                    currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
+                                                collision.type == CollisionType.WAYPOINT);
+                    currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
+                                            collision.type == CollisionType.LINE);
 
                     // Catching edge case in which most recent collision was the last waypoint
-                    if(lastWaypoint == mostRecentCollision.waypoint)
+                    if (lastWaypoint == mostRecentCollision.waypoint)
                     {
                         mostRecentCollision.type = CollisionType.NOTHING;
                         mostRecentCollision.waypoint = null;
                     }
 
+                    // Delete the waypoint
                     currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
                 }
             }
