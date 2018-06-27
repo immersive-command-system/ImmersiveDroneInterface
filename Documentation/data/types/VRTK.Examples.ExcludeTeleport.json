@@ -1,0 +1,1 @@
+{".NET Framework 3.5":{"name":"ExcludeTeleport","namespace":"VRTK.Examples","syntax":"public class ExcludeTeleport : MonoBehaviour","linkedSyntax":"public class [ExcludeTeleport](#/type/VRTK.Examples.ExcludeTeleport/index) : MonoBehaviour","baseTypes":[{"id":"GlobalNamespace.MonoBehaviour","name":"GlobalNamespace.MonoBehaviour"}]}}

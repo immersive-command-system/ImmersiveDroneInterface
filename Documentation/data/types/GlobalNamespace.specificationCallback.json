@@ -1,0 +1,1 @@
+{".NET Framework 3.5":{"name":"specificationCallback","namespace":"GlobalNamespace","syntax":"public delegate specificationCallback : MulticastDelegate","linkedSyntax":"public delegate [specificationCallback](#/type/GlobalNamespace.specificationCallback/index) : MulticastDelegate","baseTypes":[{"id":"System.MulticastDelegate","name":"System.MulticastDelegate"}]}}

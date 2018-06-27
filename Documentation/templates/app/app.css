@@ -1,0 +1,26 @@
+#main{
+	left: 300px;
+}
+
+#content{
+    position: relative;
+    padding: 35px 25px 25px 25px;
+}
+
+#sidebar{
+	height: 100%;
+	width: 300px;
+}
+
+#divider {
+    left: 300px;
+    width: 2px;
+}
+
+#disqus {
+  display:block;
+  max-width:800px;
+  margin:auto;
+  padding: 25px;
+  padding-top: 0;
+}

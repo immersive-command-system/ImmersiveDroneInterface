@@ -1,0 +1,1 @@
+{".NET Framework 3.5":{"name":"VRTK.Examples.Utilities","assembly":"Assembly-CSharp","description":"","uses":[{"id":"VRTK","name":"VRTK"}],"types":[{"id":"VRTK.Examples.Utilities.SceneChanger","kind":"class","accessibility":"public","name":"SceneChanger","summary":""}]}}

@@ -36,6 +36,9 @@
         public Material adjustMaterial;
         public Material placePointMaterial;
 
+        /// <summary>
+        /// The start method initializes all necessary variables and creates the selection zone (sphereVRTK) and the place point
+        /// </summary>
         public void Start()
         {
             // Defining the selection zone variables
@@ -484,6 +487,10 @@
             return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));
         }
 
+        /// <summary>
+        /// This class notes the type of collision and the waypoint it is associated with. 
+        /// Line collisions are associated with the waypoint they originate from -- all waypoint have lines pointing back to the previous waypoint.
+        /// </summary>
         public class CollisionPair : IEquatable<CollisionPair>
         {
             public Waypoint waypoint;

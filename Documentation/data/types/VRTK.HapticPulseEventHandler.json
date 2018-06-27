@@ -1,0 +1,1 @@
+{".NET Framework 3.5":{"name":"HapticPulseEventHandler","namespace":"VRTK","syntax":"public delegate HapticPulseEventHandler : MulticastDelegate","linkedSyntax":"public delegate [HapticPulseEventHandler](#/type/VRTK.HapticPulseEventHandler/index) : MulticastDelegate","baseTypes":[{"id":"System.MulticastDelegate","name":"System.MulticastDelegate"}]}}

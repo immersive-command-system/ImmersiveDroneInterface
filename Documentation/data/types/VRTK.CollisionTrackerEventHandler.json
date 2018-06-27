@@ -1,0 +1,1 @@
+{".NET Framework 3.5":{"name":"CollisionTrackerEventHandler","namespace":"VRTK","syntax":"public delegate CollisionTrackerEventHandler : MulticastDelegate","linkedSyntax":"public delegate [CollisionTrackerEventHandler](#/type/VRTK.CollisionTrackerEventHandler/index) : MulticastDelegate","baseTypes":[{"id":"System.MulticastDelegate","name":"System.MulticastDelegate"}]}}
