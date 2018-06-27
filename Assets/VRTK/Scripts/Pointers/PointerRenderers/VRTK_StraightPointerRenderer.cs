@@ -3,6 +3,7 @@
     using UnityEngine;
     using System.Collections;
     using System;
+    using ISAACS;
 
     /// <summary>
     /// The Straight Pointer Renderer emits a coloured beam from the end of the object it is attached to and simulates a laser beam.
@@ -43,14 +44,6 @@
         protected GameObject actualCursor;
 
         protected Vector3 cursorOriginalScale = Vector3.one;
-
-        // DRONE MENU
-        public GameObject drone;
-        // DRONE MENU
-
-        // SETTING DRONE
-        public bool setDrone = false;
-        // SETTING DRONE
 
         // SETTING WAYPOINT
         public GameObject waypoint;
@@ -216,16 +209,6 @@
             }
         }
 
-        // DRONE MENU
-        protected virtual void ActivateDroneMenu(bool rayHit, RaycastHit pointerCollidedWith)
-        {
-            if (rayHit && pointerCollidedWith.collider.tag == "Drone")
-            {
-                pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().ActivateDroneMenu();
-                //get object with tag
-            }
-        }
-
         protected virtual float CastRayForward()
         {
             Transform origin = GetOrigin();
@@ -237,10 +220,6 @@
             OnGround(rayHit, pointerCollidedWith);
             CheckRayMiss(rayHit, pointerCollidedWith);
             CheckRayHit(rayHit, pointerCollidedWith);
-
-            // DRONE MENU
-            ActivateDroneMenu(rayHit, pointerCollidedWith);
-            // DRONE MENU
 
             // SETTING WAYPOINT            
             MarkGroundPoint(rayHit, pointerCollidedWith);
@@ -307,12 +286,6 @@
             }
         }
 
-        // SETTING DRONE
-        public void placingDrone()
-        {
-            setDrone = !setDrone;
-        }
-
         // SETTING WAYPOINT
         public void OnClick()
         {
@@ -370,11 +343,7 @@
         {
             if (rayHit && pointerCollidedWith.collider.tag == "Line Collider")
             {
-                //return pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().waypoints.IndexOf(pointerCollidedWith.collider.gameObject);
-                //GameObject selectedWaypoint = pointerCollidedWith.collider.transform.parent.gameObject;
-                GameObject selectedWaypoint = pointerCollidedWith.collider.gameObject.GetComponent<WaypointLine>().waypoint;
-                //ArrayList temp1 = selectedWaypoint.GetComponent<SetWaypoint>().waypoints;
-                //return selectedWaypoint.GetComponent<SetWaypoint>().waypoints.IndexOf(selectedWaypoint);
+                GameObject selectedWaypoint = pointerCollidedWith.collider.gameObject.GetComponent<LineProperties>().originWaypoint.gameObjectPointer;
                 return selectedWaypoint;
             }
             else
@@ -383,7 +352,7 @@
             }
         }
 
-        // SETTING WAYPOINT
+        // Selecting Drone
 
         public void SelectDrone(bool rayhit, RaycastHit pointerCollidedWith)
         {
@@ -391,25 +360,8 @@
             {
                 if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
                 {
-                    if (selectDroneToggle)
-                    {
-                        pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected = !pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected;
-                        pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().toggleDeselectOtherDrones = true;
-                        pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().selected = !pointerCollidedWith.collider.GetComponentInParent<DroneMenuActivator>().selected;
-                        if (pointerCollidedWith.collider.GetComponentInParent<SetWaypoint>().selected)
-                        {
-                            Debug.Log("Selected!");
-                        }
-                        else
-                        {
-                            Debug.Log("Deselected!");
-                        }
-                        selectDroneToggle = false;
-                    }
-                }
-                else
-                {
-                    selectDroneToggle = true;
+                    pointerCollidedWith.collider.GetComponentInParent<DroneProperties>().classPointer.Select();
+                    Debug.Log("Selected!");
                 }
             }
         }
