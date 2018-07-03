@@ -28,4 +28,4 @@ These commands will handle updating of the ROS submodules. Run them from the top
 
 [Touch Interface](https://github.com/tcheng96/2d-drone-interface)
 
-[Meta Fastrack](https://github.com/HJReachability/meta_fastrack)
+[Meta Fastrack](https://github.com/HJReachability/meta_fastrack/tree/vr2)
