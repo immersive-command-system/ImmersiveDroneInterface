@@ -31,7 +31,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
         //Debug.Log("callback");
         Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
         ObstacleMsg pose = (ObstacleMsg)msg;
-        if (!ids.Contains(pose.id))
+        if (!ids.Contains(pose.id) && pose.id!=0)
         {
             Debug.Log("making sphere id:" + pose.id);
             ids.Add(pose.id);
@@ -40,13 +40,6 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             sphere.transform.parent = world.transform;
             sphere.transform.localPosition = new Vector3(pose._x + tablePos.x, pose._z + tablePos.z + 0.148f, pose._y / 5);
             sphere.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) / 5;
-            //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
-            //string path = "Assets/Results/user_test.txt";
-
-            ////Here we write the obstacle locations to a file.
-            //StreamWriter writer = new StreamWriter(path, true);
-            //writer.WriteLine("Sphere: "+ pose.id + ", Position: " + sphere.transform.localPosition + ", Scale: " + sphere.transform.localScale);
-            //writer.Close();
         }
     }
 }

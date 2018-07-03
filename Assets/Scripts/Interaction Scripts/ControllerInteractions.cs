@@ -81,6 +81,9 @@
             // COLLISIONS UPDATE
             CollisionsUpdate();
 
+            // SELECTION POINTER  
+            SelectionPointerChecks();
+
             if (WorldProperties.selectedDrone != null)
             {
                 // WAYPOINT GRABBING
@@ -95,13 +98,10 @@
                 //PRIMARY PLACEMENT
                 PrimaryPlacementChecks();
 
-                // SELECTION POINTER  
-                SelectionPointerChecks();
-
                 // SECONDARY PLACEMENT
                 SecondaryPlacementChecks();
             }
-            
+
         }
 
         /// <summary>
@@ -133,13 +133,13 @@
                 if (possibleWaypointCollision != null)
                 {
                     mostRecentCollision = possibleWaypointCollision;
-                    Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                 }
                 else
                 {
                     // If we did not find any waypoints, we look for the first line collision
                     mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
-                    Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
+                    //Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
                 }
             }
         }
@@ -156,11 +156,11 @@
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 if (!currentCollisions.Any(x => (x.waypoint == collidedWaypoint && x.type == CollisionType.WAYPOINT)))
                 {
-                    Debug.Log("A waypoint is entering the grab zone");
+                    //Debug.Log("A waypoint is entering the grab zone");
                     
                     // We automatically default to the most recent waypointCollision
                     mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
-                    Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                     currentCollisions.Add(mostRecentCollision);
                 }
             }
@@ -173,11 +173,17 @@
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
                 if (!currentCollisions.Any(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE)))
                 {
-                    Debug.Log("A line is entering the grab zone");
+                    //Debug.Log("A line is entering the grab zone");
                     currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
                 }
                 
             }
+
+            // MENU COLLISION
+            //else if (currentCollider.gameObject.tag == "DroneMenu")
+            //{
+            //    Debug.Log("Hit the menu");
+            //}
         }
 
         /// <summary>
@@ -192,7 +198,7 @@
                 currentCollisions.RemoveAll(collision => collision.waypoint == collidedWaypoint &&
                                             collision.type == CollisionType.WAYPOINT);
 
-                Debug.Log("A waypoint is leaving the grab zone");
+                //Debug.Log("A waypoint is leaving the grab zone");
             }
             if (currentCollider.tag == "Line Collider")
             {
@@ -200,7 +206,7 @@
                 currentCollisions.RemoveAll(collision => collision.waypoint == lineOriginWaypoint &&
                                         collision.type == CollisionType.LINE);
 
-                Debug.Log("A line is leaving the grab zone");
+                //Debug.Log("A line is leaving the grab zone");
             }
         }
 
@@ -233,7 +239,8 @@
         }
 
         /// <summary>
-        /// This handles the Selection Pointer toggling
+        /// This handles the Selection Pointer toggling, which is activated by the right grip trigger.
+        /// Both grip triggers at the same time means we are scaling.
         /// </summary>
         private void SelectionPointerChecks()
         {
@@ -241,24 +248,17 @@
                 && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger)
                 && !OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
             {
-                // Activated by the right grip trigger
                 toggleRaycastOn();
-
                 currentControllerState = ControllerState.POINTING; // Switch to the controller's pointing state
-                Debug.Log(currentControllerState);
             }
 
-            if ((currentControllerState == ControllerState.POINTING
+            if ((currentControllerState == ControllerState.POINTING             // Checking for releasing grip
                 && OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger)) ||
-                (currentControllerState == ControllerState.POINTING
-                && OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger)) ||
-                (currentControllerState == ControllerState.SETTING_HEIGHT
-                && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger)))
+                (currentControllerState == ControllerState.POINTING             // Checking for scaling interaction
+                && OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger)))
             {
                 toggleRaycastOff();
-
-                currentControllerState = ControllerState.IDLE; // Switch to the controller's pointing state
-                Debug.Log(currentControllerState);
+                currentControllerState = ControllerState.IDLE; // Switch to the controller's idle state
             }
 
 
@@ -324,14 +324,23 @@
             // Need to check this first so that it does not get triggered immediately after setting the ground sdfpoint
             if (currentControllerState == ControllerState.SETTING_HEIGHT && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                currentControllerState = ControllerState.IDLE;
+                currentControllerState = ControllerState.POINTING;
+
+                if (!OVRInput.Get(OVRInput.RawButton.RHandTrigger))
+                {
+                    toggleRaycastOff();
+                    currentControllerState = ControllerState.IDLE;
+                }
             }
             // Initializing groundPoint when pointing and pressing index trigger
             if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
-                currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
-                currentControllerState = ControllerState.SETTING_HEIGHT;
+                if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
+                {
+                    Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+                    currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
+                    currentControllerState = ControllerState.SETTING_HEIGHT;
+                }
             }
             // Adjusting the height for secondary placement
             if (currentControllerState == ControllerState.SETTING_HEIGHT)

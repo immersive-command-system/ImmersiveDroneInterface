@@ -5,12 +5,12 @@ using System.Collections;
 using SimpleJSON;
 using UnityEngine;
 
-public class ROSDronePublisher : ROSBridgePublisher
+public class UserpointPublisher : ROSBridgePublisher
 {
 
     public static string GetMessageTopic()
     {
-        return "/waypoints";
+        return "userpoint";
     }
 
     public static string GetMessageType()

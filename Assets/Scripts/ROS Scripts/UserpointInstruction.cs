@@ -7,6 +7,9 @@ namespace ROSBridgeLib
 {
     namespace interface_msgs
     {
+        /// <summary>
+        /// These messages are used to send waypoint adding, inserting, deleting and moving information to ROS
+        /// </summary>
         public class UserpointInstruction : ROSBridgeMsg
         {
             public string curr_id;
@@ -18,14 +21,13 @@ namespace ROSBridgeLib
 
             public UserpointInstruction(string curr_id_, string prev_id_, float x_, float y_, float z_, string action_)
             {
-
                 curr_id = curr_id_;
                 prev_id = prev_id_;
 
                 // Translation into ROS space
-                x = (double) x;
-                y = (double) -z;
-                z = (double) (y - 0.148f);
+                x = (double) x_;
+                y = (double) -z_;
+                z = (double) (y_ - 0.148f);
 
                 action = action_;
             }
@@ -34,10 +36,21 @@ namespace ROSBridgeLib
             {
                 curr_id = sendPoint.id;
                 prev_id = sendPoint.prevPathPoint.id;
-                x = sendPoint.gameObjectPointer.transform.localPosition.x;
-                y = sendPoint.gameObjectPointer.transform.localPosition.y;
-                z = sendPoint.gameObjectPointer.transform.localPosition.z;
+
+                Vector3 rosPos = WorldSpaceToRosSpace(sendPoint.gameObjectPointer.transform.localPosition);
+                x = (double) rosPos.x;
+                y = (double) rosPos.y;
+                z = (double) rosPos.z;
                 action = action_;
+            }
+
+            private Vector3 WorldSpaceToRosSpace(Vector3 worldPosition)
+            {
+                return new Vector3(
+                    worldPosition.x,
+                    -worldPosition.z,
+                    worldPosition.y - 0.148f
+                    );
             }
 
             public override string ToYAMLString()

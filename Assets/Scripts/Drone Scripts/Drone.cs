@@ -35,13 +35,16 @@
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
             WorldProperties.AddClipShader(gameObjectPointer.transform);
 
+            // Initialize path and placement order lists
             waypoints = new ArrayList(0);
             waypointsOrder = new ArrayList(0);
 
+            // Add waypoints container
             nextWaypointId = 0;
             waypointsDict = new Dictionary<string, Waypoint>();
-        
+
             // Updating the world properties to reflect a new drone being added
+            id = WorldProperties.nextDroneId;
             WorldProperties.dronesDict.Add(id, this);
             WorldProperties.nextDroneId++;
 
@@ -71,8 +74,13 @@
                 // Storing this for the ROS message
                 prev_id = "DRONE";
 
+                // Swapping the ids so the order makes sense
+                string tempId = startWaypoint.id;
+                startWaypoint.id = newWaypoint.id;
+                newWaypoint.id = tempId;
+
                 // Adding to dictionary, order, and path list
-                waypointsDict.Add(startWaypoint.id, newWaypoint);
+                waypointsDict.Add(startWaypoint.id, startWaypoint);
                 waypoints.Add(startWaypoint);
                 waypointsOrder.Add(startWaypoint);
             } else
@@ -91,15 +99,13 @@
                 waypointsOrder.Add(newWaypoint);
             }
 
-            
-
             //Send a ROS ADD Update only if this is not the initial waypoint
             if (prev_id != "DRONE") {
                 UserpointInstruction msg = new UserpointInstruction(newWaypoint, "ADD");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
             } else
             {
-                // Otherwise we just set the starter waypoint and still need to create the real waypoint
+                // Otherwise we have just set the starter waypoint and still need to create the real waypoint
                 this.AddWaypoint(newWaypoint);
             }
         }

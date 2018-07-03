@@ -4,6 +4,9 @@
     using System.Collections.Generic;
     using UnityEngine;
 
+    /// <summary>
+    /// This is the only class that should have static variables or functions that are consistent throughout the entire program.
+    /// </summary>
     public class WorldProperties : MonoBehaviour
     {
         public GameObject droneBaseObject;
@@ -16,7 +19,7 @@
         public static Vector3 actualScale;
         public static Vector3 currentScale;
         private static float maxHeight;
-        
+
 
         // Use this for initialization
         void Start()
@@ -39,6 +42,10 @@
             return (maxHeight * (actualScale.y)) + worldObject.transform.position.y;
         }
 
+        /// <summary>
+        /// Recursively adds the clipShader to the parent and all its children
+        /// </summary>
+        /// <param name="parent">The topmost container of the objects which will have the shader added to them</param>
         public static void AddClipShader(Transform parent)
         {
             if (parent.GetComponent<Renderer>())
@@ -52,7 +59,10 @@
             }
         }
         
-        public void NewDrone()
+        /// <summary>
+        /// Creates a new drone
+        /// </summary>
+        public static void NewDrone()
         {
             if (!GameObject.FindWithTag("Drone"))
             {

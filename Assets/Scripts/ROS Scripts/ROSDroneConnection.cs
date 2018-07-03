@@ -16,10 +16,10 @@ public class ROSDroneConnection : MonoBehaviour {
         ros = new ROSBridgeWebSocketConnection("ws://192.168.0.185", 9090);
         ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
-        ros.AddPublisher(typeof(ROSDronePublisher));
+        ros.AddPublisher(typeof(UserpointPublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
-        Debug.Log("Connected to ROS");
+        Debug.Log("Sending connection attempt to ROS");
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
@@ -36,6 +36,12 @@ public class ROSDroneConnection : MonoBehaviour {
     void Update()
     {
         ros.Render();
+    }
+
+    public void PublishWaypointUpdateMessage(UserpointInstruction msg)
+    {
+        Debug.Log("Published new userpoint instruction: "+ msg.ToYAMLString());
+        ros.Publish(UserpointPublisher.GetMessageTopic(), msg);
     }
 
     //WriteData will write the location of the gameObject passed to it to a text file
@@ -56,10 +62,4 @@ public class ROSDroneConnection : MonoBehaviour {
     //    //Print the text from the file
     //    Debug.Log(asset.text);
     //}
-
-    public void PublishWaypointUpdateMessage(UserpointInstruction msg)
-    {
-        Debug.Log("Published new userpoint instruction: "+ msg.ToYAMLString());
-        ros.Publish("/waypoints", msg);
-    }
 }
