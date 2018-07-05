@@ -3,7 +3,6 @@
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    using ROSBridgeLib;
     using ROSBridgeLib.interface_msgs;
 
     public class Drone
@@ -83,6 +82,16 @@
                 waypointsDict.Add(startWaypoint.id, startWaypoint);
                 waypoints.Add(startWaypoint);
                 waypointsOrder.Add(startWaypoint);
+
+                // Send a sepcial Userpoint message marking this as the start
+                UserpointInstruction msg = new UserpointInstruction(
+                    startWaypoint.id,
+                    "DRONE",
+                    gameObjectPointer.transform.position.x,
+                    gameObjectPointer.transform.position.y,
+                    gameObjectPointer.transform.position.z,
+                    "ADD");
+                WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
             } else
             {
                 // Otherwise we can add as normal

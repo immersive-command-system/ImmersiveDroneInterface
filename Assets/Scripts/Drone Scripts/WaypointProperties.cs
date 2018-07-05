@@ -5,6 +5,10 @@
     using UnityEngine;
     using VRTK;
 
+
+    /// <summary>
+    /// This class handles the rendering of a waypoint's groundpoint and path line
+    /// </summary>
     public class WaypointProperties : MonoBehaviour
     {
         public Waypoint classPointer;
@@ -47,26 +51,30 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
-            LineProperties = this.GetComponentInParent<LineRenderer>();
-            lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
-            lineCollider.tag = "Line Collider";
-            lineCollider.isTrigger = true;
-            lineCollider.radius = 0.1f;
-            lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
-            lineCollider.transform.parent = this.gameObject.transform;
-
-            // Establishing the previous point in the path. (could be the drone)
             if (classPointer.prevPathPoint != null)
             {
+                LineProperties = this.GetComponentInParent<LineRenderer>();
+                lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
+                lineCollider.tag = "Line Collider";
+                lineCollider.isTrigger = true;
+                lineCollider.radius = 0.1f;
+                lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
+                lineCollider.transform.parent = this.gameObject.transform;
+
+                // Establishing the previous point in the path. (Null if it is the drone)
                 prevPoint = classPointer.prevPathPoint.gameObjectPointer;
+
+                // Create the collider around the line renderer
+                SetLineCollider();
             }
             else
             {
-                prevPoint = referenceDrone.gameObjectPointer;
+                prevPoint = null;
+                //prevPoint = referenceDrone.gameObjectPointer;
             }
 
-            // Create the collider around the line renderer
-            SetLineCollider();
+
+
 
             // Sets up interaction events
             GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += new InteractableObjectEventHandler(InteractableObjectUngrabbed);
@@ -78,17 +86,20 @@
             if (classPointer.prevPathPoint != null)
             {
                 prevPoint = classPointer.prevPathPoint.gameObjectPointer;
-            } else
-            {
-                prevPoint = referenceDrone.gameObjectPointer;
-            } 
-            
+            }
+            //else
+            //{
+            //    prevPoint = referenceDrone.gameObjectPointer;
+            //}
+
             if (prevPoint != null)
             {
                 SetPassedState();
 
                 SetLine();
-                
+
+                UpdateLineCollider();
+
                 if (thisGroundpoint == null)
                 {
                     CreateGroundpoint();
@@ -100,8 +111,6 @@
             }
 
             UpdateGroundpointLine();
-
-            UpdateLineCollider();
         }
 
         // Positions line between waypoints and drones
@@ -113,16 +122,19 @@
 
                 Vector3 endpoint;
 
-                if (referenceDroneGameObject.GetComponent<MoveDrone>().targetWaypoint != this.gameObject || passed)
-                {
-                    endpoint = prevPoint.transform.position;
-                    LineProperties.SetPosition(1, endpoint);
-                } else
-                {
-                    endpoint = referenceDroneGameObject.transform.position;
-                    LineProperties.SetPosition(1, endpoint);
-                }
-                
+                //if (referenceDroneGameObject.GetComponent<MoveDrone>().targetWaypoint != this.gameObject || passed)
+                //{
+                //    endpoint = prevPoint.transform.position;
+                //    LineProperties.SetPosition(1, endpoint);
+                //} else
+                //{
+                //    endpoint = referenceDroneGameObject.transform.position;
+                //    LineProperties.SetPosition(1, endpoint);
+                //}
+
+                endpoint = prevPoint.transform.position;
+                LineProperties.SetPosition(1, endpoint);
+
                 // If line being selected by controller
                 if (controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject && referenceDrone.selected)
                 {

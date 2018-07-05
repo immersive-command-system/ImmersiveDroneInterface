@@ -24,6 +24,7 @@
         // Use this for initialization
         void Start()
         {
+            selectedDrone = null;
             dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
             nextDroneId = 'A'; // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
             worldObject = gameObject;
@@ -67,6 +68,7 @@
             if (!GameObject.FindWithTag("Drone"))
             {
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
+                selectedDrone = newDrone;
             }
         }
     }

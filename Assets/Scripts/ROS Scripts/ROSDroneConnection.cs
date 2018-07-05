@@ -44,6 +44,12 @@ public class ROSDroneConnection : MonoBehaviour {
         ros.Publish(UserpointPublisher.GetMessageTopic(), msg);
     }
 
+    public void SendServiceCall(string service, string args)
+    {
+        Debug.Log("Calling service: " + service);
+        ros.CallService(service, args);
+    }
+
     //WriteData will write the location of the gameObject passed to it to a text file
     //[MenuItem("Tools/Write file")]
     //static void WriteData(GameObject robot)

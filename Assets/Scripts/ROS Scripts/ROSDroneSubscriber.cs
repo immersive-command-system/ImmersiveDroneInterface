@@ -7,22 +7,22 @@ using UnityEngine;
 
 public class ROSDroneSubscriber : ROSBridgeSubscriber
 {
-    public static string GetMessageTopic()
+    public new static string GetMessageTopic()
     {
         return "/state/position_velocity";
     }
 
-    public static string GetMessageType()
+    public new static string GetMessageType()
     {
         return "crazyflie_msgs/PositionVelocityStateStamped";
     }
 
-    public static ROSBridgeMsg ParseMessage(JSONNode msg)
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg)
     {
         return new DronePositionMsg(msg);
     }
 
-    public static void CallBack(ROSBridgeMsg msg)
+    public new static void CallBack(ROSBridgeMsg msg)
     {
         //Debug.Log("callback");
         GameObject robot = GameObject.FindWithTag("Drone");
