@@ -45,7 +45,7 @@
             id = "" + referenceDrone.id + referenceDrone.nextWaypointId;
             referenceDrone.nextWaypointId ++;
 
-            Debug.Log("Created new waypoint with id: " + id);
+            //Debug.Log("Created new waypoint with id: " + id);
         }
 
         public void UpdateLineColliders()

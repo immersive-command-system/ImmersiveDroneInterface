@@ -40,7 +40,7 @@ public class ROSDroneConnection : MonoBehaviour {
 
     public void PublishWaypointUpdateMessage(UserpointInstruction msg)
     {
-        Debug.Log("Published new userpoint instruction: "+ msg.ToYAMLString());
+        //Debug.Log("Published new userpoint instruction: "+ msg.ToYAMLString());
         ros.Publish(UserpointPublisher.GetMessageTopic(), msg);
     }
 
