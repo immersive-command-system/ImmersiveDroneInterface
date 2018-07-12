@@ -9,10 +9,7 @@ public class Ref
 {
     private bool backing;
     public bool Value { get { return backing; } set { backing = value; } }
-    public Ref()
-    {
-        backing = false;
-    }
+    public Ref() { backing = false; }
 }
 
 
@@ -21,8 +18,6 @@ public class TimedTutorialRight : MonoBehaviour {
     private ToggleTooltips individualTooltips;
     private VRTK_ControllerTooltips tooltips;
     private VRTK_ControllerEvents events;
-
-    private VRTK_ControllerTooltips.TooltipButtons triggerButton, gripButton, touchpadButton, buttonOneButton, buttonTwoButton;
 
     private Ref pressedTrigger = new Ref(), pressedGrip = new Ref(), pressedTouchpad = new Ref(), pressedButtonOne = new Ref(), pressedButtonTwo = new Ref();
     //private bool pressedTrigger = false, pressedGrip = false, pressedTouchpad = false, pressedButtonOne = false, pressedButtonTwo = false;
@@ -74,15 +69,7 @@ public class TimedTutorialRight : MonoBehaviour {
         events = GetComponent<VRTK_ControllerEvents>();
         individualTooltips = GetComponent<ToggleTooltips>();
         tooltips = GetComponentInChildren<VRTK_ControllerTooltips>();
-
         SetupControllerEventListeners();
-
-        triggerButton = VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip;
-        gripButton = VRTK_ControllerTooltips.TooltipButtons.GripTooltip;
-        touchpadButton = VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip;
-        buttonOneButton = VRTK_ControllerTooltips.TooltipButtons.ButtonOneTooltip;
-        buttonTwoButton = VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip;
-
         StartCoroutine(TutorialCoroutine());
     }
 
@@ -100,9 +87,9 @@ public class TimedTutorialRight : MonoBehaviour {
         yield return new WaitForSecondsRealtime(leftJoystickAudio.clip.length);
 
 
-        yield return TutorialStep(individualTooltips.touchpadTooltip, touchpadAudio, touchpadAudioDone, touchpadButton, pressedTouchpad);
-        yield return TutorialStep(individualTooltips.gripTooltip, gripAudio, gripAudioDone, gripButton, pressedGrip);
-        yield return TutorialStep(individualTooltips.triggerTooltip, triggerAudio, triggerAudioDone, triggerButton, pressedTrigger);
+        yield return TutorialStep(individualTooltips.touchpadTooltip, touchpadAudio, touchpadAudioDone, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, pressedTouchpad);
+        yield return TutorialStep(individualTooltips.gripTooltip, gripAudio, gripAudioDone, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, pressedGrip);
+        yield return TutorialStep(individualTooltips.triggerTooltip, triggerAudio, triggerAudioDone, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, pressedTrigger);
 
         grabZoneAudio.Play();
         yield return new WaitForSecondsRealtime(grabZoneAudio.clip.length);
@@ -117,8 +104,8 @@ public class TimedTutorialRight : MonoBehaviour {
         yield return new WaitForSecondsRealtime(SecondaryPlacementAudio.clip.length);
 
 
-      //  yield return TutorialStep(individualTooltips.buttonOne, buttonOneAudio, buttonOneAudioDone, buttonOneButton, pressedButtonOne);
-        yield return TutorialStep(individualTooltips.buttonTwo, buttonTwoAudio, buttonTwoAudioDone, buttonTwoButton, pressedButtonTwo);
+      //  yield return TutorialStep(individualTooltips.buttonOne, buttonOneAudio, buttonOneAudioDone, VRTK_ControllerTooltips.TooltipButtons.ButtonOneTooltip, pressedButtonOne);
+        yield return TutorialStep(individualTooltips.buttonTwo, buttonTwoAudio, buttonTwoAudioDone, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip, pressedButtonTwo);
 
     }
 
@@ -175,54 +162,53 @@ public class TimedTutorialRight : MonoBehaviour {
     
     private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(triggerAudioDone.Value, pressedTrigger, individualTooltips.triggerTooltip, triggerButton);
+        DoTooltipPressed(triggerAudioDone.Value, pressedTrigger, individualTooltips.triggerTooltip, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
     }
 
     private void DoTriggerReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(triggerAudioDone.Value, individualTooltips.triggerTooltip, triggerButton);
+        DoTooltipReleased(triggerAudioDone.Value, individualTooltips.triggerTooltip, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
     }
 
     private void DoButtonOnePressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(buttonOneAudioDone.Value,  pressedButtonOne, individualTooltips.buttonOne, buttonOneButton);
+        DoTooltipPressed(buttonOneAudioDone.Value,  pressedButtonOne, individualTooltips.buttonOne, VRTK_ControllerTooltips.TooltipButtons.ButtonOneTooltip);
     }
 
     private void DoButtonOneReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(buttonOneAudioDone.Value, individualTooltips.buttonOne, buttonOneButton);
+        DoTooltipReleased(buttonOneAudioDone.Value, individualTooltips.buttonOne, VRTK_ControllerTooltips.TooltipButtons.ButtonOneTooltip);
     }
 
     private void DoButtonTwoPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(buttonTwoAudioDone.Value, pressedButtonTwo, individualTooltips.buttonTwo, buttonTwoButton);
+        DoTooltipPressed(buttonTwoAudioDone.Value, pressedButtonTwo, individualTooltips.buttonTwo, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip);
     }
 
     private void DoButtonTwoReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(buttonTwoAudioDone.Value, individualTooltips.buttonTwo, buttonTwoButton);
+        DoTooltipReleased(buttonTwoAudioDone.Value, individualTooltips.buttonTwo, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip);
     }
 
     private void DoGripPressed(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(gripAudioDone.Value, pressedGrip, individualTooltips.gripTooltip, gripButton);
+        DoTooltipPressed(gripAudioDone.Value, pressedGrip, individualTooltips.gripTooltip, VRTK_ControllerTooltips.TooltipButtons.GripTooltip);
     }
 
     private void DoGripReleased(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(gripAudioDone.Value, individualTooltips.gripTooltip, gripButton);
+        DoTooltipReleased(gripAudioDone.Value, individualTooltips.gripTooltip, VRTK_ControllerTooltips.TooltipButtons.GripTooltip);
     }
 
     private void DoTouchpadTouchStart(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipPressed(touchpadAudioDone.Value, pressedTouchpad, individualTooltips.touchpadTooltip, touchpadButton);
+        DoTooltipPressed(touchpadAudioDone.Value, pressedTouchpad, individualTooltips.touchpadTooltip, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
     }
 
     private void DoTouchpadTouchEnd(object sender, ControllerInteractionEventArgs e)
     {
-        DoTooltipReleased(touchpadAudioDone.Value, individualTooltips.touchpadTooltip, touchpadButton);
+        DoTooltipReleased(touchpadAudioDone.Value, individualTooltips.touchpadTooltip, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip);
     }
-
 
     private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
     {

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿namespace ISAACS
+
+using UnityEngine;
 using VRTK;
 using System.Collections;
 
