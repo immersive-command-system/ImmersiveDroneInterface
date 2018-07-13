@@ -14,8 +14,8 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING}; // These are the possible values for the controller's state
-        public ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
+        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING}; // These are the possible values for the controller's state
+        public static ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
         public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
         public CollisionPair mostRecentCollision;
@@ -101,7 +101,6 @@
                 // SECONDARY PLACEMENT
                 SecondaryPlacementChecks();
             }
-
         }
 
         /// <summary>
@@ -447,6 +446,8 @@
             // Make sure the currently selected drone has waypoints
             if (currentlySelectedDrone.waypoints != null && currentlySelectedDrone.waypoints.Count > 0)
             {
+                currentControllerState = ControllerState.DELETING;
+
                 //Checking to see if we are colliding with one of those
                 if (mostRecentCollision.type == CollisionType.WAYPOINT && currentlySelectedDrone.waypoints.Contains(mostRecentCollision.waypoint))
                 {
@@ -487,7 +488,9 @@
 
                     // Delete the waypoint
                     currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
+                    currentControllerState = ControllerState.IDLE;
                 }
+               
             }
         }
 

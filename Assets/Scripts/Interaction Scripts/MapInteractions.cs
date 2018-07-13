@@ -32,7 +32,7 @@
         //This tells us if the map is still moving or being dragged
         public enum MapState
         {
-            IDLE, DRAGGING, MOVING
+            IDLE, DRAGGING, MOVING, ROTATING
         }
         // The radius of the table (assuming the table is circular)
         public float tableRadius;
@@ -119,6 +119,11 @@
                 {
                     rotatingTable.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
                 }
+                mapState = MapState.ROTATING;
+            }
+            else if (mapState == MapState.ROTATING)
+            {
+                mapState = MapState.IDLE;
             }
         }
 

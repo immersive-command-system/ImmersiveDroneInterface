@@ -1252,33 +1252,34 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 595981708}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d43fb0f5fadc14d42a764f10d4a40550, type: 3}
+  m_Script: {fileID: 11500000, guid: 16d250abd80dcce4c99f191a79e4e637, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  triggerTooltip: {fileID: 0}
+  gripTooltip: {fileID: 0}
+  touchpadTooltip: {fileID: 0}
+  buttonOne: {fileID: 0}
+  buttonTwo: {fileID: 0}
+  introTiming: 0
+  tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
+  tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
+  tipBackgroundColor_AfterPressed: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  tipTextColor_AfterPressed: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_AfterPressed: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!114 &595981711
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 595981708}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d140780543907549b458324fe7be48b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  a: {fileID: 0}
-  b: {fileID: 0}
-  c: {fileID: 0}
-  d: {fileID: 0}
-  e: {fileID: 0}
-  f: {fileID: 0}
-  g: {fileID: 0}
-  h: {fileID: 0}
-  i: {fileID: 0}
-  j: {fileID: 0}
-  k: {fileID: 0}
 --- !u!114 &595981712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1400,7 +1401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f49619ac12cb7a468a1466cba12e3fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentControllerState: 0
   controller_right: {fileID: 0}
   sphereVRTK: {fileID: 0}
   defaultMaterial: {fileID: 0}
@@ -3015,19 +3015,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c1099261aa6f89488aba4720358bb5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rightController: {fileID: 1902478965}
-  leftController: {fileID: 595981708}
-  introAudio: {fileID: 1761694398}
-  envAudio: {fileID: 1761694397}
-  mapLocationAudio: {fileID: 1761694396}
-  mapRotationAudio: {fileID: 1761694395}
-  MapScaleAudio: {fileID: 1761694394}
-  primaryPlacementAudio: {fileID: 1761694393}
-  grabZoneAudio: {fileID: 1761694392}
-  intermediatePlacementAudio: {fileID: 1761694391}
-  selectionPointerAudio: {fileID: 1761694390}
-  secondaryPlacementAudio: {fileID: 1761694389}
-  undoAndDeleteAudio: {fileID: 1761694388}
+  seconds: 4
 --- !u!4 &1761694387
 Transform:
   m_ObjectHideFlags: 0
@@ -4396,7 +4384,6 @@ GameObject:
   - component: {fileID: 1902478981}
   - component: {fileID: 1902478980}
   - component: {fileID: 1902478979}
-  - component: {fileID: 1902478978}
   - component: {fileID: 1902478977}
   - component: {fileID: 1902478976}
   - component: {fileID: 1902478975}
@@ -5309,22 +5296,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
---- !u!114 &1902478978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1902478965}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c50f5a629362c64fb127c964c2f5f2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  triggerTooltip: {fileID: 0}
-  gripTooltip: {fileID: 0}
-  touchpadTooltip: {fileID: 0}
-  buttonOne: {fileID: 0}
-  buttonTwo: {fileID: 0}
 --- !u!114 &1902478979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5336,18 +5307,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16d250abd80dcce4c99f191a79e4e637, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  introAudio: {fileID: 1902478977}
-  envAudio: {fileID: 1902478976}
-  leftJoystickAudio: {fileID: 1902478975}
-  triggerAudio: {fileID: 1902478972}
-  gripAudio: {fileID: 1902478973}
-  grabZoneAudio: {fileID: 1902478971}
-  IntermediatePlacementAudio: {fileID: 1902478970}
-  SelectionPointerAudio: {fileID: 1902478969}
-  SecondaryPlacementAudio: {fileID: 1902478968}
-  touchpadAudio: {fileID: 1902478974}
-  buttonOneAudio: {fileID: 0}
-  buttonTwoAudio: {fileID: 1902478967}
+  triggerTooltip: {fileID: 0}
+  gripTooltip: {fileID: 0}
+  touchpadTooltip: {fileID: 0}
+  buttonOne: {fileID: 0}
+  buttonTwo: {fileID: 0}
   introTiming: 5
   tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
   tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
@@ -5366,17 +5330,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d140780543907549b458324fe7be48b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  a: {fileID: 1902478977}
-  b: {fileID: 1902478976}
-  c: {fileID: 1902478975}
-  d: {fileID: 1902478974}
-  e: {fileID: 1902478973}
-  f: {fileID: 1902478972}
-  g: {fileID: 1902478971}
-  h: {fileID: 1902478970}
-  i: {fileID: 1902478969}
-  j: {fileID: 1902478968}
-  k: {fileID: 1902478967}
 --- !u!114 &1902478981
 MonoBehaviour:
   m_ObjectHideFlags: 0
