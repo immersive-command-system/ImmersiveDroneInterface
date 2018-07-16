@@ -1893,7 +1893,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0.099999905
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: m_LocalPosition.z
@@ -3015,7 +3015,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c1099261aa6f89488aba4720358bb5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seconds: 4
+  seconds: 0
+  rightController: {fileID: 1902478965}
+  leftController: {fileID: 595981708}
+  introAudio: {fileID: 1761694398}
+  envAudio: {fileID: 1761694397}
+  mapLocationAudio: {fileID: 1761694396}
+  mapRotationAudio: {fileID: 1761694395}
+  MapScaleAudio: {fileID: 1761694394}
+  primaryPlacementAudio: {fileID: 1761694393}
+  grabZoneAudio: {fileID: 1761694392}
+  intermediatePlacementAudio: {fileID: 1761694391}
+  selectionPointerAudio: {fileID: 1761694390}
+  secondaryPlacementAudio: {fileID: 1761694389}
+  undoAndDeleteAudio: {fileID: 1761694388}
 --- !u!4 &1761694387
 Transform:
   m_ObjectHideFlags: 0
@@ -3199,7 +3212,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b2ea8a53bf99777439155020ce1e06c6, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0

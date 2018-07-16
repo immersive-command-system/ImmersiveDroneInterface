@@ -11,8 +11,8 @@
         [Tooltip("The amount of time to wait before tutorial starts")]
         public float seconds;
 
-        public static GameObject rightController, leftController;
-        public static AudioSource introAudio, envAudio, mapLocationAudio, mapRotationAudio, MapScaleAudio, primaryPlacementAudio,
+        public GameObject rightController, leftController;
+        public AudioSource introAudio, envAudio, mapLocationAudio, mapRotationAudio, MapScaleAudio, primaryPlacementAudio,
             grabZoneAudio, intermediatePlacementAudio, selectionPointerAudio, secondaryPlacementAudio, undoAndDeleteAudio;
 
         private static VRTK_ControllerTooltips leftTooltips, rightTooltips;
@@ -34,7 +34,7 @@
 
         IEnumerator TutorialCoroutine()
         {
-            yield return new WaitForSecondsRealtime(seconds);
+           // yield return new WaitForSecondsRealtime(seconds);
             introAudio.Play();
             yield return new WaitForSecondsRealtime(introAudio.clip.length);
             envAudio.Play();

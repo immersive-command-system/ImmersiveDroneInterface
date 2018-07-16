@@ -48,13 +48,14 @@
 
         void Start()
         {
+            individualTooltips = GetComponentsInChildren<VRTK_ObjectTooltip>(true);
             events = GetComponent<VRTK_ControllerEvents>();
             tooltips = GetComponentInChildren<VRTK_ControllerTooltips>();
             SetupControllerEventListeners();
             InitializeIndividualTooltips();
         }
 
-        private void InitializeIndividualTooltips()
+        void InitializeIndividualTooltips()
         {
             for (int i = 0; i < individualTooltips.Length; i++)
             {
