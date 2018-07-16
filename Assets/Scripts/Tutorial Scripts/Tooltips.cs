@@ -24,9 +24,6 @@
         private Ref pressedTrigger = new Ref(), pressedGrip = new Ref(), pressedTouchpad = new Ref(), pressedButtonOne = new Ref(), pressedButtonTwo = new Ref();
         private Ref triggerAudioDone = new Ref(), gripAudioDone = new Ref(), touchpadAudioDone = new Ref(), buttonOneAudioDone = new Ref(), buttonTwoAudioDone = new Ref();
 
-        public float introTiming;
-
-
         [Header("PRESSED Tooltip Colour Settings")]
 
         [Tooltip("The colour to use for the tooltip background container.")]
@@ -111,19 +108,35 @@
             ChangeLineColor(tooltip, tipLineColor_AfterPressed);
             ChangeFontColor(tooltip, tipTextColor_AfterPressed);
         }
-    
-        private void DoTooltipPressed(VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
-        {
-            if (MapInteractions.mapState == MapInteractions.MapState.IDLE && ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.IDLE)
+
+        private void DoTooltipPressed(Ref audioDone, Ref pressedTooltip, VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
+        { 
+            if(tooltipButton == VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip)
             {
-                tooltips.ToggleTips(true, tooltipButton);
-               
-            } else
+                if (Tutorial.currentTutorialState == Tutorial.TutorialState.MOVINGMAP)
+                {
+                
+                } else
+                {
+
+                }
+                pressedTooltip.Value = true;
+                if (currentTutorialState == 0)
+                {
+                    ChangeTooltipColorWhenPressed(tooltip);
+                }
+                else
+                {
+                    ChangeTooltipColorAfterPressed(tooltip);
+                }
+            }
+
+            if ()
             {
-                ChangeTooltipColorWhenPressed(tooltip);
-                ChangeTooltipColorAfterPressed(tooltip);
+
             }
         }
+       
     
         private void DoTooltipReleased(VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
         {
@@ -133,7 +146,7 @@
     
         private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
         {
-            DoTooltipPressed(triggerTooltip, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
+            DoTooltipPressed(triggerAudioDone, pressedTrigger, triggerTooltip, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
         }
 
         private void DoTriggerReleased(object sender, ControllerInteractionEventArgs e)
