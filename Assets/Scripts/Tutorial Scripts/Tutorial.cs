@@ -6,6 +6,12 @@
     using UnityEngine;
     using VRTK;
 
+    /// <summary>
+    /// This class manages the tutorial for how to navigate the ISAACS interface.
+    /// </summary>
+    /// <remarks>
+    /// This script needs to be added to the parent (i.e. Controllers) of the relevant alias controller GameObjects (i.e. RightController, LeftController)
+    /// </remarks>
     public class Tutorial : MonoBehaviour {
 
        /* public static class ControllerStateRef { public static ControllerInteractions.ControllerState getValue() { return ControllerInteractions.currentControllerState; } }
@@ -18,7 +24,7 @@
         } */
 
         [Tooltip("The amount of time to wait before tutorial starts")]
-        public float seconds;
+        public float seconds = 4;
 
         [Header("DURING TutorialStep Tooltip Colour Settings")]
 
@@ -28,7 +34,7 @@
         public Color tipTextColor_DuringTutorialStep = Color.white;
         [Tooltip("The colour to use for the line between the tooltip and the relevant controller button.")]
         public Color tipLineColor_DuringTutorialStep = Color.green;
-
+        
         [Header("AFTER TutorialStep Tooltip Colour Settings")]
 
         [Tooltip("The colour to use for the tooltip background container.")]
@@ -38,19 +44,24 @@
         [Tooltip("The colour to use for the line between the tooltip and the relevant controller button.")]
         public Color tipLineColor_AfterTutorialStep = Color.blue;
 
-        public GameObject rightController, leftController;
+       
+
+        public GameObject rightController, leftController; //the controllers that have the Tooltips script attached to each of them
         public AudioSource introAudio, envAudio, mapLocationAudio, mapRotationAudio, MapScaleAudio, primaryPlacementAudio,
             grabZoneAudio, intermediatePlacementAudio, selectionPointerAudio, secondaryPlacementAudio, undoAndDeleteAudio;
 
-        private static VRTK_ControllerTooltips leftTooltips, rightTooltips;
-        public static bool stepFinished;
-        private static Tooltips rightToggling, leftToggling;
+        private static VRTK_ControllerTooltips leftTooltips, rightTooltips; 
+        private static bool stepFinished; //lets you know when the tutorial can move on to the next step
+        private static Tooltips rightToggling, leftToggling; //used to toggle corresponding tooltips of the controllers
 
-        public enum TutorialState  {NONE, INTRO, MOVINGMAP, ROTATINGMAP, SCALINGMAP, PRIMARYPLACEMENT, GRABZONE, INTERMEDIATEPLACEMENT, SELECTIONPOINTER, SECONDARYPLACEMENT, UNDOANDDELETE, DONE};
-        public static TutorialState currentTutorialState;
+        //possible states of the tutorial AKA the tutorialsteps
+        public enum TutorialState  {NONE, INTRO, MOVINGMAP, ROTATINGMAP, SCALINGMAP, PRIMARYPLACEMENT, GRABZONE, INTERMEDIATEPLACEMENT, SELECTIONPOINTER, SECONDARYPLACEMENT, UNDOANDDELETE, DONE}; 
+        public static TutorialState currentTutorialState; //keeps track of the current tutorial state
 
+        /// <summary>
+        /// Initializes all necessary variables and starts the tutorial
+        /// </summary>
         void Start() {
-            seconds = 4;
             stepFinished = false;
 
             rightTooltips = rightController.GetComponentInChildren<VRTK_ControllerTooltips>();
@@ -66,6 +77,10 @@
             StartCoroutine(TutorialCoroutine());
         }
 
+        /// <summary>
+        /// Initiates each step of the tutorial sequentially, waiting for the previous step to finish before starting the next
+        /// </summary>
+        /// <returns></returns>
         IEnumerator TutorialCoroutine()
         {
             yield return new WaitForSecondsRealtime(seconds);
@@ -130,8 +145,18 @@
             stepFinished = false;
         }
         */
+
+        /// <summary>
+        /// Plays the audio of the tutorial step, and shows the tooltip of the corresponding button and additional givin tooltip if there is one.
+        /// Waits until does the task mentioned in the tutorial step.
+        /// </summary>
+        /// <param name="audio">The audio to play for the tutorial step</param>
+        /// <param name="button">The button that is required for the tutorial step, of which its tooltip should show</param>
+        /// <param name="tooltip">Additional tooltip object that should show if needed for the tutorial step, null if only one tooltip is needed.</param>
+        /// <param name="controller">If controller is -1 then left only, 0 then both, 1 then right controller only</param>
+        /// <returns></returns>
         IEnumerator TutorialStep (AudioSource audio, VRTK_ControllerTooltips.TooltipButtons button, VRTK_ObjectTooltip tooltip, int controller)
-        { //if controller is -1 then left only, 0 then both, 1 then right controller only
+        { 
             audio.Play();
 
             if (controller <= 0) {
@@ -169,6 +194,11 @@
             stepFinished = false;
         }
 
+        /// <summary>
+        /// Changes the colors of the tooltip's container, line, and font for during a tutorial step
+        /// </summary>
+        /// <param name="toggling">The Tooltips script instance to use for toggling the tooltips of the corresponding controller the script is attached to</param>
+        /// <param name="tooltip">The tooltip the change the color of</param>
         public void ChangeTooltipColorDuringTutorialStep(Tooltips toggling, VRTK_ObjectTooltip tooltip)
         {
             toggling.ChangeContainerColor(tooltip, tipBackgroundColor_DuringTutorialStep);
@@ -177,6 +207,11 @@
             tooltip.ResetTooltip();
         }
 
+        /// <summary>
+        /// Changes the colors of the tooltip's container, line, and font for after a tutorial step
+        /// </summary>
+        /// <param name="toggling">The Tooltips script instance to use for toggling the tooltips of the corresponding controller the script is attached to</param>
+        /// <param name="tooltip">The tooltip to change the color of</param>
         public void ChangeTooltipColorAfterTutorialStep(Tooltips toggling, VRTK_ObjectTooltip tooltip)
         {
             toggling.ChangeContainerColor(tooltip, tipBackgroundColor_AfterTutorialStep);
@@ -185,6 +220,9 @@
             tooltip.ResetTooltip();
         }
 
+        /// <summary>
+        /// Checks if the user does what the turial step indicates to do during the tutorial step, so that the tutorial can move on to the next step
+        /// </summary>
         private void Update()
         {
             switch (currentTutorialState)

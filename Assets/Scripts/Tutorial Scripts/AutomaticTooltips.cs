@@ -4,6 +4,8 @@
     using VRTK;
     using System.Collections;
 
+    //use this script instead if you only desire the tooltipButton's tooltip to show when corresponding tooltip is pressed, and to disappear when button is released
+
     public class AutomaticTooltips : MonoBehaviour
     {
 
@@ -101,7 +103,6 @@
 
         private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
         {
-            GetComponentInChildren<VRTK_ControllerTooltips>().enabled = !GetComponentInChildren<VRTK_ControllerTooltips>().enabled;
         }
         */
 
