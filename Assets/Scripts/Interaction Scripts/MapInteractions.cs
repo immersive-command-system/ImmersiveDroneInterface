@@ -32,7 +32,7 @@
         //This tells us if the map is still moving or being dragged
         public enum MapState
         {
-            IDLE, DRAGGING, MOVING
+            IDLE, DRAGGING, MOVING, ROTATING
         }
         // The radius of the table (assuming the table is circular)
         public float tableRadius;
@@ -44,7 +44,7 @@
         // Rotation stuff
         public LinkedList<float> angles;
         public bool handleHeldTrigger = false;
-        public MapState mapState;
+        public static MapState mapState;
         public OVRInput.Controller currentController;
         private Vector3 oldVec;
         private float movementAngle;
@@ -119,6 +119,11 @@
                 {
                     rotatingTable.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
                 }
+                mapState = MapState.ROTATING;
+            }
+            else if (mapState == MapState.ROTATING)
+            {
+                mapState = MapState.IDLE;
             }
         }
 
@@ -205,12 +210,22 @@
         {
             float moveX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x;
             float moveZ = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y;
+            
+            if (moveX != 0 || moveZ != 0)
+            {
+                // update map position based on input
+                Vector3 position = transform.position;
+                position.x += moveX * speed * Time.deltaTime;
+                position.z += moveZ * speed * Time.deltaTime;
+                transform.position = position;
+                mapState = MapState.MOVING;
+            }
+            else if (mapState == MapState.MOVING)
+            {
+                mapState = MapState.IDLE;
+            }
 
-            // update map position based on input
-            Vector3 position = transform.position;
-            position.x += moveX * speed * Time.deltaTime;
-            position.z += moveZ * speed * Time.deltaTime;
-            transform.position = position;
+           
         }
 
 
