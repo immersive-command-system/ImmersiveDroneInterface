@@ -1262,13 +1262,6 @@ MonoBehaviour:
   touchpadTooltip: {fileID: 0}
   buttonOne: {fileID: 0}
   buttonTwo: {fileID: 0}
-  introTiming: 0
-  tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
-  tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
-  tipLineColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
-  tipBackgroundColor_AfterPressed: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  tipTextColor_AfterPressed: {r: 1, g: 1, b: 1, a: 1}
-  tipLineColor_AfterPressed: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!114 &595981711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2053,27 +2046,27 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.r
-      value: 0.15862082
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.g
-      value: 0
+      value: 0.9724138
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
-      propertyPath: tipBackgroundColor.r
-      value: 0.11724138
-      objectReference: {fileID: 0}
-    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
-      propertyPath: tipBackgroundColor.g
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
-      propertyPath: tipBackgroundColor.b
+      propertyPath: tipBackgroundColor.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.g
+      value: 0.93103445
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.b
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
@@ -3016,6 +3009,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seconds: 0
+  tipBackgroundColor_DuringTutorialStep: {r: 0, g: 1, b: 0, a: 1}
+  tipTextColor_DuringTutorialStep: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_DuringTutorialStep: {r: 0, g: 1, b: 0, a: 1}
+  tipBackgroundColor_AfterTutorialStep: {r: 0, g: 0, b: 1, a: 1}
+  tipTextColor_AfterTutorialStep: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_AfterTutorialStep: {r: 0, g: 0, b: 1, a: 1}
   rightController: {fileID: 1902478965}
   leftController: {fileID: 595981708}
   introAudio: {fileID: 1761694398}
@@ -4095,19 +4094,27 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.r
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.g
-      value: 0.21379304
+      value: 0.93103445
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipLineColor.b
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: tipBackgroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: tipBackgroundColor.g
+      value: 0.93103456
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
@@ -5325,13 +5332,6 @@ MonoBehaviour:
   touchpadTooltip: {fileID: 0}
   buttonOne: {fileID: 0}
   buttonTwo: {fileID: 0}
-  introTiming: 5
-  tipBackgroundColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
-  tipTextColor_WhenPressed: {r: 1, g: 1, b: 1, a: 1}
-  tipLineColor_WhenPressed: {r: 1, g: 0, b: 0, a: 1}
-  tipBackgroundColor_AfterPressed: {r: 0.97794116, g: 0.95096344, b: 0, a: 1}
-  tipTextColor_AfterPressed: {r: 1, g: 1, b: 1, a: 1}
-  tipLineColor_AfterPressed: {r: 1, g: 0.88965523, b: 0, a: 1}
 --- !u!114 &1902478980
 MonoBehaviour:
   m_ObjectHideFlags: 0
