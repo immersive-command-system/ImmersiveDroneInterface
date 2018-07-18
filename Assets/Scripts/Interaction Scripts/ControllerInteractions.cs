@@ -465,6 +465,7 @@
                     
                     mostRecentCollision.type = CollisionType.NOTHING;
                     mostRecentCollision.waypoint = null;
+                    currentControllerState = ControllerState.IDLE;
                 }
                 else
                 {
