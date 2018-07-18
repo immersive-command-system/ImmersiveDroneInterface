@@ -158,6 +158,16 @@
     
         private void DoTooltipReleased(VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
         {
+           if (tooltip.lineColor == Color.green)
+            {
+                return;
+            }
+            else
+            {
+                tooltips.ToggleTips(false, tooltipButton);
+            }
+            
+            /*
             switch (tooltipButton)
             {
                 case VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip:
@@ -191,7 +201,7 @@
                         tooltips.ToggleTips(false, tooltipButton);
                     }
                     break;
-            }
+            }*/
         }
     
         private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)

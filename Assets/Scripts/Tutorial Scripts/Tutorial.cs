@@ -75,7 +75,7 @@
             envAudio.Play();
             yield return new WaitForSecondsRealtime(envAudio.clip.length);
 
-         /*   currentTutorialState = TutorialState.MOVINGMAP;
+        /*    currentTutorialState = TutorialState.MOVINGMAP;
             yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
 
             currentTutorialState = TutorialState.ROTATINGMAP;
