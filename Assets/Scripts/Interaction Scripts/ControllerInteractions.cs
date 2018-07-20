@@ -490,9 +490,9 @@
 
                     // Delete the waypoint
                     currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
-                    currentControllerState = ControllerState.IDLE;
                 }
-               
+                currentControllerState = ControllerState.IDLE;
+
             }
         }
 

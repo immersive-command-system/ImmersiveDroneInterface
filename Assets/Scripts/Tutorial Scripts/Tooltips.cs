@@ -3,37 +3,39 @@
     using UnityEngine;
     using VRTK;
 
-    //implement clicking on joystick to turn on labels afterwards
-
-  /*  public class Ref
-    {
-        private bool backing;
-        public bool Value { get { return backing; } set { backing = value; } }
-        public Ref() { backing = false; }
-    }*/
-
+    /// <summary>
+    /// This adds a collection of Object Tooltips to the Controller that give information on what the main controller buttons may do. 
+    /// </summary>
+    /// <remarks>
+    /// It needs to be added to the relevant alias controller GameObjects (i.e. RightController, LeftController), and the controller GameObjects should be children of the same parent GameObject (i.e. "Controllers)
+    /// </remarks>
 
     public class Tooltips : MonoBehaviour {
 
-        private VRTK_ObjectTooltip[] individualTooltips;
-        public VRTK_ObjectTooltip triggerTooltip, gripTooltip, touchpadTooltip, buttonOne, buttonTwo;
+        private VRTK_ObjectTooltip[] individualTooltips; //this contains the possible tooltips and is used for initialization
+        public VRTK_ObjectTooltip triggerTooltip, gripTooltip, touchpadTooltip, buttonOne, buttonTwo; //possible tooltips
 
-        private VRTK_ControllerTooltips tooltips;
-        private VRTK_ControllerEvents events;
+        private VRTK_ControllerTooltips tooltips; //need to access VRTK tooltip functions
+        private VRTK_ControllerEvents events; //for setting event listeners
 
-      //  private Ref pressedTrigger = new Ref(), pressedGrip = new Ref(), pressedTouchpad = new Ref(), pressedButtonOne = new Ref(), pressedButtonTwo = new Ref();
-     //   private Ref triggerAudioDone = new Ref(), gripAudioDone = new Ref(), touchpadAudioDone = new Ref(), buttonOneAudioDone = new Ref(), buttonTwoAudioDone = new Ref();
+        private Tutorial tutorial; //for getting the color of the tooltip during the tutorial step
 
-
+        /// <summary>
+        /// The start method initializes all necessary variables and sets up event listeners for the tooltip buttons and the place point
+        /// </summary>
         void Start()
         {
             individualTooltips = GetComponentsInChildren<VRTK_ObjectTooltip>(true);
             events = GetComponent<VRTK_ControllerEvents>();
             tooltips = GetComponentInChildren<VRTK_ControllerTooltips>();
+            tutorial = GetComponentInParent<Tutorial>();
             SetupControllerEventListeners();
             InitializeIndividualTooltips();
         }
 
+        /// <summary>
+        /// This initializes the tooltip objects
+        /// </summary>
         void InitializeIndividualTooltips()
         {
             for (int i = 0; i < individualTooltips.Length; i++)
@@ -61,6 +63,11 @@
             }
         }
 
+        /// <summary>
+        /// This function is used as a helper to get a tooltip object given a button of the TooltipButtons enum type
+        /// </summary>
+        /// <param name="button">this is the button that we want the corresponding tooltip of</param>
+        /// <returns>This is the corresponding tooltip object</returns>
         public VRTK_ObjectTooltip ChangeButtonToTooltip(VRTK_ControllerTooltips.TooltipButtons button)
         {
             switch(button)
@@ -79,6 +86,11 @@
             throw new System.ArgumentException("Parameter must be a valid tooltip button");
         }
 
+        /// <summary>
+        /// This function is used as a helper to get a TooltipButtons enum item given a tooltip object
+        /// </summary>
+        /// <param name="tooltip">This is the tooltip that we want the corresponding enum item of</param>
+        /// <returns>This is the corresponding enum item</returns>
         public VRTK_ControllerTooltips.TooltipButtons ChangeTooltipToButton(VRTK_ObjectTooltip tooltip)
         {
             if (tooltip.Equals(triggerTooltip))
@@ -100,69 +112,56 @@
             throw new System.ArgumentException("Parameter must be a valid tooltip");
 
         }
+
+        /// <summary>
+        /// This function changes the colour to use for the background container of the tooltip.
+        /// </summary>
+        /// <param name="tooltip">The tooltip that you want to change the color of</param>
+        /// <param name="newColor">The color to be changed to</param>
         public void ChangeContainerColor(VRTK_ObjectTooltip tooltip, Color newColor)
         {
             tooltip.containerColor = newColor;
         }
 
+        /// <summary>
+        /// This function changes the colour to use for the text on the tooltip.
+        /// </summary>
+        /// <param name="tooltip">The tooltip that you want to change the color of</param>
+        /// <param name="newColor">The color to be changed to</param>
         public void ChangeFontColor(VRTK_ObjectTooltip tooltip, Color newColor)
         {
             tooltip.fontColor = newColor;
         }
 
+        /// <summary>
+        /// The function changes colour to use for the line drawn between the tooltip and the destination transform.
+        /// </summary>
+        /// <param name="tooltip">The tooltip that you want to change the color of</param>
+        /// <param name="newColor">The color to be changed to</param>
         public void ChangeLineColor(VRTK_ObjectTooltip tooltip, Color newColor)
         {
             tooltip.lineColor = newColor;
         }
 
+        /// <summary>
+        /// This function determines the behavior of the tooltip when the corresponding button is pressed
+        /// </summary>
+        /// <param name="tooltip">The tooltip which should have its behavior changed</param>
+        /// <param name="tooltipButton">The button that corresponds to the tooltip</param>
         private void DoTooltipPressed(VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
         {
-            /*switch (tooltipButton)
-            {
-                case VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip:
-                    if (gameObject.name == "LeftController" || (Tutorial.currentTutorialState != Tutorial.TutorialState.GRABZONE 
-                            && Tutorial.currentTutorialState != Tutorial.TutorialState.PRIMARYPLACEMENT 
-                            && Tutorial.currentTutorialState != Tutorial.TutorialState.SECONDARYPLACEMENT))
-                    {
-                        tooltips.ToggleTips(true, tooltipButton);
-                    }
-                    break;
-                case VRTK_ControllerTooltips.TooltipButtons.GripTooltip:
-                    if (Tutorial.currentTutorialState != Tutorial.TutorialState.MOVINGMAP)
-                    {
-                        tooltips.ToggleTips(true, tooltipButton);
-                    }
-                    break;
-                case VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip:
-                    if (Tutorial.currentTutorialState != Tutorial.TutorialState.MOVINGMAP)
-                    {
-                        tooltips.ToggleTips(true, tooltipButton);
-                    }
-                    break;
-                case VRTK_ControllerTooltips.TooltipButtons.ButtonOneTooltip:
-                    if (Tutorial.currentTutorialState != Tutorial.TutorialState.MOVINGMAP)
-                    {
-                        tooltips.ToggleTips(true, tooltipButton);
-                    }
-                    break;
-                case VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip:
-                    if (Tutorial.currentTutorialState != Tutorial.TutorialState.MOVINGMAP)
-                    {
-                        tooltips.ToggleTips(true, tooltipButton);
-                    }
-                    break;
-            }*/
             tooltips.ToggleTips(true, tooltipButton);
-
         }
-    
+
+
+        /// <summary>
+        /// This function determines the behavior of the tooltip when the corresponding button is released
+        /// </summary>
+        /// <param name="tooltip">The tooltip which should have its behavior changed</param>
+        /// <param name="tooltipButton">The button that corresponds to the tooltip</param>
         private void DoTooltipReleased(VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
         {
-           if (tooltip.lineColor == Color.green)
-            {
-                return;
-            }
-            else
+           if (tooltip.containerColor != tutorial.tipBackgroundColor_DuringTutorialStep)
             {
                 tooltips.ToggleTips(false, tooltipButton);
             }
@@ -203,7 +202,7 @@
                     break;
             }*/
         }
-    
+
         private void DoTriggerPressed(object sender, ControllerInteractionEventArgs e)
         {
             DoTooltipPressed(triggerTooltip, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip);
@@ -256,14 +255,18 @@
         /*
         private void DoTouchpadPressed(object sender, ControllerInteractionEventArgs e)
         {
-          //  GetComponent<AutomaticTooltips>().enabled = true;
+          
         }
 
         private void DoTouchpadReleased(object sender, ControllerInteractionEventArgs e)
         {
-          //  enabled = false;
+          
         }
         */
+
+        /// <summary>
+        /// This function sets up the event handlers for when controller buttons are pressed and released
+        /// </summary>
         private void SetupControllerEventListeners()
         {
             events.TriggerPressed += new ControllerInteractionEventHandler(DoTriggerPressed);
