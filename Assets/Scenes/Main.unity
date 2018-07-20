@@ -387,7 +387,7 @@ Transform:
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
   - {fileID: 79141382}
-  - {fileID: 620616029}
+  - {fileID: 207855934}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -446,6 +446,7 @@ MonoBehaviour:
     type: 2}
   waypointBaseObject: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801,
     type: 2}
+  torus: {fileID: 100000, guid: 668430bb1b9de6c45a5b24a8e7718cba, type: 3}
 --- !u!1 &170587474 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1120882164139808, guid: 600b706cd94b8cb41828739494015818,
@@ -541,6 +542,10 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
   m_IsPrefabParent: 0
+--- !u!4 &207855934 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 207855933}
 --- !u!1001 &242895466
 Prefab:
   m_ObjectHideFlags: 0
@@ -1160,10 +1165,6 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 578158563}
---- !u!4 &620616029 stripped
-Transform:
-  m_PrefabParentObject: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
-  m_PrefabInternal: {fileID: 207855933}
 --- !u!1 &665289476 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 157742, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
