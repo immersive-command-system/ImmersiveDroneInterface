@@ -159,6 +159,7 @@
         { 
             audio.Play();
 
+            //change tooltip colors to the color during tutorial step 
             if (controller <= 0) {
                 ChangeTooltipColorDuringTutorialStep(leftToggling, leftToggling.ChangeButtonToTooltip(button));
                 leftTooltips.ToggleTips(true, button);
@@ -175,7 +176,9 @@
 
             //yield return StartCoroutine(CheckAction(currentState, state));
 
-            yield return new WaitUntil(() => stepFinished);
+            yield return new WaitUntil(() => stepFinished); //wait until step is finished before continuing tutorial
+
+            //change tooltip colors once step is finished
             if (controller <= 0)
             {
                 ChangeTooltipColorAfterTutorialStep(leftToggling, leftToggling.ChangeButtonToTooltip(button));
@@ -191,6 +194,8 @@
                 ChangeTooltipColorAfterTutorialStep(rightToggling, rightToggling.ChangeButtonToTooltip(button));
                 rightTooltips.ToggleTips(false, button);
             }
+            
+            //set it back to false for the next step
             stepFinished = false;
         }
 
