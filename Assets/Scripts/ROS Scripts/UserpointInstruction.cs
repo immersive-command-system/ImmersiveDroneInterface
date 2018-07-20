@@ -47,7 +47,7 @@ namespace ROSBridgeLib
             private Vector3 WorldSpaceToRosSpace(Vector3 worldPosition)
             {
                 return new Vector3(
-                    worldPosition.x,
+                    -worldPosition.x,
                     -worldPosition.z,
                     worldPosition.y - 0.148f
                     );

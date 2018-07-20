@@ -212,7 +212,7 @@ Transform:
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children: []
   m_Father: {fileID: 146794963}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &79141383
 MeshRenderer:
@@ -386,8 +386,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 2.146, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
-  - {fileID: 620616029}
   - {fileID: 79141382}
+  - {fileID: 620616029}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -418,7 +418,6 @@ MonoBehaviour:
   mapRadius: 3
   rotatingTable: {fileID: 79195765}
   handleHeldTrigger: 0
-  mapState: 0
   currentController: 0
   movementAngleDecay: 0.98
 --- !u!114 &146794966
@@ -473,59 +472,59 @@ Prefab:
     m_Modifications:
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.71
+      value: -0.92
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5299997
+      value: 0.79
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.84
+      value: -1.2939997
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.505728
+      value: 0.5009048
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.466611
+      value: 0.471913
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.48714465
+      value: 0.49470574
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.53777647
+      value: -0.5307153
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_RootOrder
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.49999997
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.50000006
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.50000024
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -86.916
+      value: -86.95901
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -9.779
+      value: 354.264
       objectReference: {fileID: 0}
     - target: {fileID: 400026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -75.075005
+      value: -80.538
       objectReference: {fileID: 0}
     - target: {fileID: 100026, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
       propertyPath: m_TagString
@@ -559,7 +558,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.961
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 2}
       propertyPath: m_LocalRotation.x
@@ -1180,7 +1179,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f49619ac12cb7a468a1466cba12e3fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentControllerState: 0
   controller_right: {fileID: 0}
   sphereVRTK: {fileID: 0}
   defaultMaterial: {fileID: 0}

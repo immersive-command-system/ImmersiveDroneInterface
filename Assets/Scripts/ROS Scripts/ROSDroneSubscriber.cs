@@ -30,7 +30,7 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
         {
             DronePositionMsg pose = (DronePositionMsg)msg;
             Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
-            robot.transform.localPosition = new Vector3(pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
+            robot.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
             //Debug.Log(robot.transform.position);
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
         } else {

@@ -38,7 +38,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             GameObject world = GameObject.FindWithTag("World");
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere.transform.parent = world.transform;
-            sphere.transform.localPosition = new Vector3(pose._x + tablePos.x, pose._z + tablePos.z + 0.148f, pose._y / 5);
+            sphere.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
             sphere.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) / 5;
         }
     }
