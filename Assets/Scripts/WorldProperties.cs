@@ -19,7 +19,7 @@
         public static Vector3 actualScale;
         public static Vector3 currentScale;
         private static float maxHeight;
-
+        public GameObject torus;
 
         // Use this for initialization
         void Start()

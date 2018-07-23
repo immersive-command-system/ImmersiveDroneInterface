@@ -446,6 +446,7 @@ MonoBehaviour:
     type: 2}
   waypointBaseObject: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801,
     type: 2}
+  torus: {fileID: 100000, guid: 668430bb1b9de6c45a5b24a8e7718cba, type: 3}
 --- !u!4 &160986176 stripped
 Transform:
   m_PrefabParentObject: {fileID: 479208, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
