@@ -4,6 +4,7 @@ using ROSBridgeLib.interface_msgs;
 using System.Collections;
 using SimpleJSON;
 using UnityEngine;
+using ISAACS;
 
 public class ROSDroneSubscriber : ROSBridgeSubscriber
 {
@@ -35,6 +36,7 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
         } else {
             //Debug.Log("The RosDroneSubscriber script can't find the robot.");
+            WorldProperties.NewDrone();
         }
     }
 }
