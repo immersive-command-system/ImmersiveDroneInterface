@@ -13,7 +13,7 @@ public class ROSDroneConnection : MonoBehaviour {
     void Start()
     {
         // This is the IP of the linux computer that is connected to the drone.  
-        ros = new ROSBridgeWebSocketConnection("ws://192.168.0.185", 9090);
+        ros = new ROSBridgeWebSocketConnection("ws://192.168.0.133", 9090);
         ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(ROSDroneSubscriber));
         ros.AddPublisher(typeof(UserpointPublisher));
