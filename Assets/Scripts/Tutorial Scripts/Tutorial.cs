@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using UnityEngine;
     using VRTK;
-    using UnityEngine.SceneManagement;
+    //using UnityEngine.SceneManagement;
 
     /// <summary>
     /// This class manages the tutorial for how to navigate the ISAACS interface.
@@ -282,12 +282,12 @@
                         stepFinished = true;
                     }
                     break;
-                case Tutorial.TutorialState.DONE:
+               /* case Tutorial.TutorialState.DONE:
                     Debug.Log("loading Main scene");
                     VRTK_SDKManager.instance.UnloadSDKSetup();
                     SceneManager.LoadScene("Main");
                     break;
-
+                    */
             }
         }
     }

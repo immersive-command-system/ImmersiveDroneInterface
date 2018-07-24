@@ -28,7 +28,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
 
     public static void CallBack(ROSBridgeMsg msg)
     {
-        //Debug.Log("callback");
+        Debug.Log("callback");
         Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
         ObstacleMsg pose = (ObstacleMsg)msg;
         if (!ids.Contains(pose.id) && pose.id != 0)
@@ -40,7 +40,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             GameObject newTorus = Object.Instantiate(torus);
             newTorus.transform.parent = world.transform;
             newTorus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
-            newTorus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) / 5;
+            newTorus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) * 5;
         }
     }
 }
