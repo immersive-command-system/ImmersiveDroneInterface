@@ -387,7 +387,7 @@ Transform:
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
   - {fileID: 79141382}
-  - {fileID: 207855934}
+  - {fileID: 1724396235}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -542,10 +542,19 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 12ef5c57c701def4c866df5f121d51ca, type: 3}
   m_IsPrefabParent: 0
---- !u!4 &207855934 stripped
+--- !u!4 &207855934
 Transform:
+  m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 207855933}
+  m_GameObject: {fileID: 1855779223}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1724396235}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &242895466
 Prefab:
   m_ObjectHideFlags: 0
@@ -657,7 +666,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Create
+  m_Text: Clear
 --- !u!222 &258381002
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2186,6 +2195,35 @@ Transform:
   m_PrefabParentObject: {fileID: 4810226314760384, guid: 600b706cd94b8cb41828739494015818,
     type: 2}
   m_PrefabInternal: {fileID: 1601131207}
+--- !u!1 &1724396234
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 207855933}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1724396235}
+  m_Layer: 0
+  m_Name: Missing Prefab
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1724396235
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 207855933}
+  m_GameObject: {fileID: 1724396234}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 207855934}
+  m_Father: {fileID: 146794963}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1830922788
 GameObject:
   m_ObjectHideFlags: 0
@@ -2200,7 +2238,7 @@ GameObject:
   - component: {fileID: 1830922793}
   - component: {fileID: 1830922794}
   m_Layer: 5
-  m_Name: bnt_create
+  m_Name: bnt_clear
   m_TagString: DroneMenu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2313,7 +2351,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1830922788}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a26b901de88df34ea957b295eb895f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 567047bb8f959d1458fe3c5a1a66ac85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1845743972
@@ -2383,6 +2421,21 @@ Transform:
   m_PrefabParentObject: {fileID: 4810226314760384, guid: 600b706cd94b8cb41828739494015818,
     type: 2}
   m_PrefabInternal: {fileID: 1845743972}
+--- !u!1 &1855779223
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 207855933}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 207855934}
+  m_Layer: 0
+  m_Name: Missing Prefab (Dummy)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1866386692
 GameObject:
   m_ObjectHideFlags: 0

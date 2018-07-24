@@ -426,7 +426,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 146794962}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ca9d0ba830a405941937d80884a54e0e, type: 3}
   m_Name: 
@@ -872,6 +872,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 449042260}
+  - component: {fileID: 449042261}
   m_Layer: 0
   m_Name: Controllers
   m_TagString: Untagged
@@ -894,6 +895,37 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &449042261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 449042259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c1099261aa6f89488aba4720358bb5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seconds: 0
+  tipBackgroundColor_DuringTutorialStep: {r: 0, g: 1, b: 0, a: 1}
+  tipTextColor_DuringTutorialStep: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_DuringTutorialStep: {r: 0, g: 1, b: 0, a: 1}
+  tipBackgroundColor_AfterTutorialStep: {r: 0, g: 0, b: 1, a: 1}
+  tipTextColor_AfterTutorialStep: {r: 1, g: 1, b: 1, a: 1}
+  tipLineColor_AfterTutorialStep: {r: 0, g: 0, b: 1, a: 1}
+  rightController: {fileID: 1902478965}
+  leftController: {fileID: 595981708}
+  introAudio: {fileID: 1761694398}
+  envAudio: {fileID: 1761694397}
+  mapLocationAudio: {fileID: 1761694396}
+  mapRotationAudio: {fileID: 1761694395}
+  MapScaleAudio: {fileID: 1761694394}
+  primaryPlacementAudio: {fileID: 1761694393}
+  grabZoneAudio: {fileID: 1761694392}
+  intermediatePlacementAudio: {fileID: 1761694391}
+  selectionPointerAudio: {fileID: 1761694390}
+  secondaryPlacementAudio: {fileID: 1761694389}
+  undoAndDeleteAudio: {fileID: 1761694388}
 --- !u!1 &477024028
 GameObject:
   m_ObjectHideFlags: 0
@@ -3011,7 +3043,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1761694387}
-  - component: {fileID: 1761694386}
   - component: {fileID: 1761694398}
   - component: {fileID: 1761694397}
   - component: {fileID: 1761694396}
@@ -3024,43 +3055,12 @@ GameObject:
   - component: {fileID: 1761694389}
   - component: {fileID: 1761694388}
   m_Layer: 0
-  m_Name: Tutorial
+  m_Name: Tutorial Audio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1761694386
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1761694385}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c1099261aa6f89488aba4720358bb5f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  seconds: 0
-  tipBackgroundColor_DuringTutorialStep: {r: 0, g: 1, b: 0, a: 1}
-  tipTextColor_DuringTutorialStep: {r: 1, g: 1, b: 1, a: 1}
-  tipLineColor_DuringTutorialStep: {r: 0, g: 1, b: 0, a: 1}
-  tipBackgroundColor_AfterTutorialStep: {r: 0, g: 0, b: 1, a: 1}
-  tipTextColor_AfterTutorialStep: {r: 1, g: 1, b: 1, a: 1}
-  tipLineColor_AfterTutorialStep: {r: 0, g: 0, b: 1, a: 1}
-  rightController: {fileID: 1902478965}
-  leftController: {fileID: 595981708}
-  introAudio: {fileID: 1761694398}
-  envAudio: {fileID: 1761694397}
-  mapLocationAudio: {fileID: 1761694396}
-  mapRotationAudio: {fileID: 1761694395}
-  MapScaleAudio: {fileID: 1761694394}
-  primaryPlacementAudio: {fileID: 1761694393}
-  grabZoneAudio: {fileID: 1761694392}
-  intermediatePlacementAudio: {fileID: 1761694391}
-  selectionPointerAudio: {fileID: 1761694390}
-  secondaryPlacementAudio: {fileID: 1761694389}
-  undoAndDeleteAudio: {fileID: 1761694388}
 --- !u!4 &1761694387
 Transform:
   m_ObjectHideFlags: 0

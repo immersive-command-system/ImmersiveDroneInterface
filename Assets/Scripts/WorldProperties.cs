@@ -32,6 +32,7 @@
             currentScale = new Vector3(1, 1, 1);
             maxHeight = 5;
             clipShader = GameObject.FindWithTag("Ground").GetComponent<Renderer>().material.shader;
+            NewDrone();
         }
 
         /// <summary>

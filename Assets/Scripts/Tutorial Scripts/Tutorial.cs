@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using UnityEngine;
     using VRTK;
+    using UnityEngine.SceneManagement;
 
     /// <summary>
     /// This class manages the tutorial for how to navigate the ISAACS interface.
@@ -14,14 +15,14 @@
     /// </remarks>
     public class Tutorial : MonoBehaviour {
 
-       /* public static class ControllerStateRef { public static ControllerInteractions.ControllerState getValue() { return ControllerInteractions.currentControllerState; } }
-        public static class MapStateRef { public static MapInteractions.MapState getValue() { return MapInteractions.mapState; } }
-        public class AudioRef
-        {
-            private AudioSource backing;
-            public AudioSource Value { get { return backing; } set { backing = value; } }
-            public AudioRef(AudioSource reference) { backing = reference; }
-        } */
+        /* public static class ControllerStateRef { public static ControllerInteractions.ControllerState getValue() { return ControllerInteractions.currentControllerState; } }
+         public static class MapStateRef { public static MapInteractions.MapState getValue() { return MapInteractions.mapState; } }
+         public class AudioRef
+         {
+             private AudioSource backing;
+             public AudioSource Value { get { return backing; } set { backing = value; } }
+             public AudioRef(AudioSource reference) { backing = reference; }
+         } */
 
         [Tooltip("The amount of time to wait before tutorial starts")]
         public float seconds = 4;
@@ -89,16 +90,18 @@
             yield return new WaitForSecondsRealtime(introAudio.clip.length);
             envAudio.Play();
             yield return new WaitForSecondsRealtime(envAudio.clip.length);
+            currentTutorialState = TutorialState.DONE;
 
-        /*    currentTutorialState = TutorialState.MOVINGMAP;
-            yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
 
-            currentTutorialState = TutorialState.ROTATINGMAP;
-            yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
+            /*    currentTutorialState = TutorialState.MOVINGMAP;
+                yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
 
-            currentTutorialState = TutorialState.SCALINGMAP;
-            yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
-            */
+                currentTutorialState = TutorialState.ROTATINGMAP;
+                yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
+
+                currentTutorialState = TutorialState.SCALINGMAP;
+                yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
+                
             currentTutorialState = TutorialState.PRIMARYPLACEMENT;
             yield return StartCoroutine(TutorialStep(primaryPlacementAudio, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, null, 1));
 
@@ -117,34 +120,36 @@
             currentTutorialState = TutorialState.UNDOANDDELETE;
             yield return StartCoroutine(TutorialStep(undoAndDeleteAudio, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip, null, 1));
 
-            currentTutorialState = TutorialState.DONE;
+            currentTutorialState = TutorialState.DONE; 
+            */
+
         }
-        
-   /*    void CheckAction<T>(AudioRef audio, Func<T> currentState, T state)
-        {
-            bool isPlaying = audio.Value.isPlaying;
-            while (isPlaying)
-            {
-                if (currentState().Equals(state))
-                {
-                    Debug.Log(currentState());
-                    stepFinished = true;
-                    return;
-                }
-                isPlaying = audio.Value.isPlaying;
-            }
-        }
-        
-        IEnumerator CheckAction<T> (Func<T> currentState, T state)
-        {
-            if (!stepFinished)
-            {
-                Debug.Log(currentState());
-                yield return new WaitUntil(() => currentState().Equals(state));
-            }
-            stepFinished = false;
-        }
-        */
+
+        /*    void CheckAction<T>(AudioRef audio, Func<T> currentState, T state)
+             {
+                 bool isPlaying = audio.Value.isPlaying;
+                 while (isPlaying)
+                 {
+                     if (currentState().Equals(state))
+                     {
+                         Debug.Log(currentState());
+                         stepFinished = true;
+                         return;
+                     }
+                     isPlaying = audio.Value.isPlaying;
+                 }
+             }
+
+             IEnumerator CheckAction<T> (Func<T> currentState, T state)
+             {
+                 if (!stepFinished)
+                 {
+                     Debug.Log(currentState());
+                     yield return new WaitUntil(() => currentState().Equals(state));
+                 }
+                 stepFinished = false;
+             }
+             */
 
         /// <summary>
         /// Plays the audio of the tutorial step, and shows the tooltip of the corresponding button and additional givin tooltip if there is one.
@@ -277,7 +282,12 @@
                         stepFinished = true;
                     }
                     break;
-                    
+                case Tutorial.TutorialState.DONE:
+                    Debug.Log("loading Main scene");
+                    VRTK_SDKManager.instance.UnloadSDKSetup();
+                    SceneManager.LoadScene("Main");
+                    break;
+
             }
         }
     }

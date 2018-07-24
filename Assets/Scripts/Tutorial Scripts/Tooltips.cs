@@ -161,6 +161,8 @@
         /// <param name="tooltipButton">The button that corresponds to the tooltip</param>
         private void DoTooltipReleased(VRTK_ObjectTooltip tooltip, VRTK_ControllerTooltips.TooltipButtons tooltipButton)
         {
+            Debug.Log("1" + tooltip.containerColor);
+            Debug.Log("2" + tutorial.tipBackgroundColor_DuringTutorialStep);
            if (tooltip.containerColor != tutorial.tipBackgroundColor_DuringTutorialStep)
             {
                 tooltips.ToggleTips(false, tooltipButton);
