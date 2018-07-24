@@ -11,7 +11,6 @@ using ISAACS;
 public class ObstacleSubscriber : ROSBridgeSubscriber
 {
     public static HashSet<int> ids = new HashSet<int>();
-    public static GameObject torus = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().torus;
     public static string GetMessageTopic()
     {
         return "/vis/true_env";
@@ -37,10 +36,11 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             Debug.Log("making sphere id:" + pose.id);
             ids.Add(pose.id);
             GameObject world = GameObject.FindWithTag("World");
-            Object.Instantiate(torus);
-            torus.transform.parent = world.transform;
-            torus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
-            torus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) / 5;
+            GameObject torus = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().torus;
+            GameObject newTorus = Object.Instantiate(torus);
+            newTorus.transform.parent = world.transform;
+            newTorus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
+            newTorus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) / 5;
         }
     }
 }
