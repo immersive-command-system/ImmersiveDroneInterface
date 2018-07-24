@@ -22,6 +22,7 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
         Debug.Log("Sending connection attempt to ROS");
+        
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow

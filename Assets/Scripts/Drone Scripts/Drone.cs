@@ -16,7 +16,7 @@
         public ArrayList waypointsOrder; // Keeps track of the order in which waypoints were created for the undo function
 
         public int nextWaypointId; // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
-        public static Dictionary<string, Waypoint> waypointsDict; // Collection of the waypoints in this drone's path
+        public Dictionary<string, Waypoint> waypointsDict; // Collection of the waypoints in this drone's path
 
         /// <summary>
         /// Constructor method for Drone class objects
