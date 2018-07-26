@@ -11,6 +11,9 @@
     {
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
+        public GameObject torus;
+        public GameObject cart;
+
         public static Shader clipShader;
         public static Dictionary<char, Drone> dronesDict;
         public static Drone selectedDrone;
@@ -19,7 +22,6 @@
         public static Vector3 actualScale;
         public static Vector3 currentScale;
         private static float maxHeight;
-        public GameObject torus;
 
         // Use this for initialization
         void Start()
@@ -71,6 +73,48 @@
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
                 selectedDrone = newDrone;
             }
+        }
+
+        /// <summary>
+        /// Converts the worldPosition vector to the ROSPosition vector
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static Vector3 WorldSpaceToRosSpace(Vector3 worldPosition)
+        {
+            return new Vector3(
+                -worldPosition.x,
+                -worldPosition.z,
+                worldPosition.y - 0.148f
+                );
+        }
+
+        /// <summary>
+        /// Converts the ROSPosition to WorldPosition
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static Vector3 RosSpaceToWorldSpace(Vector3 ROSPosition)
+        {
+            return new Vector3(
+                -ROSPosition.x,
+                ROSPosition.z + 0.148f,
+                -ROSPosition.y
+                );
+        }
+
+        /// <summary>
+        /// Converts the ROSPosition to WorldPosition
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static Vector3 RosSpaceToWorldSpace(float pose_x, float pose_y, float pose_z)
+        {
+            return new Vector3(
+                -pose_x,
+                pose_z + 0.148f,
+                -pose_y
+                );
         }
     }
 }

@@ -25,17 +25,15 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
 
     public new static void CallBack(ROSBridgeMsg msg)
     {
-        //Debug.Log("callback");
+        //Debug.Log("Drone Position Callback");
         GameObject robot = GameObject.FindWithTag("Drone");
         if (robot != null)
         {
             DronePositionMsg pose = (DronePositionMsg)msg;
-            Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
-            robot.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
-            //Debug.Log(robot.transform.position);
+            robot.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x, pose._y, pose._z);
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
         } else {
-            //Debug.Log("The RosDroneSubscriber script can't find the robot.");
+            Debug.Log("The RosDroneSubscriber script can't find the robot.");
         }
     }
 }
