@@ -26,6 +26,7 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
     public new static void CallBack(ROSBridgeMsg msg)
     {
         //Debug.Log("Drone Position Callback");
+
         GameObject robot = GameObject.FindWithTag("Drone");
         if (robot != null)
         {
