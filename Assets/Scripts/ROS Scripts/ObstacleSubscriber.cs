@@ -11,6 +11,8 @@ using System.IO;
 public class ObstacleSubscriber : ROSBridgeSubscriber
 {
     public static HashSet<int> ids = new HashSet<int>();
+    public static List<GameObject> obstacles = new List<GameObject>();
+   
     public static string GetMessageTopic()
     {
         return "/vis/true_env";
@@ -41,6 +43,8 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             newTorus.transform.parent = world.transform;
             newTorus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
             newTorus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) * 5;
+            obstacles.Add(newTorus);
         }
     }
+
 }

@@ -22,7 +22,6 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
         Debug.Log("Sending connection attempt to ROS");
-        
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
@@ -53,23 +52,5 @@ public class ROSDroneConnection : MonoBehaviour
         ros.CallService(service, args);
     }
 
-    //WriteData will write the location of the gameObject passed to it to a text file
-    //[MenuItem("Tools/Write file")]
-    //static void WriteData(GameObject robot)
-    //{
-    //    string path = "Assets/Results/user_test.txt";
-
-    //    //Write some text to the test.txt file
-    //    StreamWriter writer = new StreamWriter(path, true);
-    //    writer.WriteLine(robot.transform.position);
-    //    writer.Close();
-
-    //    //Re-import the file to update the reference in the editor
-    //    AssetDatabase.ImportAsset(path);
-    //    TextAsset asset = (TextAsset) Resources.Load("test");
-
-    //    //Print the text from the file
-    //    Debug.Log(asset.text);
-    //}
 }
 
