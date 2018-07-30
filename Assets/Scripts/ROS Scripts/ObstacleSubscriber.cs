@@ -9,10 +9,7 @@ using UnityEngine;
 using System.IO;
 
 public class ObstacleSubscriber : ROSBridgeSubscriber
-{
-    public static HashSet<int> ids = new HashSet<int>();
-    public static List<GameObject> obstacles = new List<GameObject>();
-   
+{   
     public static string GetMessageTopic()
     {
         return "/vis/true_env";
@@ -30,20 +27,22 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
 
     public static void CallBack(ROSBridgeMsg msg)
     {
-        Debug.Log("callback");
+        //Debug.Log("callback");
         Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
         ObstacleMsg pose = (ObstacleMsg)msg;
-        if (!ids.Contains(pose.id) && pose.id != 0)
+        if (!WorldProperties.obstacleids.Contains(pose.id) && pose.id != 0)
         {
-            Debug.Log("making sphere id:" + pose.id);
-            ids.Add(pose.id);
+            WorldProperties.obstacleids.Add(pose.id);
             GameObject world = GameObject.FindWithTag("World");
             GameObject torus = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().torus;
             GameObject newTorus = Object.Instantiate(torus);
+            //newTorus.name = pose.id + "";
             newTorus.transform.parent = world.transform;
             newTorus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
             newTorus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) * 5;
-            obstacles.Add(newTorus);
+            WorldProperties.obstacles.Add(newTorus);
+            //Debug.Log("making torus id: " + newTorus.name);
+
         }
     }
 

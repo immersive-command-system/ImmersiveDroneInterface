@@ -10,6 +10,7 @@ using UnityEditor;
 
 public class ROSDroneSubscriber : ROSBridgeSubscriber
 {
+
     public new static string GetMessageTopic()
     {
         return "/state/position_velocity";
@@ -34,6 +35,8 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
             DronePositionMsg pose = (DronePositionMsg)msg;
             Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
             robot.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
+            SaveData();
+            //WriteData();
             //Debug.Log(robot.transform.position);
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
         } else {
@@ -43,53 +46,40 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
 
     //WriteData will write the location of the closest Obstacle passed to it to a text file
     //[MenuItem("Tools/Write file")]
-    static void WriteData(GameObject robot)
+    /*static void WriteData()
     {
-        //Find the closest obstacle from drone and its distance
-        GameObject closestObstacle;
-        float closestDist;
-        FindClosestObstacleAndDist(out closestObstacle, out closestDist); //if no obstacles exist, closestDist is -1, and closestObstacle is null       
+        //Find the closest obstacle from the selected drone and its distance
+
+        WorldProperties.FindClosestObstacleAndDist(); //if no obstacles exist, closestDist is -1, and closestObstacle is null       
         string path = "Assets/Results/obstacles.txt";
-
         Debug.Log("hi");
-
-        if (closestObstacle != null)
+        if (WorldProperties.closestObstacle != null)
         {
-            Debug.Log(closestObstacle.name + ": " + closestDist);
+           // Debug.Log(closestObstacle.name + ": " + closestDist);
 
             //Write some text to the test.txt file
             StreamWriter writer = new StreamWriter(path, true);
-            writer.WriteLine(closestObstacle.name + ": " + closestDist);
+            writer.WriteLine(WorldProperties.closestObstacle.name + ": " + WorldProperties.closestDist);
             writer.Close();
 
             //Re-import the file to update the reference in the editor
             AssetDatabase.ImportAsset(path);
-            TextAsset asset = (TextAsset)Resources.Load("test");
+            
 
             //Print the text from the file
-            Debug.Log(asset.text);
+            //Debug.Log("Text " + WorldProperties.asset.text);
         }
+    }
+        */
+    /// <summary>
+    /// Finds and keeps track of all the closest obstacle distancecs as strings in a list 
+    /// </summary>
+    static void SaveData()
+    {
+        WorldProperties.FindClosestObstacleAndDist();
+        WorldProperties.obstacleDistsToPrint.Add(WorldProperties.closestDist.ToString());
+    }
 
         
-    }
 
-    static void FindClosestObstacleAndDist(out GameObject closestObstacle, out float closestDist)
-    {
-        closestObstacle = null;
-        closestDist = -1;
-        if (ObstacleSubscriber.obstacles.Count > 0)
-        {
-            closestDist = Vector3.Distance(WorldProperties.selectedDrone.gameObjectPointer.transform.localPosition, ObstacleSubscriber.obstacles[0].transform.localPosition);
-            float dist;
-            foreach (GameObject obstacle in ObstacleSubscriber.obstacles)
-            {
-                dist = Vector3.Distance(WorldProperties.selectedDrone.gameObjectPointer.transform.localPosition, obstacle.transform.localPosition);
-                if (dist < closestDist)
-                {
-                    closestDist = dist;
-                    closestObstacle = obstacle;
-                }
-            }
-        }
-    }
 }
