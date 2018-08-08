@@ -41,7 +41,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             newTorus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
             newTorus.transform.localScale = new Vector3(pose.scale_x, pose.scale_x, pose.scale_x) * 5;
             WorldProperties.obstacles.Add(newTorus);
-
+/*
             var radius = newTorus.GetComponent<MeshFilter>().mesh.bounds.extents.x;
             Vector3 start = new Vector3(newTorus.transform.localPosition.x, newTorus.transform.localPosition.y - radius, newTorus.transform.localPosition.z);
             Vector3 end = new Vector3(newTorus.transform.localPosition.x, tablePos.z, newTorus.transform.localPosition.z);
@@ -52,7 +52,7 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
             GameObject pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             pole.transform.localPosition = position;
             pole.transform.up = offset;
-            pole.transform.localScale = scale;
+            pole.transform.localScale = scale;*/
 
             //Debug.Log("making torus id: " + newTorus.name);
 
