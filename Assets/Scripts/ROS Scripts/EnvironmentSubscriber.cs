@@ -43,7 +43,7 @@ public class EnvironmentSubscriber : ROSBridgeSubscriber
         }
 
         EnvironmentMsg pose = (EnvironmentMsg)msg;
-        cart.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x, pose._y, pose._z);
-        //cart.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
+        cart.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x+0.5f, pose._y+0.1f, pose._z - 0.95f);
+        cart.transform.localRotation = Quaternion.AngleAxis(WorldProperties.RosRotationToWorldYaw(pose._x_rot, pose._y_rot, pose._z_rot, pose._w_rot), Vector3.up);
     }
 }

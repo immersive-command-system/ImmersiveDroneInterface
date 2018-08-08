@@ -6,8 +6,9 @@ using SimpleJSON;
 using UnityEngine;
 using ISAACS;
 
-public class ROSDroneSubscriber : ROSBridgeSubscriber
+public class DronePositionSubscriber : ROSBridgeSubscriber
 {
+
     public new static string GetMessageTopic()
     {
         return "/state/position_velocity";
@@ -31,7 +32,8 @@ public class ROSDroneSubscriber : ROSBridgeSubscriber
         if (robot != null)
         {
             DronePositionMsg pose = (DronePositionMsg)msg;
-            robot.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x, pose._y, pose._z);
+            robot.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x, pose._y, pose._z) + 
+                WorldProperties.droneModelOffset;
             //robot.transform.rotation = Quaternion.AngleAxis(-pose.getTheta() * 180.0f / 3.1415f, Vector3.up);
         } else {
             Debug.Log("The RosDroneSubscriber script can't find the robot.");

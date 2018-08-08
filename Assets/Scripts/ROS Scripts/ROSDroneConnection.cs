@@ -18,7 +18,7 @@ public class ROSDroneConnection : MonoBehaviour
         ros = new ROSBridgeWebSocketConnection("ws://192.168.0.133", 9090);
         ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(EnvironmentSubscriber));
-        ros.AddSubscriber(typeof(ROSDroneSubscriber));
+        ros.AddSubscriber(typeof(DronePositionSubscriber));
         ros.AddPublisher(typeof(UserpointPublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();
