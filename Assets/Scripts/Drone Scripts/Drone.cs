@@ -65,7 +65,7 @@
             if (waypoints.Count < 1)
             {
                 //Creating the starter waypoint
-                Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.position);
+                Waypoint startWaypoint = new Waypoint(this, new Vector3(0, 1, 0));
 
                 // Otherwise, this is the first waypoint.
                 startWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
@@ -83,7 +83,7 @@
                 waypoints.Add(startWaypoint);
                 waypointsOrder.Add(startWaypoint);
 
-                // Send a sepcial Userpoint message marking this as the start
+                // Send a special Userpoint message marking this as the start
                 UserpointInstruction msg = new UserpointInstruction(
                     startWaypoint.id,
                     "DRONE",
