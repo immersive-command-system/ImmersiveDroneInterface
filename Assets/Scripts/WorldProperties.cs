@@ -12,28 +12,40 @@
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
         public GameObject torus;
-        public GameObject cart;
 
         public static Shader clipShader;
+
         public static Dictionary<char, Drone> dronesDict;
+        public static Dictionary<char, GameObject> hoopsDict;
+
         public static Drone selectedDrone;
-        public static char nextDroneId;
+
         public static GameObject worldObject; // Refers to the ground
+
         public static Vector3 actualScale;
         public static Vector3 currentScale;
+
         public static Vector3 droneModelOffset;
+        public static Vector3 torusModelOffset;
+
         private static float maxHeight;
+
+        public static char nextDroneId;
 
         // Use this for initialization
         void Start()
         {
             selectedDrone = null;
             dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
+            hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
             nextDroneId = 'A'; // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
             worldObject = gameObject;
             actualScale = new Vector3(1, 1, 1);
             currentScale = new Vector3(1, 1, 1);
+
             droneModelOffset = new Vector3(0.0044f, -0.0388f, 0.0146f);
+            torusModelOffset = new Vector3(0f, -0.3175f, 0f);
+
             maxHeight = 5;
             clipShader = GameObject.FindWithTag("Ground").GetComponent<Renderer>().material.shader;
             NewDrone();

@@ -9,25 +9,30 @@ namespace ROSBridgeLib
     {
         public class EnvironmentMsg : ROSBridgeMsg
         {
-            public float _x, _y, _z;
-            public float _x_rot, _y_rot, _z_rot, _w_rot;
+            public string id_;
+            public float x_, y_, z_;
+            public float x_rot_, y_rot_, z_rot_, w_rot_;
 
             public EnvironmentMsg(JSONNode msg)
             {
-                _x = float.Parse(msg["pose"]["position"]["x"]);
-                _y = float.Parse(msg["pose"]["position"]["y"]);
-                _z = float.Parse(msg["pose"]["position"]["z"]);
-                _x_rot = float.Parse(msg["pose"]["orientation"]["x"]);
-                _y_rot = float.Parse(msg["pose"]["orientation"]["y"]);
-                _z_rot = float.Parse(msg["pose"]["orientation"]["z"]);
-                _w_rot = float.Parse(msg["pose"]["orientation"]["z"]);
+
+                id_ = msg["transforms"][0]["child_frame_id"];
+
+                x_ = float.Parse(msg["transforms"][0]["transform"]["translation"]["x"]);
+                y_ = float.Parse(msg["transforms"][0]["transform"]["translation"]["y"]);
+                z_ = float.Parse(msg["transforms"][0]["transform"]["translation"]["z"]);
+
+                x_rot_ = float.Parse(msg["transforms"][0]["transform"]["rotation"]["x"]);
+                y_rot_ = float.Parse(msg["transforms"][0]["transform"]["rotation"]["y"]);
+                z_rot_ = float.Parse(msg["transforms"][0]["transform"]["rotation"]["z"]);
+                w_rot_ = float.Parse(msg["transforms"][0]["transform"]["rotation"]["w"]);
             }
 
             public EnvironmentMsg(float x, float y, float z)
             {
-                _x = x;
-                _y = y;
-                _z = z;
+                x_ = x;
+                y_ = y;
+                z_ = z;
             }
         }
     }
