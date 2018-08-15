@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Shape1340Mat
-  m_Shader: {fileID: 4800000, guid: a5d107dfc11eb5849854d581570b19d8, type: 3}
+  m_Shader: {fileID: 4800000, guid: 1fcc87ee6842ca24b959af6afaabec10, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -22,5 +22,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Floats: []
-    m_Colors: []
+    m_Floats:
+    - _Glossiness: 0.5
+    - _GridSpacing: 10
+    - _GridStep: 10
+    - _GridThickness: 0.01
+    - _GridWidth: 1
+    - _Metallic: 0
+    m_Colors:
+    - _BaseColour: {r: 0, g: 0, b: 0, a: 0}
+    - _Color: {r: 0.1799308, g: 0.7836772, b: 0.9411765, a: 1}
+    - _GridColour: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}

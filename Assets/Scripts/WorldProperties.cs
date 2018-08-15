@@ -13,16 +13,27 @@
     {
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
+        public GameObject torus;
+
         public static Shader clipShader;
+
         public static Dictionary<char, Drone> dronesDict;
+        public static Dictionary<char, GameObject> hoopsDict;
+
         public static Drone selectedDrone;
-        public static char nextDroneId;
+
         public static GameObject worldObject; // Refers to the ground
+
         public static Vector3 actualScale;
         public static Vector3 currentScale;
-        private static float maxHeight;
 
-        public GameObject torus;
+        public static Vector3 droneModelOffset;
+        public static Vector3 torusModelOffset;
+
+        private static float maxHeight;
+        public static char nextDroneId;
+
+
         public static List<GameObject> obstacles;
         public static TextAsset asset; //used in ROSDroneSubscriber
         public static GameObject closestObstacle;
@@ -30,17 +41,20 @@
         public static HashSet<int> obstacleids; //used in ObstacleSubscriber
         public static List<string> obstacleDistsToPrint;
 
-
-
         // Use this for initialization
         void Start()
         {
             selectedDrone = null;
             dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
+            hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
             nextDroneId = 'A'; // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
             worldObject = gameObject;
             actualScale = new Vector3(1, 1, 1);
             currentScale = new Vector3(1, 1, 1);
+
+            droneModelOffset = new Vector3(0.0044f, -0.0388f, 0.0146f);
+            torusModelOffset = new Vector3(0f, -0.3175f, 0f);
+
             maxHeight = 5;
             clipShader = GameObject.FindWithTag("Ground").GetComponent<Renderer>().material.shader;
 
@@ -90,6 +104,70 @@
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
                 selectedDrone = newDrone;
             }
+        }
+
+        /// <summary>
+        /// Converts the worldPosition vector to the ROSPosition vector
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static Vector3 WorldSpaceToRosSpace(Vector3 worldPosition)
+        {
+            return new Vector3(
+                -worldPosition.x,
+                -worldPosition.z,
+                worldPosition.y - 0.148f
+                );
+        }
+
+        /// <summary>
+        /// Converts the ROSPosition to WorldPosition
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static Vector3 RosSpaceToWorldSpace(Vector3 ROSPosition)
+        {
+            return new Vector3(
+                -ROSPosition.x,
+                ROSPosition.z + 0.148f,
+                -ROSPosition.y
+                );
+        }
+
+        /// <summary>
+        /// Converts the ROSPosition to WorldPosition
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static Vector3 RosSpaceToWorldSpace(float pose_x, float pose_y, float pose_z)
+        {
+            return new Vector3(
+                -pose_x,
+                pose_z + 0.148f,
+                -pose_y
+                );
+        }
+
+        /// <summary>
+        /// Converts the ROSRotation to a yaw angle
+        /// </summary>
+        /// <param name="worldPosition"></param>
+        /// <returns></returns>
+        public static float RosRotationToWorldYaw(float pose_x_rot, float pose_y_rot, float pose_z_rot, float pose_w_rot)
+        {
+            Quaternion q = new Quaternion(
+                pose_x_rot,
+                pose_y_rot,
+                pose_z_rot,
+                pose_w_rot
+                );
+
+            float sqw = q.w * q.w;
+            float sqz = q.z * q.z;
+            float yaw = 57.2958f * (float)Mathf.Atan2(2f * q.x * q.w + 2f * q.y * q.z, 1 - 2f * (sqz + sqw));
+
+            Debug.Log(yaw);
+            return yaw;
         }
 
         public static void FindClosestObstacleAndDist()

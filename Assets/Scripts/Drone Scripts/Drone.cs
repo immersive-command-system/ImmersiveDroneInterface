@@ -65,7 +65,7 @@
             if (waypoints.Count < 1)
             {
                 //Creating the starter waypoint
-                Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.position);
+                Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.TransformPoint(new Vector3(0,1,0)));
 
                 // Otherwise, this is the first waypoint.
                 startWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
@@ -83,14 +83,9 @@
                 waypoints.Add(startWaypoint);
                 waypointsOrder.Add(startWaypoint);
 
-                // Send a sepcial Userpoint message marking this as the start
+                // Send a special Userpoint message marking this as the start
                 UserpointInstruction msg = new UserpointInstruction(
-                    startWaypoint.id,
-                    "DRONE",
-                    gameObjectPointer.transform.position.x,
-                    gameObjectPointer.transform.position.y,
-                    gameObjectPointer.transform.position.z,
-                    "ADD");
+                    startWaypoint.id, "DRONE", 0, 1, 0, "ADD");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
             } else
             {
@@ -108,7 +103,7 @@
                 waypointsOrder.Add(newWaypoint);
             }
 
-            //Send a ROS ADD Update only if this is not the initial waypoint
+            // Send a generic ROS ADD Update only if this is not the initial waypoint
             if (prev_id != "DRONE") {
                 UserpointInstruction msg = new UserpointInstruction(newWaypoint, "ADD");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);

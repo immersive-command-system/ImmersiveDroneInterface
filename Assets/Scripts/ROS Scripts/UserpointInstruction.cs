@@ -37,20 +37,11 @@ namespace ROSBridgeLib
                 curr_id = sendPoint.id;
                 prev_id = sendPoint.prevPathPoint.id;
 
-                Vector3 rosPos = WorldSpaceToRosSpace(sendPoint.gameObjectPointer.transform.localPosition);
+                Vector3 rosPos = WorldProperties.WorldSpaceToRosSpace(sendPoint.gameObjectPointer.transform.localPosition);
                 x = (double) rosPos.x;
                 y = (double) rosPos.y;
                 z = (double) rosPos.z;
                 action = action_;
-            }
-
-            private Vector3 WorldSpaceToRosSpace(Vector3 worldPosition)
-            {
-                return new Vector3(
-                    -worldPosition.x,
-                    -worldPosition.z,
-                    worldPosition.y - 0.148f
-                    );
             }
 
             public override string ToYAMLString()
