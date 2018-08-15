@@ -428,7 +428,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 146794962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca9d0ba830a405941937d80884a54e0e, type: 3}
+  m_Script: {fileID: 11500000, guid: aebd008abee601a489d49b2b7b8a3328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &146794967
@@ -446,7 +446,7 @@ MonoBehaviour:
     type: 2}
   waypointBaseObject: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801,
     type: 2}
-  torus: {fileID: 100000, guid: 668430bb1b9de6c45a5b24a8e7718cba, type: 3}
+  torus: {fileID: 1895450155305386, guid: ba09a8628d2ed474786002f92e987b58, type: 2}
 --- !u!1 &170587474 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1120882164139808, guid: 600b706cd94b8cb41828739494015818,
