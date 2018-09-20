@@ -32,7 +32,7 @@
         //This tells us if the map is still moving or being dragged
         public enum MapState
         {
-            IDLE, DRAGGING, MOVING, ROTATING
+            IDLE, DRAGGING, MOVING, ROTATING, SCALING
         }
         // The radius of the table (assuming the table is circular)
         public float tableRadius;
@@ -261,7 +261,13 @@
                 // finally, actually perform the scale/translation
                 transform.localScale = endScale;
                 transform.position = FinalPosition;
+                mapState = MapState.SCALING;
             }
+            else if (mapState == MapState.SCALING)
+            {
+                mapState = MapState.IDLE;
+            }
+
         }
 
         private void UpdateScale()

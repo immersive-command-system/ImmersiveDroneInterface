@@ -14,7 +14,7 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING}; // These are the possible values for the controller's state
+        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, DELETING}; // These are the possible values for the controller's state
         public static ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
         public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
@@ -93,6 +93,7 @@
                 if (OVRInput.GetDown(OVRInput.Button.Two))
                 {
                     UndoAndDeleteWaypoints();
+                    //currentControllerState = ControllerState.IDLE;
                 }
 
                 //PRIMARY PLACEMENT
@@ -240,7 +241,7 @@
         /// <summary>
         /// Checks to see if we are scaling (actual scaling code is in Map Interactions)
         /// </summary>
-        private void ScalingChecks()
+        /*private void ScalingChecks()
         {
             if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
             {
@@ -249,7 +250,7 @@
             {
                 currentControllerState = ControllerState.IDLE;
             }
-        }
+        }*/
 
         /// <summary>
         /// This handles the Selection Pointer toggling, which is activated by the right grip trigger.
@@ -446,7 +447,7 @@
             // Make sure the currently selected drone has waypoints
             if (currentlySelectedDrone.waypoints != null && currentlySelectedDrone.waypoints.Count > 0)
             {
-                currentControllerState = ControllerState.DELETING;
+               // currentControllerState = ControllerState.DELETING;
 
                 //Checking to see if we are colliding with one of those
                 if (mostRecentCollision.type == CollisionType.WAYPOINT && currentlySelectedDrone.waypoints.Contains(mostRecentCollision.waypoint))
@@ -466,7 +467,6 @@
                     mostRecentCollision.type = CollisionType.NOTHING;
                     mostRecentCollision.waypoint = null;
 
-                    currentControllerState = ControllerState.IDLE;
                 }
                 else
                 {
@@ -491,8 +491,6 @@
                     // Delete the waypoint
                     currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
                 }
-                currentControllerState = ControllerState.IDLE;
-
             }
         }
 

@@ -85,22 +85,21 @@
         IEnumerator TutorialCoroutine()
         {
             yield return new WaitForSecondsRealtime(seconds);
+            
             currentTutorialState = TutorialState.INTRO;
             introAudio.Play();
             yield return new WaitForSecondsRealtime(introAudio.clip.length);
             envAudio.Play();
             yield return new WaitForSecondsRealtime(envAudio.clip.length);
-            currentTutorialState = TutorialState.DONE;
+            
+            currentTutorialState = TutorialState.MOVINGMAP;
+            yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
 
+            currentTutorialState = TutorialState.ROTATINGMAP;
+            yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
 
-            /*    currentTutorialState = TutorialState.MOVINGMAP;
-                yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
-
-                currentTutorialState = TutorialState.ROTATINGMAP;
-                yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
-
-                currentTutorialState = TutorialState.SCALINGMAP;
-                yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
+            currentTutorialState = TutorialState.SCALINGMAP;
+            yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
                 
             currentTutorialState = TutorialState.PRIMARYPLACEMENT;
             yield return StartCoroutine(TutorialStep(primaryPlacementAudio, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, null, 1));
@@ -116,12 +115,12 @@
 
             currentTutorialState = TutorialState.SECONDARYPLACEMENT;
             yield return StartCoroutine(TutorialStep(secondaryPlacementAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, rightToggling.ChangeButtonToTooltip(VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip), 1));
-
+            
             currentTutorialState = TutorialState.UNDOANDDELETE;
             yield return StartCoroutine(TutorialStep(undoAndDeleteAudio, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip, null, 1));
 
             currentTutorialState = TutorialState.DONE; 
-            */
+            
 
         }
 
@@ -168,7 +167,8 @@
             if (controller <= 0) {
                 ChangeTooltipColorDuringTutorialStep(leftToggling, leftToggling.ChangeButtonToTooltip(button));
                 leftTooltips.ToggleTips(true, button);
-            } else if (controller >= 0) {
+            }
+            if (controller >= 0) {
                 if (tooltip != null) {
                     ChangeTooltipColorDuringTutorialStep(rightToggling, tooltip);
                     rightTooltips.ToggleTips(true, rightToggling.ChangeTooltipToButton(tooltip));
@@ -189,7 +189,7 @@
                 ChangeTooltipColorAfterTutorialStep(leftToggling, leftToggling.ChangeButtonToTooltip(button));
                 leftTooltips.ToggleTips(false, button);
             }
-            else if (controller >= 0)
+            if (controller >= 0)
             {
                 if (tooltip != null)
                 {
@@ -248,12 +248,12 @@
                     }
                     break;
                 case Tutorial.TutorialState.SCALINGMAP:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.SCALING) {
+                    if (MapInteractions.mapState == MapInteractions.MapState.SCALING) {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.PRIMARYPLACEMENT:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.POINTING) {
+                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.PLACING_WAYPOINT) {
                         stepFinished = true;
                     }
                     break;
@@ -278,9 +278,10 @@
                     }
                     break;
                 case Tutorial.TutorialState.UNDOANDDELETE:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.DELETING) {
-                        stepFinished = true;
-                    }
+                    //having issues with ControllerState.DELETING on when to set it back to IDLE, so for now since this is the last tutorial step, just going to have it automatically say it's done
+                    //if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.DELETING) { 
+                    stepFinished = true;
+                   // }
                     break;
                /* case Tutorial.TutorialState.DONE:
                     Debug.Log("loading Main scene");
