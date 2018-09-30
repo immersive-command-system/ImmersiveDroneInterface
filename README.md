@@ -33,4 +33,5 @@ These commands will handle updating of the ROS submodules. Run them from the top
 
 [VRTK Documentation](https://vrtoolkit.readme.io/docs)
 
+[VRTK Releases](https://github.com/thestonefox/VRTK/releases)
 
