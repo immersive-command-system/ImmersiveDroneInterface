@@ -73,9 +73,6 @@
                 //prevPoint = referenceDrone.gameObjectPointer;
             }
 
-
-
-
             // Sets up interaction events
             GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += new InteractableObjectEventHandler(InteractableObjectUngrabbed);
         }
