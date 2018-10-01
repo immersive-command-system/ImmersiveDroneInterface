@@ -132,17 +132,8 @@
                 endpoint = prevPoint.transform.position;
                 LineProperties.SetPosition(1, endpoint);
 
-                // If line being selected by controller
-                if (controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject && referenceDrone.selected)
-                {
-                    LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
-                    LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 100;
-                }
-                else
-                {
-                    LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
-                    LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
-                }
+                LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
             }
         }
         
@@ -213,9 +204,8 @@
                 {
                     LineProperties.material = unselectedPassedLine;
                 }
-            } else if ((controller.GetComponent<VRTK_StraightPointerRenderer>().lineSelected == this.gameObject || 
-                (controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint != null && 
-                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == this.gameObject)) && 
+            } else if (( controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint != null && 
+                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == this.gameObject) && 
                 referenceDrone.selected)
             {
                 LineProperties.material = unpassedWaypoint;

@@ -24,7 +24,7 @@
         public GameObject controller_right; // Our right controller
         private GameObject controller; //needed to access pointer
 
-        public GameObject sphereVRTK;
+        public GameObject grabZone;
         private static GameObject placePoint; // Place waypoint in front of controller
 
         private Waypoint currentWaypoint; // The current waypoint we are trying to place
@@ -37,7 +37,7 @@
         public Material placePointMaterial;
 
         /// <summary>
-        /// The start method initializes all necessary variables and creates the selection zone (sphereVRTK) and the place point
+        /// The start method initializes all necessary variables and creates the selection zone (grabZone) and the place point
         /// </summary>
         public void Start()
         {
@@ -50,7 +50,7 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             currentControllerState = ControllerState.IDLE;
 
-            // Creating the sphereVRTK
+            // Creating the grabZone
             this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
             gameObject.GetComponent<SphereCollider>().radius = 0.040f;
             GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -59,11 +59,11 @@
             tempSphere.transform.parent = this.gameObject.transform;
             tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
             this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
-            tempSphere.gameObject.name = "sphereVRTK";
+            tempSphere.gameObject.name = "grabZone";
             Renderer tempRend = tempSphere.GetComponent<Renderer>();
             tempRend.material = opaqueMaterial;
             tempSphere.GetComponent<SphereCollider>().isTrigger = true;
-            sphereVRTK = tempSphere;
+            grabZone = tempSphere;
             
             // Creating the placePoint
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -116,7 +116,7 @@
                 {
                     mostRecentCollision.waypoint = null;
                     mostRecentCollision.type = CollisionType.NOTHING;
-                    //Debug.Log("There is nothing in the grab zone - " + mostRecentCollision);
+                    Debug.Log("There is nothing in the grab zone - " + mostRecentCollision);
                 }
             }
 
@@ -132,13 +132,13 @@
                 if (possibleWaypointCollision != null)
                 {
                     mostRecentCollision = possibleWaypointCollision;
-                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                 }
                 else
                 {
                     // If we did not find any waypoints, we look for the first line collision
                     mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
-                    //Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
+                    Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
                 }
             }
         }
@@ -220,6 +220,8 @@
                 // Updating to note that we are currently grabbing a waypoint
                 grabbedWaypoint = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject().GetComponent<WaypointProperties>().classPointer;
                 currentControllerState = ControllerState.GRABBING;
+
+                Debug.Log("Grabbing!");
             }
             else if (currentControllerState == ControllerState.GRABBING &&
               controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
@@ -282,7 +284,7 @@
         /// </summary>
         private void toggleRaycastOn()
         {
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            GameObject.Find("grabZone").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
             placePoint.SetActive(false); // Prevents placePoint from blocking raycast
             controller.GetComponent<VRTK_Pointer>().Toggle(true);
         }
@@ -294,7 +296,7 @@
         {
             controller.GetComponent<VRTK_Pointer>().Toggle(false);
             placePoint.SetActive(true); // turn placePoint back on
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+            GameObject.Find("grabZone").GetComponent<SphereCollider>().enabled = true;
         }
 
         /// <summary>
@@ -350,9 +352,11 @@
             // Initializing groundPoint when pointing and pressing index trigger
             if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
+                if (controller.GetComponent<VRTK_Pointer>().IsStateValid() && 
+                    controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point.y < WorldProperties.placementPlane.transform.position.y+0.1)
+
                 {
-                    Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+                    Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point;
                     currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
                     currentControllerState = ControllerState.SETTING_HEIGHT;
                 }
@@ -370,18 +374,7 @@
         /// <param name="newWaypoint"></param>
         private void AdjustHeight(Waypoint newWaypoint)
         {
-            GameObject newWaypointGameObject = newWaypoint.gameObjectPointer;
-            float groundX = newWaypointGameObject.transform.position.x;
-            float groundY = newWaypointGameObject.transform.position.y;
-            float groundZ = newWaypointGameObject.transform.position.z;
-            float localX = controller.transform.position.x;
-            float localY = controller.transform.position.y;
-            float localZ = controller.transform.position.z;
-            float height = 2.147f + (float)Distance(groundX, groundZ, 0f, 0f, localX, localZ) * (float)Math.Tan(Math.PI * (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x));
-            float heightMin = 2.3f + WorldProperties.actualScale.y / 200; //mesh height = 2.147
-
-            height = Math.Min(WorldProperties.GetMaxHeight(), Math.Max(heightMin, height));
-            newWaypointGameObject.transform.position = new Vector3(groundX, height, groundZ);
+            // Insert plane logic
         }
 
         /// <summary>
