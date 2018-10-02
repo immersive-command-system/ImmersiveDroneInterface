@@ -26,6 +26,7 @@
 
         public GameObject grabZone;
         private static GameObject placePoint; // Place waypoint in front of controller
+        private GameObject heightSelectionPlane;
 
         private Waypoint currentWaypoint; // The current waypoint we are trying to place
         private Waypoint grabbedWaypoint; // The current waypoint we are grabbing and moving
@@ -35,6 +36,7 @@
         public Material opaqueMaterial;
         public Material adjustMaterial;
         public Material placePointMaterial;
+        public Material heightSelectionPlaneMaterial;
 
         /// <summary>
         /// The start method initializes all necessary variables and creates the selection zone (grabZone) and the place point
@@ -71,6 +73,16 @@
             placePoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
             placePoint.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
             placePoint.SetActive(true);
+
+            // Creating the heightSelectionPlane
+            heightSelectionPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            heightSelectionPlane.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
+            heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
+            heightSelectionPlane.transform.localScale = new Vector3(10f, 10f, 10f);
+            heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
+            heightSelectionPlane.gameObject.name = "heightSelectionPlane";
+            heightSelectionPlane.layer = 8;
+            heightSelectionPlane.SetActive(false);
         }
 
         /// <summary>
@@ -341,6 +353,8 @@
             // Need to check this first so that it does not get triggered immediately after setting the ground sdfpoint
             if (currentControllerState == ControllerState.SETTING_HEIGHT && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
+                heightSelectionPlane.SetActive(false);
+                grabZone.SetActive(true);
                 currentControllerState = ControllerState.POINTING;
 
                 if (!OVRInput.Get(OVRInput.RawButton.RHandTrigger))
@@ -358,6 +372,8 @@
                 {
                     Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point;
                     currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
+                    heightSelectionPlane.SetActive(true);
+                    grabZone.SetActive(false);
                     currentControllerState = ControllerState.SETTING_HEIGHT;
                 }
             }
@@ -374,7 +390,24 @@
         /// <param name="newWaypoint"></param>
         private void AdjustHeight(Waypoint newWaypoint)
         {
-            // Insert plane logic
+            // Bit shift the index of the layer (8) to get a bit mask
+            int layerMask = 1 << 8;
+
+            // This would cast rays only against colliders in layer 8.
+            // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+            layerMask = ~layerMask;
+
+            Vector3 currentPosition = newWaypoint.gameObjectPointer.transform.position;
+            Ray ray = new Ray(currentPosition, Vector3.up);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask)) {
+                if (hit.rigidbody != null) {
+                    if(hit.rigidbody.gameObject.name == "heightSelectionPlane")
+                    newWaypoint.gameObjectPointer.transform.position = new Vector3(currentPosition.x,
+                                                                                   hit.point.y,
+                                                                                   currentPosition.z);
+                }
+            }
         }
 
         /// <summary>
