@@ -52,13 +52,11 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             currentControllerState = ControllerState.IDLE;
 
-            // Creating the grabZone
-            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
+            // Creating the grabZone GameObject with offset
             GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            tempSphere.transform.parent = this.gameObject.transform;
             this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
             tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
-            tempSphere.transform.parent = this.gameObject.transform;
             tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
             this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
             tempSphere.gameObject.name = "grabZone";
@@ -66,6 +64,11 @@
             tempRend.material = opaqueMaterial;
             tempSphere.GetComponent<SphereCollider>().isTrigger = true;
             grabZone = tempSphere;
+
+            // Creating the grabZone collider with offset
+            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
+            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
+            gameObject.GetComponent<SphereCollider>().center = new Vector3(0F, 0F, 0.1F);
             
             // Creating the placePoint
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -90,9 +93,6 @@
         /// </summary>
         void Update()
         {
-            // COLLISIONS UPDATE
-            CollisionsUpdate();
-
             // SELECTION POINTER  
             SelectionPointerChecks();
 
@@ -116,46 +116,6 @@
         }
 
         /// <summary>
-        /// This method updates the mostRecentCollision, used for adaptive controller interactions
-        /// </summary>
-        private void CollisionsUpdate()
-        {
-            // Check if there are no objects in the selection zone
-            if (currentCollisions.Count == 0)
-            {
-                // We note that there is nothing in the selection zone
-                if (mostRecentCollision.waypoint != null || mostRecentCollision.type != CollisionType.NOTHING)
-                {
-                    mostRecentCollision.waypoint = null;
-                    mostRecentCollision.type = CollisionType.NOTHING;
-                    Debug.Log("There is nothing in the grab zone - " + mostRecentCollision);
-                }
-            }
-
-            // Otherwise, we check if the lastSelected Object is still in the selection zone
-            else if (!currentCollisions.Any(x => x.waypoint == mostRecentCollision.waypoint))
-            {
-                // If the mostRecentCollision.waypoint isn't in the selection zone anymore, we need to grab the next most recent collision
-
-                // We prioritize the most recent waypoint collision
-                // Because we add to the end of the list, we need to grab the last waypoint on the list
-                CollisionPair possibleWaypointCollision = currentCollisions.FindLast(collision => collision.type == CollisionType.WAYPOINT);
-
-                if (possibleWaypointCollision != null)
-                {
-                    mostRecentCollision = possibleWaypointCollision;
-                    Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
-                }
-                else
-                {
-                    // If we did not find any waypoints, we look for the first line collision
-                    mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
-                    Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
-                }
-            }
-        }
-
-        /// <summary>
         /// This function handles objects entering the selection zone for adapative interactions
         /// </summary>
         /// <param name="currentCollider"> This is the collider that our selection zone is intersecting with </param>
@@ -171,7 +131,7 @@
                     
                     // We automatically default to the most recent waypointCollision
                     mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
-                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    ////Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                     currentCollisions.Add(mostRecentCollision);
                 }
             }
@@ -189,12 +149,6 @@
                 }
                 
             }
-
-            // MENU COLLISION
-            //else if (currentCollider.gameObject.tag == "DroneMenu")
-            //{
-            //    Debug.Log("Hit the menu");
-            //}
         }
 
         /// <summary>
@@ -203,6 +157,7 @@
         /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
         void OnTriggerExit(Collider currentCollider)
         {
+            CollisionsDebug();
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
@@ -219,6 +174,15 @@
 
                 //Debug.Log("A line is leaving the grab zone");
             }
+
+            if(currentCollisions.Count > 0)
+            {
+                mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
+            } else
+            {
+                mostRecentCollision = new CollisionPair(null, CollisionType.NOTHING);
+            }
+            
         }
 
         /// <summary>
@@ -316,8 +280,11 @@
         /// </summary>
         private void PrimaryPlacementChecks()
         {
-            // Checks for right index Pressed
-            if (currentControllerState == ControllerState.IDLE && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+            // Checks for right index Pressed and no waypoint in collision
+            if (currentControllerState == ControllerState.IDLE && 
+                OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
+                mostRecentCollision.type != CollisionType.WAYPOINT)
+
             {
                 currentWaypoint = CreateWaypoint(placePoint.transform.position);
 
@@ -531,20 +498,25 @@
         {
             return OVRInput.GetLocalControllerRotation(buttonType);
         }
-
+        
         /// <summary>
-        /// Finds the distance between the controller and the ground
+        /// Print statements to help debug the collisions logic.
         /// </summary>
-        /// <param name="groundX"></param>
-        /// <param name="groundZ"></param>
-        /// <param name="groundY"></param>
-        /// <param name="controllerY"></param>
-        /// <param name="controllerX"></param>
-        /// <param name="controllerZ"></param>
-        /// <returns></returns>
-        private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
+        private void CollisionsDebug()
         {
-            return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));
+            if (mostRecentCollision.waypoint != null)
+            {
+                Debug.Log("Most Recent Collision: " + mostRecentCollision.type + ", " + mostRecentCollision.waypoint.id);
+            }
+           
+            string debugString = "All Current Collisions: {";
+            foreach (CollisionPair collision in currentCollisions)
+            {
+                debugString += "(" + collision.type + ", " + collision.waypoint.id + ")";
+            }
+
+            debugString += "}";
+            Debug.Log(debugString);
         }
 
         /// <summary>
