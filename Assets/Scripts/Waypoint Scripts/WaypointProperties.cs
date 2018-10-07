@@ -243,7 +243,7 @@
             CreateGroundpoint();
         }
 
-        public void deleteLineCollider()
+        public void DeleteLineCollider()
         {
             Destroy(this.lineCollider.gameObject);
         }

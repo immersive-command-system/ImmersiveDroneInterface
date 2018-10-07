@@ -78,10 +78,10 @@
             placePoint.SetActive(true);
 
             // Creating the heightSelectionPlane
-            heightSelectionPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            heightSelectionPlane = GameObject.CreatePrimitive(PrimitiveType.Cube);
             heightSelectionPlane.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
-            heightSelectionPlane.transform.localScale = new Vector3(10f, 10f, 10f);
+            heightSelectionPlane.transform.localScale = new Vector3(10f, 0.01f, 10f);
             heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
             heightSelectionPlane.gameObject.name = "heightSelectionPlane";
             heightSelectionPlane.layer = 8;
@@ -113,6 +113,8 @@
                 // SECONDARY PLACEMENT
                 SecondaryPlacementChecks();
             }
+
+            //Debug.Log(currentControllerState);
         }
 
         /// <summary>
@@ -157,7 +159,7 @@
         /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
         void OnTriggerExit(Collider currentCollider)
         {
-            CollisionsDebug();
+            //CollisionsDebug();
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
@@ -260,7 +262,8 @@
         /// </summary>
         private void toggleRaycastOn()
         {
-            GameObject.Find("grabZone").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            controller_right.GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            grabZone.SetActive(false);
             placePoint.SetActive(false); // Prevents placePoint from blocking raycast
             controller.GetComponent<VRTK_Pointer>().Toggle(true);
         }
@@ -272,7 +275,8 @@
         {
             controller.GetComponent<VRTK_Pointer>().Toggle(false);
             placePoint.SetActive(true); // turn placePoint back on
-            GameObject.Find("grabZone").GetComponent<SphereCollider>().enabled = true;
+            grabZone.SetActive(true);
+            controller_right.GetComponent<SphereCollider>().enabled = true; // This prevents the raycast from colliding with the grab zone
         }
 
         /// <summary>
@@ -316,12 +320,10 @@
         /// </summary>
         private void SecondaryPlacementChecks()
         {
-            // Ending the height adjustment by pressing index after setting ground point 
-            // Need to check this first so that it does not get triggered immediately after setting the ground sdfpoint
+            // Ending the height adjustment
             if (currentControllerState == ControllerState.SETTING_HEIGHT && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                heightSelectionPlane.SetActive(false);
-                grabZone.SetActive(true);
+                toggleHeightPlaneOff();
                 currentControllerState = ControllerState.POINTING;
 
                 if (!OVRInput.Get(OVRInput.RawButton.RHandTrigger))
@@ -339,16 +341,39 @@
                 {
                     Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point;
                     currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
-                    heightSelectionPlane.SetActive(true);
-                    grabZone.SetActive(false);
+                    toggleHeightPlaneOn();
                     currentControllerState = ControllerState.SETTING_HEIGHT;
                 }
             }
-            // Adjusting the height for secondary placement
+            // Adjusting the height after groundpoint has been placed
             if (currentControllerState == ControllerState.SETTING_HEIGHT)
             {
                 AdjustHeight(currentWaypoint);
             }
+        }
+
+        /// <summary>
+        /// Turn the height plane on
+        /// </summary>
+        private void toggleHeightPlaneOn()
+        {
+            controller_right.GetComponent<SphereCollider>().enabled = false; 
+            grabZone.SetActive(false);
+            placePoint.SetActive(false); 
+            controller.GetComponent<VRTK_Pointer>().Toggle(false);
+            heightSelectionPlane.SetActive(true);
+        }
+
+        /// <summary>
+        /// Turn the height plane off
+        /// </summary>
+        private void toggleHeightPlaneOff()
+        {
+            controller.GetComponent<VRTK_Pointer>().Toggle(true);
+            placePoint.SetActive(false);
+            grabZone.SetActive(false);
+            controller_right.GetComponent<SphereCollider>().enabled = false;
+            heightSelectionPlane.SetActive(false);
         }
 
         /// <summary>
@@ -360,20 +385,26 @@
             // Bit shift the index of the layer (8) to get a bit mask
             int layerMask = 1 << 8;
 
-            // This would cast rays only against colliders in layer 8.
-            // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
-            layerMask = ~layerMask;
+            Vector3 waypointLocation = newWaypoint.gameObjectPointer.transform.position;
+        
+            RaycastHit upHit;
+            RaycastHit downHit;
 
-            Vector3 currentPosition = newWaypoint.gameObjectPointer.transform.position;
-            Ray ray = new Ray(currentPosition, Vector3.up);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask)) {
-                if (hit.rigidbody != null) {
-                    if(hit.rigidbody.gameObject.name == "heightSelectionPlane")
-                    newWaypoint.gameObjectPointer.transform.position = new Vector3(currentPosition.x,
-                                                                                   hit.point.y,
-                                                                                   currentPosition.z);
-                }
+            if (Physics.Raycast(waypointLocation, Vector3.up, out upHit, Mathf.Infinity, layerMask))
+            {
+                Debug.DrawRay(waypointLocation, Vector3.up * upHit.distance, Color.yellow);
+                Debug.Log("Did Hit");
+                newWaypoint.gameObjectPointer.transform.position = upHit.point;
+            } else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
+            {
+                Debug.DrawRay(waypointLocation, -Vector3.up * downHit.distance, Color.yellow);
+                Debug.Log("Did Hit");
+                newWaypoint.gameObjectPointer.transform.position = downHit.point;
+            }
+            else
+            {
+                Debug.DrawRay(waypointLocation, Vector3.up * 1000, Color.white);
+                Debug.Log("Did not Hit from: " + waypointLocation + " in the direction of " + Vector3.up);
             }
         }
 
@@ -413,7 +444,6 @@
                 // If we don't have a line selected, we default to placing the new waypoint at the end of the path
                 else
                 {
-                    // Create a new waypoint at that location
                     Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
 
                     // Add the new waypoint to the drone's path
@@ -487,16 +517,6 @@
                 currentControllerState = ControllerState.IDLE;
 
             }
-        }
-
-        /// <summary>
-        /// Get local rotation of controller
-        /// </summary>
-        /// <param name="buttonType"></param>
-        /// <returns></returns>
-        public static Quaternion getLocalControllerRotation(OVRInput.Controller buttonType)
-        {
-            return OVRInput.GetLocalControllerRotation(buttonType);
         }
         
         /// <summary>
