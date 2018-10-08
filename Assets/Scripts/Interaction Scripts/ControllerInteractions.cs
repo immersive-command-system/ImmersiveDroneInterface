@@ -81,7 +81,7 @@
             heightSelectionPlane = GameObject.CreatePrimitive(PrimitiveType.Cube);
             heightSelectionPlane.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
-            heightSelectionPlane.transform.localScale = new Vector3(10f, 0.01f, 10f);
+            heightSelectionPlane.transform.localScale = new Vector3(10f, 0.0001f, 10f);
             heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
             heightSelectionPlane.gameObject.name = "heightSelectionPlane";
             heightSelectionPlane.layer = 8;
