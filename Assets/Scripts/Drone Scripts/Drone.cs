@@ -172,7 +172,7 @@
 
             // Removing line collider
             WaypointProperties tempProperties = deletedWaypoint.gameObjectPointer.GetComponent<WaypointProperties>();
-            tempProperties.deleteLineCollider();
+            tempProperties.DeleteLineCollider();
 
             // Deleting the waypoint gameObject
             Object.Destroy(deletedWaypoint.gameObjectPointer);

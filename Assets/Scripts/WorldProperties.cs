@@ -22,7 +22,8 @@
 
         public static Drone selectedDrone;
 
-        public static GameObject worldObject; // Refers to the ground
+        public static GameObject worldObject;
+        public static GameObject placementPlane;
 
         public static Vector3 actualScale;
         public static Vector3 currentScale;
@@ -49,6 +50,7 @@
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
             nextDroneId = 'A'; // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
             worldObject = gameObject;
+            placementPlane = GameObject.FindWithTag("Ground");
             actualScale = new Vector3(1, 1, 1);
             currentScale = new Vector3(1, 1, 1);
 
