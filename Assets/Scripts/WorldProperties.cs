@@ -108,6 +108,28 @@
             }
         }
 
+        public static IEnumerable<string> generateNextDroneID(string start = "")
+
+        {
+
+            StringBuilder chars = start == null ? new StringBuilder() : new StringBuilder(start);
+
+            while (true)
+            {
+                int i = chars.Length - 1;
+                while (i >= 0 && chars[i] == 'Z')
+                {
+                    chars[i] = 'A';
+                    i--;
+                }
+                if (i == -1)
+                    chars.Insert(0, 'A');
+                else
+                    chars[i]++;
+                yield return chars.ToString();
+            }
+        }
+
         /// <summary>
         /// Converts the worldPosition vector to the ROSPosition vector
         /// </summary>
