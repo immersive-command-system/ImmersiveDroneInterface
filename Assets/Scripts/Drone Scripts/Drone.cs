@@ -10,6 +10,7 @@
 
         public GameObject gameObjectPointer; // This is the related game object
         public string id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
+        public string groupID;
         public bool selected;
 
         public ArrayList waypoints; // All waypoints held by the drone
@@ -45,6 +46,8 @@
             // Updating the world properties to reflect a new drone being added
             id = WorldProperties.getNextDroneId();
             WorldProperties.dronesDict.Add(id, this);
+
+            groupID = null;
 
             // Select this drone
             this.Select();
@@ -199,6 +202,11 @@
                     otherDrone.selected = false;
                 }
             }
+        }
+
+        public void removeDroneFromGroup()
+        {
+            groupID = null;
         }
     }
 }

@@ -12,6 +12,13 @@
         public Color color;
         public string groupId;
 
+        public DroneGroup(string groupIdName, Dictionary<string, Drone> group)
+        {
+            groupId = groupIdName;
+            color = WorldProperties.getNextGroupColor(); //getNextGroupColor needs to be implemented
+            dronesDict = group;
+        }
+
         public DroneGroup(Dictionary<string, Drone> group)
         {
             dronesDict = group;

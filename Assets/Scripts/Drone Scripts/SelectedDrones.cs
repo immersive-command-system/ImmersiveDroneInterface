@@ -14,12 +14,14 @@ namespace ISAACS
         public Dictionary<string, Drone> individualDrones;
         public Dictionary<string, DroneGroup> groupedDrones;
         public Color color;
+        public bool oneDroneSelected;
 
         // since currently a drone is automatically spawned at the start
         public SelectedDrones(Drone initialDrone)
         {
             individualDrones[initialDrone.id] = initialDrone;
             color = WorldProperties.droneSelectionColor;
+            oneDroneSelected = true;
         }
 
         /// <summary>
@@ -96,23 +98,25 @@ namespace ISAACS
         /// </summary>
         private void createNewGroup()
         {
-            Dictionary<string, Drone> newGroup = new Dictionary<string, Drone>();
+            Dictionary<string, Drone> drones = new Dictionary<string, Drone>();
             string groupIdName = WorldProperties.getNextGroupId();
 
             foreach(KeyValuePair<string, Drone> entry in individualDrones)
             {
-                newGroup[entry.Key] = entry.Value;
+                entry.Value.groupID = groupIdName;
+                drones[entry.Key] = entry.Value;
             }
-            
+           
             foreach(DroneGroup group in groupedDrones.Values)
             {
                 foreach(KeyValuePair<string, Drone> entry in group.getDronesDict())
                 {
-                    newGroup[entry.Key] = entry.Value;
+                    entry.Value.groupID = groupIdName;
+                    drones[entry.Key] = entry.Value;
                 }
             }
 
-            WorldProperties.groupedDrones[WorldProperties.getNextGroupId()] = new DroneGroup(newGroup);
+            WorldProperties.groupedDrones[groupIdName] = new DroneGroup(groupIdName, drones);
             
         }
 
@@ -121,12 +125,11 @@ namespace ISAACS
         /// Ungroups the previously grouped drones that make up the selection if more than one drone/drone groups are selected and waypoint(s) are added for the drones.
         /// </summary>
         private void ungroupOldGroups()
-        {
+        { //don't change the drones' groupID's to be null, since the drones are now part of the new selectedDrones group
             foreach (string groupID in groupedDrones.Keys)
             {
                 WorldProperties.groupedDrones.Remove(groupID);
             }
-
         }
 
     }
