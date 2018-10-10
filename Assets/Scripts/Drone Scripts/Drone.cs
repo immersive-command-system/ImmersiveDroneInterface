@@ -10,8 +10,8 @@
 
         public GameObject gameObjectPointer; // This is the related game object
         public string id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
-        public string groupID;
-        public bool selected;
+        public string groupID = null;
+        public bool selected = false;
 
         public ArrayList waypoints; // All waypoints held by the drone
         public ArrayList waypointsOrder; // Keeps track of the order in which waypoints were created for the undo function
@@ -47,8 +47,6 @@
             id = WorldProperties.getNextDroneId();
             WorldProperties.dronesDict.Add(id, this);
 
-            groupID = null;
-
             // Select this drone
             this.Select();
 
@@ -67,7 +65,7 @@
             if (waypoints.Count < 1)
             {
                 //Creating the starter waypoint
-                Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.TransformPoint(new Vector3(0,1,0)));
+                Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.TransformPoint(new Vector3(0, 1, 0)));
 
                 // Otherwise, this is the first waypoint.
                 startWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
@@ -135,7 +133,7 @@
             // Inserting into the path linked list by adjusting the next and previous pointers of the surrounding waypoints
             newWaypoint.prevPathPoint = prevWaypoint;
             newWaypoint.nextPathPoint = prevWaypoint.nextPathPoint;
-            
+
             newWaypoint.prevPathPoint.nextPathPoint = newWaypoint;
             newWaypoint.nextPathPoint.prevPathPoint = newWaypoint;
 
@@ -190,23 +188,15 @@
                 this.gameObjectPointer.GetComponent<DroneProperties>().selectedMaterial;
             this.selected = true;
 
-            WorldProperties.selectedDrone = this;
-
-            // Check through all other drones and change their materials to deselected
-            foreach (Drone otherDrone in WorldProperties.dronesDict.Values)
-            {
-                if (otherDrone != this)
-                {
-                    otherDrone.gameObjectPointer.transform.Find("group3").Find("Outline").GetComponent<MeshRenderer>().material = 
-                        this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
-                    otherDrone.selected = false;
-                }
-            }
+            WorldProperties.selectedDrones.addDrone(this);
         }
 
-        public void removeDroneFromGroup()
+        public void Deselect()
         {
-            groupID = null;
+            WorldProperties.selectedDrones.deselectDrone(this);
+            this.selected = false;
+            this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
+                this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
         }
     }
 }

@@ -9,8 +9,13 @@
     {
 
         private Dictionary<string, Drone> dronesDict;
-        public Color color;
         public string groupId;
+        public Color color;
+        
+
+        // The following fields are for the purpose of having the group keep track of its waypoints.
+        // This makes displaying a group's waypoints easier.
+        public ArrayList waypoints; // All waypoints held by the group as a whole
 
         public DroneGroup(string groupIdName, Dictionary<string, Drone> group)
         {
@@ -24,6 +29,24 @@
             dronesDict = group;
             groupId = WorldProperties.getNextGroupId();
             color = WorldProperties.getNextGroupColor(); //getNextGroupColor needs to be implemented
+        }
+
+        public void AddWaypoint(Waypoint newWaypoint)
+        {
+            waypoints.Add(newWaypoint);
+            foreach (KeyValuePair<string, Drone> entry in dronesDict)
+            {
+                entry.Value.AddWaypoint(newWaypoint);
+            }
+        }
+
+        public void DeleteWaypoint(Waypoint toDeleteWaypoint)
+        {
+            waypoints.Remove(toDeleteWaypoint);
+            foreach (KeyValuePair<string, Drone> entry in dronesDict)
+            {
+                entry.Value.DeleteWaypoint(toDeleteWaypoint);
+            }
         }
 
         public List<string> getIDs()
