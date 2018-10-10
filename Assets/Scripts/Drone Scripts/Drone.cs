@@ -9,7 +9,7 @@
     {
 
         public GameObject gameObjectPointer; // This is the related game object
-        public char id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
+        public string id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
         public bool selected;
 
         public ArrayList waypoints; // All waypoints held by the drone
@@ -43,9 +43,8 @@
             waypointsDict = new Dictionary<string, Waypoint>();
 
             // Updating the world properties to reflect a new drone being added
-            id = WorldProperties.nextDroneId;
+            id = WorldProperties.getNextDroneId();
             WorldProperties.dronesDict.Add(id, this);
-            WorldProperties.nextDroneId++;
 
             // Select this drone
             this.Select();

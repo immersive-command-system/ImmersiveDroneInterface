@@ -3,6 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
     using UnityEditor;
     using UnityEngine;
 
@@ -17,10 +18,11 @@
 
         public static Shader clipShader;
 
-        public static Dictionary<char, Drone> dronesDict;
+        public static Dictionary<string, Drone> dronesDict;
         public static Dictionary<char, GameObject> hoopsDict;
 
-        public static Drone selectedDrone;
+        public static Dictionary<string, DroneGroup> groupedDrones;
+        public static SelectedDrones selectedDrones;
 
         public static GameObject worldObject;
         public static GameObject placementPlane;
@@ -32,8 +34,9 @@
         public static Vector3 torusModelOffset;
 
         private static float maxHeight;
-        public static char nextDroneId;
-
+        private static IEnumerator<string> nextDroneId;
+        private static int nextGroupIDNum;
+        private static Color nextGroupColor;
 
         public static List<GameObject> obstacles;
         public static TextAsset asset; //used in ROSDroneSubscriber
@@ -45,10 +48,13 @@
         // Use this for initialization
         void Start()
         {
-            selectedDrone = null;
-            dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
+            selectedDrones = null;
+            dronesDict = new Dictionary<string, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
-            nextDroneId = 'A'; // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
+            nextDroneId = generateNextDroneID().GetEnumerator(); // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
+            nextGroupIDNum = 0; //used for grouped drone IDs (format is "Group" + groupIDNum)
+            nextGroupColor = Color.blue; //arbitray right now; used so users can differentiate groups of drones
+
             worldObject = gameObject;
             placementPlane = GameObject.FindWithTag("Ground");
             actualScale = new Vector3(1, 1, 1);
@@ -104,14 +110,16 @@
             if (!GameObject.FindWithTag("Drone"))
             {
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
-                selectedDrone = newDrone;
+                selectedDrones = new SelectedDrones(newDrone);
             }
         }
-
+        /// <summary>
+        /// Used to generate new Drone ID strings; "A" -> "Z", then "AA" -> "AZ", then "BA" -> "BZ" and so on
+        /// </summary>
+        /// <param name="start"></param>
+        /// <returns>return an IEnumerable for generating new Drone IDs</returns>
         public static IEnumerable<string> generateNextDroneID(string start = "")
-
         {
-
             StringBuilder chars = start == null ? new StringBuilder() : new StringBuilder(start);
 
             while (true)
@@ -128,6 +136,30 @@
                     chars[i]++;
                 yield return chars.ToString();
             }
+        }
+
+        /// <summary>
+        /// returns the next Drone Id
+        /// </summary>
+        /// <returns>next Drone ID; which is in the infinite set {"A", "B", ..., "Z", "AA", ..., "AZ", "BA", ...}</returns>
+        public static string getNextDroneId()
+        {
+            string toReturn = nextDroneId.Current;
+            nextDroneId.MoveNext();
+            return toReturn;
+        }
+
+        public static string getNextGroupId()
+        {
+            int idNum = nextGroupIDNum;
+            nextGroupIDNum++;
+            return "Group" + idNum;
+        }
+
+        //needs to be implemented
+        public static Color getNextGroupColor()
+        {
+            return nextGroupColor;
         }
 
         /// <summary>
@@ -194,12 +226,12 @@
             return yaw;
         }
 
-        public static void FindClosestObstacleAndDist()
+        public static void FindClosestObstacleAndDist(Drone drone)
         {
 
             if (WorldProperties.obstacles.Count > 0)
             {
-                closestDist = Vector3.Distance(WorldProperties.selectedDrone.gameObjectPointer.transform.localPosition, WorldProperties.obstacles[0].transform.localPosition);
+                closestDist = Vector3.Distance(WorldProperties.selectedDrones.gameObjectPointer.transform.localPosition, WorldProperties.obstacles[0].transform.localPosition);
                 closestObstacle = WorldProperties.obstacles[0];
                 float dist;
                 foreach (GameObject obstacle in WorldProperties.obstacles)

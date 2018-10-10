@@ -96,7 +96,7 @@
             // SELECTION POINTER  
             SelectionPointerChecks();
 
-            if (WorldProperties.selectedDrone != null)
+            if (WorldProperties.selectedDrones.dronesAreSelected())
             {
                 // WAYPOINT GRABBING
                 GrabbingChecks();
