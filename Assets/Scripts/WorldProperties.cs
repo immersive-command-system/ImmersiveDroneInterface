@@ -16,6 +16,8 @@
         public GameObject waypointBaseObject;
         public GameObject torus;
 
+        public static Color droneSelectionColor;
+
         public static Shader clipShader;
 
         public static Dictionary<string, Drone> dronesDict;
@@ -54,6 +56,7 @@
             nextDroneId = generateNextDroneID().GetEnumerator(); // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
             nextGroupIDNum = 0; //used for grouped drone IDs (format is "Group" + groupIDNum)
             nextGroupColor = Color.blue; //arbitray right now; used so users can differentiate groups of drones
+            droneSelectionColor = Color.yellow;
 
             worldObject = gameObject;
             placementPlane = GameObject.FindWithTag("Ground");
