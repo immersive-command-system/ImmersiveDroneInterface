@@ -7,21 +7,20 @@ namespace ISAACS
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
-    public class SelectedDrones
+    public class SelectedDrones //should SelectedDrones be a DroneGroup???
     {
         public Dictionary<string, Drone> individualDrones;
         public Dictionary<string, DroneGroup> groupedDrones;
         public Color color;
-        public bool oneDroneSelected;
 
         // since currently a drone is automatically spawned at the start
         public SelectedDrones(Drone initialDrone)
         {
             individualDrones[initialDrone.id] = initialDrone;
             color = WorldProperties.droneSelectionColor;
-            oneDroneSelected = true;
         }
 
         /// <summary>
@@ -77,20 +76,45 @@ namespace ISAACS
             return individualDrones.Count != 0 || groupedDrones.Count != 0;
         }
 
+        public bool onlyOneDroneSelected()
+        {
+            return individualDrones.Count == 1 && groupedDrones.Count == 0;
+        }
+
         public void addWayPoint(Waypoint newWaypoint)
         {
-            createNewGroup();
-            ungroupOldGroups();
+            if (onlyOneDroneSelected()) {
+                individualDrones.Values.Single().AddWaypoint(newWaypoint);
+            }
+            else
+            {
+                createNewGroup();
+                ungroupOldGroups();
+            }
+
         }
 
-        public void insertWayPoint(Waypoint newWaypoint)
+        public void insertWayPoint(Waypoint newWaypoint, Waypoint prevWaypoint)
         {
+            if (onlyOneDroneSelected())
+            {
+                individualDrones.Values.Single().InsertWaypoint(newWaypoint, prevWaypoint);
+            }
+            else
+            {
 
+            }
         }
 
-        public void deleteWayPoint(Waypoint deletedWaypoint)
+        public void deleteWayPoint(Waypoint deletedWaypoint) //should we keep track of old groups in case the user decides to not add any waypoints for the newly selected-drones group?
         {
+            if (onlyOneDroneSelected())
+            {
+                individualDrones.Values.Single().DeleteWaypoint(deletedWaypoint);
+            } else
+            {
 
+            }
         }
 
         /// <summary>
