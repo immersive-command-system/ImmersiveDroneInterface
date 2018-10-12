@@ -11,7 +11,7 @@
     /// </summary>
     public class WaypointProperties : MonoBehaviour
     {
-        public Waypoint classPointer;
+        public GeneralWaypoint classPointer;
         public Drone referenceDrone;
         public GameObject referenceDroneGameObject;
         private GameObject prevPoint;

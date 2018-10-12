@@ -2,13 +2,9 @@
 {
     using System;
     using System.Linq;
-    using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    using UnityEngine.Events;
-    using VRTK.UnityEventHelper;
     using VRTK;
-    using ROSBridgeLib.interface_msgs;
 
     // THis class handles all controller interactions with the waypoints and drone
 
@@ -17,9 +13,13 @@
         public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING}; // These are the possible values for the controller's state
         public static ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
-        public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
+        public enum CollisionType { NOTHING, WAYPOINT, LINE, DRONE, OTHER }; // These are the possible values for objects we could be colliding with
         public CollisionPair mostRecentCollision;
         private List<CollisionPair> currentCollisions;
+        private CollisionPair nothingCollision = new CollisionPair(null, CollisionType.NOTHING);
+
+        private enum SelectionMode { NONE, SELECTING, DESELECTING};
+        private SelectionMode selectionMode = SelectionMode.NONE;
 
         public GameObject controller_right; // Our right controller
         private GameObject controller; //needed to access pointer
@@ -28,8 +28,8 @@
         private static GameObject placePoint; // Place waypoint in front of controller
         private GameObject heightSelectionPlane;
 
-        private Waypoint currentWaypoint; // The current waypoint we are trying to place
-        private Waypoint grabbedWaypoint; // The current waypoint we are grabbing and moving
+        private GeneralWaypoint currentWaypoint; // The current waypoint we are trying to place
+        private GeneralWaypoint grabbedWaypoint; // The current waypoint we are grabbing and moving
 
         public Material defaultMaterial;
         public Material selectedMaterial;
@@ -44,7 +44,7 @@
         public void Start()
         {
             // Defining the selection zone variables
-            mostRecentCollision = new CollisionPair(null, CollisionType.NOTHING);
+            mostRecentCollision = nothingCollision;
             currentCollisions = new List<CollisionPair>();
 
             // Assigning the controller and setting the controller state
@@ -68,12 +68,12 @@
             // Creating the grabZone collider with offset
             this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
             gameObject.GetComponent<SphereCollider>().radius = 0.040f;
-            gameObject.GetComponent<SphereCollider>().center = new Vector3(0F, 0F, 0.1F);
+            gameObject.GetComponent<SphereCollider>().center = grabZone.transform.position;
             
             // Creating the placePoint
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             placePoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
-            placePoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
+            placePoint.transform.localPosition = grabZone.transform.position;
             placePoint.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
             placePoint.SetActive(true);
 
@@ -96,7 +96,9 @@
             // SELECTION POINTER  
             SelectionPointerChecks();
 
-            if (WorldProperties.selectedDrones.areDronesSelected())
+            //ScalingChecks();
+
+            if (WorldProperties.selectedDrones.AreDronesSelected())
             {
                 // WAYPOINT GRABBING
                 GrabbingChecks();
@@ -126,14 +128,14 @@
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
-                if (!currentCollisions.Any(x => (x.waypoint == collidedWaypoint && x.type == CollisionType.WAYPOINT)))
+                GeneralWaypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
+                if (!currentCollisions.Any(x => (x.type == CollisionType.WAYPOINT && x.waypoint == collidedWaypoint)))
                 {
                     //Debug.Log("A waypoint is entering the grab zone");
-                    
+
                     // We automatically default to the most recent waypointCollision
                     mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
-                    ////Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                     currentCollisions.Add(mostRecentCollision);
                 }
             }
@@ -144,12 +146,44 @@
             {
                 // This is the waypoint at the end of the line (the line points back toward the path origin / previous waypoint)
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                if (!currentCollisions.Any(x => (x.waypoint == lineOriginWaypoint && x.type == CollisionType.LINE)))
+                if (!currentCollisions.Any(x => (x.type == CollisionType.LINE && x.waypoint == lineOriginWaypoint)))
                 {
                     //Debug.Log("A line is entering the grab zone");
                     currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
                 }
-                
+
+            }
+
+            // MENU COLLISION
+            //else if (currentCollider.gameObject.tag == "DroneMenu")
+            //{
+            //    Debug.Log("Hit the menu");
+            //}
+
+            // DRONE COLLISION
+            else if (currentCollider.tag == "Drone")
+            {
+                // Help needed: how to check whether the collider and the drone are the same object.
+                // Currently assuming that the collider and the Drone script are both attached to the same game object.
+                Drone currentDrone = currentCollider.GetComponent<Drone>();
+                if (!currentCollisions.Any(x => (x.type == CollisionType.DRONE && x.drone == currentDrone)))
+                {
+                    //Debug.Log("A drone is entering the grab zone");
+                    currentCollisions.Add(new CollisionPair(currentCollider.gameObject.GetComponent<Drone>()));
+                    if (currentControllerState == ControllerState.POINTING)
+                    {
+                        currentDrone.Select();
+                    }
+                }
+            }
+
+            if (currentCollisions.Count > 0)
+            {
+                mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
+            }
+            else
+            {
+                mostRecentCollision = nothingCollision;
             }
         }
 
@@ -162,27 +196,32 @@
             //CollisionsDebug();
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
-                currentCollisions.RemoveAll(collision => collision.waypoint == collidedWaypoint &&
-                                            collision.type == CollisionType.WAYPOINT);
+                GeneralWaypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
+                currentCollisions.RemoveAll(collision => collision.type == CollisionType.WAYPOINT && collision.waypoint == collidedWaypoint);
 
                 //Debug.Log("A waypoint is leaving the grab zone");
             }
-            if (currentCollider.tag == "Line Collider")
+            else if (currentCollider.tag == "Line Collider")
             {
                 Waypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
-                currentCollisions.RemoveAll(collision => collision.waypoint == lineOriginWaypoint &&
-                                        collision.type == CollisionType.LINE);
+                currentCollisions.RemoveAll(collision => collision.type == CollisionType.LINE && collision.waypoint == lineOriginWaypoint);
 
                 //Debug.Log("A line is leaving the grab zone");
             }
+            else if (currentCollider.tag == "Drone")
+            {
+                Drone currentDrone = currentCollider.GetComponent<Drone>();
+                currentCollisions.RemoveAll(collision => collision.type == CollisionType.DRONE && collision.drone == currentDrone);
 
-            if(currentCollisions.Count > 0)
+                //Debug.Log("A drone is leaving the grab zone");
+            }
+
+            if (currentCollisions.Count > 0)
             {
                 mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
             } else
             {
-                mostRecentCollision = new CollisionPair(null, CollisionType.NOTHING);
+                mostRecentCollision = nothingCollision;
             }
             
         }
@@ -197,7 +236,7 @@
             {
                 // Updating to note that we are currently grabbing a waypoint
                 grabbedWaypoint = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject().GetComponent<WaypointProperties>().classPointer;
-                currentControllerState = ControllerState.GRABBING;
+                changeControllerState(ControllerState.GRABBING);
 
                 Debug.Log("Grabbing!");
             }
@@ -207,27 +246,34 @@
                 // Updating the line colliders
                 grabbedWaypoint.UpdateLineColliders();
 
-                // Sending a ROS MODIFY Update
-                UserpointInstruction msg = new UserpointInstruction(grabbedWaypoint, "MODIFY");
-                WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+                if (grabbedWaypoint is Waypoint)
+                {
+                    Waypoint droneWaypoint = (Waypoint)grabbedWaypoint;
+                    droneWaypoint.referenceDrone.OnModifyWaypoint(droneWaypoint);
+                } else if (grabbedWaypoint is GroupWaypoint)
+                {
+                    GroupWaypoint groupPoint = (GroupWaypoint)grabbedWaypoint;
+                    WorldProperties.groupedDrones[groupPoint.GetGroupID()].OnModifyWaypoint(groupPoint);
+                }
+                
                 
                 // Updating the controller state and noting that we are not grabbing anything
                 grabbedWaypoint = null;
-                currentControllerState = ControllerState.IDLE;
+                changeControllerState(ControllerState.IDLE);
             }
         }
 
         /// <summary>
-        /// Checks to see if we are scaling (actual scaling code is in Map Interactions)
+        /// Checks to see if we are scaling (actual scaling code is in MapInteractions)
         /// </summary>
         private void ScalingChecks()
         {
             if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
             {
-                currentControllerState = ControllerState.SCALING;
+                changeControllerState(ControllerState.SCALING);
             } else if (currentControllerState == ControllerState.SCALING)
             {
-                currentControllerState = ControllerState.IDLE;
+                changeControllerState(ControllerState.IDLE);
             }
         }
 
@@ -238,23 +284,68 @@
         private void SelectionPointerChecks()
         {
             if (currentControllerState == ControllerState.IDLE 
-                && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger)
-                && !OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
+                && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
             {
-                toggleRaycastOn();
-                currentControllerState = ControllerState.POINTING; // Switch to the controller's pointing state
+                changeControllerState(ControllerState.POINTING); // Switch to the controller's pointing state
             }
 
-            if ((currentControllerState == ControllerState.POINTING             // Checking for releasing grip
-                && OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger)) ||
-                (currentControllerState == ControllerState.POINTING             // Checking for scaling interaction
-                && OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger)))
+            if (currentControllerState == ControllerState.POINTING)             // Checking for releasing grip
+            {
+                if (OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger))
+                {
+                    changeControllerState(ControllerState.IDLE); // Switch to the controller's idle state
+                } else if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
+                {
+                    RaycastHit hit;
+                    if (Physics.Raycast(this.gameObject.transform.position, this.gameObject.transform.forward, out hit))
+                    {
+                        DroneProperties targetDrone = hit.collider.gameObject.GetComponent<DroneProperties>();
+                        if (targetDrone != null)
+                        {
+                            Drone drone = targetDrone.classPointer;
+                            if (selectionMode == SelectionMode.NONE)
+                            {
+                                selectionMode = (drone.selected) ? SelectionMode.DESELECTING : SelectionMode.SELECTING;
+                            }
+                            if (selectionMode == SelectionMode.SELECTING)
+                            {
+                                drone.Select();
+                            }
+                            else
+                            {
+                                drone.Deselect();
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+        private void changeControllerState(ControllerState newState)
+        {
+            if (newState == currentControllerState)
+            {
+                return;
+            }
+            if (currentControllerState == ControllerState.POINTING)
             {
                 toggleRaycastOff();
-                currentControllerState = ControllerState.IDLE; // Switch to the controller's idle state
+            } else if (currentControllerState == ControllerState.SETTING_HEIGHT)
+            {
+                toggleHeightPlaneOff();
+            }
+            if (newState == ControllerState.POINTING)
+            {
+                toggleRaycastOn();
+                selectionMode = SelectionMode.NONE;
+            } else if (newState == ControllerState.SETTING_HEIGHT)
+            {
+                toggleHeightPlaneOn();
             }
 
-
+            currentControllerState = newState;
         }
 
         /// <summary>
@@ -288,30 +379,37 @@
             if (currentControllerState == ControllerState.IDLE && 
                 OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
                 mostRecentCollision.type != CollisionType.WAYPOINT)
-
             {
-                currentWaypoint = CreateWaypoint(placePoint.transform.position);
+                currentWaypoint = WorldProperties.selectedDrones.AddWayPoint(placePoint.transform.position);
 
                 //Check to make sure we have successfully placed a waypoint
                 if (currentWaypoint != null)
                 {
-                    currentControllerState = ControllerState.PLACING_WAYPOINT;
+                    changeControllerState(ControllerState.PLACING_WAYPOINT);
                 }
             }
 
             // Updates new waypoint location as long as the index is held
             if (currentControllerState == ControllerState.PLACING_WAYPOINT)
             {
-                currentWaypoint.gameObjectPointer.transform.position = placePoint.transform.position;
-                currentWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateGroundpointLine();
+                currentWaypoint.AssignPosition(placePoint.transform.position);
             }
 
             // Releases the waypoint when the right index is released
             if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
-                UserpointInstruction msg = new UserpointInstruction(currentWaypoint, "MODIFY");
-                WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
-                currentControllerState = ControllerState.IDLE;
+                if (currentWaypoint is Waypoint)
+                {
+                    Waypoint droneWaypoint = (Waypoint)currentWaypoint;
+                    droneWaypoint.referenceDrone.OnModifyWaypoint(droneWaypoint);
+                }
+                else if (currentWaypoint is GroupWaypoint)
+                {
+                    GroupWaypoint groupPoint = (GroupWaypoint)currentWaypoint;
+                    WorldProperties.groupedDrones[groupPoint.GetGroupID()].OnModifyWaypoint(groupPoint);
+                }
+
+                changeControllerState(ControllerState.IDLE);
             }
         }
 
@@ -323,13 +421,11 @@
             // Ending the height adjustment
             if (currentControllerState == ControllerState.SETTING_HEIGHT && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                toggleHeightPlaneOff();
-                currentControllerState = ControllerState.POINTING;
+                changeControllerState(ControllerState.POINTING);
 
-                if (!OVRInput.Get(OVRInput.RawButton.RHandTrigger))
+                if (!OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
                 {
-                    toggleRaycastOff();
-                    currentControllerState = ControllerState.IDLE;
+                    changeControllerState(ControllerState.IDLE);
                 }
             }
             // Initializing groundPoint when pointing and pressing index trigger
@@ -340,9 +436,8 @@
 
                 {
                     Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point;
-                    currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
-                    toggleHeightPlaneOn();
-                    currentControllerState = ControllerState.SETTING_HEIGHT;
+                    currentWaypoint = CreateWaypoint(groundPoint);
+                    changeControllerState(ControllerState.SETTING_HEIGHT);
                 }
             }
             // Adjusting the height after groundpoint has been placed
@@ -380,12 +475,12 @@
         /// This handles setting the height of the new waypoint
         /// </summary>
         /// <param name="newWaypoint"></param>
-        private void AdjustHeight(Waypoint newWaypoint)
+        private void AdjustHeight(GeneralWaypoint newWaypoint)
         {
             // Bit shift the index of the layer (8) to get a bit mask
             int layerMask = 1 << 8;
 
-            Vector3 waypointLocation = newWaypoint.gameObjectPointer.transform.position;
+            Vector3 waypointLocation = newWaypoint.GetPosition();
         
             RaycastHit upHit;
             RaycastHit downHit;
@@ -394,12 +489,12 @@
             {
                 Debug.DrawRay(waypointLocation, Vector3.up * upHit.distance, Color.yellow);
                 Debug.Log("Did Hit");
-                newWaypoint.gameObjectPointer.transform.position = upHit.point;
+                newWaypoint.AssignPosition(upHit.point);
             } else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
             {
                 Debug.DrawRay(waypointLocation, -Vector3.up * downHit.distance, Color.yellow);
                 Debug.Log("Did Hit");
-                newWaypoint.gameObjectPointer.transform.position = downHit.point;
+                newWaypoint.AssignPosition(downHit.point);
             }
             else
             {
@@ -414,47 +509,44 @@
         /// </summary>
         /// <param name="groundPoint"> This is the location on the ground that the waypoint will be directly above. </param>
         /// <returns></returns>
-        private Waypoint CreateWaypoint(Vector3 groundPoint)
+        private GeneralWaypoint CreateWaypoint(Vector3 groundPoint)
         {
             // We will use the placePoint location.
             Vector3 newLocation = new Vector3(groundPoint.x, placePoint.transform.position.y, groundPoint.z);
-            Drone currentlySelectedDrone = WorldProperties.selectedDrone; // Grabbing the drone that we are creating this waypoint for
+            SelectedDrones currentSelection = WorldProperties.selectedDrones; // Grabbing the drone that we are creating this waypoint for
 
             // Make sure our drone exists
-            if (currentlySelectedDrone != null)
+            if (currentSelection.AreDronesSelected())
             {
                 // INSERT
                 // Placing a new waypoint in between old ones - triggers if a line is in the selection zone
                 if (mostRecentCollision.type == CollisionType.LINE)
                 {
-                    // Create a new waypoint at that location
-                    Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
+                    // CURRENTLY NOT SUPPORTED
+                    //// Create a new waypoint at that location
+                    //Waypoint newWaypoint = new Waypoint(currentSelection, newLocation);
 
-                    // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
-                    Waypoint lineOriginWaypoint = mostRecentCollision.waypoint;
+                    //// Grabbing the waypoint at the origin of the line (the lines point back towards the start)
+                    //Waypoint lineOriginWaypoint = mostRecentCollision.waypoint;
 
-                    // Insert the new waypoint into the drone path just behind the lineOriginWaypoint
-                    currentlySelectedDrone.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
+                    //// Insert the new waypoint into the drone path just behind the lineOriginWaypoint
+                    //currentSelection.InsertWaypoint(newWaypoint, lineOriginWaypoint.prevPathPoint);
 
-                    // Return the waypoint to announce that we successfully created one
-                    return newWaypoint;
+                    //// Return the waypoint to announce that we successfully created one
+                    //return newWaypoint;
+                    return null;
                 }
 
                 // ADD
                 // If we don't have a line selected, we default to placing the new waypoint at the end of the path
                 else
                 {
-                    Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
+                    //Waypoint newWaypoint = new Waypoint(currentSelection, newLocation);
 
                     // Add the new waypoint to the drone's path
-                    currentlySelectedDrone.AddWaypoint(newWaypoint);
-
-                    // Return the waypoint to announce that we successfully created one
-                    return newWaypoint;
+                    return currentSelection.AddWayPoint(newLocation);
                 }
             }
-
-            // If we have not added or inserted a waypoint, we need to return null
             return null;
         }
 
@@ -464,59 +556,58 @@
         /// </summary>
         public void UndoAndDeleteWaypoints()
         {
-            Drone currentlySelectedDrone = WorldProperties.selectedDrone;
+            // CURRENTLY NOT SUPPORTED
+            //SelectedDrones currentlySelection = WorldProperties.selectedDrones;
 
-            // Make sure the currently selected drone has waypoints
-            if (currentlySelectedDrone.waypoints != null && currentlySelectedDrone.waypoints.Count > 0)
-            {
-                currentControllerState = ControllerState.DELETING;
+            //// Make sure the currently selected drone has waypoints
+            //if (currentlySelection.waypoints != null && currentlySelection.waypoints.Count > 0)
+            //{
+            //    changeControllerState(ControllerState.DELETING);
 
-                //Checking to see if we are colliding with one of those
-                if (mostRecentCollision.type == CollisionType.WAYPOINT && currentlySelectedDrone.waypoints.Contains(mostRecentCollision.waypoint))
-                {
-                    // Remove the highlighted waypoint (DELETE)
-                    Debug.Log("Removing waypoint in grab zone");
+            //    //Checking to see if we are colliding with one of those
+            //    if (mostRecentCollision.type == CollisionType.WAYPOINT && currentlySelection.waypoints.Contains(mostRecentCollision.waypoint))
+            //    {
+            //        // Remove the highlighted waypoint (DELETE)
+            //        Debug.Log("Removing waypoint in grab zone");
 
-                    Waypoint selectedWaypoint = mostRecentCollision.waypoint;
-                    currentlySelectedDrone.DeleteWaypoint(selectedWaypoint);
+            //        Waypoint selectedWaypoint = mostRecentCollision.waypoint;
+            //        currentlySelection.DeleteWaypoint(selectedWaypoint);
 
-                    // Remove from collisions zone list and variables
-                    currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
-                                                collision.type == CollisionType.WAYPOINT);
-                    currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
-                                            collision.type == CollisionType.LINE);
-                    
-                    mostRecentCollision.type = CollisionType.NOTHING;
-                    mostRecentCollision.waypoint = null;
+            //        // Remove from collisions zone list and variables
+            //        currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
+            //                                    collision.type == CollisionType.WAYPOINT);
+            //        currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
+            //                                collision.type == CollisionType.LINE);
 
-                    currentControllerState = ControllerState.IDLE;
-                }
-                else
-                {
-                    // Otherwise we default to removing the last waypoint (UNDO)
-                    Debug.Log("Removing most recently placed waypoint");
+            //        mostRecentCollision = nothingCollision;
 
-                    Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypointsOrder[currentlySelectedDrone.waypointsOrder.Count - 1];
+            //        changeControllerState(ControllerState.IDLE);
+            //    }
+            //    else
+            //    {
+            //        // Otherwise we default to removing the last waypoint (UNDO)
+            //        Debug.Log("Removing most recently placed waypoint");
 
-                    // Remove from collisions list
-                    currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
-                                                collision.type == CollisionType.WAYPOINT);
-                    currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
-                                            collision.type == CollisionType.LINE);
+            //        Waypoint lastWaypoint = (Waypoint) currentlySelection.waypointsOrder[currentlySelection.waypointsOrder.Count - 1];
 
-                    // Catching edge case in which most recent collision was the last waypoint
-                    if (lastWaypoint == mostRecentCollision.waypoint)
-                    {
-                        mostRecentCollision.type = CollisionType.NOTHING;
-                        mostRecentCollision.waypoint = null;
-                    }
+            //        // Remove from collisions list
+            //        currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
+            //                                    collision.type == CollisionType.WAYPOINT);
+            //        currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
+            //                                collision.type == CollisionType.LINE);
 
-                    // Delete the waypoint
-                    currentlySelectedDrone.DeleteWaypoint(lastWaypoint);
-                }
-                currentControllerState = ControllerState.IDLE;
+            //        // Catching edge case in which most recent collision was the last waypoint
+            //        if (lastWaypoint == mostRecentCollision.waypoint)
+            //        {
+            //            mostRecentCollision = nothingCollision;
+            //        }
 
-            }
+            //        // Delete the waypoint
+            //        currentlySelection.DeleteWaypoint(lastWaypoint);
+            //    }
+            //    changeControllerState(ControllerState.IDLE);
+
+            //}
         }
         
         /// <summary>
@@ -526,13 +617,13 @@
         {
             if (mostRecentCollision.waypoint != null)
             {
-                Debug.Log("Most Recent Collision: " + mostRecentCollision.type + ", " + mostRecentCollision.waypoint.id);
+                Debug.Log("Most Recent Collision: " + mostRecentCollision.type + ", " + mostRecentCollision.waypoint.ToString());
             }
            
             string debugString = "All Current Collisions: {";
             foreach (CollisionPair collision in currentCollisions)
             {
-                debugString += "(" + collision.type + ", " + collision.waypoint.id + ")";
+                debugString += "(" + collision.type + ", " + collision.waypoint.ToString() + ")";
             }
 
             debugString += "}";
@@ -545,13 +636,20 @@
         /// </summary>
         public class CollisionPair : IEquatable<CollisionPair>
         {
-            public Waypoint waypoint;
+            public GeneralWaypoint waypoint = null;
+            public Drone drone = null;
             public CollisionType type;
 
-            public CollisionPair(Waypoint waypoint, CollisionType type)
+            public CollisionPair(GeneralWaypoint waypoint, CollisionType type)
             {
                 this.waypoint = waypoint;
                 this.type = type;
+            }
+
+            public CollisionPair(Drone drone)
+            {
+                this.drone = drone;
+                this.type = CollisionType.DRONE;
             }
 
             public override bool Equals(object obj)
@@ -566,17 +664,20 @@
 
             public bool Equals(CollisionPair other)
             {
-                if (other.waypoint == this.waypoint && other.type == this.type)
+                if (this.type != other.type)
                 {
-                    return true;
+                    return false;
                 }
-
-                return false;
+                if (this.type == CollisionType.DRONE)
+                {
+                    return this.drone == other.drone;
+                }
+                return this.waypoint == other.waypoint;
             }
 
-            public int GetHashcode()
+            public override int GetHashCode()
             {
-                return this.waypoint.GetHashCode() * 17 + this.type.GetHashCode();
+                return ((this.type == CollisionType.DRONE) ? this.drone.GetHashCode() * 17 : this.waypoint.GetHashCode() * 17) + this.type.GetHashCode();
             }
         }
     }

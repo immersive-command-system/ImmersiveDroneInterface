@@ -234,12 +234,12 @@
 
             if (WorldProperties.obstacles.Count > 0)
             {
-                closestDist = Vector3.Distance(WorldProperties.selectedDrones.gameObjectPointer.transform.localPosition, WorldProperties.obstacles[0].transform.localPosition);
+                closestDist = Vector3.Distance(drone.gameObjectPointer.transform.position, WorldProperties.obstacles[0].transform.localPosition);
                 closestObstacle = WorldProperties.obstacles[0];
                 float dist;
                 foreach (GameObject obstacle in WorldProperties.obstacles)
                 {
-                    dist = Vector3.Distance(WorldProperties.selectedDrone.gameObjectPointer.transform.localPosition, obstacle.transform.localPosition);
+                    dist = Vector3.Distance(drone.gameObjectPointer.transform.position, obstacle.transform.localPosition);
                     if (dist < closestDist)
                     {
                         closestDist = dist;

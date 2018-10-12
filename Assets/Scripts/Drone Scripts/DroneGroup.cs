@@ -31,23 +31,36 @@
             color = WorldProperties.getNextGroupColor(); //getNextGroupColor needs to be implemented
         }
 
-        public void AddWaypoint(Waypoint newWaypoint)
+        public void AddWaypoint(GroupWaypoint waypoint)
         {
-            waypoints.Add(newWaypoint);
+            waypoints.Add(waypoint);
             foreach (KeyValuePair<string, Drone> entry in dronesDict)
             {
-                entry.Value.AddWaypoint(newWaypoint);
+                entry.Value.AddWaypoint(new Waypoint(entry.Value, waypoint.GetPosition()));
             }
         }
 
-        public void DeleteWaypoint(Waypoint toDeleteWaypoint)
+        public void OnModifyWaypoint(GroupWaypoint waypoint)
         {
-            waypoints.Remove(toDeleteWaypoint);
             foreach (KeyValuePair<string, Drone> entry in dronesDict)
             {
-                entry.Value.DeleteWaypoint(toDeleteWaypoint);
+                entry.Value.OnModifyWaypoint(waypoint.GetPosition());
             }
         }
+
+        public void DeleteWaypoint(GroupWaypoint waypoint)
+        {
+            if (!this.waypoints.Contains(waypoint))
+            {
+                return;
+            }
+            foreach (KeyValuePair<string, Drone> entry in dronesDict)
+            {
+                entry.Value.DeleteWaypoint(waypoint.GetPosition());
+            }
+            this.waypoints.Remove(waypoint);
+        }
+
 
         public List<string> getIDs()
         {

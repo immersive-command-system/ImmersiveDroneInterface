@@ -1,11 +1,10 @@
 ﻿namespace ISAACS
 {
     using System.Collections;
-    using System.Collections.Generic;
     using UnityEngine;
     using VRTK;
 
-    public class Waypoint
+    public class Waypoint : GeneralWaypoint
     {
         public Drone referenceDrone; // The drone whose path this waypoint belongs to
         public GameObject gameObjectPointer; // This is the related game object
@@ -48,13 +47,36 @@
             //Debug.Log("Created new waypoint with id: " + id);
         }
 
-        public void UpdateLineColliders()
+        public override void UpdateLineColliders()
         {
             gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
             if (nextPathPoint != null)
             {
                 nextPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
             }
+        }
+
+        /// <summary>
+        /// Get the position of this waypoint in Unity world coordinates.
+        /// </summary>
+        public override Vector3 GetPosition()
+        {
+            return this.gameObjectPointer.transform.position;
+        }
+
+        /// <summary>
+        /// Assign a new position for this waypoint in Unity world coordinates
+        /// </summary>
+        /// <param name="newPosition">The new position to assign this waypoint.</param>
+        public override void AssignPosition(Vector3 newPosition)
+        {
+            this.gameObjectPointer.transform.position = newPosition;
+            gameObjectPointer.GetComponent<WaypointProperties>().UpdateGroundpointLine();
+        }
+
+        public override string ToString()
+        {
+            return this.id;
         }
     }
 }

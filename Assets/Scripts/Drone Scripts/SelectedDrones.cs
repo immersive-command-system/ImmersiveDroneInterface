@@ -1,16 +1,10 @@
-﻿/* 
- *
- * 
- */
-
-namespace ISAACS
+﻿namespace ISAACS
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
 
-    public class SelectedDrones //should SelectedDrones be a DroneGroup???
+    public class SelectedDrones
     {
         public Dictionary<string, Drone> individualDrones;
         public Dictionary<string, DroneGroup> groupedDrones;
@@ -28,14 +22,14 @@ namespace ISAACS
         /// If drone is part of a group, adds entire group to the selection.
         /// </summary>
         /// <param name="drone">Drone object to add</param>
-        public void addDrone(Drone drone)
+        public void AddDrone(Drone drone)
         {
             if (drone.groupID == null)
             {
                 individualDrones[drone.id] = drone;
             } else
             {
-                addGroup(drone.groupID);
+                AddGroup(drone.groupID);
             }
             
         }
@@ -45,24 +39,24 @@ namespace ISAACS
         /// If drone is part of a group, adds entire group to the selection.
         /// </summary>
         /// <param name="droneID">Id of drone object to add</param>
-        public void addDrone(string droneID)
+        public void AddDrone(string droneID)
         {
-            addDrone(WorldProperties.dronesDict[droneID]);
+            AddDrone(WorldProperties.dronesDict[droneID]);
         }
 
         /// <summary>
         /// Remove drone from selection.
         /// If drone is part of a group, removes entire group from the selection.
         /// </summary>
-        /// <param name="droneID">Drone object to deselect</param>
-        public void deselectDrone(Drone drone)
+        /// <param name="drone">Drone object to deselect</param>
+        public void DeselectDrone(Drone drone)
         {
             if (drone.groupID == null)
             {
                 individualDrones.Remove(drone.id);
             } else
             {
-                deselectGroup(drone.groupID);
+                DeselectGroup(drone.groupID);
             }
         }
 
@@ -71,16 +65,16 @@ namespace ISAACS
         /// If drone is part of a group, removes entire group from the selection.
         /// </summary>
         /// <param name="droneID">Id of drone object to deselect</param>
-        public void deselectDrone(string droneID)
+        public void DeselectDrone(string droneID)
         {
-            deselectDrone(WorldProperties.dronesDict[droneID]);
+            DeselectDrone(WorldProperties.dronesDict[droneID]);
         }
 
         /// <summary>
         /// Adds one collection of grouped drones to selection.
         /// </summary>
-        /// <param name="group">Id of grouped drones to add</param>
-        public void addGroup(string groupID)
+        /// <param name="groupID">Id of grouped drones to add</param>
+        public void AddGroup(string groupID)
         {
             groupedDrones[groupID] = WorldProperties.groupedDrones[groupID];
         }
@@ -88,8 +82,8 @@ namespace ISAACS
         /// <summary>
         ///Removes one collection of grouped drones to selection.
         /// </summary>
-        /// <param name="group">Id of grouped drones to add</param>
-        public void deselectGroup(string groupID)
+        /// <param name="groupID">Id of grouped drones to add</param>
+        public void DeselectGroup(string groupID)
         {
             groupedDrones.Remove(groupID);
         }
@@ -100,13 +94,13 @@ namespace ISAACS
         public void deleteDrones()
         {
             //should this be a feature?
-            //how sure should we be that the user actually wants to do this?
+            //how sure should we be that the user actually wants to do this before continuing?
         }
 
         /// <summary>
         /// Clears selections, i.e. nothing should be selected after running this method
         /// </summary>
-        public void clear()
+        public void Clear()
         {
             individualDrones.Clear();
             groupedDrones.Clear();
@@ -116,16 +110,16 @@ namespace ISAACS
         /// Returns whether or not there are drones selected
         /// </summary>
         /// <returns>True if individual or grouped drone(s) are selected, False if no drones are selected</returns>
-        public bool areDronesSelected()
+        public bool AreDronesSelected()
         {
-            return individualDrones.Count != 0 || groupedDrones.Count != 0;
+            return individualDrones.Count > 0 || groupedDrones.Count > 0;
         }
 
         /// <summary>
         /// Returns whether or not only a single ungrouped drone is selected
         /// </summary>
         /// <returns>True if only one ungrouped drone is selected. False otherwise. </returns>
-        public bool isSingleDroneSelected()
+        public bool IsSingleDroneSelected()
         {
             return individualDrones.Count == 1 && groupedDrones.Count == 0;
         }
@@ -134,9 +128,9 @@ namespace ISAACS
         /// Returns whether or not only a single drone group is selected
         /// </summary>
         /// <returns>True if only one drone group is selected. False otherwise. </returns>
-        public bool isSingleGroupSelected()
+        public bool IsSingleGroupSelected()
         {
-            return individualDrones.Count == 0 && groupedDrones.Count == 0;
+            return individualDrones.Count == 0 && groupedDrones.Count == 1;
         }
 
         /// <summary>
@@ -144,28 +138,38 @@ namespace ISAACS
         /// If the selection is not an individual ungrouped drone or a single group,
         /// the selection will first be regrouped into one DroneGroup.
         /// </summary>
-        public void addWayPoint(Waypoint newWaypoint)
+        /// <param name="waypointPosition">Position of new waypoint.</param>
+        public GeneralWaypoint AddWayPoint(Vector3 waypointPosition)
         {
-            if (isSingleDroneSelected()) {
-                individualDrones.Values.Single().AddWaypoint(newWaypoint);
+            if (!AreDronesSelected())
+            {
+                return null;
+            }
+            if (IsSingleDroneSelected()) {
+                Drone drone = individualDrones.Values.Single();
+                Waypoint newWaypoint = new Waypoint(drone, waypointPosition);
+                drone.AddWaypoint(newWaypoint);
+                return newWaypoint;
             } else
             {
                 DroneGroup singleGroup = null;
-                if (isSingleGroupSelected())
+                if (IsSingleGroupSelected())
                 {
                     singleGroup = groupedDrones.Values.Single();
                 } else
                 {
-                    singleGroup = createNewGroup();
+                    singleGroup = CreateNewGroup();
                 }
+                GroupWaypoint newWaypoint = new GroupWaypoint(singleGroup.groupId, waypointPosition);
                 singleGroup.AddWaypoint(newWaypoint);
+                return newWaypoint;
             }
 
         }
 
-        public void insertWayPoint(Waypoint newWaypoint, Waypoint prevWaypoint)
+        public void InsertWayPoint(Waypoint newWaypoint, Waypoint prevWaypoint)
         {
-            if (isSingleDroneSelected())
+            if (IsSingleDroneSelected())
             {
                 individualDrones.Values.Single().InsertWaypoint(newWaypoint, prevWaypoint);
             }
@@ -179,15 +183,17 @@ namespace ISAACS
         /// Deletes waypoint from selection.
         /// Only works if selection is a single drone or single DroneGroup.
         /// </summary>
-        public void deleteWayPoint(Waypoint deletedWaypoint) //should we keep track of old groups in case the user decides to not add any waypoints for the newly selected-drones group?
+        /// <param name="waypoint">GeneralWaypoint object to delete from selected drones and groups.</param>
+        public void DeleteWayPoint(GeneralWaypoint waypoint) //should we keep track of old groups in case the user decides to not add any waypoints for the newly selected-drones group?
         {
-            if (isSingleDroneSelected())
+            if (IsSingleDroneSelected())
             {
-                individualDrones.Values.Single().DeleteWaypoint(deletedWaypoint);
-            } else if (isSingleGroupSelected())
+                individualDrones.Values.Single().DeleteWaypoint((Waypoint)waypoint);
+            }
+            else if (IsSingleGroupSelected())
             {
                 DroneGroup singleGroup = groupedDrones.Values.Single();
-                singleGroup.DeleteWaypoint(deletedWaypoint);
+                singleGroup.DeleteWaypoint((GroupWaypoint)waypoint);
             }
         }
 
@@ -196,9 +202,9 @@ namespace ISAACS
         /// Creating a group is valid if more than one individual drone or more than one group or 1 drone and 1 group is selected.
         /// </summary>
         /// <returns>Newly created DroneGroup object from the current select, if valid. Returns null otherwise.</returns>
-        private DroneGroup createNewGroup()
+        private DroneGroup CreateNewGroup()
         {
-            if (isSingleDroneSelected() || isSingleGroupSelected() || !areDronesSelected())
+            if (IsSingleDroneSelected() || IsSingleGroupSelected() || !AreDronesSelected())
             {
                 return null;
             }

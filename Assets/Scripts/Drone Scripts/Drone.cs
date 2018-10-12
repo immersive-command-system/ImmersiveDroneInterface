@@ -178,9 +178,33 @@
             Object.Destroy(deletedWaypoint.gameObjectPointer);
         }
 
+        public void DeleteWaypoint(Vector3 position)
+        {
+            int index = findWaypoint(position);
+            if (index >= 0)
+            {
+                DeleteWaypoint((Waypoint)waypoints[index]);
+            }
+        }
+
+        public void OnModifyWaypoint(Waypoint waypoint)
+        {
+            // Sending a ROS MODIFY
+            UserpointInstruction msg = new UserpointInstruction(waypoint, "MODIFY");
+            WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+        }
+
+        public void OnModifyWaypoint(Vector3 position)
+        {
+            int index = findWaypoint(position);
+            if (index >= 0)
+            {
+                OnModifyWaypoint((Waypoint)this.waypoints[index]);
+            }
+        }
+
         /// <summary>
-        /// Use this to change which drone is selected in the world.
-        /// This also changes all drone aura materials so this drone is the only yellow one.
+        /// Use this to add this drone to the selection and reflect that change in the interface.
         /// </summary>
         public void Select() {
             // Changes the color of the drone to indicate that it has been selected
@@ -188,15 +212,47 @@
                 this.gameObjectPointer.GetComponent<DroneProperties>().selectedMaterial;
             this.selected = true;
 
-            WorldProperties.selectedDrones.addDrone(this);
+            WorldProperties.selectedDrones.AddDrone(this);
         }
 
+        /// <summary>
+        /// Use this to remove this drone from the selection and reflect that change in the interface.
+        /// </summary>
         public void Deselect()
         {
-            WorldProperties.selectedDrones.deselectDrone(this);
+            WorldProperties.selectedDrones.DeselectDrone(this);
             this.selected = false;
             this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
+        }
+
+        ///// <summary>
+        ///// Use this to toggle the selection state of the drone and reflect that change in the interface.
+        ///// </summary>
+        //public void ToggleSelect()
+        //{
+        //    if (this.selected)
+        //    {
+        //        Deselect();
+        //    } else
+        //    {
+        //        Select();
+        //    }
+        //}
+
+        /// <summary>
+        /// Finds the first waypoint in this.waypoints that has the same position.
+        /// </summary>
+        private int findWaypoint(Vector3 position)
+        {
+            for (int i = 0; i < this.waypoints.Count; i++)
+            {
+                if (((Waypoint)this.waypoints[i]).GetPosition() == position)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }
