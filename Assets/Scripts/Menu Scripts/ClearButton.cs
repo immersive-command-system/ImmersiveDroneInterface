@@ -2,6 +2,7 @@
 {
     using UnityEngine;
     using UnityEngine.UI; // <-- you need this to access UI (button in this case) functionalities
+    using UnityEngine.SceneManagement;
     using System.Collections;
 
     public class ClearButton : MonoBehaviour
@@ -20,10 +21,13 @@
             drone = WorldProperties.selectedDrone;
             while (drone.waypoints.Count > 1)
             {
-                if (((Waypoint)drone.waypoints[drone.waypoints.Count - 1]).prevPathPoint != null) {
+                if (((Waypoint)drone.waypoints[drone.waypoints.Count - 1]).prevPathPoint != null)
+                {
                     drone.DeleteWaypoint((Waypoint)drone.waypoints[drone.waypoints.Count - 1]);
                 }
             }
+
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
         }
     }
