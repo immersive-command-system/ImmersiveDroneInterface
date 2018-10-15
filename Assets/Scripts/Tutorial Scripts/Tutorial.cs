@@ -13,7 +13,8 @@
     /// <remarks>
     /// This script needs to be added to the parent (i.e. Controllers) of the relevant alias controller GameObjects (i.e. RightController, LeftController)
     /// </remarks>
-    public class Tutorial : MonoBehaviour {
+    public class Tutorial : MonoBehaviour
+    {
 
         /* public static class ControllerStateRef { public static ControllerInteractions.ControllerState getValue() { return ControllerInteractions.currentControllerState; } }
          public static class MapStateRef { public static MapInteractions.MapState getValue() { return MapInteractions.mapState; } }
@@ -35,7 +36,7 @@
         public Color tipTextColor_DuringTutorialStep = Color.white;
         [Tooltip("The colour to use for the line between the tooltip and the relevant controller button.")]
         public Color tipLineColor_DuringTutorialStep = Color.green;
-        
+
         [Header("AFTER TutorialStep Tooltip Colour Settings")]
 
         [Tooltip("The colour to use for the tooltip background container.")]
@@ -45,24 +46,25 @@
         [Tooltip("The colour to use for the line between the tooltip and the relevant controller button.")]
         public Color tipLineColor_AfterTutorialStep = Color.blue;
 
-       
+
 
         public GameObject rightController, leftController; //the controllers that have the Tooltips script attached to each of them
         public AudioSource introAudio, envAudio, mapLocationAudio, mapRotationAudio, MapScaleAudio, primaryPlacementAudio,
             grabZoneAudio, intermediatePlacementAudio, selectionPointerAudio, secondaryPlacementAudio, undoAndDeleteAudio;
 
-        private static VRTK_ControllerTooltips leftTooltips, rightTooltips; 
+        private static VRTK_ControllerTooltips leftTooltips, rightTooltips;
         private static bool stepFinished; //lets you know when the tutorial can move on to the next step
         private static Tooltips rightToggling, leftToggling; //used to toggle corresponding tooltips of the controllers
 
         //possible states of the tutorial AKA the tutorialsteps
-        public enum TutorialState  {NONE, INTRO, MOVINGMAP, ROTATINGMAP, SCALINGMAP, PRIMARYPLACEMENT, GRABZONE, INTERMEDIATEPLACEMENT, SELECTIONPOINTER, SECONDARYPLACEMENT, UNDOANDDELETE, DONE}; 
+        public enum TutorialState { NONE, INTRO, MOVINGMAP, ROTATINGMAP, SCALINGMAP, PRIMARYPLACEMENT, GRABZONE, INTERMEDIATEPLACEMENT, SELECTIONPOINTER, SECONDARYPLACEMENT, UNDOANDDELETE, DONE };
         public static TutorialState currentTutorialState; //keeps track of the current tutorial state
 
         /// <summary>
         /// Initializes all necessary variables and starts the tutorial
         /// </summary>
-        void Start() {
+        void Start()
+        {
             stepFinished = false;
 
             rightTooltips = rightController.GetComponentInChildren<VRTK_ControllerTooltips>();
@@ -85,23 +87,22 @@
         IEnumerator TutorialCoroutine()
         {
             yield return new WaitForSecondsRealtime(seconds);
+
             currentTutorialState = TutorialState.INTRO;
             introAudio.Play();
             yield return new WaitForSecondsRealtime(introAudio.clip.length);
             envAudio.Play();
             yield return new WaitForSecondsRealtime(envAudio.clip.length);
-            currentTutorialState = TutorialState.DONE;
 
+            currentTutorialState = TutorialState.MOVINGMAP;
+            yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
 
-            /*    currentTutorialState = TutorialState.MOVINGMAP;
-                yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
+            currentTutorialState = TutorialState.ROTATINGMAP;
+            yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
 
-                currentTutorialState = TutorialState.ROTATINGMAP;
-                yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
+            currentTutorialState = TutorialState.SCALINGMAP;
+            yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
 
-                currentTutorialState = TutorialState.SCALINGMAP;
-                yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
-                
             currentTutorialState = TutorialState.PRIMARYPLACEMENT;
             yield return StartCoroutine(TutorialStep(primaryPlacementAudio, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, null, 1));
 
@@ -120,8 +121,8 @@
             currentTutorialState = TutorialState.UNDOANDDELETE;
             yield return StartCoroutine(TutorialStep(undoAndDeleteAudio, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip, null, 1));
 
-            currentTutorialState = TutorialState.DONE; 
-            */
+            currentTutorialState = TutorialState.DONE;
+
 
         }
 
@@ -160,16 +161,20 @@
         /// <param name="tooltip">Additional tooltip object that should show if needed for the tutorial step, null if only one tooltip is needed.</param>
         /// <param name="controller">If controller is -1 then left only, 0 then both, 1 then right controller only</param>
         /// <returns></returns>
-        IEnumerator TutorialStep (AudioSource audio, VRTK_ControllerTooltips.TooltipButtons button, VRTK_ObjectTooltip tooltip, int controller)
-        { 
+        IEnumerator TutorialStep(AudioSource audio, VRTK_ControllerTooltips.TooltipButtons button, VRTK_ObjectTooltip tooltip, int controller)
+        {
             audio.Play();
 
             //change tooltip colors to the color during tutorial step 
-            if (controller <= 0) {
+            if (controller <= 0)
+            {
                 ChangeTooltipColorDuringTutorialStep(leftToggling, leftToggling.ChangeButtonToTooltip(button));
                 leftTooltips.ToggleTips(true, button);
-            } else if (controller >= 0) {
-                if (tooltip != null) {
+            }
+            if (controller >= 0)
+            {
+                if (tooltip != null)
+                {
                     ChangeTooltipColorDuringTutorialStep(rightToggling, tooltip);
                     rightTooltips.ToggleTips(true, rightToggling.ChangeTooltipToButton(tooltip));
                 }
@@ -189,7 +194,7 @@
                 ChangeTooltipColorAfterTutorialStep(leftToggling, leftToggling.ChangeButtonToTooltip(button));
                 leftTooltips.ToggleTips(false, button);
             }
-            else if (controller >= 0)
+            if (controller >= 0)
             {
                 if (tooltip != null)
                 {
@@ -199,7 +204,7 @@
                 ChangeTooltipColorAfterTutorialStep(rightToggling, rightToggling.ChangeButtonToTooltip(button));
                 rightTooltips.ToggleTips(false, button);
             }
-            
+
             //set it back to false for the next step
             stepFinished = false;
         }
@@ -238,56 +243,65 @@
             switch (currentTutorialState)
             {
                 case Tutorial.TutorialState.MOVINGMAP:
-                    if (MapInteractions.mapState == MapInteractions.MapState.MOVING) {
+                    if (MapInteractions.mapState == MapInteractions.MapState.MOVING)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.ROTATINGMAP:
-                    if (MapInteractions.mapState == MapInteractions.MapState.ROTATING) {
+                    if (MapInteractions.mapState == MapInteractions.MapState.ROTATING)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.SCALINGMAP:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.SCALING) {
+                    if (MapInteractions.mapState == MapInteractions.MapState.SCALING)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.PRIMARYPLACEMENT:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.POINTING) {
+                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.PLACING_WAYPOINT)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.GRABZONE:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.GRABBING) {
+                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.GRABBING)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.INTERMEDIATEPLACEMENT:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.PLACING_WAYPOINT) {
+                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.PLACING_WAYPOINT)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.SELECTIONPOINTER:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.POINTING) {
+                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.POINTING)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.SECONDARYPLACEMENT:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.SETTING_HEIGHT) {
+                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.SETTING_HEIGHT)
+                    {
                         stepFinished = true;
                     }
                     break;
                 case Tutorial.TutorialState.UNDOANDDELETE:
-                    if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.DELETING) {
-                        stepFinished = true;
-                    }
+                    //having issues with ControllerState.DELETING on when to set it back to IDLE, so for now since this is the last tutorial step, just going to have it automatically say it's done
+                    //if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.DELETING) { 
+                    stepFinished = true;
+                    // }
                     break;
-               /* case Tutorial.TutorialState.DONE:
-                    Debug.Log("loading Main scene");
-                    VRTK_SDKManager.instance.UnloadSDKSetup();
-                    SceneManager.LoadScene("Main");
-                    break;
-                    */
+                    /* case Tutorial.TutorialState.DONE:
+                         Debug.Log("loading Main scene");
+                         VRTK_SDKManager.instance.UnloadSDKSetup();
+                         SceneManager.LoadScene("Main");
+                         break;
+                         */
             }
         }
     }
