@@ -15,7 +15,7 @@
 
         void Start()
         {
-            thisDrone = WorldProperties.selectedDrone;
+            //thisDrone = WorldProperties.selectedDrone;
             size = new Vector3(0, 0, 0);
             ActivateButton();
         }

@@ -34,6 +34,8 @@
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
             WorldProperties.AddClipShader(gameObjectPointer.transform);
+            this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
+                this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
 
             // Initialize path and placement order lists
             waypoints = new ArrayList(0);
@@ -46,11 +48,10 @@
             // Updating the world properties to reflect a new drone being added
             id = WorldProperties.getNextDroneId();
             WorldProperties.dronesDict.Add(id, this);
+            Debug.Log("Created new drone with id: " + id);
 
             // Select this drone
             this.Select();
-
-            Debug.Log("Created new drone with id: " + id);
         }
 
         /// <summary>
@@ -178,29 +179,11 @@
             Object.Destroy(deletedWaypoint.gameObjectPointer);
         }
 
-        public void DeleteWaypoint(Vector3 position)
-        {
-            int index = findWaypoint(position);
-            if (index >= 0)
-            {
-                DeleteWaypoint((Waypoint)waypoints[index]);
-            }
-        }
-
         public void OnModifyWaypoint(Waypoint waypoint)
         {
             // Sending a ROS MODIFY
             UserpointInstruction msg = new UserpointInstruction(waypoint, "MODIFY");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
-        }
-
-        public void OnModifyWaypoint(Vector3 position)
-        {
-            int index = findWaypoint(position);
-            if (index >= 0)
-            {
-                OnModifyWaypoint((Waypoint)this.waypoints[index]);
-            }
         }
 
         /// <summary>

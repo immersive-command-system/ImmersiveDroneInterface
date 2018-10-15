@@ -21,17 +21,17 @@
 
         void OnClickEvent()
         {
-            if (controller.GetComponent<VRTK_Pointer>().IsPointerActive())
-            {
-                drone = WorldProperties.selectedDrone;
-                while (drone.waypoints.Count > 1)
-                {
-                    if (((Waypoint)drone.waypoints[drone.waypoints.Count - 1]).prevPathPoint != null)
-                    {
-                        drone.DeleteWaypoint((Waypoint)drone.waypoints[drone.waypoints.Count - 1]);
-                    }
-                }
-            }
+            //if (controller.GetComponent<VRTK_Pointer>().IsPointerActive())
+            //{
+            //    drone = WorldProperties.selectedDrone;
+            //    while (drone.waypoints.Count > 1)
+            //    {
+            //        if (((Waypoint)drone.waypoints[drone.waypoints.Count - 1]).prevPathPoint != null)
+            //        {
+            //            drone.DeleteWaypoint((Waypoint)drone.waypoints[drone.waypoints.Count - 1]);
+            //        }
+            //    }
+            //}
         }
     }
 }

@@ -10,7 +10,7 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING}; // These are the possible values for the controller's state
+        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING, SELECTING_DRONES}; // These are the possible values for the controller's state
         public static ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
         public enum CollisionType { NOTHING, WAYPOINT, LINE, DRONE, OTHER }; // These are the possible values for objects we could be colliding with
@@ -96,6 +96,8 @@
             // SELECTION POINTER  
             SelectionPointerChecks();
 
+            AddDroneCheck();
+
             //ScalingChecks();
 
             if (WorldProperties.selectedDrones.AreDronesSelected())
@@ -165,14 +167,25 @@
             {
                 // Help needed: how to check whether the collider and the drone are the same object.
                 // Currently assuming that the collider and the Drone script are both attached to the same game object.
-                Drone currentDrone = currentCollider.GetComponent<Drone>();
+                Drone currentDrone = currentCollider.GetComponent<DroneProperties>().classPointer;
                 if (!currentCollisions.Any(x => (x.type == CollisionType.DRONE && x.drone == currentDrone)))
                 {
                     //Debug.Log("A drone is entering the grab zone");
-                    currentCollisions.Add(new CollisionPair(currentCollider.gameObject.GetComponent<Drone>()));
-                    if (currentControllerState == ControllerState.POINTING)
+                    currentCollisions.Add(new CollisionPair(currentDrone));
+                    if (currentControllerState == ControllerState.POINTING || currentControllerState == ControllerState.SELECTING_DRONES)
                     {
-                        currentDrone.Select();
+                        changeControllerState(ControllerState.SELECTING_DRONES);
+                        if (this.selectionMode == SelectionMode.NONE)
+                        {
+                            this.selectionMode = currentDrone.selected ? SelectionMode.DESELECTING : SelectionMode.SELECTING;
+                        }
+                        if (this.selectionMode == SelectionMode.SELECTING)
+                        {
+                            currentDrone.Select();
+                        } else if (this.selectionMode == SelectionMode.DESELECTING)
+                        {
+                            currentDrone.Deselect();
+                        }                        
                     }
                 }
             }
@@ -210,7 +223,7 @@
             }
             else if (currentCollider.tag == "Drone")
             {
-                Drone currentDrone = currentCollider.GetComponent<Drone>();
+                Drone currentDrone = currentCollider.GetComponent<DroneProperties>().classPointer;
                 currentCollisions.RemoveAll(collision => collision.type == CollisionType.DRONE && collision.drone == currentDrone);
 
                 //Debug.Log("A drone is leaving the grab zone");
@@ -277,6 +290,14 @@
             }
         }
 
+        private void AddDroneCheck()
+        {
+            if (OVRInput.GetUp(OVRInput.Button.PrimaryThumbstick))
+            {
+                new Drone(this.gameObject.transform.position);
+            }
+        }
+
         /// <summary>
         /// This handles the Selection Pointer toggling, which is activated by the right grip trigger.
         /// Both grip triggers at the same time means we are scaling.
@@ -284,43 +305,52 @@
         private void SelectionPointerChecks()
         {
             if (currentControllerState == ControllerState.IDLE 
-                && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
+                && OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger))
             {
                 changeControllerState(ControllerState.POINTING); // Switch to the controller's pointing state
             }
 
-            if (currentControllerState == ControllerState.POINTING)             // Checking for releasing grip
+            if (currentControllerState == ControllerState.POINTING || currentControllerState == ControllerState.SELECTING_DRONES)
             {
-                if (OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger))
+                if (OVRInput.GetUp(OVRInput.Button.PrimaryHandTrigger))
                 {
                     changeControllerState(ControllerState.IDLE); // Switch to the controller's idle state
-                } else if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
+                } else if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger))
                 {
-                    RaycastHit hit;
-                    if (Physics.Raycast(this.gameObject.transform.position, this.gameObject.transform.forward, out hit))
-                    {
-                        DroneProperties targetDrone = hit.collider.gameObject.GetComponent<DroneProperties>();
-                        if (targetDrone != null)
-                        {
-                            Drone drone = targetDrone.classPointer;
-                            if (selectionMode == SelectionMode.NONE)
-                            {
-                                selectionMode = (drone.selected) ? SelectionMode.DESELECTING : SelectionMode.SELECTING;
-                            }
-                            if (selectionMode == SelectionMode.SELECTING)
-                            {
-                                drone.Select();
-                            }
-                            else
-                            {
-                                drone.Deselect();
-                            }
-                        }
-                    }
+                    CheckForDroneSelection();
+                } else
+                {
+                    selectionMode = SelectionMode.NONE;
                 }
             }
 
 
+        }
+
+        private void CheckForDroneSelection()
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(this.gameObject.transform.position, this.gameObject.transform.forward, out hit))
+            {
+                DroneProperties targetDrone = hit.collider.gameObject.GetComponent<DroneProperties>();
+                if (targetDrone != null)
+                {
+                    changeControllerState(ControllerState.SELECTING_DRONES);
+                    Drone drone = targetDrone.classPointer;
+                    if (selectionMode == SelectionMode.NONE)
+                    {
+                        selectionMode = (drone.selected) ? SelectionMode.DESELECTING : SelectionMode.SELECTING;
+                    }
+                    if (selectionMode == SelectionMode.SELECTING)
+                    {
+                        drone.Select();
+                    }
+                    else
+                    {
+                        drone.Deselect();
+                    }
+                }
+            }
         }
 
         private void changeControllerState(ControllerState newState)
@@ -329,15 +359,16 @@
             {
                 return;
             }
-            if (currentControllerState == ControllerState.POINTING)
+            if (currentControllerState == ControllerState.POINTING || currentControllerState == ControllerState.SELECTING_DRONES)
             {
                 toggleRaycastOff();
             } else if (currentControllerState == ControllerState.SETTING_HEIGHT)
             {
                 toggleHeightPlaneOff();
             }
-            if (newState == ControllerState.POINTING)
+            if (newState == ControllerState.POINTING || newState == ControllerState.SELECTING_DRONES)
             {
+                Debug.Log("Pointing");
                 toggleRaycastOn();
                 selectionMode = SelectionMode.NONE;
             } else if (newState == ControllerState.SETTING_HEIGHT)

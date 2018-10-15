@@ -50,10 +50,11 @@
         // Use this for initialization
         void Start()
         {
-            selectedDrones = null;
+            selectedDrones = new SelectedDrones();
             dronesDict = new Dictionary<string, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
             nextDroneId = generateNextDroneID().GetEnumerator(); // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
+            nextDroneId.MoveNext();
             nextGroupIDNum = 0; //used for grouped drone IDs (format is "Group" + groupIDNum)
             nextGroupColor = Color.blue; //arbitray right now; used so users can differentiate groups of drones
             droneSelectionColor = Color.yellow;
@@ -113,7 +114,6 @@
             if (!GameObject.FindWithTag("Drone"))
             {
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
-                selectedDrones = new SelectedDrones(newDrone);
             }
         }
         /// <summary>
@@ -123,7 +123,7 @@
         /// <returns>return an IEnumerable for generating new Drone IDs</returns>
         public static IEnumerable<string> generateNextDroneID(string start = "")
         {
-            StringBuilder chars = start == null ? new StringBuilder() : new StringBuilder(start);
+            StringBuilder chars = (start == null) ? new StringBuilder() : new StringBuilder(start);
 
             while (true)
             {
@@ -147,8 +147,8 @@
         /// <returns>next Drone ID; which is in the infinite set {"A", "B", ..., "Z", "AA", ..., "AZ", "BA", ...}</returns>
         public static string getNextDroneId()
         {
-            string toReturn = nextDroneId.Current;
             nextDroneId.MoveNext();
+            string toReturn = nextDroneId.Current;
             return toReturn;
         }
 

@@ -80,7 +80,7 @@ public class DronePositionSubscriber : ROSBridgeSubscriber
     /// </summary>
     static void SaveData()
     {
-        WorldProperties.FindClosestObstacleAndDist();
+        //WorldProperties.FindClosestObstacleAndDist();
         WorldProperties.obstacleDistsToPrint.Add(WorldProperties.closestDist.ToString());
     }
 

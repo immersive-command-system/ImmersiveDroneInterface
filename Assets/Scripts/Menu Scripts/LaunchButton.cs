@@ -25,30 +25,30 @@
 
         void OnClickEvent()
         {
-            if (controller.GetComponent<VRTK_Pointer>().IsPointerActive())
-            {
-                if (WorldProperties.selectedDrone != null && !flying)
-                {
-                    WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/takeoff", "");
-                    GetComponentInChildren<Text>().text = "Land";
-                    flying = true;
-                }
+            //if (controller.GetComponent<VRTK_Pointer>().IsPointerActive())
+            //{
+            //    if (WorldProperties.selectedDrone != null && !flying)
+            //    {
+            //        WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/takeoff", "");
+            //        GetComponentInChildren<Text>().text = "Land";
+            //        flying = true;
+            //    }
 
-                else if (WorldProperties.selectedDrone != null && flying)
-                {
-                    WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/land", "");
-                    GetComponentInChildren<Text>().text = "Takeoff";
-                    flying = false;
-                }
-            }        
+            //    else if (WorldProperties.selectedDrone != null && flying)
+            //    {
+            //        WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/land", "");
+            //        GetComponentInChildren<Text>().text = "Takeoff";
+            //        flying = false;
+            //    }
+            //}        
         }
 
         void OnApplicationQuit()
         {
-            if (WorldProperties.selectedDrone != null && flying)
-            {
-                WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/land", "");
-            }
+            //if (WorldProperties.selectedDrone != null && flying)
+            //{
+            //    WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/land", "");
+            //}
         }
     }
 }

@@ -6,14 +6,13 @@
 
     public class SelectedDrones
     {
-        public Dictionary<string, Drone> individualDrones;
-        public Dictionary<string, DroneGroup> groupedDrones;
+        public Dictionary<string, Drone> individualDrones = new Dictionary<string, Drone>();
+        public Dictionary<string, DroneGroup> groupedDrones = new Dictionary<string, DroneGroup>();
         public Color color;
 
         // since currently a drone is automatically spawned at the start
-        public SelectedDrones(Drone initialDrone)
+        public SelectedDrones()
         {
-            individualDrones[initialDrone.id] = initialDrone;
             color = WorldProperties.droneSelectionColor;
         }
 
@@ -31,7 +30,6 @@
             {
                 AddGroup(drone.groupID);
             }
-            
         }
 
         /// <summary>
@@ -167,15 +165,15 @@
 
         }
 
-        public void InsertWayPoint(Waypoint newWaypoint, Waypoint prevWaypoint)
+        public void InsertWayPoint(GeneralWaypoint newWaypoint, GeneralWaypoint prevWaypoint)
         {
             if (IsSingleDroneSelected())
             {
-                individualDrones.Values.Single().InsertWaypoint(newWaypoint, prevWaypoint);
+                individualDrones.Values.Single().InsertWaypoint((Waypoint)newWaypoint, (Waypoint)prevWaypoint);
             }
-            else
+            else if (IsSingleGroupSelected())
             {
-                // Unsure of what to do here?
+                groupedDrones.Values.Single().InsertWaypoint((GroupWaypoint)newWaypoint, (GroupWaypoint)prevWaypoint);
             }
         }
 
@@ -236,6 +234,16 @@
             WorldProperties.groupedDrones[groupIdName] = newGroup;
 
             return newGroup;
+        }
+
+        private void printIndividualDroneIDs()
+        {
+            string idList = "";
+            foreach (string id in individualDrones.Keys)
+            {
+                idList += id + "\n";
+            }
+            Debug.Log("Individual Drones:\n" + idList);
         }
     }
 }

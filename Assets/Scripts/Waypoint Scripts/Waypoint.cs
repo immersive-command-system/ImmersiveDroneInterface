@@ -7,7 +7,6 @@
     public class Waypoint : GeneralWaypoint
     {
         public Drone referenceDrone; // The drone whose path this waypoint belongs to
-        public GameObject gameObjectPointer; // This is the related game object
         public ArrayList ROSpoints; // Keeps track of the ROSpoints received over the ROSBridge
         public string id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
 
@@ -62,16 +61,6 @@
         public override Vector3 GetPosition()
         {
             return this.gameObjectPointer.transform.position;
-        }
-
-        /// <summary>
-        /// Assign a new position for this waypoint in Unity world coordinates
-        /// </summary>
-        /// <param name="newPosition">The new position to assign this waypoint.</param>
-        public override void AssignPosition(Vector3 newPosition)
-        {
-            this.gameObjectPointer.transform.position = newPosition;
-            gameObjectPointer.GetComponent<WaypointProperties>().UpdateGroundpointLine();
         }
 
         public override string ToString()

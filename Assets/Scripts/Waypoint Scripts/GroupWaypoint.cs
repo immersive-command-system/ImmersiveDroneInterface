@@ -6,7 +6,6 @@
     public class GroupWaypoint : GeneralWaypoint
     {
         private string groupID;
-        private GameObject gameObjectPointer;
 
         public GroupWaypoint(string groupID, Vector3 position)
         {
@@ -33,16 +32,6 @@
         public override Vector3 GetPosition()
         {
             return this.gameObjectPointer.transform.position;
-        }
-
-        /// <summary>
-        /// Assign a new position for this waypoint in Unity world coordinates
-        /// </summary>
-        /// <param name="newPosition">The new position to assign this waypoint.</param>
-        public override void AssignPosition(Vector3 newPosition)
-        {
-            this.gameObjectPointer.transform.position = newPosition;
-            gameObjectPointer.GetComponent<WaypointProperties>().UpdateGroundpointLine();
         }
 
         /// <summary>
