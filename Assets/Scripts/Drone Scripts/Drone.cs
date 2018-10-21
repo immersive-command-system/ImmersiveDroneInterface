@@ -149,6 +149,7 @@
         /// <param name="deletedWaypoint"> The waypoint which is to be deleted </param>
         public void DeleteWaypoint(Waypoint deletedWaypoint)
         {
+            Debug.Log("Deleting");
             //Sending a ROS DELETE Update
             string curr_id = deletedWaypoint.id;
             string prev_id = deletedWaypoint.prevPathPoint.id;
@@ -190,12 +191,16 @@
         /// Use this to add this drone to the selection and reflect that change in the interface.
         /// </summary>
         public void Select() {
+            WorldProperties.selectedDrones.AddDrone(this);
+            OnSelect();
+        }
+
+        public void OnSelect()
+        {
             // Changes the color of the drone to indicate that it has been selected
             this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().selectedMaterial;
             this.selected = true;
-
-            WorldProperties.selectedDrones.AddDrone(this);
         }
 
         /// <summary>
@@ -204,6 +209,11 @@
         public void Deselect()
         {
             WorldProperties.selectedDrones.DeselectDrone(this);
+            OnDeselect();
+        }
+
+        public void OnDeselect()
+        {
             this.selected = false;
             this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;

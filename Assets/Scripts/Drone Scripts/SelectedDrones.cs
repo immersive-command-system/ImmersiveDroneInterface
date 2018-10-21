@@ -28,7 +28,7 @@
                 individualDrones[drone.id] = drone;
             } else
             {
-                AddGroup(drone.groupID);
+                WorldProperties.groupedDrones[drone.groupID].Select();
             }
         }
 
@@ -54,7 +54,7 @@
                 individualDrones.Remove(drone.id);
             } else
             {
-                DeselectGroup(drone.groupID);
+                WorldProperties.groupedDrones[drone.groupID].Deselect();
             }
         }
 
@@ -74,16 +74,34 @@
         /// <param name="groupID">Id of grouped drones to add</param>
         public void AddGroup(string groupID)
         {
-            groupedDrones[groupID] = WorldProperties.groupedDrones[groupID];
+            AddGroup(WorldProperties.groupedDrones[groupID]);
+        }
+
+        /// <summary>
+        /// Adds one collection of grouped drones to selection.
+        /// </summary>
+        /// <param name="group">DroneGroup object to add</param>
+        public void AddGroup(DroneGroup group)
+        {
+            groupedDrones[group.groupId] = group;
         }
 
         /// <summary>
         ///Removes one collection of grouped drones to selection.
         /// </summary>
-        /// <param name="groupID">Id of grouped drones to add</param>
+        /// <param name="groupID">Id of grouped drones to remove from selection</param>
         public void DeselectGroup(string groupID)
         {
             groupedDrones.Remove(groupID);
+        }
+
+        /// <summary>
+        ///Removes one collection of grouped drones to selection.
+        /// </summary>
+        /// <param name="group">DroneGroup object to remove from selection</param>
+        public void DeselectGroup(DroneGroup group)
+        {
+            DeselectGroup(group.groupId);
         }
 
         /// <summary>
@@ -158,23 +176,25 @@
                 {
                     singleGroup = CreateNewGroup();
                 }
-                GroupWaypoint newWaypoint = new GroupWaypoint(singleGroup.groupId, waypointPosition);
-                singleGroup.AddWaypoint(newWaypoint);
-                return newWaypoint;
+                return singleGroup.AddWaypoint(waypointPosition);
             }
 
         }
 
-        public void InsertWayPoint(GeneralWaypoint newWaypoint, GeneralWaypoint prevWaypoint)
+        public GeneralWaypoint InsertWayPoint(Vector3 position, GeneralWaypoint prevWaypoint)
         {
             if (IsSingleDroneSelected())
             {
-                individualDrones.Values.Single().InsertWaypoint((Waypoint)newWaypoint, (Waypoint)prevWaypoint);
+                Drone currDrone = individualDrones.Values.Single();
+                Waypoint newWaypoint = new Waypoint(currDrone, position);
+                currDrone.InsertWaypoint(newWaypoint, (Waypoint)prevWaypoint);
+                return newWaypoint;
             }
             else if (IsSingleGroupSelected())
             {
-                groupedDrones.Values.Single().InsertWaypoint((GroupWaypoint)newWaypoint, (GroupWaypoint)prevWaypoint);
+                return groupedDrones.Values.Single().InsertWaypoint(position, (GroupWaypoint)prevWaypoint);
             }
+            return null;
         }
 
         /// <summary>
@@ -217,12 +237,12 @@
            
             foreach(DroneGroup group in groupedDrones.Values)
             {
-                WorldProperties.groupedDrones.Remove(group.groupId);
                 foreach (KeyValuePair<string, Drone> entry in group.getDronesDict())
                 {
                     entry.Value.groupID = groupIdName;
                     drones[entry.Key] = entry.Value;
                 }
+                group.Ungroup(false, false, false);
             }
 
             DroneGroup newGroup = new DroneGroup(groupIdName, drones);

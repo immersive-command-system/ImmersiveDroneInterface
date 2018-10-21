@@ -9,6 +9,6 @@
      */
     public class LineProperties : MonoBehaviour
     {
-        public Waypoint originWaypoint;
+        public GeneralWaypoint originWaypoint;
     }
 }

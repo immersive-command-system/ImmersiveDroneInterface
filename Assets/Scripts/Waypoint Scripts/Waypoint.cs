@@ -67,5 +67,15 @@
         {
             return this.id;
         }
+
+        public override GeneralWaypoint GetPrevWaypoint()
+        {
+            return this.prevPathPoint;
+        }
+
+        public override void SetPrevWaypoint(GeneralWaypoint waypoint)
+        {
+            this.prevPathPoint = (Waypoint)waypoint;
+        }
     }
 }

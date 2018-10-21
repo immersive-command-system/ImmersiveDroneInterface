@@ -53,6 +53,7 @@
             selectedDrones = new SelectedDrones();
             dronesDict = new Dictionary<string, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
+            groupedDrones = new Dictionary<string, DroneGroup>(); // Collection of all the groups of drones.
             nextDroneId = generateNextDroneID().GetEnumerator(); // Used as an incrementing key for the dronesDict and for a piece of the communication about waypoints across the ROSBridge
             nextDroneId.MoveNext();
             nextGroupIDNum = 0; //used for grouped drone IDs (format is "Group" + groupIDNum)

@@ -6,19 +6,23 @@
     public class GroupWaypoint : GeneralWaypoint
     {
         private string groupID;
+        private GroupWaypoint previousWaypoint;
 
-        public GroupWaypoint(string groupID, Vector3 position)
+        public GroupWaypoint(string groupID, Vector3 position, GroupWaypoint prevWaypoint)
         {
             this.groupID = groupID;
 
             GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = GameObject.Find("controller_right").GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
+            gameObjectPointer.GetComponent<WaypointProperties>().classPointer = this; // Connect the gameObject back to the classObject
             gameObjectPointer.tag = "waypoint";
             gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 100;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
             WorldProperties.AddClipShader(gameObjectPointer.transform);
+
+            this.previousWaypoint = prevWaypoint;
         }
 
         public override void UpdateLineColliders()
@@ -42,9 +46,22 @@
             return this.groupID;
         }
 
+        /// <summary>
+        /// Get the waypoint that comes before this on group itinerary.
+        /// </summary>
+        public override GeneralWaypoint GetPrevWaypoint()
+        {
+            return this.previousWaypoint;
+        }
+
         public override string ToString()
         {
             return "Waypoint of group: " + this.groupID;
+        }
+
+        public override void SetPrevWaypoint(GeneralWaypoint waypoint)
+        {
+            this.previousWaypoint = (GroupWaypoint)waypoint;
         }
     }
 }

@@ -11,10 +11,10 @@
     /// </summary>
     public class WaypointProperties : MonoBehaviour
     {
-        public Waypoint classPointer;
+        public GeneralWaypoint classPointer;
         public Drone referenceDrone;
         public GameObject referenceDroneGameObject;
-        private GameObject prevPoint;
+        private GameObject prevPoint = null;
 
         public Material unpassedWaypoint;
         public Material passedWaypoint;
@@ -43,15 +43,19 @@
         void Start()
         {
             passed = false;
-
-            referenceDrone = classPointer.referenceDrone;
-            referenceDroneGameObject = referenceDrone.gameObjectPointer;
+            
+            if (classPointer != null && classPointer is Waypoint)
+            {
+                referenceDrone = ((Waypoint)classPointer).referenceDrone;
+                referenceDroneGameObject = referenceDrone.gameObjectPointer;
+            }
+            
 
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
-            if (classPointer.prevPathPoint != null)
+            if (classPointer.GetPrevWaypoint() != null)
             {
                 LineProperties = this.GetComponentInParent<LineRenderer>();
                 lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
@@ -62,15 +66,10 @@
                 lineCollider.transform.parent = this.gameObject.transform;
 
                 // Establishing the previous point in the path. (Null if it is the drone)
-                prevPoint = classPointer.prevPathPoint.gameObjectPointer;
+                prevPoint = classPointer.GetPrevWaypoint().gameObjectPointer;
 
                 // Create the collider around the line renderer
                 SetLineCollider();
-            }
-            else
-            {
-                prevPoint = null;
-                //prevPoint = referenceDrone.gameObjectPointer;
             }
 
             // Sets up interaction events
@@ -80,10 +79,11 @@
         void Update()
         {
             // Establishing the previous point in the path. (could be the drone)
-            if (classPointer.prevPathPoint != null)
+            if (classPointer.GetPrevWaypoint() != null)
             {
-                prevPoint = classPointer.prevPathPoint.gameObjectPointer;
+                prevPoint = classPointer.GetPrevWaypoint().gameObjectPointer;
             }
+            
             //else
             //{
             //    prevPoint = referenceDrone.gameObjectPointer;

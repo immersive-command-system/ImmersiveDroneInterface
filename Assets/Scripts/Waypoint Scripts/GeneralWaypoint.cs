@@ -10,6 +10,10 @@
 
         public abstract void UpdateLineColliders();
 
+        public abstract GeneralWaypoint GetPrevWaypoint();
+
+        public abstract void SetPrevWaypoint(GeneralWaypoint waypoint);
+
         /// <summary>
         /// Assign a new position for this waypoint in Unity world coordinates
         /// </summary>
