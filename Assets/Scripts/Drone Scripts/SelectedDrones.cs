@@ -256,7 +256,7 @@
         /// Creating a group is valid if more than one individual drone or more than one group or 1 drone and 1 group is selected.
         /// </summary>
         /// <returns> Newly created DroneGroup object from the current select, if valid. Returns null otherwise. </returns>
-        private DroneGroup CreateNewGroup()
+        public DroneGroup CreateNewGroup()
         {
             if (IsSingleDroneSelected() || IsSingleGroupSelected() || !AreDronesSelected())
             {
