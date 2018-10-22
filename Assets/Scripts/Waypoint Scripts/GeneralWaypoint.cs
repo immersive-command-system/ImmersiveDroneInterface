@@ -2,6 +2,9 @@
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Superclass to Waypoint and GroupWaypoint and prototypes some common waypoint functions.
+    /// </summary>
     public abstract class GeneralWaypoint
     {
         public GameObject gameObjectPointer;

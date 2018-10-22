@@ -4,13 +4,18 @@
     using System.Linq;
     using UnityEngine;
 
+    /// <summary>
+    /// This class is a container representing a selection of drones in the interface.
+    /// </summary>
     public class SelectedDrones
     {
+        // Drones in the selection that aren't part of a group.
         public Dictionary<string, Drone> individualDrones = new Dictionary<string, Drone>();
+        // Drone groups in the selection.
         public Dictionary<string, DroneGroup> groupedDrones = new Dictionary<string, DroneGroup>();
+        // The color of the selection.
         public Color color;
-
-        // since currently a drone is automatically spawned at the start
+        
         public SelectedDrones()
         {
             color = WorldProperties.droneSelectionColor;
@@ -87,7 +92,7 @@
         }
 
         /// <summary>
-        ///Removes one collection of grouped drones to selection.
+        /// Removes one collection of grouped drones to selection.
         /// </summary>
         /// <param name="groupID">Id of grouped drones to remove from selection</param>
         public void DeselectGroup(string groupID)
@@ -96,7 +101,7 @@
         }
 
         /// <summary>
-        ///Removes one collection of grouped drones to selection.
+        /// Removes one collection of grouped drones to selection.
         /// </summary>
         /// <param name="group">DroneGroup object to remove from selection</param>
         public void DeselectGroup(DroneGroup group)
@@ -105,7 +110,7 @@
         }
 
         /// <summary>
-        /// Deletes selected drones from map.
+        /// Deletes selected drones from map. NOT IMPLEMENTED YET.
         /// </summary>
         public void deleteDrones()
         {
@@ -118,14 +123,22 @@
         /// </summary>
         public void Clear()
         {
+            foreach (Drone drone in individualDrones.Values)
+            {
+                drone.OnDeselect();
+            }
             individualDrones.Clear();
+            foreach (DroneGroup group in groupedDrones.Values)
+            {
+                group.OnDeselect();
+            }
             groupedDrones.Clear();
         }
 
         /// <summary>
         /// Returns whether or not there are drones selected
         /// </summary>
-        /// <returns>True if individual or grouped drone(s) are selected, False if no drones are selected</returns>
+        /// <returns> True if something is selected. False otherwise </returns>
         public bool AreDronesSelected()
         {
             return individualDrones.Count > 0 || groupedDrones.Count > 0;
@@ -134,7 +147,7 @@
         /// <summary>
         /// Returns whether or not only a single ungrouped drone is selected
         /// </summary>
-        /// <returns>True if only one ungrouped drone is selected. False otherwise. </returns>
+        /// <returns> True if only one ungrouped drone is selected. False otherwise. </returns>
         public bool IsSingleDroneSelected()
         {
             return individualDrones.Count == 1 && groupedDrones.Count == 0;
@@ -143,7 +156,7 @@
         /// <summary>
         /// Returns whether or not only a single drone group is selected
         /// </summary>
-        /// <returns>True if only one drone group is selected. False otherwise. </returns>
+        /// <returns> True if only one drone group is selected. False otherwise. </returns>
         public bool IsSingleGroupSelected()
         {
             return individualDrones.Count == 0 && groupedDrones.Count == 1;
@@ -155,12 +168,20 @@
         /// the selection will first be regrouped into one DroneGroup.
         /// </summary>
         /// <param name="waypointPosition">Position of new waypoint.</param>
+        /// <returns>
+        /// Newly created waypoint.
+        /// If only one individual drone is selected, then the returned waypoint is a Waypoint object.
+        /// Otherwise, a GroupWaypoint object is returned.
+        /// </returns>
         public GeneralWaypoint AddWayPoint(Vector3 waypointPosition)
         {
+            // Do nothing if nothing is selected.
             if (!AreDronesSelected())
             {
                 return null;
             }
+
+            // Do single drone waypoint insertion if only one ungrouped drone is selected.
             if (IsSingleDroneSelected()) {
                 Drone drone = individualDrones.Values.Single();
                 Waypoint newWaypoint = new Waypoint(drone, waypointPosition);
@@ -169,18 +190,33 @@
             } else
             {
                 DroneGroup singleGroup = null;
+                // Check if only a single group is selected.
+                // If not then regroup all drones in selection to a single group.
                 if (IsSingleGroupSelected())
                 {
                     singleGroup = groupedDrones.Values.Single();
                 } else
                 {
+                    //should we keep track of old groups in case the user decides to not add any waypoints for the newly selected-drones group?
                     singleGroup = CreateNewGroup();
                 }
+                
                 return singleGroup.AddWaypoint(waypointPosition);
             }
 
         }
 
+        /// <summary>
+        /// Insert waypoint after prevWaypoint.
+        /// This function is only valid if a single drone or a single group is selected.
+        /// </summary>
+        /// <param name="position"> Position of new waypoint. </param>
+        /// <param name="prevWaypoint"> Waypoint after which to insert the new waypoint. </param>
+        /// <returns>
+        /// Newly created waypoint.
+        /// If only one individual drone is selected, then the returned waypoint is a Waypoint object.
+        /// Otherwise, a GroupWaypoint object is returned.
+        /// </returns>
         public GeneralWaypoint InsertWayPoint(Vector3 position, GeneralWaypoint prevWaypoint)
         {
             if (IsSingleDroneSelected())
@@ -201,8 +237,8 @@
         /// Deletes waypoint from selection.
         /// Only works if selection is a single drone or single DroneGroup.
         /// </summary>
-        /// <param name="waypoint">GeneralWaypoint object to delete from selected drones and groups.</param>
-        public void DeleteWayPoint(GeneralWaypoint waypoint) //should we keep track of old groups in case the user decides to not add any waypoints for the newly selected-drones group?
+        /// <param name="waypoint"> GeneralWaypoint object to delete from selected drones and groups. </param>
+        public void DeleteWayPoint(GeneralWaypoint waypoint)
         {
             if (IsSingleDroneSelected())
             {
@@ -219,7 +255,7 @@
         /// A new group is created if more than one drone/drone groups are selected and waypoint(s) are added for the drones.
         /// Creating a group is valid if more than one individual drone or more than one group or 1 drone and 1 group is selected.
         /// </summary>
-        /// <returns>Newly created DroneGroup object from the current select, if valid. Returns null otherwise.</returns>
+        /// <returns> Newly created DroneGroup object from the current select, if valid. Returns null otherwise. </returns>
         private DroneGroup CreateNewGroup()
         {
             if (IsSingleDroneSelected() || IsSingleGroupSelected() || !AreDronesSelected())
@@ -254,6 +290,24 @@
             WorldProperties.groupedDrones[groupIdName] = newGroup;
 
             return newGroup;
+        }
+
+        /// <summary>
+        /// Gets a flattened list of all the drones in the selection (both grouped and ungrouped).
+        /// </summary>
+        /// <returns> A list of all the drones in the selection (both grouped and ungrouped). </returns>
+        public List<Drone> GetFlattenedDroneList()
+        {
+            List<Drone> droneList = new List<Drone>();
+            droneList.AddRange(individualDrones.Values);
+            foreach (DroneGroup group in groupedDrones.Values)
+            {
+                // Want to call the enumerable version of getDrones so
+                // less overhead of materializing it into a list if it'll only
+                // be used to add it to this droneList
+                droneList.AddRange(group.getDronesEnumerable());
+            }
+            return droneList;
         }
 
         private void printIndividualDroneIDs()

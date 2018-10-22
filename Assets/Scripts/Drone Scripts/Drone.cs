@@ -5,30 +5,35 @@
     using UnityEngine;
     using ROSBridgeLib.interface_msgs;
 
+    public delegate void DroneFunction();
+
     public class Drone
     {
 
-        public GameObject gameObjectPointer; // This is the related game object
-        public string id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
-        public string groupID = null;
-        public bool selected = false;
+        public GameObject gameObjectPointer;    // This is the related game object
+        public string id;                       // This is the identifier of the drone in the dronesDict and across the ROSBridge
+        public string groupID = null;           // ID of the drone the group is in (null if not part of a group)
+        public bool selected = false;           // Whether drone is currently in the selection.
 
-        public ArrayList waypoints; // All waypoints held by the drone
-        public ArrayList waypointsOrder; // Keeps track of the order in which waypoints were created for the undo function
+        public ArrayList waypoints;         // All waypoints held by the drone
+        public ArrayList waypointsOrder;    // Keeps track of the order in which waypoints were created for the undo function
 
-        public int nextWaypointId; // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
-        public Dictionary<string, Waypoint> waypointsDict; // Collection of the waypoints in this drone's path
+        public int nextWaypointId;                          // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
+        public Dictionary<string, Waypoint> waypointsDict;  // Collection of the waypoints in this drone's path
+
+
 
         /// <summary>
         /// Constructor method for Drone class objects
         /// </summary>
-        /// <param name="drone_obj"> We pass in a Gameobject for the drone -- this will be phased out and the new drone_obj gameObject will be instantiated in this method </param>
+        /// <param name="position"> The position at which to instantiate the drone game object. </param>
         public Drone(Vector3 position)
         {
             // Create gameObject at position
             GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().droneBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
-            gameObjectPointer.GetComponent<DroneProperties>().classPointer = this; // Connect the gameObject back to the classObject
+            // Connect the gameObject back to the classObject.
+            gameObjectPointer.GetComponent<DroneProperties>().classPointer = this;
             gameObjectPointer.tag = "Drone";
             gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
@@ -50,12 +55,12 @@
             WorldProperties.dronesDict.Add(id, this);
             Debug.Log("Created new drone with id: " + id);
 
-            // Select this drone
+            // Add drone to selection by default.
             this.Select();
         }
 
         /// <summary>
-        /// Use this to add a new Waypoint to the end of the drone's path
+        /// Use this to add a new Waypoint to the end of the drone's path.
         /// </summary>
         /// <param name="newWaypoint"> The Waypoint which is to be added to the end of path </param>        
         public void AddWaypoint(Waypoint newWaypoint)
@@ -67,14 +72,12 @@
             {
                 //Creating the starter waypoint
                 Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.TransformPoint(new Vector3(0, 1, 0)));
-
-                // Otherwise, this is the first waypoint.
                 startWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
 
                 // Storing this for the ROS message
                 prev_id = "DRONE";
 
-                // Swapping the ids so the order makes sense
+                // Swapping the ids to maintain order of waypoint ID's
                 string tempId = startWaypoint.id;
                 startWaypoint.id = newWaypoint.id;
                 newWaypoint.id = tempId;
@@ -91,7 +94,7 @@
             } else
             {
                 // Otherwise we can add as normal
-                Waypoint prevWaypoint = (Waypoint)waypoints[waypoints.Count - 1]; // Grabbing the waypoint at the end of our waypoints path
+                Waypoint prevWaypoint = (Waypoint)waypoints[waypoints.Count - 1]; // Grabbing the last waypoint.
                 newWaypoint.prevPathPoint = prevWaypoint; // setting the previous of the new waypoint
                 prevWaypoint.nextPathPoint = newWaypoint; // setting the next of the previous waypoint
 
@@ -180,21 +183,28 @@
             Object.Destroy(deletedWaypoint.gameObjectPointer);
         }
 
-        public void OnModifyWaypoint(Waypoint waypoint)
+        /// <summary>
+        /// Callback method to notify ROS that a waypoint's position has been modified.
+        /// </summary>
+        /// <param name="modifiedWaypoint"> The waypoint which was modified </param>
+        public void OnModifyWaypoint(Waypoint modifiedWaypoint)
         {
             // Sending a ROS MODIFY
-            UserpointInstruction msg = new UserpointInstruction(waypoint, "MODIFY");
+            UserpointInstruction msg = new UserpointInstruction(modifiedWaypoint, "MODIFY");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
         }
 
         /// <summary>
-        /// Use this to add this drone to the selection and reflect that change in the interface.
+        /// Use this to add this drone to the selection. Will call OnSelect().
         /// </summary>
         public void Select() {
             WorldProperties.selectedDrones.AddDrone(this);
             OnSelect();
         }
 
+        /// <summary>
+        /// Callback method to update the drone object's appearance to reflect selection.
+        /// </summary>
         public void OnSelect()
         {
             // Changes the color of the drone to indicate that it has been selected
@@ -204,7 +214,7 @@
         }
 
         /// <summary>
-        /// Use this to remove this drone from the selection and reflect that change in the interface.
+        /// Use this to remove this drone from the selection. Will call OnDeselect().
         /// </summary>
         public void Deselect()
         {
@@ -212,6 +222,9 @@
             OnDeselect();
         }
 
+        /// <summary>
+        /// Callback method to update the drone object's appearance to reflect deselection.
+        /// </summary>
         public void OnDeselect()
         {
             this.selected = false;
@@ -236,11 +249,11 @@
         /// <summary>
         /// Finds the first waypoint in this.waypoints that has the same position.
         /// </summary>
-        private int findWaypoint(Vector3 position)
+        private int findWaypoint(Waypoint waypoint)
         {
             for (int i = 0; i < this.waypoints.Count; i++)
             {
-                if (((Waypoint)this.waypoints[i]).GetPosition() == position)
+                if (((Waypoint)this.waypoints[i]) == waypoint)
                 {
                     return i;
                 }
