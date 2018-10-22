@@ -15,6 +15,8 @@
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
         public GameObject torus;
+		public SelectedDroneMenu selectedDroneMenuPrefab;
+
 
         public static Color droneSelectionColor;
 
@@ -25,6 +27,7 @@
 
         public static Dictionary<string, DroneGroup> groupedDrones;
         public static SelectedDrones selectedDrones;
+		public static SelectedDroneMenu selectedDroneMenu;
 
         public static GameObject worldObject;
         public static GameObject placementPlane;
@@ -51,6 +54,7 @@
         void Start()
         {
             selectedDrones = new SelectedDrones();
+			selectedDroneMenu = selectedDroneMenuPrefab;
             dronesDict = new Dictionary<string, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
             groupedDrones = new Dictionary<string, DroneGroup>(); // Collection of all the groups of drones.
