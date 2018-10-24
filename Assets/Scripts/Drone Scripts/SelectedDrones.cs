@@ -31,10 +31,13 @@
             if (drone.groupID == null)
             {
                 individualDrones[drone.id] = drone;
+				WorldProperties.selectedDroneMenu.UpdateMenu_Select_Drone (drone.id);
             } else
             {
                 WorldProperties.groupedDrones[drone.groupID].Select();
+				WorldProperties.selectedDroneMenu.UpdateMenu_Select_Group (drone.groupID);
             }
+
         }
 
         /// <summary>
@@ -57,10 +60,14 @@
             if (drone.groupID == null)
             {
                 individualDrones.Remove(drone.id);
+				WorldProperties.selectedDroneMenu.UpdateMenu_Deselect_Drone (drone.id);
+
             } else
             {
                 WorldProperties.groupedDrones[drone.groupID].Deselect();
+				WorldProperties.selectedDroneMenu.UpdateMenu_Deselect_Group (drone.groupID);
             }
+
         }
 
         /// <summary>
