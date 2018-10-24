@@ -7,7 +7,7 @@
 
     public delegate void DroneFunction();
 
-    public class Drone
+    public class Drone : MonoBehaviour
     {
 
         public GameObject gameObjectPointer;    // This is the related game object
@@ -135,11 +135,13 @@
             waypoints.Insert(newIndex, newWaypoint);
 
             // Inserting into the path linked list by adjusting the next and previous pointers of the surrounding waypoints
-            newWaypoint.prevPathPoint = prevWaypoint;
+            newWaypoint.SetPrevWaypoint(prevWaypoint);
             newWaypoint.nextPathPoint = prevWaypoint.nextPathPoint;
 
-            newWaypoint.prevPathPoint.nextPathPoint = newWaypoint;
-            newWaypoint.nextPathPoint.prevPathPoint = newWaypoint;
+            prevWaypoint.nextPathPoint = newWaypoint;
+            newWaypoint.nextPathPoint.SetPrevWaypoint(newWaypoint);
+
+            newWaypoint.UpdateLineColliders();
 
             //Sending a ROS INSERT Update
             UserpointInstruction msg = new UserpointInstruction(newWaypoint, "INSERT");
@@ -189,6 +191,7 @@
         /// <param name="modifiedWaypoint"> The waypoint which was modified </param>
         public void OnModifyWaypoint(Waypoint modifiedWaypoint)
         {
+            modifiedWaypoint.UpdateLineColliders();
             // Sending a ROS MODIFY
             UserpointInstruction msg = new UserpointInstruction(modifiedWaypoint, "MODIFY");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);

@@ -10,7 +10,7 @@
     /// Inherent challenges for having a mutable group would be handling the group waypoints.
     /// In other words, do new additions to the group also receive older group waypoints?
     /// </summary>
-    public class DroneGroup
+    public class DroneGroup : MonoBehaviour
     {
 
         private Dictionary<string, Drone> dronesDict;   // All drones in the selection, mapped from ID to Drone object.
@@ -125,8 +125,9 @@
             GroupWaypoint waypoint = new GroupWaypoint(groupId, position, prevWaypoint);
             if (insertIndex < waypoints.Count)
             {
-                (waypoints[waypoints.Count - 1]).SetPrevWaypoint(waypoint);
+                (waypoints[insertIndex + 1]).SetPrevWaypoint(waypoint);
             }
+            waypoint.SetPrevWaypoint(prevWaypoint);
             waypoints.Insert(insertIndex, waypoint);
 
             // Perform waypoint insertion on each of the drones.
@@ -354,5 +355,12 @@
             return dronesDict;
         }
         
+        public void MapExecute(string method_name, int delay = 0)
+        {
+            foreach (Drone drone in getDronesEnumerable())
+            {
+                drone.Invoke(method_name, delay);
+            }
+        }
     }
 }

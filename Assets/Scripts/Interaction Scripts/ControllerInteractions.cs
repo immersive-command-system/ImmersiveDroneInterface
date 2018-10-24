@@ -150,6 +150,7 @@
             {
                 // This is the waypoint at the end of the line (the line points back toward the path origin / previous waypoint)
                 GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                Debug.Log("Colliding with " + lineOriginWaypoint);
                 if (!currentCollisions.Any(x => (x.type == CollisionType.LINE && x.waypoint == lineOriginWaypoint)))
                 {
                     //Debug.Log("A line is entering the grab zone");
@@ -446,7 +447,7 @@
                 OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger) &&
                 mostRecentCollision.type != CollisionType.WAYPOINT)
             {
-                currentWaypoint = WorldProperties.selectedDrones.AddWayPoint(placePoint.transform.position);
+                currentWaypoint = CreateWaypoint(placePoint.transform.position);
 
                 //Check to make sure we have successfully placed a waypoint
                 if (currentWaypoint != null)
@@ -598,7 +599,9 @@
                     // Find the waypoint before which to insert current waypoint.
                     GeneralWaypoint mostRecentWaypoint = mostRecentCollision.waypoint;
                     GeneralWaypoint newWaypoint = null;
-                    
+
+                    Debug.Log("Inserting after " + mostRecentWaypoint);
+
                     // Create and insert appropriate type of waypoint depending on the type of mostRecentWaypoint.
                     if (mostRecentWaypoint is GroupWaypoint)
                     {
@@ -621,7 +624,9 @@
                     //Waypoint newWaypoint = new Waypoint(currentSelection, newLocation);
 
                     // Add the new waypoint to the drone's path
-                    return currentSelection.AddWayPoint(newLocation);
+                    GeneralWaypoint newWaypoint = currentSelection.AddWayPoint(newLocation);
+                    Debug.Log("Adding " + newWaypoint);
+                    return newWaypoint;
                 }
             }
             return null;

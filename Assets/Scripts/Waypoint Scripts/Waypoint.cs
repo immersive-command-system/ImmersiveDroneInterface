@@ -26,7 +26,7 @@
             referenceDrone = myDrone;
 
             // Setting up all the related gameObject parameters
-            GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
+            GameObject baseObject = WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = GameObject.Find("controller_right").GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             gameObjectPointer.GetComponent<WaypointProperties>().classPointer = this; // Connect the gameObject back to the classObject
@@ -49,6 +49,10 @@
         public override void UpdateLineColliders()
         {
             gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
+            //if (prevPathPoint != null)
+            //{
+            //    prevPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
+            //}
             if (nextPathPoint != null)
             {
                 nextPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
@@ -75,6 +79,7 @@
 
         public override void SetPrevWaypoint(GeneralWaypoint waypoint)
         {
+            Debug.Log("Setting prev of " + this + " to " + waypoint);
             this.prevPathPoint = (Waypoint)waypoint;
         }
     }

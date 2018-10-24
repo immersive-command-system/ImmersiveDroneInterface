@@ -1,7 +1,5 @@
 ﻿namespace ISAACS
 {
-    using System.Collections;
-    using System.Collections.Generic;
     using UnityEngine;
 
     /** A class attached to a line object.

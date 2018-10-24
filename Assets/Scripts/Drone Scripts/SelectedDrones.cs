@@ -310,6 +310,14 @@
             return droneList;
         }
 
+        public void FlatMapExecute(string function_name, int delay = 0)
+        {
+            foreach (Drone drone in GetFlattenedDroneList())
+            {
+                drone.Invoke(function_name, delay);
+            }
+        }
+
         private void printIndividualDroneIDs()
         {
             string idList = "";

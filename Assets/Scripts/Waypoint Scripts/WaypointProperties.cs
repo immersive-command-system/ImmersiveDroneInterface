@@ -53,6 +53,7 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
+            Debug.Log(classPointer + " has prev " + classPointer.GetPrevWaypoint());
             if (classPointer.GetPrevWaypoint() != null)
             {
                 LineProperties = this.GetComponentInParent<LineRenderer>();
@@ -60,7 +61,7 @@
                 lineCollider.tag = "Line Collider";
                 lineCollider.isTrigger = true;
                 lineCollider.radius = 0.1f;
-                lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
+                lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer.GetPrevWaypoint();
                 lineCollider.transform.parent = this.gameObject.transform;
 
                 // Establishing the previous point in the path. (Null if it is the drone)
@@ -113,9 +114,7 @@
         {
             if (prevPoint != null)
             {
-                LineProperties.SetPosition(0, this.transform.position);
-
-                Vector3 endpoint;
+                LineProperties.SetPosition(0, prevPoint.transform.position);
 
                 //if (referenceDroneGameObject.GetComponent<MoveDrone>().targetWaypoint != this.gameObject || passed)
                 //{
@@ -126,9 +125,8 @@
                 //    endpoint = referenceDroneGameObject.transform.position;
                 //    LineProperties.SetPosition(1, endpoint);
                 //}
-
-                endpoint = prevPoint.transform.position;
-                LineProperties.SetPosition(1, endpoint);
+                
+                LineProperties.SetPosition(1, this.transform.position);
 
                 LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
                 LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
