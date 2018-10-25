@@ -25,6 +25,12 @@
             // Linking this waypoint to its drone
             referenceDrone = myDrone;
 
+            // Establishing the unique waypoint identifier
+            id = "" + referenceDrone.id + referenceDrone.nextWaypointId;
+            referenceDrone.nextWaypointId++;
+
+            Debug.Log("Initializing Waypoint " + this);
+
             // Setting up all the related gameObject parameters
             GameObject baseObject = WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
@@ -39,23 +45,15 @@
             // Initializing the ROSpoints Arraylist
             ROSpoints = new ArrayList(0);
 
-            // Establishing the unique waypoint identifier
-            id = "" + referenceDrone.id + referenceDrone.nextWaypointId;
-            referenceDrone.nextWaypointId ++;
-
             //Debug.Log("Created new waypoint with id: " + id);
         }
 
         public override void UpdateLineColliders()
         {
-            gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
-            //if (prevPathPoint != null)
-            //{
-            //    prevPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
-            //}
+            gameObjectPointer.GetComponent<WaypointProperties>().UpdateLineCollider();
             if (nextPathPoint != null)
             {
-                nextPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().SetLineCollider();
+                nextPathPoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateLineCollider();
             }
         }
 

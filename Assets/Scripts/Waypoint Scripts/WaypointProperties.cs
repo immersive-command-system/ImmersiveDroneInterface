@@ -54,16 +54,17 @@
             controller_right = GameObject.Find("controller_right");
 
             Debug.Log(classPointer + " has prev " + classPointer.GetPrevWaypoint());
+
+            LineProperties = this.GetComponentInParent<LineRenderer>();
+            lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
+            lineCollider.tag = "Line Collider";
+            lineCollider.isTrigger = true;
+            lineCollider.radius = 0.1f;
+            lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
+            lineCollider.transform.parent = this.gameObject.transform;
+
             if (classPointer.GetPrevWaypoint() != null)
             {
-                LineProperties = this.GetComponentInParent<LineRenderer>();
-                lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
-                lineCollider.tag = "Line Collider";
-                lineCollider.isTrigger = true;
-                lineCollider.radius = 0.1f;
-                lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer.GetPrevWaypoint();
-                lineCollider.transform.parent = this.gameObject.transform;
-
                 // Establishing the previous point in the path. (Null if it is the drone)
                 prevPoint = classPointer.GetPrevWaypoint().gameObjectPointer;
 
@@ -80,7 +81,12 @@
             // Establishing the previous point in the path. (could be the drone)
             if (classPointer.GetPrevWaypoint() != null)
             {
+                GameObject oldPrev = prevPoint;
                 prevPoint = classPointer.GetPrevWaypoint().gameObjectPointer;
+                if (oldPrev == null)
+                {
+                    SetLineCollider();
+                }
             }
             
             //else
@@ -136,6 +142,7 @@
         // Places a collider around the waypoint line
         public void SetLineCollider()
         {
+            Debug.Log("Setting line collider for " + classPointer + " with prevPoint " + prevPoint.GetComponent<WaypointProperties>().classPointer);
             Vector3 endpoint = prevPoint.transform.position;
 
             lineCollider.transform.parent = LineProperties.transform;
@@ -201,7 +208,7 @@
                     LineProperties.material = unselectedPassedLine;
                 }
             } else if (( controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint != null && 
-                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == this.gameObject) && 
+                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == prevPoint) && 
                 referenceDrone.selected)
             {
                 LineProperties.material = unpassedWaypoint;

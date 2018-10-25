@@ -141,8 +141,6 @@
             prevWaypoint.nextPathPoint = newWaypoint;
             newWaypoint.nextPathPoint.SetPrevWaypoint(newWaypoint);
 
-            newWaypoint.UpdateLineColliders();
-
             //Sending a ROS INSERT Update
             UserpointInstruction msg = new UserpointInstruction(newWaypoint, "INSERT");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
@@ -191,7 +189,6 @@
         /// <param name="modifiedWaypoint"> The waypoint which was modified </param>
         public void OnModifyWaypoint(Waypoint modifiedWaypoint)
         {
-            modifiedWaypoint.UpdateLineColliders();
             // Sending a ROS MODIFY
             UserpointInstruction msg = new UserpointInstruction(modifiedWaypoint, "MODIFY");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);

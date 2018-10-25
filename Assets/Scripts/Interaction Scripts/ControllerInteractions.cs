@@ -149,7 +149,7 @@
             else if (currentCollider.tag == "Line Collider")
             {
                 // This is the waypoint at the end of the line (the line points back toward the path origin / previous waypoint)
-                GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint.GetPrevWaypoint();
                 Debug.Log("Colliding with " + lineOriginWaypoint);
                 if (!currentCollisions.Any(x => (x.type == CollisionType.LINE && x.waypoint == lineOriginWaypoint)))
                 {
@@ -216,7 +216,7 @@
             }
             else if (currentCollider.tag == "Line Collider")
             {
-                GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint;
+                GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint.GetPrevWaypoint();
                 currentCollisions.RemoveAll(collision => collision.type == CollisionType.LINE && collision.waypoint == lineOriginWaypoint);
 
                 //Debug.Log("A line is leaving the grab zone");
