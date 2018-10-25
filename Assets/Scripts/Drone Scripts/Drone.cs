@@ -150,12 +150,16 @@
         /// Use this to remove a waypoint from the path and from the scene
         /// </summary>
         /// <param name="deletedWaypoint"> The waypoint which is to be deleted </param>
-        public void DeleteWaypoint(Waypoint deletedWaypoint)
+        public bool DeleteWaypoint(Waypoint deletedWaypoint)
         {
-            Debug.Log("Deleting");
+            if (deletedWaypoint.GetPrevWaypoint() == null || !waypointsDict.Remove(deletedWaypoint.id))
+            {
+                return false;
+            }
+
             //Sending a ROS DELETE Update
             string curr_id = deletedWaypoint.id;
-            string prev_id = deletedWaypoint.prevPathPoint.id;
+            string prev_id = (deletedWaypoint.GetPrevWaypoint() != null) ? deletedWaypoint.prevPathPoint.id : "DRONE";
             float x = deletedWaypoint.gameObjectPointer.transform.localPosition.x;
             float y = deletedWaypoint.gameObjectPointer.transform.localPosition.y;
             float z = deletedWaypoint.gameObjectPointer.transform.localPosition.z;
@@ -163,12 +167,14 @@
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
 
             // Removing the new waypoint from the dictionary, waypoints array and placement order
-            waypointsDict.Remove(deletedWaypoint.id);
             waypoints.Remove(deletedWaypoint);
             waypointsOrder.Remove(deletedWaypoint);
 
             // Removing from the path linked list by adjusting the next and previous pointers of the surrounding waypoints
-            deletedWaypoint.prevPathPoint.nextPathPoint = deletedWaypoint.nextPathPoint;
+            if (deletedWaypoint.prevPathPoint != null)
+            {
+                deletedWaypoint.prevPathPoint.nextPathPoint = deletedWaypoint.nextPathPoint;
+            }
             // Need to check if this is the last waypoint in the list -- if it has a next or not
             if (deletedWaypoint.nextPathPoint != null)
             {
@@ -181,6 +187,8 @@
 
             // Deleting the waypoint gameObject
             Object.Destroy(deletedWaypoint.gameObjectPointer);
+
+            return true;
         }
 
         /// <summary>

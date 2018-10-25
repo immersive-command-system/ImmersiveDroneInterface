@@ -53,8 +53,6 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
-            Debug.Log(classPointer + " has prev " + classPointer.GetPrevWaypoint());
-
             LineProperties = this.GetComponentInParent<LineRenderer>();
             lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
@@ -142,7 +140,6 @@
         // Places a collider around the waypoint line
         public void SetLineCollider()
         {
-            Debug.Log("Setting line collider for " + classPointer + " with prevPoint " + prevPoint.GetComponent<WaypointProperties>().classPointer);
             Vector3 endpoint = prevPoint.transform.position;
 
             lineCollider.transform.parent = LineProperties.transform;

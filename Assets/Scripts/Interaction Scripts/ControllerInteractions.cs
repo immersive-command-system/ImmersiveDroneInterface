@@ -108,7 +108,7 @@
                 GrabbingChecks();
 
                 // UNDO AND DELETE (B - BUTTON)
-                if (OVRInput.GetDown(OVRInput.Button.Two))
+                if (OVRInput.GetUp(OVRInput.Button.Two))
                 {
                     UndoAndDeleteWaypoints();
                 }
@@ -135,6 +135,7 @@
                 GeneralWaypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 if (!currentCollisions.Any(x => (x.type == CollisionType.WAYPOINT && x.waypoint == collidedWaypoint)))
                 {
+                    Debug.Log("Colliding with " + collidedWaypoint);
                     //Debug.Log("A waypoint is entering the grab zone");
 
                     // We automatically default to the most recent waypointCollision
@@ -150,7 +151,6 @@
             {
                 // This is the waypoint at the end of the line (the line points back toward the path origin / previous waypoint)
                 GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint.GetPrevWaypoint();
-                Debug.Log("Colliding with " + lineOriginWaypoint);
                 if (!currentCollisions.Any(x => (x.type == CollisionType.LINE && x.waypoint == lineOriginWaypoint)))
                 {
                     //Debug.Log("A line is entering the grab zone");
@@ -444,7 +444,7 @@
             // Check for action to add waypoint at current controller position
             // Precondition: controller mode is IDLE and only index trigger is pressed and released.
             if (currentControllerState == ControllerState.IDLE && 
-                OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger) &&
+                OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
                 mostRecentCollision.type != CollisionType.WAYPOINT)
             {
                 currentWaypoint = CreateWaypoint(placePoint.transform.position);
@@ -458,7 +458,7 @@
 
             // Releases the waypoint when the right index is released 
             // and commit waypoint position change to selected drones.
-            else if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger))
+            else if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
                 if (currentWaypoint is Waypoint)
                 {
@@ -638,58 +638,58 @@
         /// </summary>
         public void UndoAndDeleteWaypoints()
         {
-            // CURRENTLY NOT SUPPORTED
-            //SelectedDrones currentlySelection = WorldProperties.selectedDrones;
+            // Make sure the currently selected drone has waypoints
+            if (currentControllerState == ControllerState.IDLE)
+            {
+                SelectedDrones currentSelection = WorldProperties.selectedDrones;
+                changeControllerState(ControllerState.DELETING);
 
-            //// Make sure the currently selected drone has waypoints
-            //if (currentlySelection.waypoints != null && currentlySelection.waypoints.Count > 0)
-            //{
-            //    changeControllerState(ControllerState.DELETING);
+                CollisionPair lastWaypointCollision = currentCollisions.FindLast(collision => collision.type == CollisionType.WAYPOINT);
+                //Checking to see if we are colliding with one of those
+                if (lastWaypointCollision != null)
+                {
+                    // Remove the highlighted waypoint (DELETE)
+                    Debug.Log("Removing waypoint in grab zone");
 
-            //    //Checking to see if we are colliding with one of those
-            //    if (mostRecentCollision.type == CollisionType.WAYPOINT && currentlySelection.waypoints.Contains(mostRecentCollision.waypoint))
-            //    {
-            //        // Remove the highlighted waypoint (DELETE)
-            //        Debug.Log("Removing waypoint in grab zone");
+                    GeneralWaypoint selectedWaypoint = mostRecentCollision.waypoint;
+                    GeneralWaypoint previousWaypoint = selectedWaypoint.GetPrevWaypoint();
+                    Debug.Log("Attempting delete " + selectedWaypoint + " with prev " + previousWaypoint);
+                    if (currentSelection.DeleteWayPoint(selectedWaypoint))
+                    {
+                        Debug.Log("Deleted " + selectedWaypoint);
+                        // Remove from collisions zone list and variables
+                        currentCollisions.RemoveAll(collision => collision.type == CollisionType.WAYPOINT && collision.waypoint == selectedWaypoint);
+                        currentCollisions.RemoveAll(collision => collision.type == CollisionType.LINE && collision.waypoint == previousWaypoint);
+                        currentCollisions.RemoveAll(collision => collision.type == CollisionType.LINE && collision.waypoint == selectedWaypoint);
 
-            //        Waypoint selectedWaypoint = mostRecentCollision.waypoint;
-            //        currentlySelection.DeleteWaypoint(selectedWaypoint);
+                        mostRecentCollision = (currentCollisions.Count > 0) ? currentCollisions[currentCollisions.Count - 1] : nothingCollision;
+                    }
+                }
+                else
+                {
+                    //// UNSUPPORTED
+                    //// Otherwise we default to removing the last waypoint (UNDO)
+                    //Debug.Log("Removing most recently placed waypoint");
 
-            //        // Remove from collisions zone list and variables
-            //        currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
-            //                                    collision.type == CollisionType.WAYPOINT);
-            //        currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
-            //                                collision.type == CollisionType.LINE);
+                    //Waypoint lastWaypoint = (Waypoint) currentlySelection.waypointsOrder[currentlySelection.waypointsOrder.Count - 1];
 
-            //        mostRecentCollision = nothingCollision;
+                    //// Remove from collisions list
+                    //currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
+                    //                            collision.type == CollisionType.WAYPOINT);
+                    //currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
+                    //                        collision.type == CollisionType.LINE);
 
-            //        changeControllerState(ControllerState.IDLE);
-            //    }
-            //    else
-            //    {
-            //        // Otherwise we default to removing the last waypoint (UNDO)
-            //        Debug.Log("Removing most recently placed waypoint");
+                    //// Catching edge case in which most recent collision was the last waypoint
+                    //if (lastWaypoint == mostRecentCollision.waypoint)
+                    //{
+                    //    mostRecentCollision = nothingCollision;
+                    //}
 
-            //        Waypoint lastWaypoint = (Waypoint) currentlySelection.waypointsOrder[currentlySelection.waypointsOrder.Count - 1];
-
-            //        // Remove from collisions list
-            //        currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
-            //                                    collision.type == CollisionType.WAYPOINT);
-            //        currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
-            //                                collision.type == CollisionType.LINE);
-
-            //        // Catching edge case in which most recent collision was the last waypoint
-            //        if (lastWaypoint == mostRecentCollision.waypoint)
-            //        {
-            //            mostRecentCollision = nothingCollision;
-            //        }
-
-            //        // Delete the waypoint
-            //        currentlySelection.DeleteWaypoint(lastWaypoint);
-            //    }
-            //    changeControllerState(ControllerState.IDLE);
-
-            //}
+                    //// Delete the waypoint
+                    //currentlySelection.DeleteWaypoint(lastWaypoint);
+                }
+                changeControllerState(ControllerState.IDLE);
+            }
         }
         
         /// <summary>

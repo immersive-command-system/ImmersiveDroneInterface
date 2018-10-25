@@ -245,17 +245,18 @@
         /// Only works if selection is a single drone or single DroneGroup.
         /// </summary>
         /// <param name="waypoint"> GeneralWaypoint object to delete from selected drones and groups. </param>
-        public void DeleteWayPoint(GeneralWaypoint waypoint)
+        public bool DeleteWayPoint(GeneralWaypoint waypoint)
         {
             if (IsSingleDroneSelected())
             {
-                individualDrones.Values.Single().DeleteWaypoint((Waypoint)waypoint);
+                return individualDrones.Values.Single().DeleteWaypoint((Waypoint)waypoint);
             }
             else if (IsSingleGroupSelected())
             {
                 DroneGroup singleGroup = groupedDrones.Values.Single();
-                singleGroup.DeleteWaypoint((GroupWaypoint)waypoint);
+                return singleGroup.DeleteWaypoint((GroupWaypoint)waypoint);
             }
+            return false;
         }
 
         /// <summary>

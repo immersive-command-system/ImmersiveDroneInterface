@@ -200,14 +200,15 @@
         /// Delete group waypoint and remove it from all drones in group.
         /// </summary>
         /// <param name="waypoint"> The waypoint to delete. </param>
-        public void DeleteWaypoint(GroupWaypoint waypoint)
+        public bool DeleteWaypoint(GroupWaypoint waypoint)
         {
             int waypoint_ind = findWaypoint(waypoint);
             if (waypoint_ind < 0)
             {
-                return;
+                return false;
             }
             deleteWaypointAtIndex(waypoint_ind);
+            return true;
         }
 
         /// <summary>
@@ -241,7 +242,7 @@
             // Updates appropriate previous-waypoint pointers.
             if (waypoint_ind < waypoints.Count - 1)
             {
-                (waypoints[waypoint_ind + 1]).SetPrevWaypoint(waypoint.GetPrevWaypoint());
+                waypoints[waypoint_ind + 1].SetPrevWaypoint(waypoint.GetPrevWaypoint());
             }
 
             // Remove waypoint from collections.
