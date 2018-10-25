@@ -77,8 +77,19 @@
 
         public override void SetPrevWaypoint(GeneralWaypoint waypoint)
         {
-            Debug.Log("Setting prev of " + this + " to " + waypoint);
+            //Debug.Log("Setting prev of " + this + " to " + waypoint);
             this.prevPathPoint = (Waypoint)waypoint;
+        }
+
+        public override GeneralWaypoint GetNextWaypoint()
+        {
+            return this.nextPathPoint;
+        }
+
+        public override void SetNextWaypoint(GeneralWaypoint waypoint)
+        {
+            //Debug.Log("Setting next of " + this + " to " + waypoint);
+            this.nextPathPoint = (Waypoint)waypoint;
         }
     }
 }

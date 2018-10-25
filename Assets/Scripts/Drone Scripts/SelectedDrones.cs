@@ -190,7 +190,7 @@
 
             // Do single drone waypoint insertion if only one ungrouped drone is selected.
             if (IsSingleDroneSelected()) {
-                Drone drone = individualDrones.Values.Single();
+                Drone drone = individualDrones.Values.First();
                 Waypoint newWaypoint = new Waypoint(drone, waypointPosition);
                 drone.AddWaypoint(newWaypoint);
                 return newWaypoint;
@@ -226,14 +226,14 @@
         /// </returns>
         public GeneralWaypoint InsertWayPoint(Vector3 position, GeneralWaypoint prevWaypoint)
         {
-            if (IsSingleDroneSelected())
+            if (IsSingleDroneSelected() && prevWaypoint is Waypoint)
             {
                 Drone currDrone = individualDrones.Values.Single();
                 Waypoint newWaypoint = new Waypoint(currDrone, position);
                 currDrone.InsertWaypoint(newWaypoint, (Waypoint)prevWaypoint);
                 return newWaypoint;
             }
-            else if (IsSingleGroupSelected())
+            else if (IsSingleGroupSelected() && prevWaypoint is GroupWaypoint)
             {
                 return groupedDrones.Values.Single().InsertWaypoint(position, (GroupWaypoint)prevWaypoint);
             }
@@ -247,11 +247,11 @@
         /// <param name="waypoint"> GeneralWaypoint object to delete from selected drones and groups. </param>
         public bool DeleteWayPoint(GeneralWaypoint waypoint)
         {
-            if (IsSingleDroneSelected())
+            if (IsSingleDroneSelected() && waypoint is Waypoint)
             {
                 return individualDrones.Values.Single().DeleteWaypoint((Waypoint)waypoint);
             }
-            else if (IsSingleGroupSelected())
+            else if (IsSingleGroupSelected() && waypoint is GroupWaypoint)
             {
                 DroneGroup singleGroup = groupedDrones.Values.Single();
                 return singleGroup.DeleteWaypoint((GroupWaypoint)waypoint);
@@ -297,6 +297,8 @@
 
             WorldProperties.groupedDrones[groupIdName] = newGroup;
 
+            newGroup.OnSelect();
+
             return newGroup;
         }
 
@@ -316,19 +318,6 @@
                 droneList.AddRange(group.getDronesEnumerable());
             }
             return droneList;
-        }
-
-        /// <summary>
-        /// Calls the method of each drone (in the selection) that matches method_name.
-        /// </summary>
-        /// <param name="method_name"> Name of the method of the Drone obejcts to be called. </param>
-        /// <param name="delay"> The delay on invoking the method. </param>
-        public void FlatMapExecute(string function_name, int delay = 0)
-        {
-            foreach (Drone drone in GetFlattenedDroneList())
-            {
-                drone.Invoke(function_name, delay);
-            }
         }
 
         private void printIndividualDroneIDs()

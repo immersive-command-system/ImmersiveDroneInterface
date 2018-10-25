@@ -135,7 +135,6 @@
                 GeneralWaypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 if (!currentCollisions.Any(x => (x.type == CollisionType.WAYPOINT && x.waypoint == collidedWaypoint)))
                 {
-                    Debug.Log("Colliding with " + collidedWaypoint);
                     //Debug.Log("A waypoint is entering the grab zone");
 
                     // We automatically default to the most recent waypointCollision
@@ -444,7 +443,7 @@
             // Check for action to add waypoint at current controller position
             // Precondition: controller mode is IDLE and only index trigger is pressed and released.
             if (currentControllerState == ControllerState.IDLE && 
-                OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
+                OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger) &&
                 mostRecentCollision.type != CollisionType.WAYPOINT)
             {
                 currentWaypoint = CreateWaypoint(placePoint.transform.position);
@@ -458,7 +457,7 @@
 
             // Releases the waypoint when the right index is released 
             // and commit waypoint position change to selected drones.
-            else if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
+            else if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger))
             {
                 if (currentWaypoint is Waypoint)
                 {
@@ -606,7 +605,7 @@
                     if (mostRecentWaypoint is GroupWaypoint)
                     {
                         GroupWaypoint prevGroupWaypoint = (GroupWaypoint)mostRecentWaypoint;
-                        currentSelection.InsertWayPoint(newLocation, prevGroupWaypoint);
+                        newWaypoint = currentSelection.InsertWayPoint(newLocation, prevGroupWaypoint);
                     } else if (mostRecentWaypoint is Waypoint)
                     {
                         Waypoint prevWaypoint = (Waypoint)mostRecentWaypoint;

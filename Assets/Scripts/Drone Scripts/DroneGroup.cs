@@ -10,7 +10,7 @@
     /// Inherent challenges for having a mutable group would be handling the group waypoints.
     /// In other words, do new additions to the group also receive older group waypoints?
     /// </summary>
-    public class DroneGroup : MonoBehaviour
+    public class DroneGroup
     {
 
         private Dictionary<string, Drone> dronesDict;   // All drones in the selection, mapped from ID to Drone object.
@@ -81,7 +81,12 @@
         public GroupWaypoint AddWaypoint(Vector3 position)
         {
             // Create the GroupWaypoint object and add it to waypoints.
-            GroupWaypoint waypoint = new GroupWaypoint(groupId, position, (waypoints.Count > 0) ? waypoints[waypoints.Count - 1] : null);
+            GroupWaypoint prevWaypoint = (waypoints.Count > 0) ? waypoints[waypoints.Count - 1] : null;
+            GroupWaypoint waypoint = new GroupWaypoint(groupId, position, prevWaypoint);
+            if (prevWaypoint != null)
+            {
+                prevWaypoint.SetNextWaypoint(waypoint);
+            }
             waypoints.Add(waypoint);
 
             // Create and add corresponding Waypoint object to each of the drones.
@@ -91,7 +96,7 @@
             {
                 //Debug.Log("Creating waypoint for drone" + entry.Value.id);
                 Waypoint newWaypoint = new Waypoint(entry.Value, waypoint.GetPosition());
-                entry.Value.AddWaypoint(newWaypoint);
+                entry.Value.AddGroupWaypoint(newWaypoint, prevWaypoint == null);
                 currWaypointDict.Add(entry.Value.id, newWaypoint);
             }
 
@@ -125,9 +130,10 @@
             GroupWaypoint waypoint = new GroupWaypoint(groupId, position, prevWaypoint);
             if (insertIndex < waypoints.Count)
             {
-                (waypoints[insertIndex + 1]).SetPrevWaypoint(waypoint);
+                waypoints[insertIndex].SetPrevWaypoint(waypoint);
+                waypoint.SetNextWaypoint(waypoints[insertIndex]);
             }
-            waypoint.SetPrevWaypoint(prevWaypoint);
+            prevWaypoint.SetNextWaypoint(waypoint);
             waypoints.Insert(insertIndex, waypoint);
 
             // Perform waypoint insertion on each of the drones.
@@ -138,7 +144,7 @@
             {
                 Waypoint dronePrevWaypoint = (prevWaypoint == null) ? null : prevWaypointDict[entry.Key];
                 Waypoint newWaypoint = new Waypoint(entry.Value, waypoint.GetPosition());
-                entry.Value.InsertWaypoint(newWaypoint, dronePrevWaypoint);
+                entry.Value.InsertGroupWaypoint(newWaypoint, dronePrevWaypoint);
                 currWaypointDict.Add(entry.Key, newWaypoint);
             }
 
@@ -232,6 +238,16 @@
         private void deleteWaypointAtIndex(int waypoint_ind)
         {
             GroupWaypoint waypoint = waypoints[waypoint_ind];
+            GeneralWaypoint prevWaypoint = waypoint.GetPrevWaypoint();
+            GeneralWaypoint nextWaypoint = waypoint.GetNextWaypoint();
+            if (prevWaypoint != null)
+            {
+                prevWaypoint.SetNextWaypoint(nextWaypoint);
+            }
+            if (nextWaypoint != null)
+            {
+                nextWaypoint.SetPrevWaypoint(prevWaypoint);
+            }
 
             // Deletes the waypoint from the individual drones.
             Dictionary<string, Waypoint> droneWaypointDict = individualDroneWaypoints[waypoint_ind];
@@ -240,16 +256,11 @@
                 entry.Value.DeleteWaypoint(droneWaypointDict[entry.Key]);
             }
 
-            // Updates appropriate previous-waypoint pointers.
-            if (waypoint_ind < waypoints.Count - 1)
-            {
-                waypoints[waypoint_ind + 1].SetPrevWaypoint(waypoint.GetPrevWaypoint());
-            }
-
             // Remove waypoint from collections.
             waypoints.RemoveAt(waypoint_ind);
             individualDroneWaypoints.RemoveAt(waypoint_ind);
             // Remove waypoint from UI.
+            waypoint.gameObjectPointer.GetComponent<WaypointProperties>().DeleteLineCollider();
             Object.Destroy(waypoint.gameObjectPointer);
         }
 
@@ -355,19 +366,6 @@
         public Dictionary<string, Drone> getDronesDict()
         {
             return dronesDict;
-        }
-        
-        /// <summary>
-        /// Calls the method of each drone that matches method_name.
-        /// </summary>
-        /// <param name="method_name"> Name of the method of the Drone obejcts to be called. </param>
-        /// <param name="delay"> The delay on invoking the method. </param>
-        public void MapExecute(string method_name, int delay = 0)
-        {
-            foreach (Drone drone in getDronesEnumerable())
-            {
-                drone.Invoke(method_name, delay);
-            }
         }
     }
 }

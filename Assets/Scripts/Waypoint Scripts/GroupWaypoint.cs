@@ -7,12 +7,13 @@
     {
         private string groupID;
         private GroupWaypoint previousWaypoint;
+        private GroupWaypoint nextWaypoint;
 
-        public GroupWaypoint(string groupID, Vector3 position, GroupWaypoint prevWaypoint)
+        public GroupWaypoint(string groupID, Vector3 position, GroupWaypoint prevWaypoint, GroupWaypoint nextWaypoint = null)
         {
             this.groupID = groupID;
 
-            GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
+            GameObject baseObject = WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = GameObject.Find("controller_right").GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             gameObjectPointer.GetComponent<WaypointProperties>().classPointer = this; // Connect the gameObject back to the classObject
@@ -23,11 +24,16 @@
             WorldProperties.AddClipShader(gameObjectPointer.transform);
 
             this.previousWaypoint = prevWaypoint;
+            this.nextWaypoint = nextWaypoint;
         }
 
         public override void UpdateLineColliders()
         {
-            // TODO: Implement this.
+            gameObjectPointer.GetComponent<WaypointProperties>().UpdateLineCollider();
+            if (nextWaypoint != null)
+            {
+                nextWaypoint.gameObjectPointer.GetComponent<WaypointProperties>().UpdateLineCollider();
+            }
         }
 
         /// <summary>
@@ -35,7 +41,7 @@
         /// </summary>
         public override Vector3 GetPosition()
         {
-            return this.gameObjectPointer.transform.position;
+            return gameObjectPointer.transform.position;
         }
 
         /// <summary>
@@ -62,6 +68,16 @@
         public override void SetPrevWaypoint(GeneralWaypoint waypoint)
         {
             this.previousWaypoint = (GroupWaypoint)waypoint;
+        }
+
+        public override GeneralWaypoint GetNextWaypoint()
+        {
+            return this.previousWaypoint;
+        }
+
+        public override void SetNextWaypoint(GeneralWaypoint waypoint)
+        {
+            this.nextWaypoint = (GroupWaypoint)waypoint;
         }
     }
 }

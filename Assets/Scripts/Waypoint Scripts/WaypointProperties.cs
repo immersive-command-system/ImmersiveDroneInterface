@@ -10,7 +10,8 @@
     public class WaypointProperties : MonoBehaviour
     {
         public GeneralWaypoint classPointer;
-        public Drone referenceDrone;
+        public Drone referenceDrone = null;
+        public DroneGroup referenceGroup = null;
         public GameObject referenceDroneGameObject;
         private GameObject prevPoint = null;
 
@@ -42,12 +43,20 @@
         {
             passed = false;
             
-            if (classPointer != null && classPointer is Waypoint)
+            if (classPointer != null)
             {
-                referenceDrone = ((Waypoint)classPointer).referenceDrone;
-                referenceDroneGameObject = referenceDrone.gameObjectPointer;
+                if (classPointer is Waypoint)
+                {
+                    referenceDrone = ((Waypoint)classPointer).referenceDrone;
+                    referenceDroneGameObject = referenceDrone.gameObjectPointer;
+                } else if (classPointer is GroupWaypoint)
+                {
+                    referenceGroup = WorldProperties.groupedDrones[((GroupWaypoint)classPointer).GetGroupID()];
+                }
+                
             }
-            
+
+            Debug.Log("Creating line collider for " + classPointer);
 
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
@@ -86,11 +95,10 @@
                     SetLineCollider();
                 }
             }
-            
-            //else
-            //{
-            //    prevPoint = referenceDrone.gameObjectPointer;
-            //}
+            else
+            {
+                prevPoint = null;
+            }
 
             if (prevPoint != null)
             {
@@ -161,6 +169,11 @@
             lineCollider.height = (endpoint - this.transform.position).magnitude;
         }
 
+        private void SetLineColliderActive()
+        {
+            lineCollider.enabled = classPointer.IsInteractable();
+        }
+
         // Creates the groundpoint under waypoint
         public void CreateGroundpoint()
         {
@@ -181,7 +194,7 @@
             groundpointLine.SetPosition(1, this.transform.position);
             groundpointLine.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 400;
             groundpointLine.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 400;
-            if (referenceDrone.selected)
+            if (isReferenceSelected())
             {
                 groundpointLine.material = selectedGroundpointLine;
             } else
@@ -196,7 +209,7 @@
             if (passed)
             {
                 this.GetComponent<MeshRenderer>().material = passedWaypoint;
-                if (referenceDrone.selected)
+                if (isReferenceSelected())
                 {
                     LineProperties.material = selectedPassedLine;
                 }
@@ -205,14 +218,14 @@
                     LineProperties.material = unselectedPassedLine;
                 }
             } else if (( controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint != null && 
-                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == prevPoint) && 
-                referenceDrone.selected)
+                controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == prevPoint) &&
+                isReferenceSelected())
             {
                 LineProperties.material = unpassedWaypoint;
             } else
             {
                 this.GetComponent<MeshRenderer>().material = unpassedWaypoint;
-                if (referenceDrone.selected)
+                if (isReferenceSelected())
                 {
                     LineProperties.material = selectedUnpassedLine;
                 }
@@ -232,7 +245,7 @@
         // Sets this waypoint's passed state
         public void SetPassedState()
         {
-            if (!passed && referenceDroneGameObject.transform.position == this.transform.position)
+            if (!passed && referenceDroneGameObject && referenceDroneGameObject.transform.position == this.transform.position)
             {
                 passed = true;
             }
@@ -245,7 +258,8 @@
 
         public void DeleteLineCollider()
         {
-            Destroy(this.lineCollider.gameObject);
+            Debug.Log("Destroying line collider for " + classPointer);
+            Destroy(lineCollider.gameObject);
         }
 
         //Update groundpoint line 
@@ -258,6 +272,11 @@
             Vector3 groundPointLocation = new Vector3(this.transform.position.x, world.transform.position.y + modelGroundpoint.transform.localScale.y, this.transform.position.z);
             thisGroundpoint.transform.position = groundPointLocation;
             groundpointLine = thisGroundpoint.GetComponent<LineRenderer>(); 
+        }
+
+        private bool isReferenceSelected()
+        {
+            return ((referenceDrone != null && referenceDrone.selected) || (referenceGroup != null && referenceGroup.selected));
         }
     }
 }

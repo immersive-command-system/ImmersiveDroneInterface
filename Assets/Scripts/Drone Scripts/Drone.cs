@@ -4,10 +4,9 @@
     using System.Collections.Generic;
     using UnityEngine;
     using ROSBridgeLib.interface_msgs;
+    
 
-    public delegate void DroneFunction();
-
-    public class Drone : MonoBehaviour
+    public class Drone
     {
 
         public GameObject gameObjectPointer;    // This is the related game object
@@ -17,11 +16,12 @@
 
         public ArrayList waypoints;         // All waypoints held by the drone
         public ArrayList waypointsOrder;    // Keeps track of the order in which waypoints were created for the undo function
+        private List<bool> isGroupWaypoint = new List<bool>(0);
 
         public int nextWaypointId;                          // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
         public Dictionary<string, Waypoint> waypointsDict;  // Collection of the waypoints in this drone's path
 
-
+        private bool isGroupWaypointsVisible = false;
 
         /// <summary>
         /// Constructor method for Drone class objects
@@ -30,7 +30,7 @@
         public Drone(Vector3 position)
         {
             // Create gameObject at position
-            GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().droneBaseObject;
+            GameObject baseObject = WorldProperties.worldObject.GetComponent<WorldProperties>().droneBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             // Connect the gameObject back to the classObject.
             gameObjectPointer.GetComponent<DroneProperties>().classPointer = this;
@@ -72,7 +72,6 @@
             {
                 //Creating the starter waypoint
                 Waypoint startWaypoint = new Waypoint(this, gameObjectPointer.transform.TransformPoint(new Vector3(0, 1, 0)));
-                startWaypoint.prevPathPoint = null; // This means the previous point of the path is the Drone.
 
                 // Storing this for the ROS message
                 prev_id = "DRONE";
@@ -86,6 +85,7 @@
                 waypointsDict.Add(startWaypoint.id, startWaypoint);
                 waypoints.Add(startWaypoint);
                 waypointsOrder.Add(startWaypoint);
+                isGroupWaypoint.Add(false);
 
                 // Send a special Userpoint message marking this as the start
                 UserpointInstruction msg = new UserpointInstruction(
@@ -95,8 +95,8 @@
             {
                 // Otherwise we can add as normal
                 Waypoint prevWaypoint = (Waypoint)waypoints[waypoints.Count - 1]; // Grabbing the last waypoint.
-                newWaypoint.prevPathPoint = prevWaypoint; // setting the previous of the new waypoint
-                prevWaypoint.nextPathPoint = newWaypoint; // setting the next of the previous waypoint
+                newWaypoint.SetPrevWaypoint(prevWaypoint); // setting the previous of the new waypoint
+                prevWaypoint.SetNextWaypoint(newWaypoint); // setting the next of the previous waypoint
 
                 // Storing this for the ROS message
                 prev_id = prevWaypoint.id;
@@ -105,6 +105,7 @@
                 waypointsDict.Add(newWaypoint.id, newWaypoint);
                 waypoints.Add(newWaypoint);
                 waypointsOrder.Add(newWaypoint);
+                isGroupWaypoint.Add(false);
             }
 
             // Send a generic ROS ADD Update only if this is not the initial waypoint
@@ -116,6 +117,14 @@
                 // Otherwise we have just set the starter waypoint and still need to create the real waypoint
                 this.AddWaypoint(newWaypoint);
             }
+        }
+
+        public void AddGroupWaypoint(Waypoint newWaypoint, bool isFirst = false)
+        {
+            AddWaypoint(newWaypoint);
+            isGroupWaypoint[isGroupWaypoint.Count - 1] = true;
+            newWaypoint.SetInteractable(isGroupWaypointsVisible || isFirst);
+            newWaypoint.SetVisible(isGroupWaypointsVisible || isFirst);
         }
 
         /// <summary>
@@ -133,6 +142,7 @@
             int previousIndex = Mathf.Max(0, waypoints.IndexOf(prevWaypoint));
             int newIndex = previousIndex + 1;
             waypoints.Insert(newIndex, newWaypoint);
+            isGroupWaypoint.Insert(newIndex, false);
 
             // Inserting into the path linked list by adjusting the next and previous pointers of the surrounding waypoints
             newWaypoint.SetPrevWaypoint(prevWaypoint);
@@ -144,6 +154,15 @@
             //Sending a ROS INSERT Update
             UserpointInstruction msg = new UserpointInstruction(newWaypoint, "INSERT");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+        }
+
+        public void InsertGroupWaypoint(Waypoint newWaypoint, Waypoint prevWaypoint)
+        {
+            InsertWaypoint(newWaypoint, prevWaypoint);
+            int index = findWaypoint(newWaypoint);
+            isGroupWaypoint.Insert(index, true);
+            newWaypoint.SetInteractable(isGroupWaypointsVisible);
+            newWaypoint.SetVisible(isGroupWaypointsVisible);
         }
 
         /// <summary>
@@ -169,7 +188,9 @@
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
 
             // Removing the new waypoint from the dictionary, waypoints array and placement order
-            waypoints.Remove(deletedWaypoint);
+            int index = findWaypoint(deletedWaypoint);
+            isGroupWaypoint.RemoveAt(index);
+            waypoints.RemoveAt(index);
             waypointsOrder.Remove(deletedWaypoint);
 
             // Removing from the path linked list by adjusting the next and previous pointers of the surrounding waypoints
