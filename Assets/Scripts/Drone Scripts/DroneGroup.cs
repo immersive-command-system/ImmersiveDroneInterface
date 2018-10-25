@@ -200,6 +200,7 @@
         /// Delete group waypoint and remove it from all drones in group.
         /// </summary>
         /// <param name="waypoint"> The waypoint to delete. </param>
+        /// <returns> True if group contains this waypoint and it can be deleted. False otherwise. </returns>
         public bool DeleteWaypoint(GroupWaypoint waypoint)
         {
             int waypoint_ind = findWaypoint(waypoint);
@@ -356,6 +357,11 @@
             return dronesDict;
         }
         
+        /// <summary>
+        /// Calls the method of each drone that matches method_name.
+        /// </summary>
+        /// <param name="method_name"> Name of the method of the Drone obejcts to be called. </param>
+        /// <param name="delay"> The delay on invoking the method. </param>
         public void MapExecute(string method_name, int delay = 0)
         {
             foreach (Drone drone in getDronesEnumerable())

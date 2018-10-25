@@ -150,8 +150,10 @@
         /// Use this to remove a waypoint from the path and from the scene
         /// </summary>
         /// <param name="deletedWaypoint"> The waypoint which is to be deleted </param>
+        /// <returns> True if drone contains waypoing and can be validly deleted. False otherwise. </returns>
         public bool DeleteWaypoint(Waypoint deletedWaypoint)
         {
+            // Not allowing intial waypoing to be deleted is only a temporary fix. Still need to debug.
             if (deletedWaypoint.GetPrevWaypoint() == null || !waypointsDict.Remove(deletedWaypoint.id))
             {
                 return false;

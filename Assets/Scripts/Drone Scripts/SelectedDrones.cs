@@ -318,6 +318,11 @@
             return droneList;
         }
 
+        /// <summary>
+        /// Calls the method of each drone (in the selection) that matches method_name.
+        /// </summary>
+        /// <param name="method_name"> Name of the method of the Drone obejcts to be called. </param>
+        /// <param name="delay"> The delay on invoking the method. </param>
         public void FlatMapExecute(string function_name, int delay = 0)
         {
             foreach (Drone drone in GetFlattenedDroneList())
