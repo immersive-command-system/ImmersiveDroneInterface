@@ -62,6 +62,16 @@
             if (removeGroupWaypoints)
             {
                 ClearWaypoints();
+            } else
+            {
+                foreach (Drone drone in dronesDict.Values)
+                {
+                    drone.AbsorbPreviousGroupWaypoints();
+                }
+                foreach (GroupWaypoint waypoint in waypoints)
+                {
+                    GameObject.Destroy(waypoint.gameObjectPointer);
+                }
             }
             if (clearIDs)
             {
@@ -142,7 +152,7 @@
             individualDroneWaypoints.Insert(insertIndex, currWaypointDict);
             foreach (KeyValuePair<string, Drone> entry in dronesDict)
             {
-                Waypoint dronePrevWaypoint = (prevWaypoint == null) ? null : prevWaypointDict[entry.Key];
+                Waypoint dronePrevWaypoint = (prevWaypointDict == null) ? null : prevWaypointDict[entry.Key];
                 Waypoint newWaypoint = new Waypoint(entry.Value, waypoint.GetPosition());
                 entry.Value.InsertGroupWaypoint(newWaypoint, dronePrevWaypoint);
                 currWaypointDict.Add(entry.Key, newWaypoint);
@@ -240,7 +250,22 @@
             GroupWaypoint waypoint = waypoints[waypoint_ind];
             GeneralWaypoint prevWaypoint = waypoint.GetPrevWaypoint();
             GeneralWaypoint nextWaypoint = waypoint.GetNextWaypoint();
-            if (prevWaypoint != null)
+            Debug.Log("Deleting " + waypoint + " with prev " + prevWaypoint + " and next " + nextWaypoint);
+            waypoint.SetPrevWaypoint(null);
+            waypoint.SetNextWaypoint(null);
+            if (prevWaypoint == null)
+            {
+                if (waypoint_ind < waypoints.Count - 1)
+                {
+                    Dictionary<string, Waypoint> currDroneWaypointDict = individualDroneWaypoints[waypoint_ind + 1];
+                    foreach (Waypoint w in currDroneWaypointDict.Values)
+                    {
+                        w.SetVisible(true);
+                    }
+                }
+                
+            }
+            else
             {
                 prevWaypoint.SetNextWaypoint(nextWaypoint);
             }

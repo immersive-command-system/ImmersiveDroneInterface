@@ -123,7 +123,7 @@
         {
             AddWaypoint(newWaypoint);
             isGroupWaypoint[isGroupWaypoint.Count - 1] = true;
-            newWaypoint.SetInteractable(isGroupWaypointsVisible || isFirst);
+            newWaypoint.SetInteractable(isGroupWaypointsVisible);
             newWaypoint.SetVisible(isGroupWaypointsVisible || isFirst);
         }
 
@@ -146,9 +146,9 @@
 
             // Inserting into the path linked list by adjusting the next and previous pointers of the surrounding waypoints
             newWaypoint.SetPrevWaypoint(prevWaypoint);
-            newWaypoint.nextPathPoint = prevWaypoint.nextPathPoint;
+            newWaypoint.SetNextWaypoint(prevWaypoint.nextPathPoint);
 
-            prevWaypoint.nextPathPoint = newWaypoint;
+            prevWaypoint.SetNextWaypoint(newWaypoint);
             newWaypoint.nextPathPoint.SetPrevWaypoint(newWaypoint);
 
             //Sending a ROS INSERT Update
@@ -160,7 +160,7 @@
         {
             InsertWaypoint(newWaypoint, prevWaypoint);
             int index = findWaypoint(newWaypoint);
-            isGroupWaypoint.Insert(index, true);
+            isGroupWaypoint[index] = true;
             newWaypoint.SetInteractable(isGroupWaypointsVisible);
             newWaypoint.SetVisible(isGroupWaypointsVisible);
         }
@@ -189,19 +189,19 @@
 
             // Removing the new waypoint from the dictionary, waypoints array and placement order
             int index = findWaypoint(deletedWaypoint);
-            isGroupWaypoint.RemoveAt(index);
             waypoints.RemoveAt(index);
+            isGroupWaypoint.RemoveAt(index);
             waypointsOrder.Remove(deletedWaypoint);
 
             // Removing from the path linked list by adjusting the next and previous pointers of the surrounding waypoints
             if (deletedWaypoint.prevPathPoint != null)
             {
-                deletedWaypoint.prevPathPoint.nextPathPoint = deletedWaypoint.nextPathPoint;
+                deletedWaypoint.prevPathPoint.SetNextWaypoint(deletedWaypoint.nextPathPoint);
             }
             // Need to check if this is the last waypoint in the list -- if it has a next or not
             if (deletedWaypoint.nextPathPoint != null)
             {
-                deletedWaypoint.nextPathPoint.prevPathPoint = deletedWaypoint.prevPathPoint;
+                deletedWaypoint.nextPathPoint.SetPrevWaypoint(deletedWaypoint.prevPathPoint);
             }
 
             // Removing line collider
@@ -223,6 +223,19 @@
             // Sending a ROS MODIFY
             UserpointInstruction msg = new UserpointInstruction(modifiedWaypoint, "MODIFY");
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
+        }
+
+        public void AbsorbPreviousGroupWaypoints()
+        {
+            for (int i = 0; i < isGroupWaypoint.Count; i++)
+            {
+                if (isGroupWaypoint[i])
+                {
+                    ((Waypoint)waypoints[i]).SetInteractable(true);
+                    ((Waypoint)waypoints[i]).SetVisible(true);
+                    isGroupWaypoint[i] = false;
+                }
+            }
         }
 
         /// <summary>

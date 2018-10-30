@@ -9,8 +9,8 @@
     {
         public GameObject gameObjectPointer;
 
-        private bool isInteractable;
-        private bool isVisible;
+        private bool isInteractable = true;
+        private bool isVisible = true;
 
         public abstract Vector3 GetPosition();
 
@@ -31,7 +31,8 @@
         public void AssignPosition(Vector3 newPosition)
         {
             this.gameObjectPointer.transform.position = newPosition;
-            gameObjectPointer.GetComponent<WaypointProperties>().UpdateGroundpointLine();
+            WaypointProperties properties = gameObjectPointer.GetComponent<WaypointProperties>();
+            properties.UpdateGroundpointLine();
         }
 
         public bool IsInteractable()
@@ -41,8 +42,17 @@
 
         public void SetInteractable(bool isInteractable)
         {
-            gameObjectPointer.GetComponent<SphereCollider>().enabled = isInteractable;
             this.isInteractable = isInteractable;
+            if (this.isInteractable && !isInteractable)
+            {
+                WaypointProperties.controller_right.GetComponent<ControllerInteractions>().OnTriggerExit(gameObjectPointer.GetComponent<SphereCollider>());
+            }
+            gameObjectPointer.GetComponent<SphereCollider>().enabled = isInteractable;
+        }
+
+        public bool IsVisible()
+        {
+            return this.isVisible;
         }
 
         public void SetVisible(bool isVisible)

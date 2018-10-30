@@ -5,6 +5,9 @@
 
     public class GroupWaypoint : GeneralWaypoint
     {
+        private static int nextWaypointID = 0;
+        private int waypointID;
+
         private string groupID;
         private GroupWaypoint previousWaypoint;
         private GroupWaypoint nextWaypoint;
@@ -12,6 +15,8 @@
         public GroupWaypoint(string groupID, Vector3 position, GroupWaypoint prevWaypoint, GroupWaypoint nextWaypoint = null)
         {
             this.groupID = groupID;
+
+            this.waypointID = nextWaypointID++;
 
             GameObject baseObject = WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
@@ -52,17 +57,17 @@
             return this.groupID;
         }
 
+        public override string ToString()
+        {
+            return "Group(" + groupID + ") waypoint " + waypointID;
+        }
+
         /// <summary>
         /// Get the waypoint that comes before this on group itinerary.
         /// </summary>
         public override GeneralWaypoint GetPrevWaypoint()
         {
             return this.previousWaypoint;
-        }
-
-        public override string ToString()
-        {
-            return "Waypoint of group: " + this.groupID;
         }
 
         public override void SetPrevWaypoint(GeneralWaypoint waypoint)
@@ -72,7 +77,7 @@
 
         public override GeneralWaypoint GetNextWaypoint()
         {
-            return this.previousWaypoint;
+            return this.nextWaypoint;
         }
 
         public override void SetNextWaypoint(GeneralWaypoint waypoint)

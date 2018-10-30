@@ -203,7 +203,7 @@
         /// This function handles objects leaving the selection zone for adapative interactions
         /// </summary>
         /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
-        void OnTriggerExit(Collider currentCollider)
+        public void OnTriggerExit(Collider currentCollider)
         {
             //CollisionsDebug();
             if (currentCollider.gameObject.CompareTag("waypoint"))
@@ -245,14 +245,12 @@
         private void GrabbingChecks()
         {
             // Check for preconditions for entering GRABBING mode and enter it if necessary.
-            if (currentControllerState == ControllerState.IDLE &&
+            if (grabbedWaypoint == null &&
                 controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() != null)
             {
                 // Assumption: only objects with WaypointProperties is grabbable by VRTK_InteractGrab
                 grabbedWaypoint = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject().GetComponent<WaypointProperties>().classPointer;
                 changeControllerState(ControllerState.GRABBING);
-
-                Debug.Log("Grabbing!");
             }
 
             //Check for preconditions for exiting GRABBING mode and exit it if necessary.
@@ -261,8 +259,6 @@
             {
                 // Assumption: if grabbing mode was entered, then it must have been a Waypoint that
                 // was grabbed and is stored in grabbedWaypoint
-                
-                grabbedWaypoint.UpdateLineColliders();
 
                 // Commit location change of the waypoint to the drone or group since the user has
                 // now released it.
@@ -280,6 +276,10 @@
                 // Updating the controller state and noting that we are not grabbing anything
                 grabbedWaypoint = null;
                 changeControllerState(ControllerState.IDLE);
+            } else if (grabbedWaypoint != null && grabbedWaypoint is GroupWaypoint)
+            {
+                GroupWaypoint groupPoint = (GroupWaypoint)grabbedWaypoint;
+                WorldProperties.groupedDrones[groupPoint.GetGroupID()].UpdateIndividualWaypointUI(groupPoint);
             }
         }
 
@@ -402,12 +402,16 @@
             // Turn on UI features pertaining to the new selection mode.
             if (newState == ControllerState.POINTING || newState == ControllerState.SELECTING_DRONES)
             {
-                Debug.Log("Pointing");
+                Debug.Log("Mode: Pointing");
                 toggleRaycastOn();
                 selectionMode = SelectionMode.NONE;
             } else if (newState == ControllerState.SETTING_HEIGHT)
             {
+                Debug.Log("Mode: Height Selection");
                 toggleHeightPlaneOn();
+            } else if (newState == ControllerState.GRABBING)
+            {
+                Debug.Log("Mode: Grabbing");
             }
 
             currentControllerState = newState;
@@ -648,14 +652,11 @@
                 if (lastWaypointCollision != null)
                 {
                     // Remove the highlighted waypoint (DELETE)
-                    Debug.Log("Removing waypoint in grab zone");
 
                     GeneralWaypoint selectedWaypoint = mostRecentCollision.waypoint;
                     GeneralWaypoint previousWaypoint = selectedWaypoint.GetPrevWaypoint();
-                    Debug.Log("Attempting delete " + selectedWaypoint + " with prev " + previousWaypoint);
                     if (currentSelection.DeleteWayPoint(selectedWaypoint))
                     {
-                        Debug.Log("Deleted " + selectedWaypoint);
                         // Remove from collisions zone list and variables
                         currentCollisions.RemoveAll(collision => collision.type == CollisionType.WAYPOINT && collision.waypoint == selectedWaypoint);
                         currentCollisions.RemoveAll(collision => collision.type == CollisionType.LINE && collision.waypoint == previousWaypoint);

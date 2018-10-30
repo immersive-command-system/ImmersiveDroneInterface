@@ -56,13 +56,13 @@
                 
             }
 
-            Debug.Log("Creating line collider for " + classPointer);
+            //Debug.Log("Creating line collider for " + classPointer);
 
             world = GameObject.FindGameObjectWithTag("World");
             controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
-            LineProperties = this.GetComponentInParent<LineRenderer>();
+            LineProperties = this.GetComponent<LineRenderer>();
             lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
             lineCollider.isTrigger = true;
@@ -79,6 +79,8 @@
                 SetLineCollider();
             }
 
+            CreateGroundpoint();
+
             // Sets up interaction events
             GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += new InteractableObjectEventHandler(InteractableObjectUngrabbed);
         }
@@ -88,35 +90,29 @@
             // Establishing the previous point in the path. (could be the drone)
             if (classPointer.GetPrevWaypoint() != null)
             {
-                GameObject oldPrev = prevPoint;
                 prevPoint = classPointer.GetPrevWaypoint().gameObjectPointer;
-                if (oldPrev == null)
-                {
-                    SetLineCollider();
-                }
-            }
-            else
+            } else
             {
+                if (prevPoint != null)
+                {
+                    DeleteLineCollider();
+                }
                 prevPoint = null;
             }
 
+            
+            SetPassedState();
+
             if (prevPoint != null)
             {
-                SetPassedState();
-
                 SetLine();
 
                 UpdateLineCollider();
+            }          
 
-                if (thisGroundpoint == null)
-                {
-                    CreateGroundpoint();
-                }             
+            CreateWaypointIndicator();
 
-                CreateWaypointIndicator();
-
-                ChangeColor();
-            }
+            ChangeColor();
 
             UpdateGroundpointLine();
         }
@@ -142,6 +138,7 @@
 
                 LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
                 LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                LineProperties.enabled = classPointer.IsVisible();
             }
         }
         
@@ -163,15 +160,18 @@
         // Places a collider around the waypoint line
         public void UpdateLineCollider()
         {
-            Vector3 endpoint = prevPoint.transform.position;
-            lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
-            lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
-            lineCollider.height = (endpoint - this.transform.position).magnitude;
-        }
-
-        private void SetLineColliderActive()
-        {
+            if (lineCollider.enabled && !classPointer.IsInteractable())
+            {
+                controller_right.GetComponent<ControllerInteractions>().OnTriggerExit(lineCollider);
+            }
             lineCollider.enabled = classPointer.IsInteractable();
+            if (lineCollider.enabled)
+            {
+                Vector3 endpoint = prevPoint.transform.position;
+                lineCollider.transform.position = (endpoint + this.gameObject.transform.position) / 2;
+                lineCollider.transform.LookAt(this.gameObject.transform, Vector3.up);
+                lineCollider.height = (endpoint - this.transform.position).magnitude;
+            }
         }
 
         // Creates the groundpoint under waypoint
@@ -253,13 +253,14 @@
 
         void InteractableObjectUngrabbed(object sender, VRTK.InteractableObjectEventArgs e)
         {
-            CreateGroundpoint();
+            //CreateGroundpoint();
         }
 
         public void DeleteLineCollider()
         {
             Debug.Log("Destroying line collider for " + classPointer);
             Destroy(lineCollider.gameObject);
+            Destroy(LineProperties);
         }
 
         //Update groundpoint line 
@@ -271,7 +272,8 @@
 
             Vector3 groundPointLocation = new Vector3(this.transform.position.x, world.transform.position.y + modelGroundpoint.transform.localScale.y, this.transform.position.z);
             thisGroundpoint.transform.position = groundPointLocation;
-            groundpointLine = thisGroundpoint.GetComponent<LineRenderer>(); 
+            groundpointLine = thisGroundpoint.GetComponent<LineRenderer>();
+            groundpointLine.enabled = classPointer.IsVisible();
         }
 
         private bool isReferenceSelected()
