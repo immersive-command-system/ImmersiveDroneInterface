@@ -302,7 +302,7 @@
         /// </summary>
         private void AddDroneCheck()
         {
-            if (OVRInput.GetUp(OVRInput.Button.PrimaryThumbstick))
+            if (OVRInput.GetUp(OVRInput.Button.SecondaryThumbstick))
             {
                 new Drone(placePoint.transform.position);
             }
@@ -316,7 +316,7 @@
         {
             // Check for preconditions for entering POINTING mode and enter it if appropriate.
             if (currentControllerState == ControllerState.IDLE 
-                && OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger))
+                && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
             {
                 changeControllerState(ControllerState.POINTING); // Switch to the controller's pointing state
             }
@@ -325,20 +325,15 @@
             else if (currentControllerState == ControllerState.POINTING || currentControllerState == ControllerState.SELECTING_DRONES)
             {
                 // Check for entering back into IDLE mode (release of hand trigger).
-                if (OVRInput.GetUp(OVRInput.Button.PrimaryHandTrigger))
+                if (OVRInput.GetUp(OVRInput.Button.SecondaryHandTrigger))
                 {
                     changeControllerState(ControllerState.IDLE); // Switch to the controller's idle state
                 }
                 // Check for also depressing the index trigger to perform beam selection.
                 // Actual mode change to SELECTING_DRONES left to CheckForDroneSelection if drone is actually selected.
-                else if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger))
+                else if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))
                 {
                     CheckForDroneSelection();
-                }
-                // Reset selection mode on release of the index trigger.
-                else if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger))
-                {
-                    selectionMode = SelectionMode.NONE;
                 }
             }
 
@@ -447,7 +442,7 @@
             // Check for action to add waypoint at current controller position
             // Precondition: controller mode is IDLE and only index trigger is pressed and released.
             if (currentControllerState == ControllerState.IDLE && 
-                OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger) &&
+                OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
                 mostRecentCollision.type != CollisionType.WAYPOINT)
             {
                 currentWaypoint = CreateWaypoint(placePoint.transform.position);
@@ -461,7 +456,7 @@
 
             // Releases the waypoint when the right index is released 
             // and commit waypoint position change to selected drones.
-            else if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger))
+            else if (currentControllerState == ControllerState.PLACING_WAYPOINT && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
                 if (currentWaypoint is Waypoint)
                 {
@@ -503,7 +498,7 @@
                 }
             }
             // Initializing groundPoint when pointing and pressing index trigger
-            if (currentControllerState == ControllerState.POINTING && OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger))
+            if (currentControllerState == ControllerState.POINTING && OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
             {
                 if (controller.GetComponent<VRTK_Pointer>().IsStateValid() && 
                     controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point.y < WorldProperties.placementPlane.transform.position.y+0.1)
