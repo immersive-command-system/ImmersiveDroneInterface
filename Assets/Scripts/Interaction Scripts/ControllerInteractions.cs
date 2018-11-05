@@ -14,10 +14,10 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING}; // These are the possible values for the controller's state
+        public enum ControllerState { IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING }; // These are the possible values for the controller's state
         public static ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
-        public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
+        public enum CollisionType { NOTHING, WAYPOINT, LINE, OTHER }; // These are the possible values for objects we could be colliding with
         public CollisionPair mostRecentCollision;
         private List<CollisionPair> currentCollisions;
 
@@ -69,7 +69,7 @@
             this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
             gameObject.GetComponent<SphereCollider>().radius = 0.040f;
             gameObject.GetComponent<SphereCollider>().center = new Vector3(0F, 0F, 0.1F);
-            
+
             // Creating the placePoint
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             placePoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
@@ -83,6 +83,10 @@
             heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
             heightSelectionPlane.transform.localScale = new Vector3(10f, 0.0001f, 10f);
             heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
+            Color newColor = heightSelectionPlaneMaterial.color;
+            newColor.a = 0.0f;
+            heightSelectionPlane.GetComponent<Renderer>().material.color = newColor;
+            StandardShaderUtils.ChangeRenderMode(heightSelectionPlane.GetComponent<Renderer>().material, StandardShaderUtils.BlendMode.Fade);
             heightSelectionPlane.gameObject.name = "heightSelectionPlane";
             heightSelectionPlane.layer = 8;
             heightSelectionPlane.SetActive(false);
@@ -130,7 +134,7 @@
                 if (!currentCollisions.Any(x => (x.waypoint == collidedWaypoint && x.type == CollisionType.WAYPOINT)))
                 {
                     //Debug.Log("A waypoint is entering the grab zone");
-                    
+
                     // We automatically default to the most recent waypointCollision
                     mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
                     ////Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
@@ -149,7 +153,7 @@
                     //Debug.Log("A line is entering the grab zone");
                     currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
                 }
-                
+
             }
         }
 
@@ -177,14 +181,15 @@
                 //Debug.Log("A line is leaving the grab zone");
             }
 
-            if(currentCollisions.Count > 0)
+            if (currentCollisions.Count > 0)
             {
                 mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
-            } else
+            }
+            else
             {
                 mostRecentCollision = new CollisionPair(null, CollisionType.NOTHING);
             }
-            
+
         }
 
         /// <summary>
@@ -210,7 +215,7 @@
                 // Sending a ROS MODIFY Update
                 UserpointInstruction msg = new UserpointInstruction(grabbedWaypoint, "MODIFY");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
-                
+
                 // Updating the controller state and noting that we are not grabbing anything
                 grabbedWaypoint = null;
                 currentControllerState = ControllerState.IDLE;
@@ -225,7 +230,8 @@
             if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
             {
                 currentControllerState = ControllerState.SCALING;
-            } else if (currentControllerState == ControllerState.SCALING)
+            }
+            else if (currentControllerState == ControllerState.SCALING)
             {
                 currentControllerState = ControllerState.IDLE;
             }
@@ -237,7 +243,7 @@
         /// </summary>
         private void SelectionPointerChecks()
         {
-            if (currentControllerState == ControllerState.IDLE 
+            if (currentControllerState == ControllerState.IDLE
                 && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger)
                 && !OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
             {
@@ -285,7 +291,7 @@
         private void PrimaryPlacementChecks()
         {
             // Checks for right index Pressed and no waypoint in collision
-            if (currentControllerState == ControllerState.IDLE && 
+            if (currentControllerState == ControllerState.IDLE &&
                 OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
                 mostRecentCollision.type != CollisionType.WAYPOINT)
 
@@ -335,8 +341,8 @@
             // Initializing groundPoint when pointing and pressing index trigger
             if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                if (controller.GetComponent<VRTK_Pointer>().IsStateValid() && 
-                    controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point.y < WorldProperties.placementPlane.transform.position.y+0.1)
+                if (controller.GetComponent<VRTK_Pointer>().IsStateValid() &&
+                    controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point.y < WorldProperties.placementPlane.transform.position.y + 0.1)
 
                 {
                     Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point;
@@ -357,9 +363,9 @@
         /// </summary>
         private void toggleHeightPlaneOn()
         {
-            controller_right.GetComponent<SphereCollider>().enabled = false; 
+            controller_right.GetComponent<SphereCollider>().enabled = false;
             grabZone.SetActive(false);
-            placePoint.SetActive(false); 
+            placePoint.SetActive(false);
             controller.GetComponent<VRTK_Pointer>().Toggle(false);
             heightSelectionPlane.SetActive(true);
         }
@@ -386,19 +392,20 @@
             int layerMask = 1 << 8;
 
             Vector3 waypointLocation = newWaypoint.gameObjectPointer.transform.position;
-        
+
             RaycastHit upHit;
             RaycastHit downHit;
 
             if (Physics.Raycast(waypointLocation, Vector3.up, out upHit, Mathf.Infinity, layerMask))
             {
                 Debug.DrawRay(waypointLocation, Vector3.up * upHit.distance, Color.yellow);
-                Debug.Log("Did Hit");
+                //Debug.Log("Did Hit");
                 newWaypoint.gameObjectPointer.transform.position = upHit.point;
-            } else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
+            }
+            else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
             {
                 Debug.DrawRay(waypointLocation, -Vector3.up * downHit.distance, Color.yellow);
-                Debug.Log("Did Hit");
+                //Debug.Log("Did Hit");
                 newWaypoint.gameObjectPointer.transform.position = downHit.point;
             }
             else
@@ -485,7 +492,7 @@
                                                 collision.type == CollisionType.WAYPOINT);
                     currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
                                             collision.type == CollisionType.LINE);
-                    
+
                     mostRecentCollision.type = CollisionType.NOTHING;
                     mostRecentCollision.waypoint = null;
 
@@ -496,7 +503,7 @@
                     // Otherwise we default to removing the last waypoint (UNDO)
                     Debug.Log("Removing most recently placed waypoint");
 
-                    Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypointsOrder[currentlySelectedDrone.waypointsOrder.Count - 1];
+                    Waypoint lastWaypoint = (Waypoint)currentlySelectedDrone.waypointsOrder[currentlySelectedDrone.waypointsOrder.Count - 1];
 
                     // Remove from collisions list
                     currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
@@ -518,7 +525,7 @@
 
             }
         }
-        
+
         /// <summary>
         /// Print statements to help debug the collisions logic.
         /// </summary>
@@ -528,7 +535,7 @@
             {
                 Debug.Log("Most Recent Collision: " + mostRecentCollision.type + ", " + mostRecentCollision.waypoint.id);
             }
-           
+
             string debugString = "All Current Collisions: {";
             foreach (CollisionPair collision in currentCollisions)
             {

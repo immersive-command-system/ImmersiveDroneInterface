@@ -1180,6 +1180,8 @@ MonoBehaviour:
   opaqueMaterial: {fileID: 2100000, guid: 57ba41bd165d02f40838dc20443a9dfc, type: 2}
   adjustMaterial: {fileID: 0}
   placePointMaterial: {fileID: 0}
+  heightSelectionPlaneMaterial: {fileID: 2100000, guid: aa414749d8f73e6418d6256d9f7d2890,
+    type: 2}
 --- !u!114 &665289480
 MonoBehaviour:
   m_ObjectHideFlags: 0
