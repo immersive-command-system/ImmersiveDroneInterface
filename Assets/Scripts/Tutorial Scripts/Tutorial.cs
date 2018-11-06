@@ -50,7 +50,7 @@
 
         public GameObject rightController, leftController; //the controllers that have the Tooltips script attached to each of them
         public AudioSource introAudio, envAudio, mapLocationAudio, mapRotationAudio, MapScaleAudio, primaryPlacementAudio,
-            grabZoneAudio, intermediatePlacementAudio, selectionPointerAudio, secondaryPlacementAudio, undoAndDeleteAudio;
+            grabZoneAudio, intermediatePlacementAudio, selectionPointerAudio, secondaryPlacementAudio, undoAndDeleteAudio, tutorialDoneAudio, removeOrExploreAudio;
 
         private static VRTK_ControllerTooltips leftTooltips, rightTooltips;
         private static bool stepFinished; //lets you know when the tutorial can move on to the next step
@@ -123,6 +123,9 @@
 
             currentTutorialState = TutorialState.DONE;
 
+            tutorialDoneAudio.Play();
+            yield return new WaitForSecondsRealtime(tutorialDoneAudio.clip.length);
+            removeOrExploreAudio.Play();
 
         }
 
@@ -291,10 +294,11 @@
                     }
                     break;
                 case Tutorial.TutorialState.UNDOANDDELETE:
-                    //having issues with ControllerState.DELETING on when to set it back to IDLE, so for now since this is the last tutorial step, just going to have it automatically say it's done
+                    //having issues with ControllerState.DELETING on when to set it back to IDLE, so for now since this is the last tutorial step, just going to have it check if user hits B-button
                     //if (ControllerInteractions.currentControllerState == ControllerInteractions.ControllerState.DELETING) { 
-                    stepFinished = true;
-                    // }
+                    if (OVRInput.GetDown(OVRInput.Button.Two)) {
+                            stepFinished = true;
+                    }
                     break;
                     /* case Tutorial.TutorialState.DONE:
                          Debug.Log("loading Main scene");
