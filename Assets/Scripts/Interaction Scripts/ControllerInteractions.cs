@@ -14,18 +14,19 @@
 
     public class ControllerInteractions : MonoBehaviour
     {
-        public enum ControllerState {IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING}; // These are the possible values for the controller's state
+        public enum ControllerState { IDLE, GRABBING, PLACING_DRONE, PLACING_WAYPOINT, POINTING, SETTING_HEIGHT, SCALING, DELETING }; // These are the possible values for the controller's state
         public static ControllerState currentControllerState; // We use this to determine what state the controller is in - and what actions are available
 
-        public enum CollisionType {NOTHING, WAYPOINT, LINE, OTHER}; // These are the possible values for objects we could be colliding with
+        public enum CollisionType { NOTHING, WAYPOINT, LINE, OTHER }; // These are the possible values for objects we could be colliding with
         public CollisionPair mostRecentCollision;
         private List<CollisionPair> currentCollisions;
 
         public GameObject controller_right; // Our right controller
         private GameObject controller; //needed to access pointer
 
-        public GameObject sphereVRTK;
+        public GameObject grabZone;
         private static GameObject placePoint; // Place waypoint in front of controller
+        private GameObject heightSelectionPlane;
 
         private Waypoint currentWaypoint; // The current waypoint we are trying to place
         private Waypoint grabbedWaypoint; // The current waypoint we are grabbing and moving
@@ -35,9 +36,10 @@
         public Material opaqueMaterial;
         public Material adjustMaterial;
         public Material placePointMaterial;
+        public Material heightSelectionPlaneMaterial;
 
         /// <summary>
-        /// The start method initializes all necessary variables and creates the selection zone (sphereVRTK) and the place point
+        /// The start method initializes all necessary variables and creates the selection zone (grabZone) and the place point
         /// </summary>
         public void Start()
         {
@@ -50,27 +52,40 @@
             controller = GameObject.FindGameObjectWithTag("GameController");
             currentControllerState = ControllerState.IDLE;
 
-            // Creating the sphereVRTK
-            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
-            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
+            // Creating the grabZone GameObject with offset
             GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            tempSphere.transform.parent = this.gameObject.transform;
             this.gameObject.transform.position = new Vector3(0F, 0F, 0F);
             tempSphere.transform.position = new Vector3(0F, 0F, 0.1F);
-            tempSphere.transform.parent = this.gameObject.transform;
             tempSphere.transform.localScale = new Vector3(0.08F, 0.08F, 0.08F);
             this.gameObject.GetComponent<VRTK_InteractTouch>().customColliderContainer = tempSphere;
-            tempSphere.gameObject.name = "sphereVRTK";
+            tempSphere.gameObject.name = "grabZone";
             Renderer tempRend = tempSphere.GetComponent<Renderer>();
             tempRend.material = opaqueMaterial;
             tempSphere.GetComponent<SphereCollider>().isTrigger = true;
-            sphereVRTK = tempSphere;
-            
+            grabZone = tempSphere;
+
+            // Creating the grabZone collider with offset
+            this.gameObject.AddComponent<SphereCollider>(); //Adding Sphere collider to controller
+            gameObject.GetComponent<SphereCollider>().radius = 0.040f;
+            gameObject.GetComponent<SphereCollider>().center = new Vector3(0F, 0F, 0.1F);
+
             // Creating the placePoint
             placePoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             placePoint.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
             placePoint.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
             placePoint.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
             placePoint.SetActive(true);
+
+            // Creating the heightSelectionPlane
+            heightSelectionPlane = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            heightSelectionPlane.transform.parent = controller.GetComponent<VRTK_ControllerEvents>().transform;
+            heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
+            heightSelectionPlane.transform.localScale = new Vector3(10f, 0.0001f, 10f);
+            heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
+            heightSelectionPlane.gameObject.name = "heightSelectionPlane";
+            heightSelectionPlane.layer = 8;
+            heightSelectionPlane.SetActive(false);
         }
 
         /// <summary>
@@ -78,9 +93,6 @@
         /// </summary>
         void Update()
         {
-            // COLLISIONS UPDATE
-            CollisionsUpdate();
-
             // SELECTION POINTER  
             SelectionPointerChecks();
 
@@ -101,46 +113,8 @@
                 // SECONDARY PLACEMENT
                 SecondaryPlacementChecks();
             }
-        }
 
-        /// <summary>
-        /// This method updates the mostRecentCollision, used for adaptive controller interactions
-        /// </summary>
-        private void CollisionsUpdate()
-        {
-            // Check if there are no objects in the selection zone
-            if (currentCollisions.Count == 0)
-            {
-                // We note that there is nothing in the selection zone
-                if (mostRecentCollision.waypoint != null || mostRecentCollision.type != CollisionType.NOTHING)
-                {
-                    mostRecentCollision.waypoint = null;
-                    mostRecentCollision.type = CollisionType.NOTHING;
-                    //Debug.Log("There is nothing in the grab zone - " + mostRecentCollision);
-                }
-            }
-
-            // Otherwise, we check if the lastSelected Object is still in the selection zone
-            else if (!currentCollisions.Any(x => x.waypoint == mostRecentCollision.waypoint))
-            {
-                // If the mostRecentCollision.waypoint isn't in the selection zone anymore, we need to grab the next most recent collision
-
-                // We prioritize the most recent waypoint collision
-                // Because we add to the end of the list, we need to grab the last waypoint on the list
-                CollisionPair possibleWaypointCollision = currentCollisions.FindLast(collision => collision.type == CollisionType.WAYPOINT);
-
-                if (possibleWaypointCollision != null)
-                {
-                    mostRecentCollision = possibleWaypointCollision;
-                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
-                }
-                else
-                {
-                    // If we did not find any waypoints, we look for the first line collision
-                    mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
-                    //Debug.Log("New mostRecentCollision is a line - " + mostRecentCollision.waypoint.id);
-                }
-            }
+            //Debug.Log(currentControllerState);
         }
 
         /// <summary>
@@ -156,10 +130,10 @@
                 if (!currentCollisions.Any(x => (x.waypoint == collidedWaypoint && x.type == CollisionType.WAYPOINT)))
                 {
                     //Debug.Log("A waypoint is entering the grab zone");
-                    
+
                     // We automatically default to the most recent waypointCollision
                     mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
-                    //Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
+                    ////Debug.Log("New mostRecentCollision is a waypoint - " + mostRecentCollision.waypoint.id);
                     currentCollisions.Add(mostRecentCollision);
                 }
             }
@@ -175,14 +149,8 @@
                     //Debug.Log("A line is entering the grab zone");
                     currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
                 }
-                
-            }
 
-            // MENU COLLISION
-            //else if (currentCollider.gameObject.tag == "DroneMenu")
-            //{
-            //    Debug.Log("Hit the menu");
-            //}
+            }
         }
 
         /// <summary>
@@ -191,6 +159,7 @@
         /// <param name="currentCollider">  This is the collider for the object leaving our zone </param>
         void OnTriggerExit(Collider currentCollider)
         {
+            //CollisionsDebug();
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
@@ -207,6 +176,16 @@
 
                 //Debug.Log("A line is leaving the grab zone");
             }
+
+            if (currentCollisions.Count > 0)
+            {
+                mostRecentCollision = currentCollisions[currentCollisions.Count - 1];
+            }
+            else
+            {
+                mostRecentCollision = new CollisionPair(null, CollisionType.NOTHING);
+            }
+
         }
 
         /// <summary>
@@ -220,6 +199,8 @@
                 // Updating to note that we are currently grabbing a waypoint
                 grabbedWaypoint = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject().GetComponent<WaypointProperties>().classPointer;
                 currentControllerState = ControllerState.GRABBING;
+
+                Debug.Log("Grabbing!");
             }
             else if (currentControllerState == ControllerState.GRABBING &&
               controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject() == null)
@@ -230,7 +211,7 @@
                 // Sending a ROS MODIFY Update
                 UserpointInstruction msg = new UserpointInstruction(grabbedWaypoint, "MODIFY");
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
-                
+
                 // Updating the controller state and noting that we are not grabbing anything
                 grabbedWaypoint = null;
                 currentControllerState = ControllerState.IDLE;
@@ -245,7 +226,8 @@
             if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
             {
                 currentControllerState = ControllerState.SCALING;
-            } else if (currentControllerState == ControllerState.SCALING)
+            }
+            else if (currentControllerState == ControllerState.SCALING)
             {
                 currentControllerState = ControllerState.IDLE;
             }
@@ -257,7 +239,7 @@
         /// </summary>
         private void SelectionPointerChecks()
         {
-            if (currentControllerState == ControllerState.IDLE 
+            if (currentControllerState == ControllerState.IDLE
                 && OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger)
                 && !OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
             {
@@ -282,7 +264,8 @@
         /// </summary>
         private void toggleRaycastOn()
         {
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            controller_right.GetComponent<SphereCollider>().enabled = false; // This prevents the raycast from colliding with the grab zone
+            grabZone.SetActive(false);
             placePoint.SetActive(false); // Prevents placePoint from blocking raycast
             controller.GetComponent<VRTK_Pointer>().Toggle(true);
         }
@@ -294,7 +277,8 @@
         {
             controller.GetComponent<VRTK_Pointer>().Toggle(false);
             placePoint.SetActive(true); // turn placePoint back on
-            GameObject.Find("sphereVRTK").GetComponent<SphereCollider>().enabled = true;
+            grabZone.SetActive(true);
+            controller_right.GetComponent<SphereCollider>().enabled = true; // This prevents the raycast from colliding with the grab zone
         }
 
         /// <summary>
@@ -302,8 +286,11 @@
         /// </summary>
         private void PrimaryPlacementChecks()
         {
-            // Checks for right index Pressed
-            if (currentControllerState == ControllerState.IDLE && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+            // Checks for right index Pressed and no waypoint in collision
+            if (currentControllerState == ControllerState.IDLE &&
+                OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) &&
+                mostRecentCollision.type != CollisionType.WAYPOINT)
+
             {
                 currentWaypoint = CreateWaypoint(placePoint.transform.position);
 
@@ -335,10 +322,10 @@
         /// </summary>
         private void SecondaryPlacementChecks()
         {
-            // Ending the height adjustment by pressing index after setting ground point 
-            // Need to check this first so that it does not get triggered immediately after setting the ground sdfpoint
+            // Ending the height adjustment
             if (currentControllerState == ControllerState.SETTING_HEIGHT && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
+                toggleHeightPlaneOff();
                 currentControllerState = ControllerState.POINTING;
 
                 if (!OVRInput.Get(OVRInput.RawButton.RHandTrigger))
@@ -350,18 +337,45 @@
             // Initializing groundPoint when pointing and pressing index trigger
             if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
-                if (controller.GetComponent<VRTK_StraightPointerRenderer>().OnGround())
+                if (controller.GetComponent<VRTK_Pointer>().IsStateValid() &&
+                    controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point.y < WorldProperties.placementPlane.transform.position.y + 0.1)
+
                 {
-                    Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetGroundPoint();
+                    Vector3 groundPoint = controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point;
                     currentWaypoint = (Waypoint)CreateWaypoint(groundPoint);
+                    toggleHeightPlaneOn();
                     currentControllerState = ControllerState.SETTING_HEIGHT;
                 }
             }
-            // Adjusting the height for secondary placement
+            // Adjusting the height after groundpoint has been placed
             if (currentControllerState == ControllerState.SETTING_HEIGHT)
             {
                 AdjustHeight(currentWaypoint);
             }
+        }
+
+        /// <summary>
+        /// Turn the height plane on
+        /// </summary>
+        private void toggleHeightPlaneOn()
+        {
+            controller_right.GetComponent<SphereCollider>().enabled = false;
+            grabZone.SetActive(false);
+            placePoint.SetActive(false);
+            controller.GetComponent<VRTK_Pointer>().Toggle(false);
+            heightSelectionPlane.SetActive(true);
+        }
+
+        /// <summary>
+        /// Turn the height plane off
+        /// </summary>
+        private void toggleHeightPlaneOff()
+        {
+            controller.GetComponent<VRTK_Pointer>().Toggle(true);
+            placePoint.SetActive(false);
+            grabZone.SetActive(false);
+            controller_right.GetComponent<SphereCollider>().enabled = false;
+            heightSelectionPlane.SetActive(false);
         }
 
         /// <summary>
@@ -370,18 +384,31 @@
         /// <param name="newWaypoint"></param>
         private void AdjustHeight(Waypoint newWaypoint)
         {
-            GameObject newWaypointGameObject = newWaypoint.gameObjectPointer;
-            float groundX = newWaypointGameObject.transform.position.x;
-            float groundY = newWaypointGameObject.transform.position.y;
-            float groundZ = newWaypointGameObject.transform.position.z;
-            float localX = controller.transform.position.x;
-            float localY = controller.transform.position.y;
-            float localZ = controller.transform.position.z;
-            float height = 2.147f + (float)Distance(groundX, groundZ, 0f, 0f, localX, localZ) * (float)Math.Tan(Math.PI * (ControllerInteractions.getLocalControllerRotation(OVRInput.Controller.RTouch).x));
-            float heightMin = 2.3f + WorldProperties.actualScale.y / 200; //mesh height = 2.147
+            // Bit shift the index of the layer (8) to get a bit mask
+            int layerMask = 1 << 8;
 
-            height = Math.Min(WorldProperties.GetMaxHeight(), Math.Max(heightMin, height));
-            newWaypointGameObject.transform.position = new Vector3(groundX, height, groundZ);
+            Vector3 waypointLocation = newWaypoint.gameObjectPointer.transform.position;
+
+            RaycastHit upHit;
+            RaycastHit downHit;
+
+            if (Physics.Raycast(waypointLocation, Vector3.up, out upHit, Mathf.Infinity, layerMask))
+            {
+                Debug.DrawRay(waypointLocation, Vector3.up * upHit.distance, Color.yellow);
+                Debug.Log("Did Hit");
+                newWaypoint.gameObjectPointer.transform.position = upHit.point;
+            }
+            else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
+            {
+                Debug.DrawRay(waypointLocation, -Vector3.up * downHit.distance, Color.yellow);
+                Debug.Log("Did Hit");
+                newWaypoint.gameObjectPointer.transform.position = downHit.point;
+            }
+            else
+            {
+                Debug.DrawRay(waypointLocation, Vector3.up * 1000, Color.white);
+                Debug.Log("Did not Hit from: " + waypointLocation + " in the direction of " + Vector3.up);
+            }
         }
 
         /// <summary>
@@ -420,7 +447,6 @@
                 // If we don't have a line selected, we default to placing the new waypoint at the end of the path
                 else
                 {
-                    // Create a new waypoint at that location
                     Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
 
                     // Add the new waypoint to the drone's path
@@ -462,7 +488,7 @@
                                                 collision.type == CollisionType.WAYPOINT);
                     currentCollisions.RemoveAll(collision => collision.waypoint == selectedWaypoint &&
                                             collision.type == CollisionType.LINE);
-                    
+
                     mostRecentCollision.type = CollisionType.NOTHING;
                     mostRecentCollision.waypoint = null;
 
@@ -473,7 +499,7 @@
                     // Otherwise we default to removing the last waypoint (UNDO)
                     Debug.Log("Removing most recently placed waypoint");
 
-                    Waypoint lastWaypoint = (Waypoint) currentlySelectedDrone.waypointsOrder[currentlySelectedDrone.waypointsOrder.Count - 1];
+                    Waypoint lastWaypoint = (Waypoint)currentlySelectedDrone.waypointsOrder[currentlySelectedDrone.waypointsOrder.Count - 1];
 
                     // Remove from collisions list
                     currentCollisions.RemoveAll(collision => collision.waypoint == lastWaypoint &&
@@ -497,28 +523,23 @@
         }
 
         /// <summary>
-        /// Get local rotation of controller
+        /// Print statements to help debug the collisions logic.
         /// </summary>
-        /// <param name="buttonType"></param>
-        /// <returns></returns>
-        public static Quaternion getLocalControllerRotation(OVRInput.Controller buttonType)
+        private void CollisionsDebug()
         {
-            return OVRInput.GetLocalControllerRotation(buttonType);
-        }
+            if (mostRecentCollision.waypoint != null)
+            {
+                Debug.Log("Most Recent Collision: " + mostRecentCollision.type + ", " + mostRecentCollision.waypoint.id);
+            }
 
-        /// <summary>
-        /// Finds the distance between the controller and the ground
-        /// </summary>
-        /// <param name="groundX"></param>
-        /// <param name="groundZ"></param>
-        /// <param name="groundY"></param>
-        /// <param name="controllerY"></param>
-        /// <param name="controllerX"></param>
-        /// <param name="controllerZ"></param>
-        /// <returns></returns>
-        private double Distance(float groundX, float groundZ, float groundY, float controllerY, float controllerX, float controllerZ)
-        {
-            return Math.Sqrt(Math.Pow((controllerX - groundX), 2) + Math.Pow((controllerY - groundY), 2) + Math.Pow((controllerZ - groundZ), 2));
+            string debugString = "All Current Collisions: {";
+            foreach (CollisionPair collision in currentCollisions)
+            {
+                debugString += "(" + collision.type + ", " + collision.waypoint.id + ")";
+            }
+
+            debugString += "}";
+            Debug.Log(debugString);
         }
 
         /// <summary>

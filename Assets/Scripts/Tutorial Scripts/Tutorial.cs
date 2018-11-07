@@ -4,6 +4,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.UI;
     using VRTK;
     //using UnityEngine.SceneManagement;
 
@@ -60,6 +61,7 @@
         public enum TutorialState { NONE, INTRO, MOVINGMAP, ROTATINGMAP, SCALINGMAP, PRIMARYPLACEMENT, GRABZONE, INTERMEDIATEPLACEMENT, SELECTIONPOINTER, SECONDARYPLACEMENT, UNDOANDDELETE, DONE };
         public static TutorialState currentTutorialState; //keeps track of the current tutorial state
 
+        Text instruction;
         /// <summary>
         /// Initializes all necessary variables and starts the tutorial
         /// </summary>
@@ -77,6 +79,8 @@
 
             currentTutorialState = TutorialState.NONE;
 
+            instruction = GameObject.Find("InstructionCanvas/InstructionText").GetComponent<Text>();
+
             StartCoroutine(TutorialCoroutine());
         }
 
@@ -90,42 +94,56 @@
 
             currentTutorialState = TutorialState.INTRO;
             introAudio.Play();
+            instruction.text = "Welcome to the Immersive Semi-Autonomous Aerial Command System, also known as ISAACS. ISAACS is an open-source drone command platform, designed for immersive interfaces such as the Oculus Rift. This tutorial will show you how to start working with the interface and use it as an intuitive and seamless extension of  your drone supervision capabilities.";
             yield return new WaitForSecondsRealtime(introAudio.clip.length);
+
             envAudio.Play();
+            instruction.text = "On the table in front of you,  you can see a height map and scan of the environment that the drone will be flying in. This environment can be anywhere in the world and enables an operator to have a sense of presence for where the drone is.";
             yield return new WaitForSecondsRealtime(envAudio.clip.length);
 
             currentTutorialState = TutorialState.MOVINGMAP;
+            instruction.text = "Use your left joystick to change the location of the map.";
             yield return StartCoroutine(TutorialStep(mapLocationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, -1));
 
             currentTutorialState = TutorialState.ROTATINGMAP;
+            instruction.text = "Use your right joystick to rotate the map.";
             yield return StartCoroutine(TutorialStep(mapRotationAudio, VRTK_ControllerTooltips.TooltipButtons.TouchpadTooltip, null, 1));
 
             currentTutorialState = TutorialState.SCALINGMAP;
+            instruction.text = "Grab both of your grip triggers at the same time and pull your hands outward or push them together to change scale of entire map.";
             yield return StartCoroutine(TutorialStep(MapScaleAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 0));
 
             currentTutorialState = TutorialState.PRIMARYPLACEMENT;
+            instruction.text = "“In front of your right controller you should be able to see a white sphere. This is called the placepoint. Press down the index trigger to create a waypoint at the placepoint location. You can drag this waypoint around as long as the index trigger is held. Release the index trigger to finalize the waypoint location.";
             yield return StartCoroutine(TutorialStep(primaryPlacementAudio, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, null, 1));
 
             currentTutorialState = TutorialState.GRABZONE;
+            instruction.text = "At the end of your right controller surrounding your placepoint is a blue sphere called the grab zone. When you move the sphere to collide with a waypoint, the waypoint will highlight to show that it is possible to move it. To move a highlighted waypoint, simply hold down your index trigger and move the controller - the waypoint will follow.";
             yield return StartCoroutine(TutorialStep(grabZoneAudio, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, null, 1));
 
             currentTutorialState = TutorialState.INTERMEDIATEPLACEMENT;
+            instruction.text = "The grab zone can also be used to place intermediate waypoints. If you move your grab zone such that it is colliding with a line segment in the waypoint path, it will indicate that you wish to place an intermediate waypoint. If you attempt to place a waypoint using your index trigger while highlighting a path segment, the new waypoint will be placed between the existing waypoints at either end of that path segment.";
             yield return StartCoroutine(TutorialStep(intermediatePlacementAudio, VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip, null, 1));
 
             currentTutorialState = TutorialState.SELECTIONPOINTER;
+            instruction.text = "“Holding down grip trigger without a waypoint or line highlighted will cause our selection pointer to appear. This pointer will help you select buttons, locations and objects that are far away from you.";
             yield return StartCoroutine(TutorialStep(selectionPointerAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, null, 1));
 
             currentTutorialState = TutorialState.SECONDARYPLACEMENT;
+            instruction.text = "The selection pointer will enable you to use the secondary waypoint placement method. Hold down your grip trigger and point at the terrain, then press the index trigger to create a ground point. Tilt controller to finalize the waypoint height and click the index trigger again to set the waypoint.";
             yield return StartCoroutine(TutorialStep(secondaryPlacementAudio, VRTK_ControllerTooltips.TooltipButtons.GripTooltip, rightToggling.ChangeButtonToTooltip(VRTK_ControllerTooltips.TooltipButtons.TriggerTooltip), 1));
 
             currentTutorialState = TutorialState.UNDOANDDELETE;
+            instruction.text = "Pressing the B button on your right controller will delete the last waypoint that you placed. To delete particular waypoint, highlight it by putting it in your grab zone and then hit the B button.";
             yield return StartCoroutine(TutorialStep(undoAndDeleteAudio, VRTK_ControllerTooltips.TooltipButtons.ButtonTwoTooltip, null, 1));
 
             currentTutorialState = TutorialState.DONE;
 
             tutorialDoneAudio.Play();
+            instruction.text = "Thank you for completing the tutorial.";
             yield return new WaitForSecondsRealtime(tutorialDoneAudio.clip.length);
             removeOrExploreAudio.Play();
+            instruction.text = "You may remove your headset or continue to experiment in the interface.";
 
         }
 
