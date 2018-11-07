@@ -392,5 +392,14 @@
         {
             return dronesDict;
         }
+        
+        /// <summary>
+        /// Returns the number of drones in the group.
+        /// </summary>
+        /// <returns> The integer number of drones in the group. </returns>
+        public int Count()
+        {
+            return dronesDict.Count;
+        }
     }
 }
