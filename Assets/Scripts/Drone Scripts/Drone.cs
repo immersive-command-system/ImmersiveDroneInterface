@@ -149,8 +149,16 @@
         public void DeleteWaypoint(Waypoint deletedWaypoint)
         {
             //Sending a ROS DELETE Update
+    
             string curr_id = deletedWaypoint.id;
-            string prev_id = deletedWaypoint.prevPathPoint.id;
+            string prev_id = null;
+
+            //Check if we are at initial waypoint
+            if (deletedWaypoint.prevPathPoint != null)
+            {
+                prev_id = deletedWaypoint.prevPathPoint.id;
+            }
+ 
             float x = deletedWaypoint.gameObjectPointer.transform.localPosition.x;
             float y = deletedWaypoint.gameObjectPointer.transform.localPosition.y;
             float z = deletedWaypoint.gameObjectPointer.transform.localPosition.z;
@@ -162,8 +170,12 @@
             waypoints.Remove(deletedWaypoint);
             waypointsOrder.Remove(deletedWaypoint);
 
-            // Removing from the path linked list by adjusting the next and previous pointers of the surrounding waypoints
-            deletedWaypoint.prevPathPoint.nextPathPoint = deletedWaypoint.nextPathPoint;
+            // Removing from the path linked list by adjusting the next and previous pointers of the surrounding waypoints. Check if first waypoint in the list.
+            if (deletedWaypoint.prevPathPoint != null)
+            {
+                deletedWaypoint.prevPathPoint.nextPathPoint = deletedWaypoint.nextPathPoint;
+            }
+
             // Need to check if this is the last waypoint in the list -- if it has a next or not
             if (deletedWaypoint.nextPathPoint != null)
             {

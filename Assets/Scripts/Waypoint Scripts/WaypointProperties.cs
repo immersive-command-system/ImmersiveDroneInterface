@@ -258,6 +258,11 @@
 
         public void deleteLineCollider()
         {
+            //Check if we're at the intial waypoing (no line)
+            if (this.lineCollider == null)
+            {
+                return;
+            }
             Destroy(this.lineCollider.gameObject);
         }
 
