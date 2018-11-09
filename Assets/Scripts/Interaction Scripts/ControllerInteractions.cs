@@ -578,7 +578,6 @@
                 {
                     return true;
                 }
-
                 return false;
             }
 
