@@ -83,6 +83,10 @@
             heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
             heightSelectionPlane.transform.localScale = new Vector3(10f, 0.0001f, 10f);
             heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
+            Color newColor = heightSelectionPlaneMaterial.color;
+            newColor.a = 0.0f;
+            heightSelectionPlane.GetComponent<Renderer>().material.color = newColor;
+            StandardShaderUtils.ChangeRenderMode(heightSelectionPlane.GetComponent<Renderer>().material, StandardShaderUtils.BlendMode.Fade);
             heightSelectionPlane.gameObject.name = "heightSelectionPlane";
             heightSelectionPlane.layer = 8;
             heightSelectionPlane.SetActive(false);
@@ -335,7 +339,7 @@
                 }
             }
             // Initializing groundPoint when pointing and pressing index trigger
-            if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+            else if (currentControllerState == ControllerState.POINTING && OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
             {
                 if (controller.GetComponent<VRTK_Pointer>().IsStateValid() &&
                     controller.GetComponent<VRTK_StraightPointerRenderer>().GetDestinationHit().point.y < WorldProperties.placementPlane.transform.position.y + 0.1)
@@ -395,13 +399,14 @@
             if (Physics.Raycast(waypointLocation, Vector3.up, out upHit, Mathf.Infinity, layerMask))
             {
                 Debug.DrawRay(waypointLocation, Vector3.up * upHit.distance, Color.yellow);
-                Debug.Log("Did Hit");
+                //Debug.Log("Did Hit");
+
                 newWaypoint.gameObjectPointer.transform.position = upHit.point;
             }
             else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
             {
                 Debug.DrawRay(waypointLocation, -Vector3.up * downHit.distance, Color.yellow);
-                Debug.Log("Did Hit");
+                //Debug.Log("Did Hit");
                 newWaypoint.gameObjectPointer.transform.position = downHit.point;
             }
             else
