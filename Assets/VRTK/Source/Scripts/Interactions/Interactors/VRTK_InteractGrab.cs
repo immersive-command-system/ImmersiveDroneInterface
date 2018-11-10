@@ -74,8 +74,8 @@ namespace VRTK
         /// </summary>
         public event ObjectInteractEventHandler ControllerUngrabInteractableObject;
 
-        protected VRTK_ControllerEvents.ButtonAlias subscribedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
-        protected VRTK_ControllerEvents.ButtonAlias savedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
+        protected VRTK_ControllerEvents.ButtonAlias subscribedGrabButton = VRTK_ControllerEvents.ButtonAlias.TriggerPress;
+        protected VRTK_ControllerEvents.ButtonAlias savedGrabButton = VRTK_ControllerEvents.ButtonAlias.TriggerPress;
         protected bool grabPressed;
 
         protected GameObject grabbedObject = null;
