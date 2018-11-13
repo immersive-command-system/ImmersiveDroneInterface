@@ -55,7 +55,7 @@
             currentScale = new Vector3(1, 1, 1);
 
             droneModelOffset = new Vector3(0.0044f, -0.0388f, 0.0146f);
-            torusModelOffset = new Vector3(0f, -0.3175f, 0f);
+            torusModelOffset = new Vector3(0f, 0f, 0f);
 
             maxHeight = 5;
             clipShader = GameObject.FindWithTag("Ground").GetComponent<Renderer>().material.shader;
