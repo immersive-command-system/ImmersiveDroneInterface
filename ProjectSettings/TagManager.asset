@@ -27,6 +27,7 @@ TagManager:
   - selectionZone
   - drone1
   - SelectedDroneMenu
+  - legend
   layers:
   - Default
   - TransparentFX

@@ -16,7 +16,7 @@
         public GameObject waypointBaseObject;
         public GameObject torus;
 		public SelectedDroneMenu selectedDroneMenuPrefab;
-
+        //public MenuController droneLegend;
 
         public static Color droneSelectionColor;
 
@@ -55,6 +55,7 @@
         {
             selectedDrones = new SelectedDrones();
 			selectedDroneMenu = selectedDroneMenuPrefab;
+
             dronesDict = new Dictionary<string, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
             groupedDrones = new Dictionary<string, DroneGroup>(); // Collection of all the groups of drones.
@@ -119,6 +120,9 @@
             if (!GameObject.FindWithTag("Drone"))
             {
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
+                
+                //droneLegend.addItem(newDrone.id);
+                //Debug.Log("Created new drone: " + newDrone.id + ":" + newDrone.groupID);
             }
         }
         /// <summary>
