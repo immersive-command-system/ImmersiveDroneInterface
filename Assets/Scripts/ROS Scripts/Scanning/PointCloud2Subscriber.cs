@@ -1,6 +1,7 @@
 ﻿using ROSBridgeLib;
 using ROSBridgeLib.sensor_msgs;
 using SimpleJSON;
+using System.Text;
 using UnityEngine;
 
 public class PointCloud2Subscriber : ROSBridgeSubscriber
@@ -24,6 +25,14 @@ public class PointCloud2Subscriber : ROSBridgeSubscriber
     public new static void CallBack(ROSBridgeMsg msg)
     {
         PointCloud2Msg pointCloudMsg = (PointCloud2Msg)msg;
-        Debug.Log(pointCloudMsg.GetHeader().GetSeq());
+        StringBuilder sb = new StringBuilder();
+        sb.Append(pointCloudMsg.GetHeader().GetSeq());
+        sb.Append(":\n");
+        sb.AppendFormat("Size: {0} X {1} = {2}\n", pointCloudMsg.GetWidth(), pointCloudMsg.GetHeight(), pointCloudMsg.GetWidth() * pointCloudMsg.GetHeight());
+        sb.Append(pointCloudMsg.GetFieldString());
+        Debug.Log(sb.ToString());
+
+        PointCloudVisualizer visualizer = GameObject.Find("Cloud Renderer").GetComponent<PointCloudVisualizer>();
+        visualizer.SetPointCloud(pointCloudMsg.GetCloud());
     }
 }
