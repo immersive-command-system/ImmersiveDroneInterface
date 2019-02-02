@@ -11,6 +11,8 @@
     /// </summary>
     public class WorldProperties : MonoBehaviour
     {
+        public static double planningTime;
+        public static double runtime;
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
         public GameObject torus;
@@ -45,6 +47,9 @@
         // Use this for initialization
         void Start()
         {
+            planningTime = 0;
+            runtime = 0;
+
             selectedDrone = null;
             dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
@@ -68,6 +73,11 @@
             obstacleDistsToPrint = new List<string>();
 
             NewDrone();
+        }
+
+        private void Update()
+        {
+            planningTime += Time.deltaTime;
         }
 
         /// <summary>
