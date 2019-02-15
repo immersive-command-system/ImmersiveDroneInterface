@@ -4,6 +4,9 @@
     using UnityEngine.UI; // <-- you need this to access UI (button in this case) functionalities
     using ROSBridgeLib.interface_msgs;
     using VRTK;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
 
     public class LaunchButton : MonoBehaviour
     {
@@ -42,6 +45,19 @@
                     GetComponentInChildren<Text>().text = "Land";
                     flying = true;
                     Debug.Log("Total planning time was: " + WorldProperties.planningTime + "s");
+
+                    string fileName = "Assets/ExperimentData.txt";
+                    StreamWriter writer = new StreamWriter(fileName, true);
+                    //Debug.Log(runtime);
+                    //Debug.Log(planningTime);
+                    //Debug.Log("Application end");
+
+                    writer.WriteLine("\r\n");
+                    writer.WriteLine("Planning Time: " + WorldProperties.planningTime);
+                    //writer.WriteLine("Running Time: " + runtime);
+                    //writer.WriteLine(System.DateTime.Now);
+                    writer.Close();
+
                 }
 
                 else if (WorldProperties.selectedDrone != null && flying)
@@ -50,6 +66,18 @@
                     GetComponentInChildren<Text>().text = "Takeoff";
                     flying = false;
                     Debug.Log("Total flight time was: " + WorldProperties.runtime + "s");
+
+                    string fileName = "Assets/ExperimentData.txt";
+                    StreamWriter writer = new StreamWriter(fileName, true);
+                    //Debug.Log(runtime);
+                    //Debug.Log(planningTime);
+                    //Debug.Log("Application end");
+
+                    //writer.WriteLine("\r\n");
+                    //writer.WriteLine("Planning Time: " + planningTime);
+                    writer.WriteLine("Running Time: " + WorldProperties.runtime);
+                    //writer.WriteLine(System.DateTime.Now);
+                    writer.Close();
                 }
             }        
         }
