@@ -90,6 +90,11 @@
         /// <returns></returns>
         IEnumerator TutorialCoroutine()
         {
+            //dunno why, but this is needed for the tooltips to be pointed to the right places for the right controller
+            rightController.transform.GetChild(0).gameObject.SetActive(false);
+            yield return new WaitForSecondsRealtime(1);
+            rightController.transform.GetChild(0).gameObject.SetActive(true); 
+
             yield return new WaitForSecondsRealtime(seconds);
 
             currentTutorialState = TutorialState.INTRO;

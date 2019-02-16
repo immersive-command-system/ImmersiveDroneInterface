@@ -386,7 +386,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 2.146, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
-  - {fileID: 620616029}
   - {fileID: 79141382}
   - {fileID: 756034882}
   m_Father: {fileID: 0}
@@ -1259,13 +1258,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba3cd5456cd79e49948f5ceb58544b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointerToggleButton: 10
-  pointerSetButton: 10
-  grabToggleButton: 3
-  useToggleButton: 3
-  uiClickButton: 3
-  menuToggleButton: 14
   axisFidelity: 1
+  senseAxisForceZeroThreshold: 0.15
+  senseAxisPressThreshold: 0.95
   triggerClickThreshold: 1
   triggerForceZeroThreshold: 0.01
   triggerAxisZeroOnUntouch: 0
@@ -1277,6 +1272,7 @@ MonoBehaviour:
   triggerHairlinePressed: 0
   triggerClicked: 0
   triggerAxisChanged: 0
+  triggerSenseAxisChanged: 0
   gripPressed: 0
   gripTouched: 0
   gripHairlinePressed: 0
@@ -1285,16 +1281,20 @@ MonoBehaviour:
   touchpadPressed: 0
   touchpadTouched: 0
   touchpadAxisChanged: 0
+  touchpadSenseAxisChanged: 0
+  touchpadTwoTouched: 0
+  touchpadTwoPressed: 0
+  touchpadTwoAxisChanged: 0
   buttonOnePressed: 0
   buttonOneTouched: 0
   buttonTwoPressed: 0
   buttonTwoTouched: 0
   startMenuPressed: 0
-  pointerPressed: 0
-  grabPressed: 0
-  usePressed: 0
-  uiClickPressed: 0
-  menuPressed: 0
+  middleFingerSenseAxisChanged: 0
+  ringFingerSenseAxisChanged: 0
+  pinkyFingerSenseAxisChanged: 0
+  gripSenseAxisChanged: 0
+  gripSensePressed: 0
   controllerVisible: 1
 --- !u!114 &665289482
 MonoBehaviour:
@@ -1873,9 +1873,6 @@ MonoBehaviour:
   playareaCursor: {fileID: 0}
   directionIndicator: {fileID: 0}
   customRaycast: {fileID: 0}
-  layersToIgnore:
-    serializedVersion: 2
-    m_Bits: 4
   pointerOriginSmoothingSettings:
     smoothsPosition: 0
     maxAllowedPerFrameDistanceDifference: 0.003
@@ -1883,8 +1880,6 @@ MonoBehaviour:
     maxAllowedPerFrameAngleDifference: 1.5
   validCollisionColor: {r: 0, g: 1, b: 0, a: 1}
   invalidCollisionColor: {r: 1, g: 0, b: 0, a: 1}
-  waypointColor: {r: 0.101, g: 0.8392157, b: 1, a: 1}
-  droneColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   tracerVisibility: 0
   cursorVisibility: 0
   maximumLength: 100
@@ -1895,10 +1890,6 @@ MonoBehaviour:
   maximumCursorScale: {x: Infinity, y: Infinity, z: Infinity}
   customTracer: {fileID: 0}
   customCursor: {fileID: 0}
-  waypoint: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801, type: 2}
-  menu: {fileID: 1413119887555510, guid: a78724bb2b225e64092fe8e1e5dc014a, type: 2}
-  world: {fileID: 146794962}
-  lineSelected: {fileID: 0}
 --- !u!114 &1347866312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1923,9 +1914,11 @@ MonoBehaviour:
   selectAfterHoverDuration: 0
   interactWithObjects: 0
   grabToPointerTip: 0
-  controller: {fileID: 0}
+  attachedTo: {fileID: 0}
+  controllerEvents: {fileID: 0}
   interactUse: {fileID: 0}
   customOrigin: {fileID: 0}
+  controller: {fileID: 0}
 --- !u!114 &1347866313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1937,13 +1930,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba3cd5456cd79e49948f5ceb58544b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointerToggleButton: 10
-  pointerSetButton: 10
-  grabToggleButton: 7
-  useToggleButton: 3
-  uiClickButton: 3
-  menuToggleButton: 14
   axisFidelity: 1
+  senseAxisForceZeroThreshold: 0.15
+  senseAxisPressThreshold: 0.95
   triggerClickThreshold: 1
   triggerForceZeroThreshold: 0.01
   triggerAxisZeroOnUntouch: 0
@@ -1955,6 +1944,7 @@ MonoBehaviour:
   triggerHairlinePressed: 0
   triggerClicked: 0
   triggerAxisChanged: 0
+  triggerSenseAxisChanged: 0
   gripPressed: 0
   gripTouched: 0
   gripHairlinePressed: 0
@@ -1963,16 +1953,20 @@ MonoBehaviour:
   touchpadPressed: 0
   touchpadTouched: 0
   touchpadAxisChanged: 0
+  touchpadSenseAxisChanged: 0
+  touchpadTwoTouched: 0
+  touchpadTwoPressed: 0
+  touchpadTwoAxisChanged: 0
   buttonOnePressed: 0
   buttonOneTouched: 0
   buttonTwoPressed: 0
   buttonTwoTouched: 0
   startMenuPressed: 0
-  pointerPressed: 0
-  grabPressed: 0
-  usePressed: 0
-  uiClickPressed: 0
-  menuPressed: 0
+  middleFingerSenseAxisChanged: 0
+  ringFingerSenseAxisChanged: 0
+  pinkyFingerSenseAxisChanged: 0
+  gripSenseAxisChanged: 0
+  gripSensePressed: 0
   controllerVisible: 1
 --- !u!4 &1347866314
 Transform:
@@ -2033,6 +2027,10 @@ MonoBehaviour:
   clickMethod: 0
   attemptClickOnDeactivate: 0
   clickAfterHoverDuration: 0
+  maximumLength: Infinity
+  attachedTo: {fileID: 0}
+  controllerEvents: {fileID: 0}
+  customOrigin: {fileID: 0}
   controller: {fileID: 0}
   pointerOriginTransform: {fileID: 0}
   hoveringElement: {fileID: 0}
@@ -2289,7 +2287,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5837af0260a118e4d808bfe0405429a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  persistOnLoad: 0
   autoManageScriptDefines: 1
   activeScriptingDefineSymbolsWithoutSDKClasses:
   - symbol: VRTK_DEFINE_SDK_OCULUS_AVATAR
@@ -2300,6 +2297,8 @@ MonoBehaviour:
   autoLoadSetup: 1
   setups:
   - {fileID: 901874429}
+  excludeTargetGroups: 1b0000001a000000
+  persistOnLoad: 0
 --- !u!4 &1526639727
 Transform:
   m_ObjectHideFlags: 0
@@ -2471,6 +2470,10 @@ Prefab:
     - target: {fileID: 11415184, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
       propertyPath: buttonTwoText
       value: B-Button
+      objectReference: {fileID: 0}
+    - target: {fileID: 4563392985214122, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 910be6460ba00dc4bb13725c3ff972cb, type: 2}
@@ -3149,13 +3152,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eba3cd5456cd79e49948f5ceb58544b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointerToggleButton: 10
-  pointerSetButton: 10
-  grabToggleButton: 7
-  useToggleButton: 3
-  uiClickButton: 3
-  menuToggleButton: 14
   axisFidelity: 1
+  senseAxisForceZeroThreshold: 0.15
+  senseAxisPressThreshold: 0.95
   triggerClickThreshold: 1
   triggerForceZeroThreshold: 0.01
   triggerAxisZeroOnUntouch: 0
@@ -3167,6 +3166,7 @@ MonoBehaviour:
   triggerHairlinePressed: 0
   triggerClicked: 0
   triggerAxisChanged: 0
+  triggerSenseAxisChanged: 0
   gripPressed: 0
   gripTouched: 0
   gripHairlinePressed: 0
@@ -3175,16 +3175,20 @@ MonoBehaviour:
   touchpadPressed: 0
   touchpadTouched: 0
   touchpadAxisChanged: 0
+  touchpadSenseAxisChanged: 0
+  touchpadTwoTouched: 0
+  touchpadTwoPressed: 0
+  touchpadTwoAxisChanged: 0
   buttonOnePressed: 0
   buttonOneTouched: 0
   buttonTwoPressed: 0
   buttonTwoTouched: 0
   startMenuPressed: 0
-  pointerPressed: 0
-  grabPressed: 0
-  usePressed: 0
-  uiClickPressed: 0
-  menuPressed: 0
+  middleFingerSenseAxisChanged: 0
+  ringFingerSenseAxisChanged: 0
+  pinkyFingerSenseAxisChanged: 0
+  gripSenseAxisChanged: 0
+  gripSensePressed: 0
   controllerVisible: 1
 --- !u!114 &2053542338
 MonoBehaviour:
