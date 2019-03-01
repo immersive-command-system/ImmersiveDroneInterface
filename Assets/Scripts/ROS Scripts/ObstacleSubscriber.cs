@@ -9,7 +9,10 @@ using UnityEngine;
 using System.IO;
 
 public class ObstacleSubscriber : ROSBridgeSubscriber
-{   
+{
+    private static int numberThing = 0;
+
+
     public static string GetMessageTopic()
     {
         return "/vis/true_env";
@@ -34,8 +37,12 @@ public class ObstacleSubscriber : ROSBridgeSubscriber
         {
             WorldProperties.obstacleids.Add(pose.id);
             GameObject world = GameObject.FindWithTag("World");
+            
             GameObject torus = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().torus;
             GameObject newTorus = Object.Instantiate(torus);
+
+          
+
             //newTorus.name = pose.id + "";
             newTorus.transform.parent = world.transform;
             newTorus.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);

@@ -76,6 +76,7 @@
                 // Swapping the ids so the order makes sense
                 string tempId = startWaypoint.id;
                 startWaypoint.id = newWaypoint.id;
+                Debug.Log(startWaypoint.id);
                 newWaypoint.id = tempId;
 
                 // Adding to dictionary, order, and path list
