@@ -18,6 +18,9 @@
         public int nextWaypointId; // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
         public Dictionary<string, Waypoint> waypointsDict; // Collection of the waypoints in this drone's path
 
+        private int status;
+        private int battery;
+
         /// <summary>
         /// Constructor method for Drone class objects
         /// </summary>
@@ -33,6 +36,13 @@
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
             WorldProperties.AddClipShader(gameObjectPointer.transform);
+
+            GameObject statusBar = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().statusBar;
+            GameObject statusBarPointer = Object.Instantiate(statusBar);
+            statusBarPointer.transform.parent = gameObjectPointer.transform;
+            statusBarPointer.transform.position = gameObjectPointer.transform.position;
+            statusBarPointer.transform.localPosition = new Vector3(0, 0.5f, 0);
+            Debug.Log(statusBarPointer.transform.GetChildCount());
 
             // Initialize path and placement order lists
             waypoints = new ArrayList(0);

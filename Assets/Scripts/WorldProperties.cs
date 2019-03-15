@@ -14,6 +14,7 @@
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
         public GameObject torus;
+        public GameObject statusBar;
 
         public static Shader clipShader;
 
@@ -224,7 +225,7 @@
 
 
             //Re-import the file to update the reference in the editor
-            AssetDatabase.ImportAsset(path);
+            //AssetDatabase.ImportAsset(path);
 
             //Print the text from the file
             //Debug.Log("Text " + WorldProperties.asset.text);
