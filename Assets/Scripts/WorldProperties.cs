@@ -208,17 +208,7 @@
         /// </summary>
         void OnApplicationQuit()
         {
-            string fileName = "Assets/ExperimentData.txt";
-            StreamWriter writer = new StreamWriter(fileName, true);
-            //Debug.Log(runtime);
-            //Debug.Log(planningTime);
-            //Debug.Log("Application end");
-
-            //writer.WriteLine("\r\n");
-            //writer.WriteLine("Planning Time: " + planningTime);
-            //writer.WriteLine("Running Time: " + runtime);
-            writer.WriteLine(System.DateTime.Now);
-            writer.Close();
+           
         }
 
         /// <summary>
