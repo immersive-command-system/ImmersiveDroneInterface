@@ -25,6 +25,9 @@
 
         private bool isGroupWaypointsVisible = false;
 
+        public Color droneColor;
+        public Material droneMaterial;
+
         /// <summary>
         /// Constructor method for Drone class objects
         /// </summary>
@@ -51,6 +54,11 @@
             // Add waypoints container
             nextWaypointId = 0;
             waypointsDict = new Dictionary<string, Waypoint>();
+
+            // Initialize color and material
+            droneColor = Random.ColorHSV();
+            droneMaterial = new Material(Shader.Find("Specular"));
+            droneMaterial.color = droneColor;
 
             // Updating the world properties to reflect a new drone being added
             id = WorldProperties.getNextDroneId();

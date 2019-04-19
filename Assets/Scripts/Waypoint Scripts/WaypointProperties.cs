@@ -48,6 +48,8 @@
         {
             passed = false;
             
+
+
             if (classPointer != null)
             {
                 if (classPointer is Waypoint)
@@ -60,6 +62,11 @@
                 }
                 
             }
+
+            Debug.Log("Wapoint Properties for drone: " + referenceDrone.id);
+            unselectedGroundpointLine = referenceDrone.droneMaterial;
+            unselectedUnpassedLine = referenceDrone.droneMaterial;
+            unpassedWaypoint = referenceDrone.droneMaterial;
 
             //Debug.Log("Creating line collider for " + classPointer);
 
