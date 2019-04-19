@@ -50,6 +50,10 @@
         public static HashSet<int> obstacleids; //used in ObstacleSubscriber
         public static List<string> obstacleDistsToPrint;
 
+        public static Dictionary<string, List<Drone>> functionalitiesToDrones;
+        public static Dictionary<string, Color> functionalitiesToColors;
+
+
         // Use this for initialization
         void Start()
         {
@@ -252,6 +256,19 @@
                     }
                 }
             }
+        }
+
+        public static void UpdateDroneFunctionality(string func, Drone drone)
+        {
+            if (!functionalitiesToDrones.ContainsKey(func))
+            {
+                functionalitiesToDrones.Add(func, new List<Drone>());
+            }
+            if (!functionalitiesToDrones[func].Contains(drone))
+            {
+                functionalitiesToDrones[func].Add(drone);
+            }
+            
         }
 
         /// <summary>

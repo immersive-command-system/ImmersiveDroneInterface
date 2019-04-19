@@ -21,6 +21,8 @@
         public int nextWaypointId;                          // Incrementing counter to give all waypoints a unique ID when combined with the Drone ID
         public Dictionary<string, Waypoint> waypointsDict;  // Collection of the waypoints in this drone's path
 
+        public ArrayList functionalities = new ArrayList();
+
         private bool isGroupWaypointsVisible = false;
 
         /// <summary>
@@ -274,6 +276,12 @@
             this.selected = false;
             this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
+        }
+
+        public void AddFunctionality(string func)
+        {
+            functionalities.Add(func);
+            WorldProperties.UpdateDroneFunctionality(func, this);
         }
 
         ///// <summary>
