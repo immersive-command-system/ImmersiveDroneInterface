@@ -67,6 +67,8 @@
             nextGroupIDNum = 0; //used for grouped drone IDs (format is "Group" + groupIDNum)
             nextGroupColor = Color.blue; //arbitray right now; used so users can differentiate groups of drones
             droneSelectionColor = Color.yellow;
+            functionalitiesToDrones = new Dictionary<string, List<Drone>>(); // Collection of all the drones able to perform each functionality
+            functionalitiesToColors = new Dictionary<string, Color>(); // Collection of all the colors associated with each functionality
 
             worldObject = gameObject;
             placementPlane = GameObject.FindWithTag("Ground");
@@ -87,6 +89,7 @@
             obstacleDistsToPrint = new List<string>();
 
             NewDrone();
+
         }
 
         /// <summary>
@@ -260,15 +263,33 @@
 
         public static void UpdateDroneFunctionality(string func, Drone drone)
         {
-            if (!functionalitiesToDrones.ContainsKey(func))
+            if (!functionalitiesToColors.ContainsKey(func))
             {
-                functionalitiesToDrones.Add(func, new List<Drone>());
+                Debug.Log("Not a functionality, create first.");
             }
-            if (!functionalitiesToDrones[func].Contains(drone))
+            else
             {
-                functionalitiesToDrones[func].Add(drone);
+                if (!functionalitiesToDrones.ContainsKey(func))
+                {
+                    functionalitiesToDrones.Add(func, new List<Drone>());
+                }
+                if (!functionalitiesToDrones[func].Contains(drone))
+                {
+                    functionalitiesToDrones[func].Add(drone);
+                }
             }
-            
+        }
+
+        public static void CreateFunctionality(string func, Color color)
+        {
+            if (!functionalitiesToColors.ContainsKey(func))
+            {
+                functionalitiesToColors.Add(func, color);
+            } else
+            {
+                functionalitiesToColors[func] = color;
+            }
+
         }
 
         /// <summary>
