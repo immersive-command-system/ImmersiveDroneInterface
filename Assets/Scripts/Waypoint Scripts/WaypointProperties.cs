@@ -173,7 +173,7 @@
             this.lineWidthFactor = newFactor;
             if (lineCollider != null)
             {
-                lineCollider.radius = 0.1f * newFactor;
+                lineCollider.radius = 0.1f;
             }
             
         }
