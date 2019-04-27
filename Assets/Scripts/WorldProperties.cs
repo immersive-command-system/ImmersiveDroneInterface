@@ -11,6 +11,8 @@
     /// </summary>
     public class WorldProperties : MonoBehaviour
     {
+        public static double planningTime;
+        public static double runtime;
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
         public GameObject torus;
@@ -45,6 +47,9 @@
         // Use this for initialization
         void Start()
         {
+            planningTime = 0;
+            runtime = 0;
+
             selectedDrone = null;
             dronesDict = new Dictionary<char, Drone>(); // Collection of all the drone classObjects
             hoopsDict = new Dictionary<char, GameObject>(); // Collection of all the hoop gameObjects
@@ -55,7 +60,7 @@
             currentScale = new Vector3(1, 1, 1);
 
             droneModelOffset = new Vector3(0.0044f, -0.0388f, 0.0146f);
-            torusModelOffset = new Vector3(0f, -0.3175f, 0f);
+            torusModelOffset = new Vector3(-.1f, -.07f, 0f);
 
             maxHeight = 5;
             clipShader = GameObject.FindWithTag("Ground").GetComponent<Renderer>().material.shader;
@@ -68,6 +73,12 @@
             obstacleDistsToPrint = new List<string>();
 
             NewDrone();
+        }
+
+       
+        private void Update()
+        {
+            planningTime += Time.deltaTime;
         }
 
         /// <summary>
@@ -95,7 +106,7 @@
                 AddClipShader(child);
             }
         }
-        
+
         /// <summary>
         /// Creates a new drone
         /// </summary>
@@ -197,7 +208,7 @@
         /// </summary>
         void OnApplicationQuit()
         {
-            WriteData();
+           
         }
 
         /// <summary>
@@ -212,7 +223,7 @@
             //clear content of file 
             FileStream fileStream = File.Open(path, FileMode.Open);
             fileStream.SetLength(0);
-            fileStream.Close(); 
+            fileStream.Close();
 
 
             StreamWriter writer = new StreamWriter(path, true);

@@ -38,6 +38,8 @@
         public Material placePointMaterial;
         public Material heightSelectionPlaneMaterial;
 
+        public static Waypoint currentWayPointZone;
+
         /// <summary>
         /// The start method initializes all necessary variables and creates the selection zone (grabZone) and the place point
         /// </summary>
@@ -130,7 +132,16 @@
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
+                Debug.Log("getting here");
+                
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
+                if (collidedWaypoint.id == "A0")
+                {
+                    Debug.Log("destroy");
+                    Destroy(collidedWaypoint.gameObjectPointer.GetComponent<SphereCollider>());
+                    return;
+            
+                }
                 if (!currentCollisions.Any(x => (x.waypoint == collidedWaypoint && x.type == CollisionType.WAYPOINT)))
                 {
                     //Debug.Log("A waypoint is entering the grab zone");
@@ -203,7 +214,7 @@
                 // Updating to note that we are currently grabbing a waypoint
                 grabbedWaypoint = controller_right.GetComponent<VRTK_InteractGrab>().GetGrabbedObject().GetComponent<WaypointProperties>().classPointer;
                 currentControllerState = ControllerState.GRABBING;
-
+                Debug.Log(grabbedWaypoint + "grabbing 0");
                 Debug.Log("Grabbing!");
             }
             else if (currentControllerState == ControllerState.GRABBING &&
@@ -400,6 +411,7 @@
             {
                 Debug.DrawRay(waypointLocation, Vector3.up * upHit.distance, Color.yellow);
                 //Debug.Log("Did Hit");
+
                 newWaypoint.gameObjectPointer.transform.position = upHit.point;
             }
             else if (Physics.Raycast(waypointLocation, -Vector3.up, out downHit, Mathf.Infinity, layerMask))
@@ -577,7 +589,6 @@
                 {
                     return true;
                 }
-
                 return false;
             }
 

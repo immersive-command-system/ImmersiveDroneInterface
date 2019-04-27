@@ -2,6 +2,7 @@
 {
     using UnityEngine;
     using UnityEngine.UI; // <-- you need this to access UI (button in this case) functionalities
+    using UnityEngine.SceneManagement;
     using System.Collections;
     using VRTK;
 
