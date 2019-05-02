@@ -42,6 +42,13 @@
             this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
 
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.transform.parent = gameObjectPointer.transform;
+            sphere.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            sphere.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            sphere.layer = 8;
+            sphere.GetComponent<Renderer>().material.color = new Color32(255, 0, 0, 255);
+
             // Initialize path and placement order lists
             waypoints = new ArrayList(0);
             waypointsOrder = new ArrayList(0);
