@@ -31,6 +31,9 @@
 
             Debug.Log("Initializing Waypoint " + this);
 
+            //Set colors
+            
+
             // Setting up all the related gameObject parameters
             GameObject baseObject = WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);

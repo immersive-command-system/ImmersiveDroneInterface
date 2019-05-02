@@ -135,7 +135,7 @@
                 GeneralWaypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 if (!currentCollisions.Any(x => (x.type == CollisionType.WAYPOINT && x.waypoint == collidedWaypoint)))
                 {
-                    //Debug.Log("A waypoint is entering the grab zone");
+                    Debug.Log("A waypoint is entering the grab zone");
 
                     // We automatically default to the most recent waypointCollision
                     mostRecentCollision = new CollisionPair(collidedWaypoint, CollisionType.WAYPOINT);
@@ -152,7 +152,7 @@
                 GeneralWaypoint lineOriginWaypoint = currentCollider.GetComponent<LineProperties>().originWaypoint.GetPrevWaypoint();
                 if (!currentCollisions.Any(x => (x.type == CollisionType.LINE && x.waypoint == lineOriginWaypoint)))
                 {
-                    //Debug.Log("A line is entering the grab zone");
+                    Debug.Log("A line is entering the grab zone");
                     currentCollisions.Add(new CollisionPair(lineOriginWaypoint, CollisionType.LINE));
                 }
 
@@ -165,7 +165,7 @@
                 Drone currentDrone = currentCollider.GetComponent<DroneProperties>().classPointer;
                 if (!currentCollisions.Any(x => (x.type == CollisionType.DRONE && x.drone == currentDrone)))
                 {
-                    //Debug.Log("A drone is entering the grab zone");
+                    Debug.Log("A drone is entering the grab zone");
                     currentCollisions.Add(new CollisionPair(currentDrone));
 
                     // Check whether controller state is in valid mode to start drone selection.

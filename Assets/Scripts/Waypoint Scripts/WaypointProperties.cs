@@ -34,7 +34,6 @@
         private LineRenderer LineProperties;
         private GameObject lineElement = null;
         private CapsuleCollider lineCollider;
-        private float lineWidthFactor = 1;
         private float lineOpacity = 1;
 
         private GameObject world;
@@ -42,12 +41,13 @@
 
         public static GameObject controller_right;
 
-        private bool useExperimentalCylinder = true;
 
         void Start()
         {
             passed = false;
             
+
+
             if (classPointer != null)
             {
                 if (classPointer is Waypoint)
@@ -61,6 +61,11 @@
                 
             }
 
+            Debug.Log("Wapoint Properties for drone: " + referenceDrone.id);
+            unselectedGroundpointLine = referenceDrone.droneMaterial;
+            unselectedUnpassedLine = referenceDrone.droneMaterial;
+            unpassedWaypoint = referenceDrone.droneMaterial;
+
             //Debug.Log("Creating line collider for " + classPointer);
 
             world = GameObject.FindGameObjectWithTag("World");
@@ -71,7 +76,7 @@
             lineCollider = new GameObject("Line Collider").AddComponent<CapsuleCollider>();
             lineCollider.tag = "Line Collider";
             lineCollider.isTrigger = true;
-            lineCollider.radius = 0.1f * lineWidthFactor;
+            lineCollider.radius = 0.1f;
             lineCollider.gameObject.AddComponent<LineProperties>().originWaypoint = classPointer;
             lineCollider.transform.parent = this.gameObject.transform;
 
@@ -127,21 +132,7 @@
         {
             if (prevPoint != null)
             {
-                if (useExperimentalCylinder)
-                {
-                    if (lineElement == null)
-                    {
-                        Debug.Log("Creating Line for " + classPointer);
-                        lineElement = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                        lineElement.transform.parent = gameObject.transform;
-                        lineElement.GetComponent<MeshRenderer>().material = selectedUnpassedLine;
-                        lineElement.SetActive(classPointer.IsVisible());
-                    }
-                    lineElement.transform.position = lineCollider.transform.position;
-                    lineElement.transform.up = transform.position - prevPoint.transform.position;
-                    lineElement.transform.localScale = new Vector3(lineWidthFactor, (prevPoint.transform.position - transform.position).magnitude / transform.lossyScale.y / 2, lineWidthFactor);
-                }
-
+            
                 LineProperties.SetPosition(0, prevPoint.transform.position);
 
                 //if (referenceDroneGameObject.GetComponent<MoveDrone>().targetWaypoint != this.gameObject || passed)
@@ -155,20 +146,10 @@
 
                 LineProperties.SetPosition(1, transform.position);
 
-                LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200 * lineWidthFactor;
-                LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200 * lineWidthFactor;
-                LineProperties.enabled = classPointer.IsVisible() && !useExperimentalCylinder;
+                LineProperties.startWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                LineProperties.endWidth = world.GetComponent<MapInteractions>().actualScale.y / 200;
+                LineProperties.enabled = classPointer.IsVisible();
             }
-        }
-
-        public void SetLineWidthFactor(float newFactor)
-        {
-            this.lineWidthFactor = newFactor;
-            if (lineCollider != null)
-            {
-                lineCollider.radius = 0.1f * newFactor;
-            }
-            
         }
 
         public void SetLineOpacity(float newOpacity)
@@ -246,18 +227,12 @@
                 if (isReferenceSelected())
                 {
                     LineProperties.material = selectedPassedLine;
-                    if (useExperimentalCylinder && lineElement != null)
-                    {
-                        lineElement.GetComponent<MeshRenderer>().material = selectedPassedLine;
-                    }
+
                 }
                 else
                 {
                     LineProperties.material = unselectedPassedLine;
-                    if (useExperimentalCylinder && lineElement != null)
-                    {
-                        lineElement.GetComponent<MeshRenderer>().material = unselectedPassedLine;
-                    }
+
                 }
             } else if (( controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint != null && 
                 controller_right.GetComponent<ControllerInteractions>().mostRecentCollision.waypoint.gameObjectPointer == prevPoint) &&
@@ -270,7 +245,7 @@
                 if (isReferenceSelected())
                 {
                     LineProperties.material = selectedUnpassedLine;
-                    if (useExperimentalCylinder && lineElement != null)
+                    if (lineElement != null)
                     {
                         lineElement.GetComponent<MeshRenderer>().material = selectedUnpassedLine;
                     }
@@ -278,7 +253,7 @@
                 else
                 {
                     LineProperties.material = unselectedUnpassedLine;
-                    if (useExperimentalCylinder && lineElement != null)
+                    if (lineElement != null)
                     {
                         lineElement.GetComponent<MeshRenderer>().material = unselectedUnpassedLine;
                     }
@@ -311,10 +286,7 @@
             Debug.Log("Destroying line collider for " + classPointer);
             Destroy(lineCollider.gameObject);
             Destroy(LineProperties);
-            if (useExperimentalCylinder)
-            {
-                Destroy(lineElement);
-            }
+
         }
 
         //Update groundpoint line 

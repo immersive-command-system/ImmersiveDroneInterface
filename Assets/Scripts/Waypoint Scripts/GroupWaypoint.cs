@@ -23,7 +23,6 @@
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
             gameObjectPointer.GetComponent<VRTK_InteractableObject>().ignoredColliders[0] = GameObject.Find("controller_right").GetComponent<SphereCollider>(); //Ignoring Collider from Controller so that WayPoint Zone is used
             gameObjectPointer.GetComponent<WaypointProperties>().classPointer = this; // Connect the gameObject back to the classObject
-            gameObjectPointer.GetComponent<WaypointProperties>().SetLineWidthFactor(Mathf.Log(group.Count(), 2));
             gameObjectPointer.tag = "waypoint";
             gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 100 * Mathf.Log(group.Count(), 2);
