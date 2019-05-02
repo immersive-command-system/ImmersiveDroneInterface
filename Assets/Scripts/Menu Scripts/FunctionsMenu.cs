@@ -7,7 +7,7 @@ public class FunctionsMenu : MonoBehaviour {
     public GameObject row;
 
     private Transform windowTransform;
-    private float nextYPos = 26.6964f;
+    private float nextOffset = -70;
 
 	// Use this for initialization
 	void Start () {
@@ -21,13 +21,20 @@ public class FunctionsMenu : MonoBehaviour {
 
     public void addRow(string func, Color color)
     {
-        Vector3 newPosition = row.transform.position;
-        newPosition.y = nextYPos;
-        Debug.Log("heree");
-        Debug.Log(newPosition);
-        Debug.Log(row.transform.rotation);
-        Debug.Log(windowTransform);
-        GameObject newRow = Instantiate(row, newPosition, row.transform.rotation, windowTransform);
-        nextYPos -= 88;
+        
+        //Debug.Log(newPosition);
+        //Debug.Log(row.transform.rotation);
+        //Debug.Log(windowTransform);
+
+        //GameObject newRow = Instantiate(row, new Vector3(0, 0, 0), Quaternion.identity, windowTransform);
+        GameObject newRow = Instantiate(row, windowTransform, false);
+        Debug.Log("old pos");
+        Debug.Log(newRow.transform.localPosition);
+        Debug.Log("new pos");
+        newRow.transform.localPosition = new Vector3(newRow.transform.localPosition.x, newRow.transform.localPosition.y + nextOffset, newRow.transform.localPosition.z);
+        Debug.Log(newRow.transform.localPosition);
+        //GameObject newRow = Instantiate(row, newPosition, row.transform.rotation, windowTransform);
+        //newRow.transform.GetChild(0).GetChild(0).GetChild(0).gameObject
+        nextOffset -= 70;
     }
 }
