@@ -21,16 +21,14 @@
             windowTransform = transform.GetChild(0);
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
+        /// <summary>
+        /// This method is called in World Properties for each functionality added. Creates a row in the Functions Menu with corresponding 
+        /// function name and associated color.
+        /// </summary>
+        /// <param name="func"> The name of the functionality in this row. </param>
+        /// <param name="color"> The color associated with this funcitonality. </param>
         public void addRow(string func, Color color)
         {
-
-
             //GameObject newRow = Instantiate(row, new Vector3(0, 0, 0), Quaternion.identity, windowTransform);
             //GameObject newRow = Instantiate(row, transform, true);
             GameObject newRow = Instantiate(row, windowTransform, false);
