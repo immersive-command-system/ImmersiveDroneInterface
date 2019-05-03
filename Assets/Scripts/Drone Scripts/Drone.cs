@@ -60,6 +60,16 @@
             droneMaterial = new Material(Shader.Find("Specular"));
             droneMaterial.color = droneColor;
 
+            //Create associated sphere and make it a child of the drone object
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.transform.parent = gameObjectPointer.transform;
+            sphere.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            sphere.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            //set the spheres layer so that it is only visible to the minimap camera
+            sphere.layer = 8;
+            //set sphere color to the drone color
+            sphere.GetComponent<Renderer>().material.color = droneColor;
+
             // Updating the world properties to reflect a new drone being added
             id = WorldProperties.getNextDroneId();
             WorldProperties.dronesDict.Add(id, this);
