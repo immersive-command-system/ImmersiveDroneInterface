@@ -20,6 +20,10 @@
             myButton.onClick.AddListener(() => { OnClickEvent(); });  // <-- you assign a method to the button OnClick event here
         }
 
+        /// <summary>
+        /// On button click, toggle button appearance.
+        /// </summary>
+
         void OnClickEvent()
         {
             if (controller.GetComponent<VRTK_Pointer>().IsPointerActive())
@@ -30,6 +34,7 @@
                 {
                     selectLabel.GetComponent<Text>().text = "selected";
                     selected = true;
+                    
                 } else
                 {
                     selectLabel.GetComponent<Text>().text = "";
