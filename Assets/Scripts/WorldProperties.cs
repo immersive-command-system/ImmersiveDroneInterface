@@ -16,6 +16,7 @@
         public GameObject waypointBaseObject;
         public GameObject torus;
 		public SelectedDroneMenu selectedDroneMenuPrefab;
+        public FunctionsMenu functionsMenuPrefab;
 
 
         public static Color droneSelectionColor;
@@ -53,6 +54,8 @@
         public static Dictionary<string, List<Drone>> functionalitiesToDrones;
         public static Dictionary<string, Color> functionalitiesToColors;
 
+        public static FunctionsMenu functionsMenu;
+
 
         // Use this for initialization
         void Start()
@@ -67,6 +70,7 @@
             nextGroupIDNum = 0; //used for grouped drone IDs (format is "Group" + groupIDNum)
             nextGroupColor = Color.blue; //arbitray right now; used so users can differentiate groups of drones
             droneSelectionColor = Color.yellow;
+            functionsMenu = functionsMenuPrefab;
             functionalitiesToDrones = new Dictionary<string, List<Drone>>(); // Collection of all the drones able to perform each functionality
             functionalitiesToColors = new Dictionary<string, Color>(); // Collection of all the colors associated with each functionality
 
@@ -89,6 +93,13 @@
             obstacleDistsToPrint = new List<string>();
 
             NewDrone();
+
+            CreateFunctionality("scan", Color.cyan);
+            CreateFunctionality("pick", Color.red);
+            foreach (Drone d in dronesDict.Values)
+            {
+                d.AddFunctionality("scan");
+            }
 
         }
 
@@ -289,7 +300,7 @@
             {
                 functionalitiesToColors[func] = color;
             }
-
+            functionsMenu.addRow(func, color);
         }
 
         /// <summary>
