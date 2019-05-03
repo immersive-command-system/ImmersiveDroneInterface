@@ -1,4 +1,4 @@
-﻿// Interact Grab|Interactors|30040
+﻿
 namespace VRTK
 {
     using UnityEngine;
@@ -31,7 +31,7 @@ namespace VRTK
         [Header("Grab Settings")]
 
         [Tooltip("The button used to grab/release a touched Interactable Object.")]
-        public VRTK_ControllerEvents.ButtonAlias grabButton = VRTK_ControllerEvents.ButtonAlias.GripPress;
+        public VRTK_ControllerEvents.ButtonAlias grabButton = VRTK_ControllerEvents.ButtonAlias.TriggerPress;
         [Tooltip("An amount of time between when the grab button is pressed to when the controller is touching an Interactable Object to grab it.")]
         public float grabPrecognition = 0f;
         [Tooltip("An amount to multiply the velocity of any Interactable Object being thrown.")]
@@ -74,8 +74,10 @@ namespace VRTK
         /// </summary>
         public event ObjectInteractEventHandler ControllerUngrabInteractableObject;
 
-        protected VRTK_ControllerEvents.ButtonAlias subscribedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
-        protected VRTK_ControllerEvents.ButtonAlias savedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
+        //protected VRTK_ControllerEvents.ButtonAlias subscribedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
+        //protected VRTK_ControllerEvents.ButtonAlias savedGrabButton = VRTK_ControllerEvents.ButtonAlias.Undefined;
+        protected VRTK_ControllerEvents.ButtonAlias subscribedGrabButton = VRTK_ControllerEvents.ButtonAlias.TriggerPress;
+        protected VRTK_ControllerEvents.ButtonAlias savedGrabButton = VRTK_ControllerEvents.ButtonAlias.TriggerPress;
         protected bool grabPressed;
 
         protected GameObject grabbedObject = null;

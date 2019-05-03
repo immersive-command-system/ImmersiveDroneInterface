@@ -84,6 +84,10 @@
             heightSelectionPlane.transform.localPosition = new Vector3(0.0f, 0.0f, 0.1f);
             heightSelectionPlane.transform.localScale = new Vector3(10f, 0.0001f, 10f);
             heightSelectionPlane.GetComponent<Renderer>().material = heightSelectionPlaneMaterial;
+            Color newColor = heightSelectionPlaneMaterial.color;
+            newColor.a = 0.0f;
+            heightSelectionPlane.GetComponent<Renderer>().material.color = newColor;
+            StandardShaderUtils.ChangeRenderMode(heightSelectionPlane.GetComponent<Renderer>().material, StandardShaderUtils.BlendMode.Fade);
             heightSelectionPlane.gameObject.name = "heightSelectionPlane";
             heightSelectionPlane.layer = 8;
             heightSelectionPlane.SetActive(false);
