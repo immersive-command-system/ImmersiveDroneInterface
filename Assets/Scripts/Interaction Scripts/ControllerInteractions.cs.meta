@@ -1,11 +1,18 @@
 fileFormatVersion: 2
 guid: 9f49619ac12cb7a468a1466cba12e3fb
-timeCreated: 1529358564
-licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - controller_right: {instanceID: 0}
+  - grabZone: {instanceID: 0}
+  - defaultMaterial: {instanceID: 0}
+  - selectedMaterial: {instanceID: 0}
+  - opaqueMaterial: {instanceID: 0}
+  - adjustMaterial: {instanceID: 0}
+  - placePointMaterial: {instanceID: 0}
+  - heightSelectionPlaneMaterial: {fileID: 2100000, guid: aa414749d8f73e6418d6256d9f7d2890,
+      type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
