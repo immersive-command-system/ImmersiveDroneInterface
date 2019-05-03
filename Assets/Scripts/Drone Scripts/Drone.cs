@@ -47,13 +47,6 @@
             this.gameObjectPointer.transform.Find("group3/Outline").GetComponent<MeshRenderer>().material =
                 this.gameObjectPointer.GetComponent<DroneProperties>().deselectedMaterial;
 
-            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.transform.parent = gameObjectPointer.transform;
-            sphere.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-            sphere.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            sphere.layer = 8;
-            sphere.GetComponent<Renderer>().material.color = new Color32(255, 0, 0, 255);
-
             // Initialize path and placement order lists
             waypoints = new ArrayList(0);
             waypointsOrder = new ArrayList(0);
@@ -66,6 +59,16 @@
             droneColor = Random.ColorHSV();
             droneMaterial = new Material(Shader.Find("Specular"));
             droneMaterial.color = droneColor;
+
+            //Create associated sphere and make it a child of the drone object
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.transform.parent = gameObjectPointer.transform;
+            sphere.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            sphere.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            //set the spheres layer so that it is only visible to the minimap camera
+            sphere.layer = 8;
+            //set sphere color to the drone color
+            sphere.GetComponent<Renderer>().material.color = droneColor;
 
             // Updating the world properties to reflect a new drone being added
             id = WorldProperties.getNextDroneId();

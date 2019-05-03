@@ -525,6 +525,7 @@ GameObject:
   - component: {fileID: 127198319}
   - component: {fileID: 127198318}
   - component: {fileID: 127198317}
+  - component: {fileID: 127198321}
   m_Layer: 0
   m_Name: minimap_camera
   m_TagString: Untagged
@@ -595,6 +596,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &127198321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 127198316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87ca7acaa7ae49e4cb8d02249edc4e9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &146794962
 GameObject:
   m_ObjectHideFlags: 0
@@ -1518,7 +1530,8 @@ MonoBehaviour:
   opaqueMaterial: {fileID: 2100000, guid: 57ba41bd165d02f40838dc20443a9dfc, type: 2}
   adjustMaterial: {fileID: 0}
   placePointMaterial: {fileID: 0}
-  heightSelectionPlaneMaterial: {fileID: 0}
+  heightSelectionPlaneMaterial: {fileID: 2100000, guid: aa414749d8f73e6418d6256d9f7d2890,
+    type: 2}
 --- !u!114 &665289480
 MonoBehaviour:
   m_ObjectHideFlags: 0
