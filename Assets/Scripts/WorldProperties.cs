@@ -272,6 +272,11 @@
             }
         }
 
+        /// <summary>
+        /// Adds drone to functionality dictionary.
+        /// </summary>
+        /// <param name="func"> Functionality being added to drone. </param>
+        /// <param name="drone"> Drone object </param>
         public static void UpdateDroneFunctionality(string func, Drone drone)
         {
             if (!functionalitiesToColors.ContainsKey(func))
@@ -291,6 +296,11 @@
             }
         }
 
+        /// <summary>
+        /// Creates a new functionality by added it and its color to the dictionary.
+        /// </summary>
+        /// <param name="func"> Functionality to add. </param>
+        /// <param name="color"> Color associated with the functionality. </param>
         public static void CreateFunctionality(string func, Color color)
         {
             if (!functionalitiesToColors.ContainsKey(func))
@@ -302,6 +312,8 @@
             }
             functionsMenu.addRow(func, color);
         }
+
+        
 
         /// <summary>
         /// When the application closes, writes the closest obstacle distances to a text file
