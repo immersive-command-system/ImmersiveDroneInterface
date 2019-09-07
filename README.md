@@ -17,6 +17,8 @@ These commands will handle updating of the ROS submodules. Run them from the top
 
 > git submodule update --init
 
+[Our Documentation](https://docs.google.com/document/d/1KhntvRTkC-2RxWbpyWGtgXpEGcZpHQj8sb5ktEUh4MU/edit?usp=sharing)
+
 ## Related Repositories
 [Tablet Interface](https://github.com/tcheng96/2d-drone-interface)
 
@@ -24,8 +26,7 @@ These commands will handle updating of the ROS submodules. Run them from the top
 
 [Userpath Fastrack](https://github.com/j-paterson/userpath_fastrack)
 
-## Documentation
-[Our Documentation](https://docs.google.com/document/d/1e-IbR0byqPYc8jKVcgLQmIBLNh5hbIrnrqKxl1RxQU0/edit?usp=sharing)
+## Additional Documentation
 
 [Oculus Input SDK](https://developer.oculus.com/documentation/unity/latest/concepts/unity-ovrinput/#unity-ovrinput)
 
