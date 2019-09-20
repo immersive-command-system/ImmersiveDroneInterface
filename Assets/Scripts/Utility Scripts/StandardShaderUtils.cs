@@ -11,7 +11,11 @@
             Fade,
             Transparent
         }
-
+        /// <summary>
+        /// Changes a shader's BlendMode
+        /// </summary>
+        /// <param name="standardShaderMaterial"> The shader to edit. </param>
+        /// <param name="blendMode"> The desired blendmode. Options: Opaque, Cutout, Fade, Transparent </param>
         public static void ChangeRenderMode(Material standardShaderMaterial, BlendMode blendMode)
         {
             switch (blendMode)
