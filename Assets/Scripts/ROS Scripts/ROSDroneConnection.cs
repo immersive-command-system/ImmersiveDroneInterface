@@ -19,6 +19,7 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddSubscriber(typeof(ObstacleSubscriber));
         ros.AddSubscriber(typeof(EnvironmentSubscriber));
         ros.AddSubscriber(typeof(DronePositionSubscriber));
+        ros.AddSubscriber(typeof(TrajectoryBoundSubscriber));
         ros.AddPublisher(typeof(UserpointPublisher));
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
         ros.Connect();

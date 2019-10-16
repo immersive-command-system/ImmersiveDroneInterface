@@ -18,8 +18,7 @@ public class TrajectoryBoundSubscriber : ROSBridgeSubscriber
 
     public new static string GetMessageType()
     {
-        //New message type needed
-        return "crazyflie_msgs/PositionVelocityStateStamped";
+        return "visualization_msgs/Marker";
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg)
