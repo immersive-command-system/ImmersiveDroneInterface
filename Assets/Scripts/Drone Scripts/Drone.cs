@@ -50,7 +50,7 @@
             // Select this drone
             this.Select();
 
-            Debug.Log("Created new drone with id: " + id);
+            //Debug.Log("Created new drone with id: " + id);
         }
 
         /// <summary>

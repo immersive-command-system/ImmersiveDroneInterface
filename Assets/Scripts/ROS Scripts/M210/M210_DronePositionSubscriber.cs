@@ -1,20 +1,20 @@
-﻿
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
 using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
 using ROSBridgeLib.interface_msgs;
-using System.Collections;
 using SimpleJSON;
-using UnityEngine;
 using ISAACS;
 using System.IO;
 using UnityEditor;
 
-public class DronePositionSubscriber : ROSBridgeSubscriber
-{
+public class M210_DronePositionSubscriber : MonoBehaviour {
 
     public new static string GetMessageTopic()
     {
-        return "/state/position_velocity";
+        return "/dji_sdk/gps_position";
     }
 
     public new static string GetMessageType()
@@ -24,8 +24,7 @@ public class DronePositionSubscriber : ROSBridgeSubscriber
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg)
     {
-        //Debug.Log("Parse Message");
-        return new DronePositionMsg(msg);
+        return new M210_DronePositionMsg(msg);
     }
 
     public new static void CallBack(ROSBridgeMsg msg)
@@ -33,12 +32,13 @@ public class DronePositionSubscriber : ROSBridgeSubscriber
         //Debug.Log("Drone Position Callback");
 
         //GameObject robot = GameObject.FindWithTag("Drone");
-        GameObject robot = GameObject.FindWithTag("test_drone");
+        GameObject cube = GameObject.FindWithTag("test_drone");
 
-        if (robot != null)
+        if (cube != null)
         {
-            DronePositionMsg pose = (DronePositionMsg)msg;
-            robot.transform.position = new Vector3(pose._x, pose._y, pose._z);
+            M210_DronePositionMsg pose = (M210_DronePositionMsg)msg;
+            cube.transform.position = WorldProperties.M210_RosSpaceToWorld(pose._lat, pose._long, pose._altitude); //TODO
+
             //Debug.Log("Robot movement Logic");
             //***********************************************uncomment the following to actually get the drone GameObject to move to the points the actual drone is moving to
             /*DronePositionMsg pose = (DronePositionMsg)msg;
@@ -51,7 +51,9 @@ public class DronePositionSubscriber : ROSBridgeSubscriber
 
             SaveData();
             */
-        } else {
+        }
+        else
+        {
             Debug.Log("The RosDroneSubscriber script can't find the robot.");
         }
     }
@@ -92,6 +94,6 @@ public class DronePositionSubscriber : ROSBridgeSubscriber
         WorldProperties.obstacleDistsToPrint.Add(WorldProperties.closestDist.ToString());
     }
 
-        
+
 
 }

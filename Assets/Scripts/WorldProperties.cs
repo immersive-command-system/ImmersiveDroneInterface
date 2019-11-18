@@ -162,6 +162,22 @@
         }
 
         /// <summary>
+        /// Converts the ROS Position given in lat, long, and alt to WorldPosition
+        /// </summary>
+        /// <param name="pose_x"></param>
+        /// <param name="pose_y"></param>
+        /// <param name="pose_z"></param>
+        /// <returns></returns>
+        public static Vector2 M210_RosSpaceToWorld(float _lat, float _long, float _alt)
+        {
+            return new Vector3(
+                _lat,
+                _alt,
+                _long
+                );
+        }
+
+        /// <summary>
         /// Converts the ROSRotation to a yaw angle
         /// </summary>
         /// <param name="worldPosition"></param>

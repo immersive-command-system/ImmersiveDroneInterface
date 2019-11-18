@@ -10,13 +10,14 @@ public class UserpointPublisher : ROSBridgePublisher
 
     public static string GetMessageTopic()
     {
-        return "userpoint";
+        return "/dji_sdk/";
     }
 
     public static string GetMessageType()
     {
-        return "meta_planner_msgs/UserpointInstruction";
+        return "sensor_msgs/NavSatFix";
     }
+    
 
     public static string ToYAMLString(UserpointInstruction msg)
     {

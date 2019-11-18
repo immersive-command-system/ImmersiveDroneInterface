@@ -99,6 +99,8 @@
         /// </summary>
         void Update()
         {
+            
+            
             // SELECTION POINTER  
             SelectionPointerChecks();
 
@@ -121,6 +123,7 @@
             }
 
             //Debug.Log(currentControllerState);
+            
         }
 
         /// <summary>
