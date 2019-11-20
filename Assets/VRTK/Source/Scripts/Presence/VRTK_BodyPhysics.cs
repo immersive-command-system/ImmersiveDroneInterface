@@ -2,13 +2,14 @@
 namespace VRTK
 {
     using UnityEngine;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
 
     /// <summary>
     /// Event Payload
     /// </summary>
-    /// <param name="target">The target GameObject the event is dealing with.</param>
+    /// <param name="target">The target the event is dealing with.</param>
     /// <param name="collider">An optional collider that the body physics is colliding with.</param>
     public struct BodyPhysicsEventArgs
     {
@@ -24,14 +25,16 @@ namespace VRTK
     public delegate void BodyPhysicsEventHandler(object sender, BodyPhysicsEventArgs e);
 
     /// <summary>
-    /// Allows the play area to be affected by physics and detect collisions with other valid geometry.
+    /// The body physics script deals with how a user's body in the scene reacts to world physics and how to handle drops.
     /// </summary>
     /// <remarks>
-    /// **Optional Components:**
-    ///  * `VRTK_BasicTeleport` - A Teleporter script to use when snapping the play area to the nearest floor when releasing from grab.
+    /// The body physics creates a rigidbody and collider for where the user is standing to allow physics interactions and prevent walking through walls.
     ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_BodyPhysics` script on any active scene GameObject.
+    /// Upon actually moving in the play area, the rigidbody is set to kinematic to prevent the world from being pushed back in the user's view reducing sickness.
+    ///
+    /// The body physics script also deals with snapping a user to the nearest floor if they look over a ledge or walk up stairs then it will move the play area to simulate movement in the scene.
+    ///
+    /// To allow for peeking over a ledge and not falling, a fall restiction can happen by keeping a controller over the existing floor and the snap to the nearest floor will not happen until the controllers are also over the floor.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/017_CameraRig_TouchpadWalking` has a collection of walls and slopes that can be traversed by the user with the touchpad but the user cannot pass through the objects as they are collidable and the rigidbody physics won't allow the intersection to occur.
@@ -42,32 +45,18 @@ namespace VRTK
         /// <summary>
         /// Options for testing if a play space fall is valid
         /// </summary>
+        /// <param name="NoRestriction">Always drop to nearest floor when the headset is no longer over the current standing object.</param>
+        /// <param name="LeftController">Don't drop to nearest floor  if the Left Controller is still over the current standing object even if the headset isn't.</param>
+        /// <param name="RightController">Don't drop to nearest floor  if the Right Controller is still over the current standing object even if the headset isn't.</param>
+        /// <param name="EitherController">Don't drop to nearest floor  if Either Controller is still over the current standing object even if the headset isn't.</param>
+        /// <param name="BothControllers">Don't drop to nearest floor only if Both Controllers are still over the current standing object even if the headset isn't.</param>
         public enum FallingRestrictors
         {
-            /// <summary>
-            /// Always drop to nearest floor when the headset is no longer over the current standing object.
-            /// </summary>
             NoRestriction,
-            /// <summary>
-            /// Don't drop to nearest floor  if the Left Controller is still over the current standing object even if the headset isn't.
-            /// </summary>
             LeftController,
-            /// <summary>
-            /// Don't drop to nearest floor  if the Right Controller is still over the current standing object even if the headset isn't.
-            /// </summary>
             RightController,
-            /// <summary>
-            /// Don't drop to nearest floor  if Either Controller is still over the current standing object even if the headset isn't.
-            /// </summary>
             EitherController,
-            /// <summary>
-            /// Don't drop to nearest floor only if Both Controllers are still over the current standing object even if the headset isn't.
-            /// </summary>
             BothControllers,
-            /// <summary>
-            /// Never drop to nearest floor when the headset is no longer over the current standing object.
-            /// </summary>
-            AlwaysRestrict
         }
 
         [Header("Body Collision Settings")]
@@ -103,6 +92,9 @@ namespace VRTK
 
         [Tooltip("A custom raycaster to use when raycasting to find floors.")]
         public VRTK_CustomRaycast customRaycast;
+        [Tooltip("**OBSOLETE [Use customRaycast]** The layers to ignore when raycasting to find floors.")]
+        [Obsolete("`VRTK_BodyPhysics.layersToIgnore` is no longer used in the `VRTK_BodyPhysics` class, use the `customRaycast` parameter instead. This parameter will be removed in a future version of VRTK.")]
+        public LayerMask layersToIgnore = Physics.IgnoreRaycastLayer;
         [Tooltip("A check to see if the drop to nearest floor should take place. If the selected restrictor is still over the current floor then the drop to nearest floor will not occur. Works well for being able to lean over ledges and look down. Only works for falling down not teleporting up.")]
         public FallingRestrictors fallRestriction = FallingRestrictors.NoRestriction;
         [Tooltip("When the `y` distance between the floor and the headset exceeds this distance and `Enable Body Collisions` is true then the rigidbody gravity will be used instead of teleport to drop to nearest floor.")]
@@ -119,12 +111,10 @@ namespace VRTK
 
         [Tooltip("The VRTK Teleport script to use when snapping to floor. If this is left blank then a Teleport script will need to be applied to the same GameObject.")]
         public VRTK_BasicTeleport teleporter;
-        [Tooltip("A custom Rigidbody to apply to the play area. If one is not provided, then if an existing rigidbody is found on the play area GameObject it will be used, otherwise a default one will be created.")]
-        public Rigidbody customPlayAreaRigidbody = null;
         [Tooltip("A GameObject to represent a custom body collider container. It should contain a collider component that will be used for detecting body collisions. If one isn't provided then it will be auto generated.")]
-        public GameObject customBodyColliderContainer = null;
+        public GameObject customBodyColliderContainer;
         [Tooltip("A GameObject to represent a custom foot collider container. It should contain a collider component that will be used for detecting step collisions. If one isn't provided then it will be auto generated.")]
-        public GameObject customFootColliderContainer = null;
+        public GameObject customFootColliderContainer;
 
         /// <summary>
         /// Emitted when a fall begins.
@@ -211,11 +201,9 @@ namespace VRTK
         protected const string FOOT_COLLIDER_CONTAINER_NAME = "FootColliderContainer";
         protected bool enableBodyCollisionsStartingValue;
         protected float fallMinTime;
-        protected HashSet<GameObject> ignoreCollisionsOnGameObjects = new HashSet<GameObject>();
+        protected List<GameObject> ignoreCollisionsOnGameObjects = new List<GameObject>();
         protected Transform cachedGrabbedObjectTransform = null;
         protected VRTK_InteractableObject cachedGrabbedObject;
-        protected LayerMask defaultIgnoreLayer = Physics.IgnoreRaycastLayer;
-        protected Coroutine restoreCollisionsRoutine;
 
         // Draws a sphere for current standing position and a sphere for current headset position.
         // Set to `true` to view the debug spheres.
@@ -224,7 +212,7 @@ namespace VRTK
         /// <summary>
         /// The ArePhysicsEnabled method determines whether the body physics are set to interact with other scene physics objects.
         /// </summary>
-        /// <returns>Returns `true` if the body physics will interact with other scene physics objects and `false` if the body physics will ignore other scene physics objects.</returns>
+        /// <returns>Returns true if the body physics will interact with other scene physics objects and false if the body physics will ignore other scene physics objects.</returns>
         public virtual bool ArePhysicsEnabled()
         {
             return (bodyRigidbody != null ? !bodyRigidbody.isKinematic : false);
@@ -234,8 +222,8 @@ namespace VRTK
         /// The ApplyBodyVelocity method applies a given velocity to the rigidbody attached to the body physics.
         /// </summary>
         /// <param name="velocity">The velocity to apply.</param>
-        /// <param name="forcePhysicsOn">If `true` will toggle the body collision physics back on if enable body collisions is true.</param>
-        /// <param name="applyMomentum">If `true` then the existing momentum of the play area will be applied as a force to the resulting velocity.</param>
+        /// <param name="forcePhysicsOn">If true will toggle the body collision physics back on if enable body collisions is true.</param>
+        /// <param name="applyMomentum">If true then the existing momentum of the play area will be applied as a force to the resulting velocity.</param>
         public virtual void ApplyBodyVelocity(Vector3 velocity, bool forcePhysicsOn = false, bool applyMomentum = false)
         {
             if (enableBodyCollisions && forcePhysicsOn)
@@ -255,7 +243,7 @@ namespace VRTK
         /// <summary>
         /// The ToggleOnGround method sets whether the body is considered on the ground or not.
         /// </summary>
-        /// <param name="state">If `true` then body physics are set to being on the ground.</param>
+        /// <param name="state">If true then body physics are set to being on the ground.</param>
         public virtual void ToggleOnGround(bool state)
         {
             onGround = state;
@@ -272,7 +260,7 @@ namespace VRTK
         /// <summary>
         /// The PreventSnapToFloor method sets whether the snap to floor mechanic should be used.
         /// </summary>
-        /// <param name="state">If `true` the the snap to floor mechanic will not execute.</param>
+        /// <param name="state">If true the the snap to floor mechanic will not execute.</param>
         public virtual void TogglePreventSnapToFloor(bool state)
         {
             preventSnapToFloor = state;
@@ -290,7 +278,7 @@ namespace VRTK
         /// <summary>
         /// The IsFalling method returns the falling state of the body.
         /// </summary>
-        /// <returns>Returns `true` if the body is currently falling via gravity or via teleport.</returns>
+        /// <returns>Returns true if the body is currently falling via gravity or via teleport.</returns>
         public virtual bool IsFalling()
         {
             return isFalling;
@@ -308,7 +296,7 @@ namespace VRTK
         /// <summary>
         /// The IsLeaning method returns the leaning state of the user.
         /// </summary>
-        /// <returns>Returns `true` if the user is considered to be leaning over an object.</returns>
+        /// <returns>Returns true if the user is considered to be leaning over an object.</returns>
         public virtual bool IsLeaning()
         {
             return isLeaning;
@@ -317,7 +305,7 @@ namespace VRTK
         /// <summary>
         /// The OnGround method returns whether the user is currently standing on the ground or not.
         /// </summary>
-        /// <returns>Returns `true` if the play area is on the ground and false if the play area is in the air.</returns>
+        /// <returns>Returns true if the play area is on the ground and false if the play area is in the air.</returns>
         public virtual bool OnGround()
         {
             return onGround;
@@ -393,11 +381,11 @@ namespace VRTK
         public virtual void ResetIgnoredCollisions()
         {
             //Go through all the existing set up ignored colliders and reset their collision state
-            foreach (GameObject ignoreCollisionsOnGameObject in new HashSet<GameObject>(ignoreCollisionsOnGameObjects))
+            for (int i = 0; i < ignoreCollisionsOnGameObjects.Count; i++)
             {
-                if (ignoreCollisionsOnGameObject != null)
+                if (ignoreCollisionsOnGameObjects[i] != null)
                 {
-                    Collider[] objectColliders = ignoreCollisionsOnGameObject.GetComponentsInChildren<Collider>();
+                    Collider[] objectColliders = ignoreCollisionsOnGameObjects[i].GetComponentsInChildren<Collider>();
                     for (int j = 0; j < objectColliders.Length; j++)
                     {
                         ManagePhysicsCollider(objectColliders[j], false);
@@ -413,18 +401,20 @@ namespace VRTK
         /// </summary>
         /// <param name="direction">The direction to test for the potential collision.</param>
         /// <param name="maxDistance">The maximum distance to check for a potential collision.</param>
-        /// <returns>Returns `true` if a collision will occur on the given direction over the given maxium distance. Returns `false` if there is no collision about to happen.</returns>
+        /// <returns>Returns true if a collision will occur on the given direction over the given maxium distance. Returns false if there is no collision about to happen.</returns>
         public virtual bool SweepCollision(Vector3 direction, float maxDistance)
         {
-            Vector3 point1 = bodyCollider.transform.parent.TransformPoint(bodyCollider.transform.localPosition + (bodyCollider.center)) + (Vector3.up * ((bodyCollider.height * 0.5f) - bodyCollider.radius));
-            Vector3 point2 = bodyCollider.transform.parent.TransformPoint(bodyCollider.transform.localPosition + (bodyCollider.center)) - (Vector3.up * ((bodyCollider.height * 0.5f) - bodyCollider.radius));
+            Vector3 point1 = (bodyCollider.transform.position + bodyCollider.center) + (Vector3.up * ((bodyCollider.height * 0.5f) - bodyCollider.radius));
+            Vector3 point2 = (bodyCollider.transform.position + bodyCollider.center) - (Vector3.up * ((bodyCollider.height * 0.5f) - bodyCollider.radius));
             RaycastHit collisionHit;
-            return VRTK_CustomRaycast.CapsuleCast(customRaycast, point1, point2, bodyCollider.radius, direction, maxDistance, out collisionHit, defaultIgnoreLayer, QueryTriggerInteraction.Ignore);
+#pragma warning disable 0618
+            return VRTK_CustomRaycast.CapsuleCast(customRaycast, point1, point2, bodyCollider.radius, direction, maxDistance, out collisionHit, layersToIgnore, QueryTriggerInteraction.Ignore);
+#pragma warning restore 0618
         }
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected override void OnEnable()
@@ -435,10 +425,7 @@ namespace VRTK
             footColliderContainerNameCheck = VRTK_SharedMethods.GenerateVRTKObjectName(true, FOOT_COLLIDER_CONTAINER_NAME);
             enableBodyCollisionsStartingValue = enableBodyCollisions;
             EnableDropToFloor();
-            if (playArea != null)
-            {
-                EnableBodyPhysics();
-            }
+            EnableBodyPhysics();
             SetupIgnoredCollisions();
         }
 
@@ -453,7 +440,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void FixedUpdate()
@@ -517,12 +504,12 @@ namespace VRTK
 
         protected virtual bool CheckValidCollision(GameObject checkObject)
         {
-            return (!VRTK_PlayerObject.IsPlayerObject(checkObject) && (!onGround || (currentValidFloorObject != null && currentValidFloorObject != checkObject)));
+            return (!VRTK_PlayerObject.IsPlayerObject(checkObject) && (!onGround || (currentValidFloorObject != null && !currentValidFloorObject.Equals(checkObject))));
         }
 
         protected virtual bool CheckExistingCollision(GameObject checkObject)
         {
-            return (currentCollidingObject != null && currentCollidingObject == checkObject);
+            return (currentCollidingObject != null && currentCollidingObject.Equals(checkObject));
         }
 
         protected virtual void SetupPlayArea()
@@ -732,7 +719,7 @@ namespace VRTK
 
         protected virtual void SetCurrentStandingPosition()
         {
-            if (playArea != null && playArea.transform.position != lastPlayAreaPosition)
+            if (playArea != null && !playArea.transform.position.Equals(lastPlayAreaPosition))
             {
                 Vector3 playareaDifference = playArea.transform.position - lastPlayAreaPosition;
                 currentStandingPosition = new Vector2(currentStandingPosition.x + playareaDifference.x, currentStandingPosition.y + playareaDifference.z);
@@ -761,7 +748,9 @@ namespace VRTK
                 RaycastHit standingDownRayCollision;
 
                 //Determine the current valid floor that the user is standing over
-                currentValidFloorObject = (VRTK_CustomRaycast.Raycast(customRaycast, standingDownRay, out standingDownRayCollision, defaultIgnoreLayer, Mathf.Infinity, QueryTriggerInteraction.Ignore) ? standingDownRayCollision.collider.gameObject : null);
+#pragma warning disable 0618
+                currentValidFloorObject = (VRTK_CustomRaycast.Raycast(customRaycast, standingDownRay, out standingDownRayCollision, layersToIgnore, Mathf.Infinity, QueryTriggerInteraction.Ignore) ? standingDownRayCollision.collider.gameObject : null);
+#pragma warning restore 0618
 
                 //Don't bother checking for lean if body collisions are disabled
                 if (headset == null || playArea == null || !enableBodyCollisions)
@@ -780,7 +769,9 @@ namespace VRTK
 
                 // Cast a ray forward just outside the body collider radius to see if anything is blocking your path
                 // If nothing is blocking your path and you're currently standing over a valid floor
-                if (!VRTK_CustomRaycast.Raycast(customRaycast, forwardRay, out forwardRayCollision, defaultIgnoreLayer, forwardLength, QueryTriggerInteraction.Ignore) && currentValidFloorObject != null)
+#pragma warning disable 0618
+                if (!VRTK_CustomRaycast.Raycast(customRaycast, forwardRay, out forwardRayCollision, layersToIgnore, forwardLength, QueryTriggerInteraction.Ignore) && currentValidFloorObject != null)
+#pragma warning restore 0618
                 {
                     CalculateLean(standingDownRayStartPosition, forwardLength, standingDownRayCollision.distance);
                 }
@@ -800,7 +791,9 @@ namespace VRTK
             RaycastHit downRayCollision;
 
             //Cast a ray down from the end of the forward ray position
-            if (VRTK_CustomRaycast.Raycast(customRaycast, downRay, out downRayCollision, defaultIgnoreLayer, Mathf.Infinity, QueryTriggerInteraction.Ignore))
+#pragma warning disable 0618
+            if (VRTK_CustomRaycast.Raycast(customRaycast, downRay, out downRayCollision, layersToIgnore, Mathf.Infinity, QueryTriggerInteraction.Ignore))
+#pragma warning restore 0618
             {
                 //Determine the difference between the original down ray and the projected forward a bit downray
                 float rayDownDelta = VRTK_SharedMethods.RoundFloat(originalRayDistance - downRayCollision.distance, decimalPrecision);
@@ -824,7 +817,7 @@ namespace VRTK
 
         protected virtual void UpdateStandingPosition(Vector2 currentHeadsetPosition)
         {
-            VRTK_SharedMethods.AddListValue(standingPositionHistory, currentHeadsetPosition);
+            standingPositionHistory.Add(currentHeadsetPosition);
             if (standingPositionHistory.Count > standingHistorySamples)
             {
                 if (!isLeaning && currentCollidingObject == null)
@@ -877,7 +870,7 @@ namespace VRTK
         {
             initialFloorDrop = false;
             retogglePhysicsOnCanFall = false;
-            teleporter = (teleporter != null ? teleporter : FindObjectOfType<VRTK_BasicTeleport>());
+            teleporter = (teleporter != null ? teleporter : GetComponentInChildren<VRTK_BasicTeleport>());
             if (teleporter != null)
             {
                 teleporter.Teleported += Teleported;
@@ -943,14 +936,8 @@ namespace VRTK
 
         protected virtual void ManagePhysicsCollider(Collider collider, bool state)
         {
-            if (bodyCollider != null)
-            {
-                Physics.IgnoreCollision(bodyCollider, collider, state);
-            }
-            if (footCollider != null)
-            {
-                Physics.IgnoreCollision(footCollider, collider, state);
-            }
+            Physics.IgnoreCollision(bodyCollider, collider, state);
+            Physics.IgnoreCollision(footCollider, collider, state);
         }
 
         protected virtual void CheckStepUpCollision(Collision collision)
@@ -963,10 +950,9 @@ namespace VRTK
                 Vector3 colliderWorldCenter = playArea.TransformPoint(footCollider.center);
                 Vector3 castStart = new Vector3(colliderWorldCenter.x, colliderWorldCenter.y + (CalculateStepUpYOffset() * stepYIncrement), colliderWorldCenter.z);
                 Vector3 castExtents = new Vector3(bodyCollider.radius, boxCastHeight, bodyCollider.radius);
-                float castDistance = castStart.y - playArea.position.y;
                 RaycastHit floorCheckHit;
-                bool floorHit = VRTK_CustomRaycast.BoxCast(customRaycast, castStart, castExtents, Vector3.down, Quaternion.identity, castDistance, out floorCheckHit, defaultIgnoreLayer, QueryTriggerInteraction.Ignore);
-                if (floorHit && (floorCheckHit.point.y - playArea.position.y) > stepDropThreshold)
+                float castDistance = castStart.y - playArea.position.y;
+                if (Physics.BoxCast(castStart, castExtents, Vector3.down, out floorCheckHit, Quaternion.identity, castDistance) && (floorCheckHit.point.y - playArea.position.y) > stepDropThreshold)
                 {
                     //If there is a teleporter attached then use that to move
                     if (teleporter != null && enableTeleport)
@@ -1009,42 +995,13 @@ namespace VRTK
 
         protected virtual void GenerateRigidbody()
         {
-            if (customPlayAreaRigidbody != null)
-            {
-                HasExistingRigidbody();
-                bodyRigidbody.mass = customPlayAreaRigidbody.mass;
-                bodyRigidbody.drag = customPlayAreaRigidbody.drag;
-                bodyRigidbody.angularDrag = customPlayAreaRigidbody.angularDrag;
-                bodyRigidbody.useGravity = customPlayAreaRigidbody.useGravity;
-                bodyRigidbody.isKinematic = customPlayAreaRigidbody.isKinematic;
-                bodyRigidbody.interpolation = customPlayAreaRigidbody.interpolation;
-                bodyRigidbody.collisionDetectionMode = customPlayAreaRigidbody.collisionDetectionMode;
-                bodyRigidbody.constraints = customPlayAreaRigidbody.constraints;
-            }
-            else
-            {
-                if (!HasExistingRigidbody())
-                {
-                    bodyRigidbody.mass = bodyMass;
-                    bodyRigidbody.freezeRotation = true;
-                }
-            }
-        }
-
-        protected virtual bool HasExistingRigidbody()
-        {
-            Rigidbody existingRigidbody = playArea.GetComponent<Rigidbody>();
-            if (existingRigidbody != null)
-            {
-                generateRigidbody = false;
-                bodyRigidbody = existingRigidbody;
-                return true;
-            }
-            else
+            bodyRigidbody = playArea.GetComponent<Rigidbody>();
+            if (bodyRigidbody == null)
             {
                 generateRigidbody = true;
                 bodyRigidbody = playArea.gameObject.AddComponent<Rigidbody>();
-                return false;
+                bodyRigidbody.mass = bodyMass;
+                bodyRigidbody.freezeRotation = true;
             }
         }
 
@@ -1126,13 +1083,11 @@ namespace VRTK
             if (generateRigidbody && bodyRigidbody != null)
             {
                 Destroy(bodyRigidbody);
-                bodyRigidbody = null;
             }
 
             if (bodyColliderContainer != null)
             {
                 Destroy(bodyColliderContainer);
-                bodyColliderContainer = null;
             }
         }
 
@@ -1167,7 +1122,7 @@ namespace VRTK
             {
                 IgnoreCollisions(mappedController.GetComponentsInChildren<Collider>(), true);
 
-                VRTK_InteractGrab grabbingController = mappedController.GetComponentInChildren<VRTK_InteractGrab>();
+                VRTK_InteractGrab grabbingController = mappedController.GetComponent<VRTK_InteractGrab>();
                 if (grabbingController != null && ignoreGrabbedCollisions)
                 {
                     if (state)
@@ -1224,10 +1179,7 @@ namespace VRTK
         {
             if (e.target != null)
             {
-                if (restoreCollisionsRoutine != null)
-                {
-                    StopCoroutine(restoreCollisionsRoutine);
-                }
+                StopCoroutine("RestoreCollisions");
                 IgnoreCollisions(e.target.GetComponentsInChildren<Collider>(), true);
             }
         }
@@ -1236,7 +1188,7 @@ namespace VRTK
         {
             if (gameObject.activeInHierarchy && playArea.gameObject.activeInHierarchy)
             {
-                restoreCollisionsRoutine = StartCoroutine(RestoreCollisions(e.target));
+                StartCoroutine(RestoreCollisions(e.target));
             }
         }
 
@@ -1265,7 +1217,9 @@ namespace VRTK
         {
             Ray ray = new Ray(controllerObj.transform.position, -playArea.up);
             RaycastHit rayCollidedWith;
-            VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, defaultIgnoreLayer, Mathf.Infinity, QueryTriggerInteraction.Ignore);
+#pragma warning disable 0618
+            VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, layersToIgnore, Mathf.Infinity, QueryTriggerInteraction.Ignore);
+#pragma warning restore 0618
             return controllerObj.transform.position.y - rayCollidedWith.distance;
         }
 
@@ -1274,10 +1228,6 @@ namespace VRTK
             if (fallRestriction == FallingRestrictors.NoRestriction)
             {
                 return false;
-            }
-            if (fallRestriction == FallingRestrictors.AlwaysRestrict)
-            {
-                return true;
             }
 
             float controllerDropThreshold = 0.05f;
@@ -1311,7 +1261,9 @@ namespace VRTK
             {
                 Ray ray = new Ray(headset.transform.position, -playArea.up);
                 RaycastHit rayCollidedWith;
-                bool rayHit = VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, defaultIgnoreLayer, Mathf.Infinity, QueryTriggerInteraction.Ignore);
+#pragma warning disable 0618
+                bool rayHit = VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, layersToIgnore, Mathf.Infinity, QueryTriggerInteraction.Ignore);
+#pragma warning restore 0618
                 hitFloorYDelta = playArea.position.y - rayCollidedWith.point.y;
 
                 if (initialFloorDrop && (ValidDrop(rayHit, rayCollidedWith, rayCollidedWith.point.y) || retogglePhysicsOnCanFall))
@@ -1349,6 +1301,7 @@ namespace VRTK
                     storedCurrentPhysics = storedRetogglePhysics;
                     retogglePhysicsOnCanFall = false;
                 }
+
                 if (enableBodyCollisions && (teleporter == null || !enableTeleport || hitFloorYDelta > gravityFallYThreshold))
                 {
                     GravityFall(rayCollidedWith);

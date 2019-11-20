@@ -1,4 +1,4 @@
-﻿// Object Tooltip|Prefabs|0060
+﻿// Object Tooltip|Prefabs|0020
 namespace VRTK
 {
     using UnityEngine;
@@ -21,12 +21,10 @@ namespace VRTK
     public delegate void ObjectTooltipEventHandler(object sender, ObjectTooltipEventArgs e);
 
     /// <summary>
-    /// Adds a World Space Canvas that can be used to provide additional information about an object by providing a piece of text with a line drawn to a destination point.
+    /// This adds a UI element into the World Space that can be used to provide additional information about an object by providing a piece of text with a line drawn to a destination point.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/ObjectTooltip/ObjectTooltip` prefab into the scene hierarchy, preferably as a child of the GameObject it is associated with.
-    ///  * Set the `Draw Line To` option to the Transform component of the GameObject the Tooltip will be assoicated with.
+    /// There are a number of parameters that can be set on the Prefab which are provided by the `VRTK_ObjectTooltip` script which is applied to the prefab.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/029_Controller_Tooltips` displays two cubes that have an object tooltip added to them along with tooltips that have been added to the controllers.
@@ -111,7 +109,7 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -122,7 +120,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()

@@ -279,7 +279,6 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
-  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!23 &23000013082547924
 MeshRenderer:
@@ -311,7 +310,6 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
-  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!23 &23558364266865106
 MeshRenderer:
@@ -343,7 +341,6 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
-  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!33 &33000010948628238
 MeshFilter:
@@ -377,9 +374,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab83c671fdbadc64099c66949ea544fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  touchpadDeadzone: {x: 0, y: 0}
   includeHeadsetOffset: 1
   displayOnInvalidLocation: 1
   usePointerColor: 0
-  indicatorVisibility: 0
   isActive: 1

@@ -2,12 +2,7 @@
 namespace VRTK
 {
     using UnityEngine;
-#if UNITY_2017_2_OR_NEWER
-    using UnityEngine.XR;
-#else
-    using XRSettings = UnityEngine.VR.VRSettings;
-    using XRDevice = UnityEngine.VR.VRDevice;
-#endif
+    using UnityEngine.VR;
 #if UNITY_EDITOR
     using UnityEditor;
     using UnityEditor.Callbacks;
@@ -21,12 +16,12 @@ namespace VRTK
     using System.Reflection;
 
     /// <summary>
-    /// The SDK Manager script provides configuration of supported SDKs and manages a list of VRTK_SDKSetups to use.
+    /// The SDK Manager script provides configuration of supported SDKs and manages a list of <see cref="VRTK_SDKSetup"/>s to use.
     /// </summary>
     public sealed class VRTK_SDKManager : MonoBehaviour
     {
         /// <summary>
-        /// A helper class that simply holds references to both the SDK_ScriptingDefineSymbolPredicateAttribute and the method info of the method the attribute is defined on.
+        /// A helper class that simply holds references to both the <see cref="SDK_ScriptingDefineSymbolPredicateAttribute"/> and the method info of the method the attribute is defined on.
         /// </summary>
         public sealed class ScriptingDefineSymbolPredicateInfo
         {
@@ -54,9 +49,9 @@ namespace VRTK
         /// <summary>
         /// Event Payload
         /// </summary>
-        /// <param name="previousSetup">The previous loaded Setup. `null` if no previous Setup was loaded.</param>
-        /// <param name="currentSetup">The current loaded Setup. `null` if no Setup is loaded anymore. See `errorMessage` to check whether this is `null` because of an error.</param>
-        /// <param name="errorMessage">Explains why loading a list of Setups wasn't successful if `currentSetup` is `null` and an error occurred. `null` if no error occurred.</param>
+        /// <param name="previousSetup">The previous loaded Setup. <see langword="null"/> if no previous Setup was loaded.</param>
+        /// <param name="currentSetup">The current loaded Setup. <see langword="null"/> if no Setup is loaded anymore. See <see cref="errorMessage"/> to check whether this is <see langword="null"/> because of an error.</param>
+        /// <param name="errorMessage">Explains why loading a list of Setups wasn't successful if <see cref="currentSetup"/> is <see langword="null"/> and an error occurred. <see langword="null"/> if no error occurred.</param>
         public struct LoadedSetupChangeEventArgs
         {
             public readonly VRTK_SDKSetup previousSetup;
@@ -112,26 +107,26 @@ namespace VRTK
         public static ReadOnlyCollection<VRTK_SDKInfo> AvailableControllerSDKInfos { get; private set; }
 
         /// <summary>
-        /// All installed system SDK infos. This is a subset of `AvailableSystemSDKInfos`.
-        /// It contains only those available SDK infos for which an SDK_ScriptingDefineSymbolPredicateAttribute exists that
+        /// All installed system SDK infos. This is a subset of <see cref="AvailableSystemSDKInfos"/>.
+        /// It contains only those available SDK infos for which an <see cref="SDK_ScriptingDefineSymbolPredicateAttribute"/> exists that
         /// uses the same symbol and whose associated method returns true.
         /// </summary>
         public static ReadOnlyCollection<VRTK_SDKInfo> InstalledSystemSDKInfos { get; private set; }
         /// <summary>
-        /// All installed boundaries SDK infos. This is a subset of `AvailableBoundariesSDKInfos`.
-        /// It contains only those available SDK infos for which an SDK_ScriptingDefineSymbolPredicateAttribute exists
+        /// All installed boundaries SDK infos. This is a subset of <see cref="AvailableBoundariesSDKInfos"/>.
+        /// It contains only those available SDK infos for which an <see cref="SDK_ScriptingDefineSymbolPredicateAttribute"/> exists
         /// that uses the same symbol and whose associated method returns true.
         /// </summary>
         public static ReadOnlyCollection<VRTK_SDKInfo> InstalledBoundariesSDKInfos { get; private set; }
         /// <summary>
-        /// All installed headset SDK infos. This is a subset of `AvailableHeadsetSDKInfos`.
-        /// It contains only those available SDK infos for which an SDK_ScriptingDefineSymbolPredicateAttribute exists
+        /// All installed headset SDK infos. This is a subset of <see cref="AvailableHeadsetSDKInfos"/>.
+        /// It contains only those available SDK infos for which an <see cref="SDK_ScriptingDefineSymbolPredicateAttribute"/> exists
         /// that uses the same symbol and whose associated method returns true.
         /// </summary>
         public static ReadOnlyCollection<VRTK_SDKInfo> InstalledHeadsetSDKInfos { get; private set; }
         /// <summary>
-        /// All installed controller SDK infos. This is a subset of `AvailableControllerSDKInfos`.
-        /// It contains only those available SDK infos for which an SDK_ScriptingDefineSymbolPredicateAttribute exists
+        /// All installed controller SDK infos. This is a subset of <see cref="AvailableControllerSDKInfos"/>.
+        /// It contains only those available SDK infos for which an <see cref="SDK_ScriptingDefineSymbolPredicateAttribute"/> exists
         /// that uses the same symbol and whose associated method returns true.
         /// </summary>
         public static ReadOnlyCollection<VRTK_SDKInfo> InstalledControllerSDKInfos { get; private set; }
@@ -145,7 +140,7 @@ namespace VRTK
             {
                 if (_instance == null)
                 {
-                    VRTK_SDKManager sdkManager = VRTK_SharedMethods.FindEvenInactiveComponent<VRTK_SDKManager>(true);
+                    VRTK_SDKManager sdkManager = VRTK_SharedMethods.FindEvenInactiveComponent<VRTK_SDKManager>();
                     if (sdkManager != null)
                     {
                         sdkManager.CreateInstance();
@@ -155,178 +150,17 @@ namespace VRTK
                 return _instance;
             }
         }
-
-        /// <summary>
-        /// A collection of behaviours to toggle on loaded setup change.
-        /// </summary>
-        public static HashSet<Behaviour> delayedToggleBehaviours = new HashSet<Behaviour>();
-
-        /// <summary>
-        /// The ValidInstance method returns whether the SDK Manager isntance is valid (i.e. it's not null).
-        /// </summary>
-        /// <returns>Returns `true` if the SDK Manager instance is valid or returns `false` if it is null.</returns>
-        public static bool ValidInstance()
-        {
-            return (instance != null);
-        }
-
-        /// <summary>
-        /// The AttemptAddBehaviourToToggleOnLoadedSetupChange method will attempt to add the given behaviour to the loaded setup change toggle if the SDK Manager instance exists. If it doesn't exist then it adds it to the `delayedToggleBehaviours` HashSet to be manually added later with the `ProcessDelayedToggleBehaviours` method.
-        /// </summary>
-        /// <param name="givenBehaviour">The behaviour to add.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool AttemptAddBehaviourToToggleOnLoadedSetupChange(Behaviour givenBehaviour)
-        {
-            if (ValidInstance())
-            {
-                instance.AddBehaviourToToggleOnLoadedSetupChange(givenBehaviour);
-                return true;
-            }
-            delayedToggleBehaviours.Add(givenBehaviour);
-            return false;
-        }
-
-        /// <summary>
-        /// The AttemptRemoveBehaviourToToggleOnLoadedSetupChange method will attempt to remove the given behaviour from the loaded setup change toggle if the SDK Manager instance exists.
-        /// </summary>
-        /// <param name="givenBehaviour">The behaviour to remove.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool AttemptRemoveBehaviourToToggleOnLoadedSetupChange(Behaviour givenBehaviour)
-        {
-            if (ValidInstance())
-            {
-                instance.RemoveBehaviourToToggleOnLoadedSetupChange(givenBehaviour);
-                delayedToggleBehaviours.Remove(givenBehaviour);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The ProcessDelayedToggleBehaviours method will attempt to addd the behaviours in the `delayedToggleBehaviours` HashSet to the loaded setup change toggle.
-        /// </summary>
-        public static void ProcessDelayedToggleBehaviours()
-        {
-            if (ValidInstance())
-            {
-                foreach (Behaviour currentBehaviour in new HashSet<Behaviour>(delayedToggleBehaviours))
-                {
-                    instance.AddBehaviourToToggleOnLoadedSetupChange(currentBehaviour);
-                }
-                delayedToggleBehaviours.Clear();
-            }
-        }
-
-        /// <summary>
-        /// The SubscribeLoadedSetupChanged method attempts to register the given callback with the `LoadedSetupChanged` event.
-        /// </summary>
-        /// <param name="callback">The callback to register.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool SubscribeLoadedSetupChanged(LoadedSetupChangeEventHandler callback)
-        {
-            if (ValidInstance())
-            {
-                instance.LoadedSetupChanged += callback;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The UnsubscribeLoadedSetupChanged method attempts to unregister the given callback from the `LoadedSetupChanged` event. 
-        /// </summary>
-        /// <param name="callback">The callback to unregister.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool UnsubscribeLoadedSetupChanged(LoadedSetupChangeEventHandler callback)
-        {
-            if (ValidInstance())
-            {
-                instance.LoadedSetupChanged -= callback;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The GetLoadedSDKSetup method returns the current loaded SDK Setup for the SDK Manager instance.
-        /// </summary>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static VRTK_SDKSetup GetLoadedSDKSetup()
-        {
-            if (ValidInstance())
-            {
-                return instance.loadedSetup;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// The GetAllSDKSetups method returns all valid SDK Setups attached to the SDK Manager instance.
-        /// </summary>
-        /// <returns>An SDKSetup array of all valid SDK Setups for the current SDK Manager instance. If no SDK Manager instance is found then an empty array is returned.</returns>
-        public static VRTK_SDKSetup[] GetAllSDKSetups()
-        {
-            if (ValidInstance())
-            {
-                return instance.setups;
-            }
-            return new VRTK_SDKSetup[0];
-        }
-
-        /// <summary>
-        /// The AttemptTryLoadSDKSetup method attempts to load a valid VRTK_SDKSetup from a list if the SDK Manager instance is valid.
-        /// </summary>
-        /// <param name="startIndex">The index of the VRTK_SDKSetup to start the loading with.</param>
-        /// <param name="tryToReinitialize">Whether or not to retry initializing and using the currently set but unusable VR Device.</param>
-        /// <param name="sdkSetups">The list to try to load a VRTK_SDKSetup from.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool AttemptTryLoadSDKSetup(int startIndex, bool tryToReinitialize, params VRTK_SDKSetup[] sdkSetups)
-        {
-            if (ValidInstance())
-            {
-                instance.TryLoadSDKSetup(startIndex, tryToReinitialize, sdkSetups);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The AttemptUnloadSDKSetup method tries to load a valid VRTK_SDKSetup from setups if the SDK Manager instance is valid.
-        /// </summary>
-        /// <param name="tryUseLastLoadedSetup">Attempt to use the last loaded setup if it's available.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool AttemptTryLoadSDKSetupFromList(bool tryUseLastLoadedSetup = true)
-        {
-            if (ValidInstance())
-            {
-                instance.TryLoadSDKSetupFromList(tryUseLastLoadedSetup);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The AttemptUnloadSDKSetup method attempts to unload the currently loaded VRTK_SDKSetup, if there is one and if the SDK Manager instance is valid.
-        /// </summary>
-        /// <param name="disableVR">Whether to disable VR altogether after unloading the SDK Setup.</param>
-        /// <returns>Returns `true` if the SDK Manager instance was valid.</returns>
-        public static bool AttemptUnloadSDKSetup(bool disableVR = false)
-        {
-            if (ValidInstance())
-            {
-                instance.UnloadSDKSetup(disableVR);
-                return true;
-            }
-            return false;
-        }
-
         private static VRTK_SDKManager _instance;
+
+        [Tooltip("**OBSOLETE. STOP USING THIS ASAP!** If this is true then the instance of the SDK Manager won't be destroyed on every scene load.")]
+        [Obsolete("`VRTK_SDKManager.persistOnLoad` has been deprecated and will be removed in a future version of VRTK. See https://github.com/thestonefox/VRTK/issues/1316 for details.")]
+        public bool persistOnLoad;
 
         [Tooltip("Determines whether the scripting define symbols required by the installed SDKs are automatically added to and removed from the player settings.")]
         public bool autoManageScriptDefines = true;
 
         /// <summary>
-        /// The active (i.e. to be added to the PlayerSettings) scripting define symbol predicate attributes that have no associated SDK classes.
+        /// The active (i.e. to be added to the <see cref="PlayerSettings"/>) scripting define symbol predicate attributes that have no associated SDK classes.
         /// </summary>
         public List<SDK_ScriptingDefineSymbolPredicateAttribute> activeScriptingDefineSymbolsWithoutSDKClasses = new List<SDK_ScriptingDefineSymbolPredicateAttribute>();
 
@@ -341,55 +175,19 @@ namespace VRTK
         public bool autoLoadSetup = true;
         [Tooltip("The list of SDK Setups to choose from.")]
         public VRTK_SDKSetup[] setups = new VRTK_SDKSetup[0];
-#if UNITY_EDITOR
-        [Tooltip("The list of Build Target Groups to exclude.")]
-        public BuildTargetGroup[] excludeTargetGroups = new BuildTargetGroup[] {
-#if UNITY_2017_1_OR_NEWER
-            BuildTargetGroup.Switch,
-            BuildTargetGroup.Facebook
-#endif
-        };
-#endif
-
-        [Header("Obsolete Settings")]
-
-        [Obsolete("`VRTK_SDKManager.persistOnLoad` has been deprecated and will be removed in a future version of VRTK. See https://github.com/thestonefox/VRTK/issues/1316 for details.")]
-        [ObsoleteInspector]
-        public bool persistOnLoad;
-
         /// <summary>
-        /// The loaded SDK Setup. `null` if no setup is currently loaded.
+        /// The loaded SDK Setup. <see langword="null"/> if no setup is currently loaded.
         /// </summary>
-        public VRTK_SDKSetup loadedSetup
-        {
-            get
-            {
-                if (_loadedSetup == null && setups.Length == 1 && setups[0].isValid && setups[0].isActiveAndEnabled)
-                {
-                    _loadedSetup = setups[0];
-                }
-
-                return _loadedSetup;
-            }
-            private set { _loadedSetup = value; }
-        }
-
-        private VRTK_SDKSetup _loadedSetup;
+        public VRTK_SDKSetup loadedSetup { get; private set; }
         private static HashSet<VRTK_SDKInfo> _previouslyUsedSetupInfos = new HashSet<VRTK_SDKInfo>();
 
         /// <summary>
-        /// All behaviours that need toggling whenever `loadedSetup` changes.
+        /// All behaviours that need toggling whenever <see cref="loadedSetup"/> changes.
         /// </summary>
         public ReadOnlyCollection<Behaviour> behavioursToToggleOnLoadedSetupChange { get; private set; }
         private List<Behaviour> _behavioursToToggleOnLoadedSetupChange = new List<Behaviour>();
         private Dictionary<Behaviour, bool> _behavioursInitialState = new Dictionary<Behaviour, bool>();
-        private Coroutine checkLeftControllerReadyRoutine = null;
-        private Coroutine checkRightControllerReadyRoutine = null;
-        private float checkControllerReadyDelay = 1f;
-        private int checkControllerValidTimer = 50;
-#if UNITY_EDITOR
-        private BuildTargetGroup[] targetGroupsToExclude;
-#endif
+
         /// <summary>
         /// The event invoked whenever the loaded SDK Setup changes.
         /// </summary>
@@ -397,13 +195,13 @@ namespace VRTK
 
 #if UNITY_EDITOR
         /// <summary>
-        /// The ManageScriptingDefineSymbols method manages (i.e. adds and removes) the scripting define symbols of the PlayerSettings for the currently set SDK infos.
+        /// Manages (i.e. adds and removes) the scripting define symbols of the <see cref="PlayerSettings"/> for the currently set SDK infos.
         /// This method is only available in the editor, so usage of the method needs to be surrounded by `#if UNITY_EDITOR` and `#endif` when used
         /// in a type that is also compiled for a standalone build.
         /// </summary>
-        /// <param name="ignoreAutoManageScriptDefines">Whether to ignore `autoManageScriptDefines` while deciding to manage.</param>
-        /// <param name="ignoreIsActiveAndEnabled">Whether to ignore `Behaviour.isActiveAndEnabled` while deciding to manage.</param>
-        /// <returns>Whether the PlayerSettings' scripting define symbols were changed.</returns>
+        /// <param name="ignoreAutoManageScriptDefines">Whether to ignore <see cref="autoManageScriptDefines"/> while deciding to manage.</param>
+        /// <param name="ignoreIsActiveAndEnabled">Whether to ignore <see cref="Behaviour.isActiveAndEnabled"/> while deciding to manage.</param>
+        /// <returns>Whether the <see cref="PlayerSettings"/>' scripting define symbols were changed.</returns>
         public bool ManageScriptingDefineSymbols(bool ignoreAutoManageScriptDefines, bool ignoreIsActiveAndEnabled)
         {
             if (!((ignoreAutoManageScriptDefines || autoManageScriptDefines) && (ignoreIsActiveAndEnabled || isActiveAndEnabled)))
@@ -512,11 +310,11 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The ManageVRSettings method manages (i.e. adds and removes) the VR SDKs of the PlayerSettings for the currently set SDK infos.
+        /// Manages (i.e. adds and removes) the VR SDKs of the <see cref="PlayerSettings"/> for the currently set SDK infos.
         /// This method is only available in the editor, so usage of the method needs to be surrounded by `#if UNITY_EDITOR` and `#endif` when used
         /// in a type that is also compiled for a standalone build.
         /// </summary>
-        /// <param name="force">Whether to ignore `autoManageVRSettings` while deciding to manage.</param>
+        /// <param name="force">Whether to ignore <see cref="autoManageVRSettings"/> while deciding to manage.</param>
         public void ManageVRSettings(bool force)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || !(force || autoManageVRSettings))
@@ -534,24 +332,14 @@ namespace VRTK
                 .ToDictionary(grouping => grouping.Key,
                               grouping => grouping.Select(info => info.description.vrDeviceName)
                                                   .Distinct()
+                                                  .Except(new[] { "None" })
                                                   .ToArray());
 
             foreach (BuildTargetGroup targetGroup in VRTK_SharedMethods.GetValidBuildTargetGroups())
             {
-                if (targetGroupsToExclude.Contains(targetGroup))
-                {
-                    continue;
-                }
                 string[] deviceNames;
                 deviceNamesByTargetGroup.TryGetValue(targetGroup, out deviceNames);
-
-                int setupCount = deviceNames == null ? 0 : deviceNames.Length;
                 bool vrEnabled = deviceNames != null && deviceNames.Length > 0;
-
-                if (deviceNames != null)
-                {
-                    deviceNames = deviceNames.Except(new[] { "None" }).ToArray();
-                }
 
 #if UNITY_5_5_OR_NEWER
                 VREditor.SetVREnabledOnTargetGroup(targetGroup, vrEnabled);
@@ -559,32 +347,20 @@ namespace VRTK
                 VREditor.SetVREnabled(targetGroup, vrEnabled);
 #endif
 
-                string[] devices;
-                if (vrEnabled)
-                {
-                    devices = setupCount > 1
-                                  ? new[] { "None" }.Concat(deviceNames).ToArray()
-                                  : deviceNames;
-                }
-                else
-                {
-                    devices = new string[0];
-                }
-
 #if UNITY_5_5_OR_NEWER
                 VREditor.SetVREnabledDevicesOnTargetGroup(
 #else
                 VREditor.SetVREnabledDevices(
 #endif
                     targetGroup,
-                    devices
+                    vrEnabled ? new[] { "None" }.Concat(deviceNames).ToArray() : new string[0]
                 );
             }
         }
 #endif
 
         /// <summary>
-        /// The AddBehaviourToToggleOnLoadedSetupChange method adds a behaviour to the list of behaviours to toggle when `loadedSetup` changes.
+        /// Adds a behaviour to the list of behaviours to toggle when <see cref="loadedSetup"/> changes.
         /// </summary>
         /// <param name="behaviour">The behaviour to add.</param>
         public void AddBehaviourToToggleOnLoadedSetupChange(Behaviour behaviour)
@@ -602,7 +378,7 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The RemoveBehaviourToToggleOnLoadedSetupChange method removes a behaviour of the list of behaviours to toggle when `loadedSetup` changes.
+        /// Removes a behaviour of the list of behaviours to toggle when <see cref="loadedSetup"/> changes.
         /// </summary>
         /// <param name="behaviour">The behaviour to remove.</param>
         public void RemoveBehaviourToToggleOnLoadedSetupChange(Behaviour behaviour)
@@ -611,9 +387,8 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The TryLoadSDKSetupFromList method tries to load a valid VRTK_SDKSetup from setups.
+        /// Tries to load a valid <see cref="VRTK_SDKSetup"/> from <see cref="setups"/>.
         /// </summary>
-        /// <param name="tryUseLastLoadedSetup">Attempt to use the last loaded setup if it's available.</param>
         public void TryLoadSDKSetupFromList(bool tryUseLastLoadedSetup = true)
         {
             int index = 0;
@@ -632,21 +407,21 @@ namespace VRTK
                         })
                 );
             }
-            else if (XRSettings.enabled)
+            else if (VRSettings.enabled)
             {
                 // Use the SDK Setup for the current VR Device if it's working already
                 // (may be due to command line argument '-vrmode')
                 index = Array.FindIndex(
                     setups,
-                    setup => setup.usedVRDeviceNames.Contains(XRSettings.loadedDeviceName)
+                    setup => setup.usedVRDeviceNames.Contains(VRSettings.loadedDeviceName)
                 );
             }
             else
             {
                 // If '-vrmode none' was used try to load the respective SDK Setup
-                string[] commandLineArgs = VRTK_SharedMethods.GetCommandLineArguements();
+                string[] commandLineArgs = Environment.GetCommandLineArgs();
                 int commandLineArgIndex = Array.IndexOf(commandLineArgs, "-vrmode", 1);
-                if (XRSettings.loadedDeviceName == "None"
+                if (VRSettings.loadedDeviceName == "None"
                     || (commandLineArgIndex != -1
                         && commandLineArgIndex + 1 < commandLineArgs.Length
                         && commandLineArgs[commandLineArgIndex + 1].ToLowerInvariant() == "none"))
@@ -663,14 +438,14 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The TryLoadSDKSetup method tries to load a valid VRTK_SDKSetup from a list.
+        /// Tries to load a valid <see cref="VRTK_SDKSetup"/> from a list.
         /// </summary>
         /// <remarks>
-        /// The first loadable VRTK_SDKSetup in the list will be loaded. Will fall back to disable VR if none of the provided Setups is useable.
+        /// The first loadable <see cref="VRTK_SDKSetup"/> in the list will be loaded. Will fall back to disable VR if none of the provided Setups is useable.
         /// </remarks>
-        /// <param name="startIndex">The index of the VRTK_SDKSetup to start the loading with.</param>
+        /// <param name="startIndex">The index of the <see cref="VRTK_SDKSetup"/> to start the loading with.</param>
         /// <param name="tryToReinitialize">Whether or not to retry initializing and using the currently set but unusable VR Device.</param>
-        /// <param name="sdkSetups">The list to try to load a VRTK_SDKSetup from.</param>
+        /// <param name="sdkSetups">The list to try to load a <see cref="VRTK_SDKSetup"/> from.</param>
         public void TryLoadSDKSetup(int startIndex, bool tryToReinitialize, params VRTK_SDKSetup[] sdkSetups)
         {
             if (sdkSetups.Length == 0)
@@ -708,25 +483,25 @@ namespace VRTK
                 previousLoadedSetup.OnUnloaded(this);
             }
 
-            string loadedDeviceName = string.IsNullOrEmpty(XRSettings.loadedDeviceName) ? "None" : XRSettings.loadedDeviceName;
-            bool isDeviceAlreadyLoaded = sdkSetups[0].usedVRDeviceNames.Contains(loadedDeviceName);
+            bool isDeviceAlreadyLoaded = VRSettings.enabled
+                                         && sdkSetups[0].usedVRDeviceNames.Contains(VRSettings.loadedDeviceName);
             if (!isDeviceAlreadyLoaded)
             {
-                if (!tryToReinitialize && !XRSettings.enabled && loadedDeviceName != "None")
+                if (!tryToReinitialize && !VRSettings.enabled && !string.IsNullOrEmpty(VRSettings.loadedDeviceName))
                 {
-                    sdkSetups = sdkSetups.Where(setup => !setup.usedVRDeviceNames.Contains(loadedDeviceName))
+                    sdkSetups = sdkSetups.Where(setup => !setup.usedVRDeviceNames.Contains(VRSettings.loadedDeviceName))
                                          .ToArray();
                 }
 
                 VRTK_SDKSetup[] missingVRDeviceSetups = sdkSetups
-                    .Where(setup => setup.usedVRDeviceNames.Except(XRSettings.supportedDevices.Concat(new[] { "None" })).Any())
+                    .Where(setup => setup.usedVRDeviceNames.Except(VRSettings.supportedDevices).Any())
                     .ToArray();
                 foreach (VRTK_SDKSetup missingVRDeviceSetup in missingVRDeviceSetups)
                 {
                     string missingVRDevicesText = string.Join(
                         ", ",
                         missingVRDeviceSetup.usedVRDeviceNames
-                                            .Except(XRSettings.supportedDevices)
+                                            .Except(VRSettings.supportedDevices)
                                             .ToArray()
                     );
                     VRTK_Logger.Warn(string.Format("Ignoring SDK Setup '{0}' because the following VR device names are missing from the PlayerSettings:\n{1}",
@@ -740,7 +515,7 @@ namespace VRTK
                     .Distinct()
                     .Concat(new[] { "None" }) // Add "None" to the end to fall back to
                     .ToArray();
-                XRSettings.LoadDeviceByName(vrDeviceNames);
+                VRSettings.LoadDeviceByName(vrDeviceNames);
             }
 
             StartCoroutine(FinishSDKSetupLoading(sdkSetups, previousLoadedSetup));
@@ -748,13 +523,11 @@ namespace VRTK
 
 #if UNITY_EDITOR
         /// <summary>
-        /// The SetLoadedSDKSetupToPopulateObjectReferences method sets a given VRTK_SDKSetup as the loaded SDK Setup to be able to use it when populating object references in the SDK Setup.
-        /// </summary>
-        /// <remarks>
+        /// Sets a given <see cref="VRTK_SDKSetup"/> as the loaded SDK Setup to be able to use it when populating object references in the SDK Setup.
         /// This method should only be called when not playing as it's only for populating the object references.
         /// This method is only available in the editor, so usage of the method needs to be surrounded by `#if UNITY_EDITOR` and `#endif` when used
         /// in a type that is also compiled for a standalone build.
-        /// </remarks>
+        /// </summary>
         /// <param name="setup">The SDK Setup to set as the loaded SDK.</param>
         public void SetLoadedSDKSetupToPopulateObjectReferences(VRTK_SDKSetup setup)
         {
@@ -769,7 +542,7 @@ namespace VRTK
 #endif
 
         /// <summary>
-        /// The UnloadSDKSetup method unloads the currently loaded VRTK_SDKSetup, if there is one.
+        /// Unloads the currently loaded <see cref="VRTK_SDKSetup"/>, if there is one.
         /// </summary>
         /// <param name="disableVR">Whether to disable VR altogether after unloading the SDK Setup.</param>
         public void UnloadSDKSetup(bool disableVR = false)
@@ -789,8 +562,8 @@ namespace VRTK
 
             if (disableVR)
             {
-                XRSettings.LoadDeviceByName("None");
-                XRSettings.enabled = false;
+                VRSettings.LoadDeviceByName("None");
+                VRSettings.enabled = false;
             }
 
             if (previousLoadedSetup != null)
@@ -819,14 +592,8 @@ namespace VRTK
             PopulateAvailableAndInstalledSDKInfos();
 
 #if UNITY_EDITOR
-
             //call AutoManageScriptingDefineSymbolsAndManageVRSettings when the currently active scene changes
-#if UNITY_2018_1_OR_NEWER
-            EditorApplication.hierarchyChanged += AutoManageScriptingDefineSymbolsAndManageVRSettings;
-#else
             EditorApplication.hierarchyWindowChanged += AutoManageScriptingDefineSymbolsAndManageVRSettings;
-#endif
-
 #endif
         }
 
@@ -836,7 +603,7 @@ namespace VRTK
 
             CreateInstance();
 
-            if (loadedSetup == null && autoLoadSetup)
+            if (autoLoadSetup)
             {
                 TryLoadSDKSetupFromList();
             }
@@ -844,16 +611,6 @@ namespace VRTK
 
         private void OnDisable()
         {
-            if (checkLeftControllerReadyRoutine != null)
-            {
-                StopCoroutine(checkLeftControllerReadyRoutine);
-            }
-
-            if (checkRightControllerReadyRoutine != null)
-            {
-                StopCoroutine(checkRightControllerReadyRoutine);
-            }
-
 #pragma warning disable 618
             if (_instance == this && !persistOnLoad)
 #pragma warning restore 618
@@ -895,7 +652,7 @@ namespace VRTK
         {
             yield return null;
 
-            string loadedDeviceName = string.IsNullOrEmpty(XRSettings.loadedDeviceName) ? "None" : XRSettings.loadedDeviceName;
+            string loadedDeviceName = string.IsNullOrEmpty(VRSettings.loadedDeviceName) ? "None" : VRSettings.loadedDeviceName;
             loadedSetup = sdkSetups.FirstOrDefault(setup => setup.usedVRDeviceNames.Contains(loadedDeviceName));
 
             if (loadedSetup == null)
@@ -904,8 +661,8 @@ namespace VRTK
                 UnloadSDKSetup();
 
                 const string errorMessage = "No SDK Setup from the provided list could be loaded.";
-                OnLoadedSetupChanged(new LoadedSetupChangeEventArgs(previousLoadedSetup, null, errorMessage));
                 VRTK_Logger.Error(errorMessage);
+                OnLoadedSetupChanged(new LoadedSetupChangeEventArgs(previousLoadedSetup, null, errorMessage));
 
                 yield break;
             }
@@ -913,9 +670,9 @@ namespace VRTK
             if (loadedSetup.usedVRDeviceNames.Except(new[] { "None" }).Any())
             {
                 // The loaded VR Device is actually a VR Device
-                XRSettings.enabled = true;
+                VRSettings.enabled = true;
 
-                if (!XRDevice.isPresent)
+                if (!VRDevice.isPresent)
                 {
                     // Despite being loaded, the loaded VR Device isn't working correctly
                     int nextSetupIndex = Array.IndexOf(sdkSetups, loadedSetup) + 1;
@@ -939,8 +696,8 @@ namespace VRTK
                     UnloadSDKSetup();
 
                     errorMessage += " There are no other Setups in the provided list to try.";
-                    OnLoadedSetupChanged(new LoadedSetupChangeEventArgs(previousLoadedSetup, null, errorMessage));
                     VRTK_Logger.Error(errorMessage);
+                    OnLoadedSetupChanged(new LoadedSetupChangeEventArgs(previousLoadedSetup, null, errorMessage));
 
                     yield break;
                 }
@@ -949,55 +706,7 @@ namespace VRTK
             // A VR Device was correctly loaded, is working and matches an SDK Setup
             loadedSetup.OnLoaded(this);
             ToggleBehaviours(true);
-            CheckControllersReady();
             OnLoadedSetupChanged(new LoadedSetupChangeEventArgs(previousLoadedSetup, loadedSetup, null));
-        }
-
-        private void CheckControllersReady()
-        {
-            if (checkLeftControllerReadyRoutine != null)
-            {
-                StopCoroutine(checkLeftControllerReadyRoutine);
-            }
-            checkLeftControllerReadyRoutine = StartCoroutine(CheckLeftControllerReady());
-
-            if (checkRightControllerReadyRoutine != null)
-            {
-                StopCoroutine(checkRightControllerReadyRoutine);
-            }
-            checkRightControllerReadyRoutine = StartCoroutine(CheckRightControllerReady());
-        }
-
-        private IEnumerator CheckLeftControllerReady()
-        {
-            WaitForSeconds delayInstruction = new WaitForSeconds(checkControllerReadyDelay);
-            int maxCheckTime = checkControllerValidTimer;
-            while (true)
-            {
-                if (loadedSetup != null && loadedSetup.actualLeftController != null && loadedSetup.actualLeftController.activeInHierarchy && (loadedSetup.controllerSDK.GetCurrentControllerType() != SDK_BaseController.ControllerType.Undefined || maxCheckTime < 0))
-                {
-                    break;
-                }
-                maxCheckTime--;
-                yield return delayInstruction;
-            }
-            loadedSetup.controllerSDK.OnControllerReady(SDK_BaseController.ControllerHand.Left);
-        }
-
-        private IEnumerator CheckRightControllerReady()
-        {
-            WaitForSeconds delayInstruction = new WaitForSeconds(checkControllerReadyDelay);
-            int maxCheckTime = checkControllerValidTimer;
-            while (true)
-            {
-                if (loadedSetup != null && loadedSetup.actualRightController != null && loadedSetup.actualRightController.activeInHierarchy && (loadedSetup.controllerSDK.GetCurrentControllerType() != SDK_BaseController.ControllerType.Undefined || maxCheckTime < 0))
-                {
-                    break;
-                }
-                maxCheckTime--;
-                yield return delayInstruction;
-            }
-            loadedSetup.controllerSDK.OnControllerReady(SDK_BaseController.ControllerHand.Right);
         }
 
         private void ToggleBehaviours(bool state)
@@ -1024,13 +733,13 @@ namespace VRTK
         }
 
         /// <summary>
-        /// Populates `AvailableScriptingDefineSymbolPredicateInfos` with all the available SDK_ScriptingDefineSymbolPredicateAttributes and associated method infos.
+        /// Populates <see cref="AvailableScriptingDefineSymbolPredicateInfos"/> with all the available <see cref="SDK_ScriptingDefineSymbolPredicateAttribute"/>s and associated method infos.
         /// </summary>
         private static void PopulateAvailableScriptingDefineSymbolPredicateInfos()
         {
             List<ScriptingDefineSymbolPredicateInfo> predicateInfos = new List<ScriptingDefineSymbolPredicateInfo>();
 
-            foreach (Type type in VRTK_SharedMethods.GetTypesOfType(typeof(VRTK_SDKManager)))
+            foreach (Type type in typeof(VRTK_SDKManager).Assembly.GetTypes())
             {
                 for (int index = 0; index < type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Length; index++)
                 {
@@ -1098,8 +807,8 @@ namespace VRTK
         /// <summary>
         /// Populates the lists of available and installed SDK infos for a specific SDK base type.
         /// </summary>
-        /// <typeparam name="BaseType">The SDK base type of which to populate the lists for. Must be a subclass of `SDK_Base`.</typeparam>
-        /// <typeparam name="FallbackType">The SDK type to fall back on if problems occur. Must be a subclass of `BaseType`.</typeparam>
+        /// <typeparam name="BaseType">The SDK base type of which to populate the lists for. Must be a subclass of <see cref="SDK_Base"/>.</typeparam>
+        /// <typeparam name="FallbackType">The SDK type to fall back on if problems occur. Must be a subclass of <typeparamref name="BaseType"/>.</typeparam>
         /// <param name="availableSDKInfos">The list of available SDK infos to populate.</param>
         /// <param name="installedSDKInfos">The list of installed SDK infos to populate.</param>
         /// <param name="symbolsOfInstalledSDKs">The list of symbols of all the installed SDKs.</param>
@@ -1112,9 +821,9 @@ namespace VRTK
             Type fallbackType = SDKFallbackTypesByBaseType[baseType];
 
             availableSDKInfos.AddRange(VRTK_SDKInfo.Create<BaseType, FallbackType, FallbackType>());
-            availableSDKInfos.AddRange(VRTK_SharedMethods.GetExportedTypesOfType(baseType)
-                                               .Where(type => VRTK_SharedMethods.IsTypeSubclassOf(type, baseType) && type != fallbackType && !VRTK_SharedMethods.IsTypeAbstract(type))
-                                               .SelectMany(VRTK_SDKInfo.Create<BaseType, FallbackType>));
+            availableSDKInfos.AddRange(baseType.Assembly.GetExportedTypes()
+                                               .Where(type => type.IsSubclassOf(baseType) && type != fallbackType && !type.IsAbstract)
+                                               .SelectMany<Type, VRTK_SDKInfo>(VRTK_SDKInfo.Create<BaseType, FallbackType>));
             availableSDKInfos.Sort((x, y) => x.description.describesFallbackSDK
                                                  ? -1 //the fallback SDK should always be the first SDK in the list
                                                  : string.Compare(x.description.prettyName, y.description.prettyName, StringComparison.Ordinal));
@@ -1128,7 +837,7 @@ namespace VRTK
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Calls `ManageScriptingDefineSymbols` and `ManageVRSettings` (both without forcing) at the appropriate times when in the editor.
+        /// Calls <see cref="ManageScriptingDefineSymbols"/> and <see cref="ManageVRSettings"/> (both without forcing) at the appropriate times when in the editor.
         /// </summary>
         [DidReloadScripts(1)]
         private static void AutoManageScriptingDefineSymbolsAndManageVRSettings()
@@ -1142,7 +851,6 @@ namespace VRTK
 
             if (instance != null && !instance.ManageScriptingDefineSymbols(false, false))
             {
-                instance.targetGroupsToExclude = instance.excludeTargetGroups;
                 instance.ManageVRSettings(false);
             }
         }

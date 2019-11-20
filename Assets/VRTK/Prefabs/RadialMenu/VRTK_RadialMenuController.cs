@@ -1,7 +1,19 @@
-﻿namespace VRTK
+// Radial Menu Controller|Prefabs|0045
+namespace VRTK
 {
     using UnityEngine;
 
+    /// <summary>
+    /// This adds a UI element into the world space that can be dropped into a Controller object and used to create and use Radial Menus from the touchpad.
+    /// </summary>
+    /// <remarks>
+    /// If the RadialMenu is placed inside a controller, it will automatically find a `VRTK_ControllerEvents` in its parent to use at the input. However, a `VRTK_ControllerEvents` can be defined explicitly by setting the `Events` parameter of the `Radial Menu Controller` script also attached to the prefab.
+    ///
+    /// The RadialMenu can also be placed inside a `VRTK_InteractableObject` for the RadialMenu to be anchored to a world object instead of the controller. The `Events Manager` parameter will automatically be set if the RadialMenu is a child of an InteractableObject, but it can also be set manually in the inspector. Additionally, for the RadialMenu to be anchored in the world, the `RadialMenuController` script in the prefab must be replaced with `VRTK_IndependentRadialMenuController`. See the script information for further details on making the RadialMenu independent of the controllers.
+    /// </remarks>
+    /// <example>
+    /// `VRTK/Examples/030_Controls_RadialTouchpadMenu` displays a radial menu for each controller. The left controller uses the `Hide On Release` variable, so it will only be visible if the left touchpad is being touched. It also uses the `Execute On Unclick` variable to delay execution until the touchpad button is unclicked. The example scene also contains a demonstration of anchoring the RadialMenu to an interactable cube instead of a controller.
+    /// </example>
     [RequireComponent(typeof(VRTK_RadialMenu))]
     public class VRTK_RadialMenuController : MonoBehaviour
     {
@@ -9,7 +21,7 @@
         public VRTK_ControllerEvents events;
 
         protected VRTK_RadialMenu menu;
-        protected TouchAngleDeflection currentTad; //Keep track of angle and deflection for when we click
+        protected float currentAngle; //Keep track of angle for when we click
         protected bool touchpadTouched;
 
         protected virtual void Awake()
@@ -59,18 +71,18 @@
 
         protected virtual void DoClickButton(object sender = null) // The optional argument reduces the need for middleman functions in subclasses whose events likely pass object sender
         {
-            menu.ClickButton(currentTad);
+            menu.ClickButton(currentAngle);
         }
 
         protected virtual void DoUnClickButton(object sender = null)
         {
-            menu.UnClickButton(currentTad);
+            menu.UnClickButton(currentAngle);
         }
 
-        protected virtual void DoShowMenu(TouchAngleDeflection initialTad, object sender = null)
+        protected virtual void DoShowMenu(float initialAngle, object sender = null)
         {
             menu.ShowMenu();
-            DoChangeAngle(initialTad); // Needed to register initial touch position before the touchpad axis actually changes
+            DoChangeAngle(initialAngle); // Needed to register initial touch position before the touchpad axis actually changes
         }
 
         protected virtual void DoHideMenu(bool force, object sender = null)
@@ -79,11 +91,11 @@
             menu.HideMenu(force);
         }
 
-        protected virtual void DoChangeAngle(TouchAngleDeflection givenTouchAngleDeflection, object sender = null)
+        protected virtual void DoChangeAngle(float angle, object sender = null)
         {
-            currentTad = givenTouchAngleDeflection;
+            currentAngle = angle;
 
-            menu.HoverButton(currentTad);
+            menu.HoverButton(currentAngle);
         }
 
         protected virtual void AttemptHapticPulse(float strength)
@@ -125,12 +137,9 @@
             }
         }
 
-        protected virtual TouchAngleDeflection CalculateAngle(ControllerInteractionEventArgs e)
+        protected virtual float CalculateAngle(ControllerInteractionEventArgs e)
         {
-            TouchAngleDeflection touchAngleDeflection = new TouchAngleDeflection();
-            touchAngleDeflection.angle = 360 - e.touchpadAngle;
-            touchAngleDeflection.deflection = e.touchpadAxis.magnitude;
-            return touchAngleDeflection;
+            return 360 - e.touchpadAngle;
         }
     }
 }

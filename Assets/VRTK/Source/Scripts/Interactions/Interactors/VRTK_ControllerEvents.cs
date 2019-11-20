@@ -1,25 +1,25 @@
-﻿// Controller Events|Interactors|30010
+﻿// Controller Events|Interactions|30010
 namespace VRTK
 {
     using UnityEngine;
+    using System;
 
     /// <summary>
     /// Event Payload
     /// </summary>
-    /// <param name="controllerReference">The reference for the controller that initiated the event.</param>
+    /// <param name="controllerIndex">**OBSOLETE** The index of the controller that was used.</param>
+    /// <param name="controllerReference">The reference for the controller that was used.</param>
     /// <param name="buttonPressure">The amount of pressure being applied to the button pressed. `0f` to `1f`.</param>
     /// <param name="touchpadAxis">The position the touchpad is touched at. `(0,0)` to `(1,1)`.</param>
     /// <param name="touchpadAngle">The rotational position the touchpad is being touched at, 0 being top, 180 being bottom and all other angles accordingly. `0f` to `360f`.</param>
-    /// <param name="touchpadTwoAxis">The position the touchpad two is touched at. `(0,0)` to `(1,1)`.</param>
-    /// <param name="touchpadTwoAngle">The rotational position the touchpad two is being touched at, 0 being top, 180 being bottom and all other angles accordingly. `0f` to `360f`.</param>
     public struct ControllerInteractionEventArgs
     {
+        [Obsolete("`ControllerInteractionEventArgs.controllerIndex` has been replaced with `ControllerInteractionEventArgs.controllerReference`. This parameter will be removed in a future version of VRTK.")]
+        public uint controllerIndex;
         public VRTK_ControllerReference controllerReference;
         public float buttonPressure;
         public Vector2 touchpadAxis;
         public float touchpadAngle;
-        public Vector2 touchpadTwoAxis;
-        public float touchpadTwoAngle;
     }
 
     /// <summary>
@@ -30,185 +30,91 @@ namespace VRTK
     public delegate void ControllerInteractionEventHandler(object sender, ControllerInteractionEventArgs e);
 
     /// <summary>
-    /// A relationship to a physical VR controller and emits events based on the inputs of the controller.
+    /// The Controller Events script deals with events that the game controller is sending out.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///  * Place the `VRTK_ControllerEvents` script on the controller script alias GameObject of the controller to track (e.g. Right Controller Script Alias).
+    /// The Controller Events script requires the Controller Mapper script on the same GameObject and provides event listeners for every button press on the controller (excluding the System Menu button as this cannot be overridden and is always used by Steam).
+    ///
+    /// When a controller button is pressed, the script emits an event to denote that the button has been pressed which allows other scripts to listen for this event without needing to implement any controller logic. When a controller button is released, the script also emits an event denoting that the button has been released.
+    ///
+    /// The script also has a public boolean pressed state for the buttons to allow the script to be queried by other scripts to check if a button is being held down.
     /// </remarks>
     /// <example>
-    /// `VRTK/Examples/002_Controller_Events` shows how the events are utilised and listened to. The accompanying example script can be viewed in `VRTK/Examples/ExampleResources/Scripts/VRTK_ControllerEvents_ListenerExample.cs`.
+    /// `VRTK/Examples/002_Controller_Events` shows how the events are utilised and listened to. The accompanying example script can be viewed in `VRTK/Examples/Resources/Scripts/VRTK_ControllerEvents_ListenerExample.cs`.
     /// </example>
-    [AddComponentMenu("VRTK/Scripts/Interactions/Interactors/VRTK_ControllerEvents")]
+    [AddComponentMenu("VRTK/Scripts/Interactions/VRTK_ControllerEvents")]
     public class VRTK_ControllerEvents : MonoBehaviour
     {
         /// <summary>
         /// Button types
         /// </summary>
+        /// <param name="Undefined">No button specified</param>
+        /// <param name="TriggerHairline">The trigger is squeezed past the current hairline threshold.</param>
+        /// <param name="TriggerTouch">The trigger is squeezed a small amount.</param>
+        /// <param name="TriggerPress">The trigger is squeezed about half way in.</param>
+        /// <param name="TriggerClick">The trigger is squeezed all the way down.</param>
+        /// <param name="GripHairline">The grip is squeezed past the current hairline threshold.</param>
+        /// <param name="GripTouch">The grip button is touched.</param>
+        /// <param name="GripPress">The grip button is pressed.</param>
+        /// <param name="GripClick">The grip button is pressed all the way down.</param>
+        /// <param name="TouchpadTouch">The touchpad is touched (without pressing down to click).</param>
+        /// <param name="TouchpadPress">The touchpad is pressed (to the point of hearing a click).</param>
+        /// <param name="ButtonOneTouch">The button one is touched.</param>
+        /// <param name="ButtonOnePress">The button one is pressed.</param>
+        /// <param name="ButtonTwoTouch">The button one is touched.</param>
+        /// <param name="ButtonTwoPress">The button one is pressed.</param>
+        /// <param name="StartMenuPress">The button one is pressed.</param>
         public enum ButtonAlias
         {
-            /// <summary>
-            /// No button specified.
-            /// </summary>
             Undefined,
-            /// <summary>
-            /// The trigger is squeezed past the current hairline threshold.
-            /// </summary>
             TriggerHairline,
-            /// <summary>
-            /// The trigger is squeezed a small amount.
-            /// </summary>
             TriggerTouch,
-            /// <summary>
-            /// The trigger is squeezed about half way in.
-            /// </summary>
             TriggerPress,
-            /// <summary>
-            /// The trigger is squeezed all the way down.
-            /// </summary>
             TriggerClick,
-            /// <summary>
-            /// The grip is squeezed past the current hairline threshold.
-            /// </summary>
             GripHairline,
-            /// <summary>
-            /// The grip button is touched.
-            /// </summary>
             GripTouch,
-            /// <summary>
-            /// The grip button is pressed.
-            /// </summary>
             GripPress,
-            /// <summary>
-            /// The grip button is pressed all the way down.
-            /// </summary>
             GripClick,
-            /// <summary>
-            /// The touchpad is touched (without pressing down to click).
-            /// </summary>
             TouchpadTouch,
-            /// <summary>
-            /// The touchpad is pressed (to the point of hearing a click).
-            /// </summary>
             TouchpadPress,
-            /// <summary>
-            /// The touchpad two is touched (without pressing down to click).
-            /// </summary>
-            TouchpadTwoTouch,
-            /// <summary>
-            /// The touchpad two is pressed (to the point of hearing a click).
-            /// </summary>
-            TouchpadTwoPress,
-            /// <summary>
-            /// The button one is touched.
-            /// </summary>
             ButtonOneTouch,
-            /// <summary>
-            /// The button one is pressed.
-            /// </summary>
             ButtonOnePress,
-            /// <summary>
-            /// The button two is touched.
-            /// </summary>
             ButtonTwoTouch,
-            /// <summary>
-            /// The button two is pressed.
-            /// </summary>
             ButtonTwoPress,
-            /// <summary>
-            /// The start menu is pressed.
-            /// </summary>
-            StartMenuPress,
-            /// <summary>
-            /// The touchpad sense touch is active.
-            /// </summary>
-            TouchpadSense,
-            /// <summary>
-            /// The trigger sense touch is active.
-            /// </summary>
-            TriggerSense,
-            /// <summary>
-            /// The middle finger sense touch is active.
-            /// </summary>
-            MiddleFingerSense,
-            /// <summary>
-            /// The ring finger sense touch is active.
-            /// </summary>
-            RingFingerSense,
-            /// <summary>
-            /// The pinky finger sense touch is active.
-            /// </summary>
-            PinkyFingerSense,
-            /// <summary>
-            /// The grip sense axis touch is active.
-            /// </summary>
-            GripSense,
-            /// <summary>
-            /// The grip sense axis is pressed.
-            /// </summary>
-            GripSensePress
+            StartMenuPress
         }
 
-        /// <summary>
-        /// Vector2 Axis Types.
-        /// </summary>
-        public enum Vector2AxisAlias
-        {
-            /// <summary>
-            /// No axis specified.
-            /// </summary>
-            Undefined,
-            /// <summary>
-            /// Touchpad on the controller.
-            /// </summary>
-            Touchpad,
-            /// <summary>
-            /// Touchpad Two on the controller.
-            /// </summary>
-            TouchpadTwo
-        }
+        [Header("Action Alias Buttons")]
 
-        /// <summary>
-        /// Axis Types
-        /// </summary>
-        public enum AxisType
-        {
-            /// <summary>
-            /// A digital axis with a binary result of 0f not pressed or 1f is pressed.
-            /// </summary>
-            Digital,
-            /// <summary>
-            /// An analog axis ranging from no squeeze at 0f to full squeeze at 1f.
-            /// </summary>
-            Axis,
-            /// <summary>
-            /// A cap sens axis ranging from not near at 0f to touching at 1f.
-            /// </summary>
-            SenseAxis
-        }
+        [Tooltip("**OBSOLETE [use VRTK_Pointer.activationButton]** The button to use for the action of turning a laser pointer on / off.")]
+        [Obsolete("`VRTK_ControllerEvents.pointerToggleButton` is no longer used in the new `VRTK_Pointer` class, use `VRTK_Pointer.activationButton` instead. This parameter will be removed in a future version of VRTK.")]
+        public ButtonAlias pointerToggleButton = ButtonAlias.TouchpadPress;
+        [Tooltip("**OBSOLETE [use VRTK_Pointer.selectionButton]** The button to use for the action of setting a destination marker from the cursor position of the pointer.")]
+        [Obsolete("`VRTK_ControllerEvents.pointerSetButton` is no longer used in the new `VRTK_Pointer` class, use `VRTK_Pointer.selectionButton` instead. This parameter will be removed in a future version of VRTK.")]
+        public ButtonAlias pointerSetButton = ButtonAlias.TouchpadPress;
+        [Tooltip("**OBSOLETE [use VRTK_InteractGrab.grabButton]** The button to use for the action of grabbing game objects.")]
+        [Obsolete("`VRTK_ControllerEvents.grabToggleButton` is no longer used in the `VRTK_InteractGrab` class, use `VRTK_InteractGrab.grabButton` instead. This parameter will be removed in a future version of VRTK.")]
+        public ButtonAlias grabToggleButton = ButtonAlias.GripPress;
+        [Tooltip("**OBSOLETE [use VRTK_InteractUse.useButton]** The button to use for the action of using game objects.")]
+        [Obsolete("`VRTK_ControllerEvents.useToggleButton` is no longer used in the `VRTK_InteractUse` class, use `VRTK_InteractUse.useButton` instead. This parameter will be removed in a future version of VRTK.")]
+        public ButtonAlias useToggleButton = ButtonAlias.TriggerPress;
+        [Tooltip("**OBSOLETE [use VRTK_UIPointer.selectionButton]** The button to use for the action of clicking a UI element.")]
+        [Obsolete("`VRTK_ControllerEvents.uiClickButton` is no longer used in the `VRTK_UIPointer` class, use `VRTK_UIPointer.selectionButton` instead. This parameter will be removed in a future version of VRTK.")]
+        public ButtonAlias uiClickButton = ButtonAlias.TriggerPress;
+        [Tooltip("**OBSOLETE [use VRTK_ControllerEvents.buttonTwoPressed]** The button to use for the action of bringing up an in-game menu.")]
+        [Obsolete("`VRTK_ControllerEvents.menuToggleButton` is no longer used, use `VRTK_ControllerEvents.buttonTwoPressed` instead. This parameter will be removed in a future version of VRTK.")]
+        public ButtonAlias menuToggleButton = ButtonAlias.ButtonTwoPress;
 
-        [Header("Axis Refinement Settings")]
+        [Header("Axis Refinement")]
 
         [Tooltip("The amount of fidelity in the changes on the axis, which is defaulted to 1. Any number higher than 2 will probably give too sensitive results.")]
         public int axisFidelity = 1;
-        [Tooltip("The level on a sense axis to reach before the sense axis is forced to 0f")]
-        [Range(0f, 1f)]
-        public float senseAxisForceZeroThreshold = 0.15f;
-        [Tooltip("The amount of pressure required to be applied to a sense button before considering the sense button pressed.")]
-        [Range(0f, 1f)]
-        public float senseAxisPressThreshold = 0.95f;
-
-        [Header("Trigger Refinement Settings")]
-
         [Tooltip("The level on the trigger axis to reach before a click is registered.")]
         public float triggerClickThreshold = 1f;
         [Tooltip("The level on the trigger axis to reach before the axis is forced to 0f.")]
         public float triggerForceZeroThreshold = 0.01f;
         [Tooltip("If this is checked then the trigger axis will be forced to 0f when the trigger button reports an untouch event.")]
         public bool triggerAxisZeroOnUntouch = false;
-
-        [Header("Grip Refinement Settings")]
-
         [Tooltip("The level on the grip axis to reach before a click is registered.")]
         public float gripClickThreshold = 1f;
         [Tooltip("The level on the grip axis to reach before the axis is forced to 0f.")]
@@ -216,9 +122,6 @@ namespace VRTK
         [Tooltip("If this is checked then the grip axis will be forced to 0f when the grip button reports an untouch event.")]
         public bool gripAxisZeroOnUntouch = false;
 
-        #region bool states
-
-        #region trigger bool states
         /// <summary>
         /// This will be true if the trigger is squeezed about half way in.
         /// </summary>
@@ -244,14 +147,7 @@ namespace VRTK
         /// </summary>
         [HideInInspector]
         public bool triggerAxisChanged = false;
-        /// <summary>
-        /// This will be true if the trigger sense is being touched more or less.
-        /// </summary>
-        [HideInInspector]
-        public bool triggerSenseAxisChanged = false;
-        #endregion trigger bool states
 
-        #region grip bool states
         /// <summary>
         /// This will be true if the grip is squeezed about half way in.
         /// </summary>
@@ -277,9 +173,7 @@ namespace VRTK
         /// </summary>
         [HideInInspector]
         public bool gripAxisChanged = false;
-        #endregion grip bool states
 
-        #region touchpad bool states
         /// <summary>
         /// This will be true if the touchpad is held down.
         /// </summary>
@@ -291,33 +185,11 @@ namespace VRTK
         [HideInInspector]
         public bool touchpadTouched = false;
         /// <summary>
-        /// This will be true if the touchpad position has changed.
+        /// This will be true if the touchpad touch position has changed.
         /// </summary>
         [HideInInspector]
         public bool touchpadAxisChanged = false;
-        /// <summary>
-        /// This will be true if the touchpad sense is being touched more or less.
-        /// </summary>
-        [HideInInspector]
-        public bool touchpadSenseAxisChanged = false;
-        /// <summary>
-        /// This will be true if the touchpad two is being touched.
-        /// </summary>
-        [HideInInspector]
-        public bool touchpadTwoTouched = false;
-        /// <summary>
-        /// This will be true if the touchpad two is held down.
-        /// </summary>
-        [HideInInspector]
-        public bool touchpadTwoPressed = false;
-        /// <summary>
-        /// This will be true if the touchpad two position has changed.
-        /// </summary>
-        [HideInInspector]
-        public bool touchpadTwoAxisChanged = false;
-        #endregion touchpad bool states
 
-        #region button one bool states
         /// <summary>
         /// This will be true if button one is held down.
         /// </summary>
@@ -328,9 +200,7 @@ namespace VRTK
         /// </summary>
         [HideInInspector]
         public bool buttonOneTouched = false;
-        #endregion button one bool states
 
-        #region button two bool states
         /// <summary>
         /// This will be true if button two is held down.
         /// </summary>
@@ -341,43 +211,43 @@ namespace VRTK
         /// </summary>
         [HideInInspector]
         public bool buttonTwoTouched = false;
-        #endregion button two bool states
 
-        #region start menu bool states
         /// <summary>
         /// This will be true if start menu is held down.
         /// </summary>
         [HideInInspector]
         public bool startMenuPressed = false;
-        #endregion start menu bool states
 
-        #region extra finger bool states
         /// <summary>
-        /// This will be true if the middle finger sense is being touched more or less.
+        /// This will be true if the button aliased to the pointer is held down.
         /// </summary>
         [HideInInspector]
-        public bool middleFingerSenseAxisChanged = false;
+        [Obsolete("`VRTK_ControllerEvents.pointerPressed` is no longer used, use `VRTK_Pointer.IsActivationButtonPressed()` instead. This parameter will be removed in a future version of VRTK.")]
+        public bool pointerPressed = false;
         /// <summary>
-        /// This will be true if the ring finger sense is being touched more or less.
+        /// This will be true if the button aliased to the grab is held down.
         /// </summary>
         [HideInInspector]
-        public bool ringFingerSenseAxisChanged = false;
+        [Obsolete("`VRTK_ControllerEvents.grabPressed` is no longer used, use `VRTK_InteractGrab.IsGrabButtonPressed()` instead. This parameter will be removed in a future version of VRTK.")]
+        public bool grabPressed = false;
         /// <summary>
-        /// This will be true if the pinky finger sense is being touched more or less.
+        /// This will be true if the button aliased to the use is held down.
         /// </summary>
         [HideInInspector]
-        public bool pinkyFingerSenseAxisChanged = false;
+        [Obsolete("`VRTK_ControllerEvents.usePressed` is no longer used, use `VRTK_InteractUse.IsUseButtonPressed()` instead. This parameter will be removed in a future version of VRTK.")]
+        public bool usePressed = false;
         /// <summary>
-        /// This will be true if the grip sense is being touched more or less.
+        /// This will be true if the button aliased to the UI click is held down.
         /// </summary>
         [HideInInspector]
-        public bool gripSenseAxisChanged = false;
+        [Obsolete("`VRTK_ControllerEvents.uiClickPressed` is no longer used, use `VRTK_UIPointer.IsSelectionButtonPressed()` instead. This parameter will be removed in a future version of VRTK.")]
+        public bool uiClickPressed = false;
         /// <summary>
-        /// This will be true if grip sense is held down.
+        /// This will be true if the button aliased to the menu is held down.
         /// </summary>
         [HideInInspector]
-        public bool gripSensePressed = false;
-        #endregion extra finger bool states
+        [Obsolete("`VRTK_ControllerEvents.menuPressed` is no longer used, use `VRTK_ControllerEvents.buttonTwoPressed` instead. This parameter will be removed in a future version of VRTK.")]
+        public bool menuPressed = false;
 
         /// <summary>
         /// This will be true if the controller model alias renderers are visible.
@@ -385,11 +255,6 @@ namespace VRTK
         [HideInInspector]
         public bool controllerVisible = true;
 
-        #endregion bool states
-
-        #region controller events
-
-        #region controller trigger events
         /// <summary>
         /// Emitted when the trigger is squeezed about half way in.
         /// </summary>
@@ -432,13 +297,6 @@ namespace VRTK
         public event ControllerInteractionEventHandler TriggerAxisChanged;
 
         /// <summary>
-        /// Emitted when the amount of touch on the trigger sense changes.
-        /// </summary>
-        public event ControllerInteractionEventHandler TriggerSenseAxisChanged;
-        #endregion controller trigger events
-
-        #region controller grip events
-        /// <summary>
         /// Emitted when the grip is squeezed about half way in.
         /// </summary>
         public event ControllerInteractionEventHandler GripPressed;
@@ -478,9 +336,7 @@ namespace VRTK
         /// Emitted when the amount of squeeze on the grip changes.
         /// </summary>
         public event ControllerInteractionEventHandler GripAxisChanged;
-        #endregion controller grip events
 
-        #region controller touchpad events
         /// <summary>
         /// Emitted when the touchpad is pressed (to the point of hearing a click).
         /// </summary>
@@ -505,36 +361,6 @@ namespace VRTK
         public event ControllerInteractionEventHandler TouchpadAxisChanged;
 
         /// <summary>
-        /// Emitted when the amount of touch on the touchpad sense changes.
-        /// </summary>
-        public event ControllerInteractionEventHandler TouchpadSenseAxisChanged;
-
-        /// <summary>
-        /// Emitted when the touchpad two is pressed (to the point of hearing a click).
-        /// </summary>
-        public event ControllerInteractionEventHandler TouchpadTwoPressed;
-        /// <summary>
-        /// Emitted when the touchpad two has been released after a pressed state.
-        /// </summary>
-        public event ControllerInteractionEventHandler TouchpadTwoReleased;
-
-        /// <summary>
-        /// Emitted when the touchpad two is touched (without pressing down to click).
-        /// </summary>
-        public event ControllerInteractionEventHandler TouchpadTwoTouchStart;
-        /// <summary>
-        /// Emitted when the touchpad two is no longer being touched.
-        /// </summary>
-        public event ControllerInteractionEventHandler TouchpadTwoTouchEnd;
-
-        /// <summary>
-        /// Emitted when the touchpad two is being touched in a different location.
-        /// </summary>
-        public event ControllerInteractionEventHandler TouchpadTwoAxisChanged;
-        #endregion controller touchpad events
-
-        #region controller button one events
-        /// <summary>
         /// Emitted when button one is touched.
         /// </summary>
         public event ControllerInteractionEventHandler ButtonOneTouchStart;
@@ -550,9 +376,7 @@ namespace VRTK
         /// Emitted when button one is released.
         /// </summary>
         public event ControllerInteractionEventHandler ButtonOneReleased;
-        #endregion controller button one events
 
-        #region controller button two events
         /// <summary>
         /// Emitted when button two is touched.
         /// </summary>
@@ -569,9 +393,7 @@ namespace VRTK
         /// Emitted when button two is released.
         /// </summary>
         public event ControllerInteractionEventHandler ButtonTwoReleased;
-        #endregion controller button one events
 
-        #region controller start menu events
         /// <summary>
         /// Emitted when start menu is pressed.
         /// </summary>
@@ -580,39 +402,67 @@ namespace VRTK
         /// Emitted when start menu is released.
         /// </summary>
         public event ControllerInteractionEventHandler StartMenuReleased;
-        #endregion controller start menu events
-
-        #region controller extra finger events
-        /// <summary>
-        /// Emitted when the amount of touch on the middle finger sense changes.
-        /// </summary>
-        public event ControllerInteractionEventHandler MiddleFingerSenseAxisChanged;
 
         /// <summary>
-        /// Emitted when the amount of touch on the ring finger sense changes.
+        /// Emitted when the pointer toggle alias button is pressed.
         /// </summary>
-        public event ControllerInteractionEventHandler RingFingerSenseAxisChanged;
+        [Obsolete("`VRTK_ControllerEvents.AliasPointerOn` has been replaced with `VRTK_Pointer.ActivationButtonPressed`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasPointerOn;
+        /// <summary>
+        /// Emitted when the pointer toggle alias button is released.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasPointerOff` has been replaced with `VRTK_Pointer.ActivationButtonReleased`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasPointerOff;
+        /// <summary>
+        /// Emitted when the pointer set alias button is released.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasPointerSet` has been replaced with `VRTK_Pointer.SelectionButtonReleased`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasPointerSet;
 
         /// <summary>
-        /// Emitted when the amount of touch on the pinky finger sense changes.
+        /// Emitted when the grab toggle alias button is pressed.
         /// </summary>
-        public event ControllerInteractionEventHandler PinkyFingerSenseAxisChanged;
+        [Obsolete("`VRTK_ControllerEvents.AliasGrabOn` has been replaced with `VRTK_InteractGrab.GrabButtonPressed`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasGrabOn;
+        /// <summary>
+        /// Emitted when the grab toggle alias button is released.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasGrabOff` has been replaced with `VRTK_InteractGrab.GrabButtonReleased`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasGrabOff;
 
         /// <summary>
-        /// Emitted when the amount of touch on the grip sense changes.
+        /// Emitted when the use toggle alias button is pressed.
         /// </summary>
-        public event ControllerInteractionEventHandler GripSenseAxisChanged;
+        [Obsolete("`VRTK_ControllerEvents.AliasUseOn` has been replaced with `VRTK_InteractUse.UseButtonPressed`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasUseOn;
         /// <summary>
-        /// Emitted when grip sense is pressed.
+        /// Emitted when the use toggle alias button is released.
         /// </summary>
-        public event ControllerInteractionEventHandler GripSensePressed;
-        /// <summary>
-        /// Emitted when grip sense is released.
-        /// </summary>
-        public event ControllerInteractionEventHandler GripSenseReleased;
-        #endregion controller extra finger events
+        [Obsolete("`VRTK_ControllerEvents.AliasUseOff` has been replaced with `VRTK_InteractUse.UseButtonReleased`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasUseOff;
 
-        #region controller generic events
+        /// <summary>
+        /// Emitted when the menu toggle alias button is pressed.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasMenuOn` is no longer used, use `VRTK_ControllerEvents.ButtonTwoPressed` instead. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasMenuOn;
+        /// <summary>
+        /// Emitted when the menu toggle alias button is released.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasMenuOff` is no longer used, use `VRTK_ControllerEvents.ButtonTwoReleased` instead. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasMenuOff;
+
+        /// <summary>
+        /// Emitted when the UI click alias button is pressed.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasUIClickOn` has been replaced with `VRTK_UIPointer.SelectionButtonPressed`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasUIClickOn;
+        /// <summary>
+        /// Emitted when the UI click alias button is released.
+        /// </summary>
+        [Obsolete("`VRTK_ControllerEvents.AliasUIClickOff` has been replaced with `VRTK_UIPointer.SelectionButtonReleased`. This parameter will be removed in a future version of VRTK.")]
+        public event ControllerInteractionEventHandler AliasUIClickOff;
+
         /// <summary>
         /// Emitted when the controller is enabled.
         /// </summary>
@@ -625,10 +475,6 @@ namespace VRTK
         /// Emitted when the controller index changed.
         /// </summary>
         public event ControllerInteractionEventHandler ControllerIndexChanged;
-        /// <summary>
-        /// Emitted when the controller model becomes available.
-        /// </summary>
-        public event ControllerInteractionEventHandler ControllerModelAvailable;
 
         /// <summary>
         /// Emitted when the controller is set to visible.
@@ -638,27 +484,13 @@ namespace VRTK
         /// Emitted when the controller is set to hidden.
         /// </summary>
         public event ControllerInteractionEventHandler ControllerHidden;
-        #endregion controller generic events
-
-        #endregion controller events
 
         protected Vector2 touchpadAxis = Vector2.zero;
-        protected Vector2 touchpadTwoAxis = Vector2.zero;
         protected Vector2 triggerAxis = Vector2.zero;
         protected Vector2 gripAxis = Vector2.zero;
-        protected float touchpadSenseAxis = 0f;
-        protected float triggerSenseAxis = 0f;
-        protected float middleFingerSenseAxis = 0f;
-        protected float ringFingerSenseAxis = 0f;
-        protected float pinkyFingerSenseAxis = 0f;
-        protected float gripSenseAxis = 0f;
         protected float hairTriggerDelta;
         protected float hairGripDelta;
-        protected VRTK_TrackedController trackedController;
 
-        #region event methods
-
-        #region event trigger methods
         public virtual void OnTriggerPressed(ControllerInteractionEventArgs e)
         {
             if (TriggerPressed != null)
@@ -731,16 +563,6 @@ namespace VRTK
             }
         }
 
-        public virtual void OnTriggerSenseAxisChanged(ControllerInteractionEventArgs e)
-        {
-            if (TriggerSenseAxisChanged != null)
-            {
-                TriggerSenseAxisChanged(this, e);
-            }
-        }
-        #endregion event trigger methods
-
-        #region event grip methods
         public virtual void OnGripPressed(ControllerInteractionEventArgs e)
         {
             if (GripPressed != null)
@@ -812,9 +634,7 @@ namespace VRTK
                 GripAxisChanged(this, e);
             }
         }
-        #endregion event grip methods
 
-        #region event touchpad methods
         public virtual void OnTouchpadPressed(ControllerInteractionEventArgs e)
         {
             if (TouchpadPressed != null)
@@ -855,56 +675,6 @@ namespace VRTK
             }
         }
 
-        public virtual void OnTouchpadSenseAxisChanged(ControllerInteractionEventArgs e)
-        {
-            if (TouchpadSenseAxisChanged != null)
-            {
-                TouchpadSenseAxisChanged(this, e);
-            }
-        }
-
-        public virtual void OnTouchpadTwoPressed(ControllerInteractionEventArgs e)
-        {
-            if (TouchpadTwoPressed != null)
-            {
-                TouchpadTwoPressed(this, e);
-            }
-        }
-
-        public virtual void OnTouchpadTwoReleased(ControllerInteractionEventArgs e)
-        {
-            if (TouchpadTwoReleased != null)
-            {
-                TouchpadTwoReleased(this, e);
-            }
-        }
-
-        public virtual void OnTouchpadTwoTouchStart(ControllerInteractionEventArgs e)
-        {
-            if (TouchpadTwoTouchStart != null)
-            {
-                TouchpadTwoTouchStart(this, e);
-            }
-        }
-
-        public virtual void OnTouchpadTwoTouchEnd(ControllerInteractionEventArgs e)
-        {
-            if (TouchpadTwoTouchEnd != null)
-            {
-                TouchpadTwoTouchEnd(this, e);
-            }
-        }
-
-        public virtual void OnTouchpadTwoAxisChanged(ControllerInteractionEventArgs e)
-        {
-            if (TouchpadTwoAxisChanged != null)
-            {
-                TouchpadTwoAxisChanged(this, e);
-            }
-        }
-        #endregion event touchpad methods
-
-        #region event button one methods
         public virtual void OnButtonOneTouchStart(ControllerInteractionEventArgs e)
         {
             if (ButtonOneTouchStart != null)
@@ -936,9 +706,7 @@ namespace VRTK
                 ButtonOneReleased(this, e);
             }
         }
-        #endregion event button one methods
 
-        #region event button two methods
         public virtual void OnButtonTwoTouchStart(ControllerInteractionEventArgs e)
         {
             if (ButtonTwoTouchStart != null)
@@ -970,9 +738,7 @@ namespace VRTK
                 ButtonTwoReleased(this, e);
             }
         }
-        #endregion event button two methods
 
-        #region event start menu methods
         public virtual void OnStartMenuPressed(ControllerInteractionEventArgs e)
         {
             if (StartMenuPressed != null)
@@ -988,59 +754,106 @@ namespace VRTK
                 StartMenuReleased(this, e);
             }
         }
-        #endregion event start menu methods
 
-        #region event extra finger methods
-        public virtual void OnMiddleFingerSenseAxisChanged(ControllerInteractionEventArgs e)
+        [Obsolete("`VRTK_ControllerEvents.OnAliasPointerOn` has been replaced with `VRTK_Pointer.OnActivationButtonPressed`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasPointerOn(ControllerInteractionEventArgs e)
         {
-            if (MiddleFingerSenseAxisChanged != null)
+            if (AliasPointerOn != null)
             {
-                MiddleFingerSenseAxisChanged(this, e);
+                AliasPointerOn(this, e);
             }
         }
 
-        public virtual void OnRingFingerSenseAxisChanged(ControllerInteractionEventArgs e)
+        [Obsolete("`VRTK_ControllerEvents.OnAliasPointerOff` has been replaced with `VRTK_Pointer.OnActivationButtonReleased`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasPointerOff(ControllerInteractionEventArgs e)
         {
-            if (RingFingerSenseAxisChanged != null)
+            if (AliasPointerOff != null)
             {
-                RingFingerSenseAxisChanged(this, e);
+                AliasPointerOff(this, e);
             }
         }
 
-        public virtual void OnPinkyFingerSenseAxisChanged(ControllerInteractionEventArgs e)
+        [Obsolete("`VRTK_ControllerEvents.OnAliasPointerSet` has been replaced with `VRTK_Pointer.OnSelectionButtonReleased`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasPointerSet(ControllerInteractionEventArgs e)
         {
-            if (PinkyFingerSenseAxisChanged != null)
+            if (AliasPointerSet != null)
             {
-                PinkyFingerSenseAxisChanged(this, e);
+                AliasPointerSet(this, e);
             }
         }
 
-        public virtual void OnGripSenseAxisChanged(ControllerInteractionEventArgs e)
+        [Obsolete("`VRTK_ControllerEvents.OnAliasGrabOn` has been replaced with `VRTK_InteractGrab.OnGrabButtonPressed`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasGrabOn(ControllerInteractionEventArgs e)
         {
-            if (GripSenseAxisChanged != null)
+            if (AliasGrabOn != null)
             {
-                GripSenseAxisChanged(this, e);
+                AliasGrabOn(this, e);
             }
         }
 
-        public virtual void OnGripSensePressed(ControllerInteractionEventArgs e)
+        [Obsolete("`VRTK_ControllerEvents.OnAliasGrabOff` has been replaced with `VRTK_InteractGrab.OnGrabButtonReleased`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasGrabOff(ControllerInteractionEventArgs e)
         {
-            if (GripSensePressed != null)
+            if (AliasGrabOff != null)
             {
-                GripSensePressed(this, e);
+                AliasGrabOff(this, e);
             }
         }
 
-        public virtual void OnGripSenseReleased(ControllerInteractionEventArgs e)
+        [Obsolete("`VRTK_ControllerEvents.OnAliasUseOn` has been replaced with `VRTK_InteractUse.OnUseButtonPressed`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasUseOn(ControllerInteractionEventArgs e)
         {
-            if (GripSenseReleased != null)
+            if (AliasUseOn != null)
             {
-                GripSenseReleased(this, e);
+                AliasUseOn(this, e);
             }
         }
-        #endregion event extra finger methods
 
-        #region event generic methods
+        [Obsolete("`VRTK_ControllerEvents.OnAliasUseOff` has been replaced with `VRTK_InteractUse.OnUseButtonReleased`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasUseOff(ControllerInteractionEventArgs e)
+        {
+            if (AliasUseOff != null)
+            {
+                AliasUseOff(this, e);
+            }
+        }
+
+        [Obsolete("`VRTK_ControllerEvents.OnAliasUIClickOn` has been replaced with `VRTK_UIPointer.OnSelectionButtonPressed`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasUIClickOn(ControllerInteractionEventArgs e)
+        {
+            if (AliasUIClickOn != null)
+            {
+                AliasUIClickOn(this, e);
+            }
+        }
+
+        [Obsolete("`VRTK_ControllerEvents.OnAliasUIClickOff` has been replaced with `VRTK_UIPointer.OnSelectionButtonReleased`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasUIClickOff(ControllerInteractionEventArgs e)
+        {
+            if (AliasUIClickOff != null)
+            {
+                AliasUIClickOff(this, e);
+            }
+        }
+
+        [Obsolete("`VRTK_ControllerEvents.OnAliasMenuOn` has been replaced with `VRTK_ControllerEvents.OnButtonTwoPressed`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasMenuOn(ControllerInteractionEventArgs e)
+        {
+            if (AliasMenuOn != null)
+            {
+                AliasMenuOn(this, e);
+            }
+        }
+
+        [Obsolete("`VRTK_ControllerEvents.OnAliasMenuOff` has been replaced with `VRTK_ControllerEvents.OnButtonTwoReleased`. This method will be removed in a future version of VRTK.")]
+        public virtual void OnAliasMenuOff(ControllerInteractionEventArgs e)
+        {
+            if (AliasMenuOff != null)
+            {
+                AliasMenuOff(this, e);
+            }
+        }
+
         public virtual void OnControllerEnabled(ControllerInteractionEventArgs e)
         {
             if (ControllerEnabled != null)
@@ -1065,14 +878,6 @@ namespace VRTK
             }
         }
 
-        public virtual void OnControllerModelAvailable(ControllerInteractionEventArgs e)
-        {
-            if (ControllerModelAvailable != null)
-            {
-                ControllerModelAvailable(this, e);
-            }
-        }
-
         public virtual void OnControllerVisible(ControllerInteractionEventArgs e)
         {
             controllerVisible = true;
@@ -1090,9 +895,6 @@ namespace VRTK
                 ControllerHidden(this, e);
             }
         }
-        #endregion event generic methods
-
-        #endregion event methods
 
         /// <summary>
         /// The SetControllerEvent/0 method is used to set the Controller Event payload.
@@ -1100,7 +902,7 @@ namespace VRTK
         /// <returns>The payload for a Controller Event.</returns>
         public virtual ControllerInteractionEventArgs SetControllerEvent()
         {
-            bool nullBool = false;
+            var nullBool = false;
             return SetControllerEvent(ref nullBool);
         }
 
@@ -1108,7 +910,7 @@ namespace VRTK
         /// The SetControllerEvent/3 method is used to set the Controller Event payload.
         /// </summary>
         /// <param name="buttonBool">The state of the pressed button if required.</param>
-        /// <param name="value">The value to set the `buttonBool` reference to.</param>
+        /// <param name="value">The value to set the buttonBool reference to.</param>
         /// <param name="buttonPressure">The pressure of the button pressed if required.</param>
         /// <returns>The payload for a Controller Event.</returns>
         public virtual ControllerInteractionEventArgs SetControllerEvent(ref bool buttonBool, bool value = false, float buttonPressure = 0f)
@@ -1116,93 +918,52 @@ namespace VRTK
             VRTK_ControllerReference controllerReference = VRTK_ControllerReference.GetControllerReference(gameObject);
             buttonBool = value;
             ControllerInteractionEventArgs e;
+#pragma warning disable 0618
+            e.controllerIndex = VRTK_ControllerReference.GetRealIndex(controllerReference);
+#pragma warning restore 0618
             e.controllerReference = controllerReference;
             e.buttonPressure = buttonPressure;
             e.touchpadAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Touchpad, controllerReference);
-            e.touchpadAngle = CalculateVector2AxisAngle(e.touchpadAxis);
-            e.touchpadTwoAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.TouchpadTwo, controllerReference);
-            e.touchpadTwoAngle = CalculateVector2AxisAngle(e.touchpadTwoAxis);
+            e.touchpadAngle = CalculateTouchpadAxisAngle(e.touchpadAxis);
             return e;
         }
 
         /// <summary>
-        /// The GetControllerType method is a shortcut to retrieve the current controller type the Controller Events is attached to.
+        /// The GetVelocity method is useful for getting the current velocity of the physical game controller. This can be useful to determine the speed at which the controller is being swung or the direction it is being moved in.
         /// </summary>
-        /// <returns>The type of controller that the Controller Events is attached to.</returns>
-        public virtual SDK_BaseController.ControllerType GetControllerType()
+        /// <returns>A 3 dimensional vector containing the current real world physical controller velocity.</returns>
+        [Obsolete("`VRTK_ControllerEvents.GetVelocity()` has been replaced with `VRTK_DeviceFinder.GetControllerVelocity(givenController)`. This method will be removed in a future version of VRTK.")]
+        public virtual Vector3 GetVelocity()
         {
-            return (trackedController != null ? trackedController.GetControllerType() : SDK_BaseController.ControllerType.Undefined);
+            return VRTK_DeviceFinder.GetControllerVelocity(gameObject);
         }
 
-        #region axis getters
         /// <summary>
-        /// The GetAxis method returns the coordinates of where the given axis type is being touched.
+        /// The GetAngularVelocity method is useful for getting the current rotational velocity of the physical game controller. This can be useful for determining which way the controller is being rotated and at what speed the rotation is occurring.
         /// </summary>
-        /// <param name="vector2AxisType">The Vector2AxisType to check the touch position of.</param>
-        /// <returns>A two dimensional vector containing the `x` and `y` position of where the given axis type is being touched. `(0,0)` to `(1,1)`.</returns>
-        public virtual Vector2 GetAxis(Vector2AxisAlias vector2AxisType)
+        /// <returns>A 3 dimensional vector containing the current real world physical controller angular (rotational) velocity.</returns>
+        [Obsolete("`VRTK_ControllerEvents.GetAngularVelocity()` has been replaced with `VRTK_DeviceFinder.GetControllerAngularVelocity(givenController)`. This method will be removed in a future version of VRTK.")]
+        public virtual Vector3 GetAngularVelocity()
         {
-            switch (vector2AxisType)
-            {
-                case Vector2AxisAlias.Touchpad:
-                    return GetTouchpadAxis();
-                case Vector2AxisAlias.TouchpadTwo:
-                    return GetTouchpadTwoAxis();
-            }
-            return Vector2.zero;
+            return VRTK_DeviceFinder.GetControllerAngularVelocity(gameObject);
         }
 
         /// <summary>
         /// The GetTouchpadAxis method returns the coordinates of where the touchpad is being touched and can be used for directional input via the touchpad. The `x` value is the horizontal touch plane and the `y` value is the vertical touch plane.
         /// </summary>
-        /// <returns>A two dimensional vector containing the `x` and `y` position of where the touchpad is being touched. `(0,0)` to `(1,1)`.</returns>
+        /// <returns>A 2 dimensional vector containing the x and y position of where the touchpad is being touched. `(0,0)` to `(1,1)`.</returns>
         public virtual Vector2 GetTouchpadAxis()
         {
             return touchpadAxis;
         }
 
         /// <summary>
-        /// The GetTouchpadTwoAxis method returns the coordinates of where the touchpad two is being touched and can be used for directional input via the touchpad two. The `x` value is the horizontal touch plane and the `y` value is the vertical touch plane.
-        /// </summary>
-        /// <returns>A two dimensional vector containing the `x` and `y` position of where the touchpad two is being touched. `(0,0)` to `(1,1)`.</returns>
-        public virtual Vector2 GetTouchpadTwoAxis()
-        {
-            return touchpadTwoAxis;
-        }
-
-        /// <summary>
-        /// The GetAxisAngle method returns the angle of where the given axis type is currently being touched with the top of the given axis type being `0` degrees and the bottom of the given axis type being `180` degrees.
-        /// </summary>
-        /// <param name="vector2AxisType">The Vector2AxisType to get the touch angle for.</param>
-        /// <returns>A float representing the angle of where the given axis type is being touched. `0f` to `360f`.</returns>
-        public virtual float GetAxisAngle(Vector2AxisAlias vector2AxisType)
-        {
-            switch (vector2AxisType)
-            {
-                case Vector2AxisAlias.Touchpad:
-                    return GetTouchpadAxisAngle();
-                case Vector2AxisAlias.TouchpadTwo:
-                    return GetTouchpadTwoAxisAngle();
-            }
-            return 0f;
-        }
-
-        /// <summary>
-        /// The GetTouchpadAxisAngle method returns the angle of where the touchpad is currently being touched with the top of the touchpad being `0` degrees and the bottom of the touchpad being `180` degrees.
+        /// The GetTouchpadAxisAngle method returns the angle of where the touchpad is currently being touched with the top of the touchpad being 0 degrees and the bottom of the touchpad being 180 degrees.
         /// </summary>
         /// <returns>A float representing the angle of where the touchpad is being touched. `0f` to `360f`.</returns>
         public virtual float GetTouchpadAxisAngle()
         {
-            return CalculateVector2AxisAngle(touchpadAxis);
-        }
-
-        /// <summary>
-        /// The GetTouchpadTwoAxisAngle method returns the angle of where the touchpad two is currently being touched with the top of the touchpad two being `0` degrees and the bottom of the touchpad two being `180` degrees.
-        /// </summary>
-        /// <returns>A float representing the angle of where the touchpad two is being touched. `0f` to `360f`.</returns>
-        public virtual float GetTouchpadTwoAxisAngle()
-        {
-            return CalculateVector2AxisAngle(touchpadTwoAxis);
+            return CalculateTouchpadAxisAngle(touchpadAxis);
         }
 
         /// <summary>
@@ -1222,9 +983,7 @@ namespace VRTK
         {
             return gripAxis.x;
         }
-        #endregion axis getters
 
-        #region hairline delta getters
         /// <summary>
         /// The GetHairTriggerDelta method returns a float representing the difference in how much the trigger is being pressed in relation to the hairline threshold start.
         /// </summary>
@@ -1242,115 +1001,21 @@ namespace VRTK
         {
             return hairGripDelta;
         }
-        #endregion hairline delta getters
 
-        #region sense axis getters
-        /// <summary>
-        /// The GetTouchpadSenseAxis method returns a float representing how much of the touch sensor is being touched.
-        /// </summary>
-        /// <returns>A float representing how much the touch sensor is being touched.</returns>
-        public virtual float GetTouchpadSenseAxis()
-        {
-            return touchpadSenseAxis;
-        }
-
-        /// <summary>
-        /// The GetTriggerSenseAxis method returns a float representing how much of the touch sensor is being touched.
-        /// </summary>
-        /// <returns>A float representing how much the touch sensor is being touched.</returns>
-        public virtual float GetTriggerSenseAxis()
-        {
-            return triggerSenseAxis;
-        }
-
-        /// <summary>
-        /// The GetMiddleFingerSenseAxis method returns a float representing how much of the touch sensor is being touched.
-        /// </summary>
-        /// <returns>A float representing how much the touch sensor is being touched.</returns>
-        public virtual float GetMiddleFingerSenseAxis()
-        {
-            return middleFingerSenseAxis;
-        }
-
-        /// <summary>
-        /// The GetRingFingerSenseAxis method returns a float representing how much of the touch sensor is being touched.
-        /// </summary>
-        /// <returns>A float representing how much the touch sensor is being touched.</returns>
-        public virtual float GetRingFingerSenseAxis()
-        {
-            return ringFingerSenseAxis;
-        }
-
-        /// <summary>
-        /// The GetPinkyFingerSenseAxis method returns a float representing how much of the touch sensor is being touched.
-        /// </summary>
-        /// <returns>A float representing how much the touch sensor is being touched.</returns>
-        public virtual float GetPinkyFingerSenseAxis()
-        {
-            return pinkyFingerSenseAxis;
-        }
-
-        /// <summary>
-        /// The GetGripSenseAxis method returns a float representing how much of the touch sensor is being touched.
-        /// </summary>
-        /// <returns>A float representing how much the touch sensor is being touched.</returns>
-        public virtual float GetGripSenseAxis()
-        {
-            return gripSenseAxis;
-        }
-        #endregion sense axis getters
-
-        #region button press getters
         /// <summary>
         /// The AnyButtonPressed method returns true if any of the controller buttons are being pressed and this can be useful to determine if an action can be taken whilst the user is using the controller.
         /// </summary>
-        /// <returns>Returns `true` if any of the controller buttons are currently being pressed.</returns>
+        /// <returns>Is true if any of the controller buttons are currently being pressed.</returns>
         public virtual bool AnyButtonPressed()
         {
-            return (triggerPressed || gripPressed || touchpadPressed || touchpadTwoPressed || buttonOnePressed || buttonTwoPressed || startMenuPressed || gripSensePressed);
-        }
-
-        /// <summary>
-        /// The GetAxisState method takes a given Vector2Axis and returns a boolean whether that given axis is currently being touched or pressed.
-        /// </summary>
-        /// <param name="axis">The axis to check on.</param>
-        /// <param name="pressType">The button press type to check for.</param>
-        /// <returns>Returns `true` if the axis is being interacted with via the given press type.</returns>
-        public virtual bool GetAxisState(Vector2AxisAlias axis, SDK_BaseController.ButtonPressTypes pressType)
-        {
-            switch (pressType)
-            {
-                case SDK_BaseController.ButtonPressTypes.Press:
-                case SDK_BaseController.ButtonPressTypes.PressDown:
-                case SDK_BaseController.ButtonPressTypes.PressUp:
-                    switch (axis)
-                    {
-                        case Vector2AxisAlias.Touchpad:
-                            return touchpadPressed;
-                        case Vector2AxisAlias.TouchpadTwo:
-                            return touchpadTwoPressed;
-                    }
-                    return false;
-                case SDK_BaseController.ButtonPressTypes.Touch:
-                case SDK_BaseController.ButtonPressTypes.TouchDown:
-                case SDK_BaseController.ButtonPressTypes.TouchUp:
-                    switch (axis)
-                    {
-                        case Vector2AxisAlias.Touchpad:
-                            return touchpadTouched;
-                        case Vector2AxisAlias.TouchpadTwo:
-                            return touchpadTwoTouched;
-                    }
-                    return false;
-            }
-            return false;
+            return (triggerPressed || gripPressed || touchpadPressed || buttonOnePressed || buttonTwoPressed || startMenuPressed);
         }
 
         /// <summary>
         /// The IsButtonPressed method takes a given button alias and returns a boolean whether that given button is currently being pressed or not.
         /// </summary>
         /// <param name="button">The button to check if it's being pressed.</param>
-        /// <returns>Returns `true` if the button is being pressed.</returns>
+        /// <returns>Is true if the button is being pressed.</returns>
         public virtual bool IsButtonPressed(ButtonAlias button)
         {
             switch (button)
@@ -1363,8 +1028,6 @@ namespace VRTK
                     return triggerPressed;
                 case ButtonAlias.TriggerClick:
                     return triggerClicked;
-                case ButtonAlias.TriggerSense:
-                    return (triggerSenseAxis >= senseAxisPressThreshold);
                 case ButtonAlias.GripHairline:
                     return gripHairlinePressed;
                 case ButtonAlias.GripTouch:
@@ -1377,12 +1040,6 @@ namespace VRTK
                     return touchpadTouched;
                 case ButtonAlias.TouchpadPress:
                     return touchpadPressed;
-                case ButtonAlias.TouchpadTwoTouch:
-                    return touchpadTwoTouched;
-                case ButtonAlias.TouchpadTwoPress:
-                    return touchpadTwoPressed;
-                case ButtonAlias.TouchpadSense:
-                    return (touchpadSenseAxis >= senseAxisPressThreshold);
                 case ButtonAlias.ButtonOnePress:
                     return buttonOnePressed;
                 case ButtonAlias.ButtonOneTouch:
@@ -1393,27 +1050,15 @@ namespace VRTK
                     return buttonTwoTouched;
                 case ButtonAlias.StartMenuPress:
                     return startMenuPressed;
-                case ButtonAlias.MiddleFingerSense:
-                    return (middleFingerSenseAxis >= senseAxisPressThreshold);
-                case ButtonAlias.RingFingerSense:
-                    return (ringFingerSenseAxis >= senseAxisPressThreshold);
-                case ButtonAlias.PinkyFingerSense:
-                    return (pinkyFingerSenseAxis >= senseAxisPressThreshold);
-                case ButtonAlias.GripSense:
-                    return (gripSenseAxis >= senseAxisPressThreshold);
-                case ButtonAlias.GripSensePress:
-                    return gripSensePressed;
             }
             return false;
         }
-        #endregion button press getters
 
-        #region subscription managers
         /// <summary>
         /// The SubscribeToButtonAliasEvent method makes it easier to subscribe to a button event on either the start or end action. Upon the event firing, the given callback method is executed.
         /// </summary>
-        /// <param name="givenButton">The Button Alias to register the event on.</param>
-        /// <param name="startEvent">If this is `true` then the start event related to the button is used (e.g. `OnPress`). If this is `false` then the end event related to the button is used (e.g. `OnRelease`). </param>
+        /// <param name="givenButton">The ButtonAlias to register the event on.</param>
+        /// <param name="startEvent">If this is `true` then the start event related to the button is used (e.g. OnPress). If this is `false` then the end event related to the button is used (e.g. OnRelease). </param>
         /// <param name="callbackMethod">The method to subscribe to the event.</param>
         public virtual void SubscribeToButtonAliasEvent(ButtonAlias givenButton, bool startEvent, ControllerInteractionEventHandler callbackMethod)
         {
@@ -1423,55 +1068,30 @@ namespace VRTK
         /// <summary>
         /// The UnsubscribeToButtonAliasEvent method makes it easier to unsubscribe to from button event on either the start or end action.
         /// </summary>
-        /// <param name="givenButton">The Button Alias to unregister the event on.</param>
-        /// <param name="startEvent">If this is `true` then the start event related to the button is used (e.g. `OnPress`). If this is `false` then the end event related to the button is used (e.g. `OnRelease`). </param>
+        /// <param name="givenButton">The ButtonAlias to unregister the event on.</param>
+        /// <param name="startEvent">If this is `true` then the start event related to the button is used (e.g. OnPress). If this is `false` then the end event related to the button is used (e.g. OnRelease). </param>
         /// <param name="callbackMethod">The method to unsubscribe from the event.</param>
         public virtual void UnsubscribeToButtonAliasEvent(ButtonAlias givenButton, bool startEvent, ControllerInteractionEventHandler callbackMethod)
         {
             ButtonAliasEventSubscription(false, givenButton, startEvent, callbackMethod);
         }
 
-        /// <summary>
-        /// The SubscribeToAxisAliasEvent method makes it easier to subscribe to axis changes on a given button for a given axis type.
-        /// </summary>
-        /// <param name="buttonType">The button to listen for axis changes on.</param>
-        /// <param name="axisType">The type of axis change to listen for.</param>
-        /// <param name="callbackMethod">The method to subscribe to the event.</param>
-        public virtual void SubscribeToAxisAliasEvent(SDK_BaseController.ButtonTypes buttonType, AxisType axisType, ControllerInteractionEventHandler callbackMethod)
-        {
-            AxisAliasEventSubscription(true, buttonType, axisType, callbackMethod);
-        }
-
-        /// <summary>
-        /// The UnsubscribeToAxisAliasEvent method makes it easier to unsubscribe from axis changes on a given button for a given axis type.
-        /// </summary>
-        /// <param name="buttonType">The button to unregister for axis changes on.</param>
-        /// <param name="axisType">The type of axis change to unregister on.</param>
-        /// <param name="callbackMethod">The method to unsubscribe from the event.</param>
-        public virtual void UnsubscribeToAxisAliasEvent(SDK_BaseController.ButtonTypes buttonType, AxisType axisType, ControllerInteractionEventHandler callbackMethod)
-        {
-            AxisAliasEventSubscription(false, buttonType, axisType, callbackMethod);
-        }
-        #endregion subscription managers
-
-        #region MonoBehaviour methods
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
         {
-            GameObject actualController = VRTK_DeviceFinder.GetActualController(gameObject);
-            if (actualController != null)
+            var actualController = VRTK_DeviceFinder.GetActualController(gameObject);
+            if (actualController)
             {
-                trackedController = actualController.GetComponentInParent<VRTK_TrackedController>();
-                if (trackedController != null)
+                var controllerTracker = actualController.GetComponent<VRTK_TrackedController>();
+                if (controllerTracker)
                 {
-                    trackedController.ControllerEnabled += TrackedControllerEnabled;
-                    trackedController.ControllerDisabled += TrackedControllerDisabled;
-                    trackedController.ControllerIndexChanged += TrackedControllerIndexChanged;
-                    trackedController.ControllerModelAvailable += TrackedControllerModelAvailable;
+                    controllerTracker.ControllerEnabled += TrackedControllerEnabled;
+                    controllerTracker.ControllerDisabled += TrackedControllerDisabled;
+                    controllerTracker.ControllerIndexChanged += TrackedControllerIndexChanged;
                 }
             }
         }
@@ -1479,11 +1099,21 @@ namespace VRTK
         protected virtual void OnDisable()
         {
             Invoke("DisableEvents", 0f);
+            var actualController = VRTK_DeviceFinder.GetActualController(gameObject);
+            if (actualController)
+            {
+                var controllerTracker = actualController.GetComponent<VRTK_TrackedController>();
+                if (controllerTracker)
+                {
+                    controllerTracker.ControllerEnabled -= TrackedControllerEnabled;
+                    controllerTracker.ControllerDisabled -= TrackedControllerDisabled;
+                }
+            }
         }
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -1496,71 +1126,62 @@ namespace VRTK
                 return;
             }
 
-            CheckTriggerEvents(controllerReference);
-            CheckGripEvents(controllerReference);
-            CheckTouchpadEvents(controllerReference);
-            CheckTouchpadTwoEvents(controllerReference);
-            CheckButtonOneEvents(controllerReference);
-            CheckButtonTwoEvents(controllerReference);
-            CheckStartMenuEvents(controllerReference);
-            CheckExtraFingerEvents(controllerReference);
-        }
-        #endregion MonoBehaviour methods
-
-        protected virtual float ProcessSenseAxis(float axisValue)
-        {
-            return (axisValue >= senseAxisForceZeroThreshold ? axisValue : 0f);
-        }
-
-        protected virtual void CheckTriggerEvents(VRTK_ControllerReference controllerReference)
-        {
             Vector2 currentTriggerAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Trigger, controllerReference);
-            float currentTriggerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.Trigger, controllerReference));
+            Vector2 currentGripAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Grip, controllerReference);
+            Vector2 currentTouchpadAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Touchpad, controllerReference);
 
             //Trigger Touched
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Trigger, SDK_BaseController.ButtonPressTypes.TouchDown, controllerReference))
             {
                 OnTriggerTouchStart(SetControllerEvent(ref triggerTouched, true, currentTriggerAxis.x));
+                EmitAlias(ButtonAlias.TriggerTouch, true, currentTriggerAxis.x, ref triggerTouched);
             }
 
             //Trigger Hairline
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.TriggerHairline, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnTriggerHairlineStart(SetControllerEvent(ref triggerHairlinePressed, true, currentTriggerAxis.x));
+                EmitAlias(ButtonAlias.TriggerHairline, true, currentTriggerAxis.x, ref triggerHairlinePressed);
             }
 
             //Trigger Pressed
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Trigger, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnTriggerPressed(SetControllerEvent(ref triggerPressed, true, currentTriggerAxis.x));
+                EmitAlias(ButtonAlias.TriggerPress, true, currentTriggerAxis.x, ref triggerPressed);
             }
 
             //Trigger Clicked
             if (!triggerClicked && currentTriggerAxis.x >= triggerClickThreshold)
             {
                 OnTriggerClicked(SetControllerEvent(ref triggerClicked, true, currentTriggerAxis.x));
+                EmitAlias(ButtonAlias.TriggerClick, true, currentTriggerAxis.x, ref triggerClicked);
             }
             else if (triggerClicked && currentTriggerAxis.x < triggerClickThreshold)
             {
                 OnTriggerUnclicked(SetControllerEvent(ref triggerClicked, false, 0f));
+                EmitAlias(ButtonAlias.TriggerClick, false, 0f, ref triggerClicked);
             }
 
             // Trigger Pressed end
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Trigger, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnTriggerReleased(SetControllerEvent(ref triggerPressed, false, 0f));
+                EmitAlias(ButtonAlias.TriggerPress, false, 0f, ref triggerPressed);
             }
 
             //Trigger Hairline End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.TriggerHairline, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnTriggerHairlineEnd(SetControllerEvent(ref triggerHairlinePressed, false, 0f));
+                EmitAlias(ButtonAlias.TriggerHairline, false, 0f, ref triggerHairlinePressed);
             }
 
             //Trigger Touch End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Trigger, SDK_BaseController.ButtonPressTypes.TouchUp, controllerReference))
             {
                 OnTriggerTouchEnd(SetControllerEvent(ref triggerTouched, false, 0f));
+                EmitAlias(ButtonAlias.TriggerTouch, false, 0f, ref triggerTouched);
             }
 
             //Trigger Axis
@@ -1574,69 +1195,58 @@ namespace VRTK
                 OnTriggerAxisChanged(SetControllerEvent(ref triggerAxisChanged, true, currentTriggerAxis.x));
             }
 
-            //Trigger Sense Axis
-            if (VRTK_SharedMethods.RoundFloat(triggerSenseAxis, axisFidelity) == VRTK_SharedMethods.RoundFloat(currentTriggerSenseAxis, axisFidelity))
-            {
-                triggerSenseAxisChanged = false;
-            }
-            else
-            {
-                OnTriggerSenseAxisChanged(SetControllerEvent(ref triggerSenseAxisChanged, true, currentTriggerSenseAxis));
-            }
-
-            triggerAxis = (triggerAxisChanged ? new Vector2(currentTriggerAxis.x, currentTriggerAxis.y) : triggerAxis);
-            triggerSenseAxis = (triggerSenseAxisChanged ? currentTriggerSenseAxis : triggerSenseAxis);
-            hairTriggerDelta = VRTK_SDK_Bridge.GetControllerHairlineDelta(SDK_BaseController.ButtonTypes.TriggerHairline, controllerReference);
-        }
-
-        protected virtual void CheckGripEvents(VRTK_ControllerReference controllerReference)
-        {
-            Vector2 currentGripAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Grip, controllerReference);
-
             //Grip Touched
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Grip, SDK_BaseController.ButtonPressTypes.TouchDown, controllerReference))
             {
                 OnGripTouchStart(SetControllerEvent(ref gripTouched, true, currentGripAxis.x));
+                EmitAlias(ButtonAlias.GripTouch, true, currentGripAxis.x, ref gripTouched);
             }
 
             //Grip Hairline
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.GripHairline, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnGripHairlineStart(SetControllerEvent(ref gripHairlinePressed, true, currentGripAxis.x));
+                EmitAlias(ButtonAlias.GripHairline, true, currentGripAxis.x, ref gripHairlinePressed);
             }
 
             //Grip Pressed
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Grip, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnGripPressed(SetControllerEvent(ref gripPressed, true, currentGripAxis.x));
+                EmitAlias(ButtonAlias.GripPress, true, currentGripAxis.x, ref gripPressed);
             }
 
             //Grip Clicked
             if (!gripClicked && currentGripAxis.x >= gripClickThreshold)
             {
                 OnGripClicked(SetControllerEvent(ref gripClicked, true, currentGripAxis.x));
+                EmitAlias(ButtonAlias.GripClick, true, currentGripAxis.x, ref gripClicked);
             }
             else if (gripClicked && currentGripAxis.x < gripClickThreshold)
             {
                 OnGripUnclicked(SetControllerEvent(ref gripClicked, false, 0f));
+                EmitAlias(ButtonAlias.GripClick, false, 0f, ref gripClicked);
             }
 
             // Grip Pressed End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Grip, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnGripReleased(SetControllerEvent(ref gripPressed, false, 0f));
+                EmitAlias(ButtonAlias.GripPress, false, 0f, ref gripPressed);
             }
 
             //Grip Hairline End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.GripHairline, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnGripHairlineEnd(SetControllerEvent(ref gripHairlinePressed, false, 0f));
+                EmitAlias(ButtonAlias.GripHairline, false, 0f, ref gripHairlinePressed);
             }
 
             // Grip Touch End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Grip, SDK_BaseController.ButtonPressTypes.TouchUp, controllerReference))
             {
                 OnGripTouchEnd(SetControllerEvent(ref gripTouched, false, 0f));
+                EmitAlias(ButtonAlias.GripTouch, false, 0f, ref gripTouched);
             }
 
             //Grip Axis
@@ -1650,35 +1260,30 @@ namespace VRTK
                 OnGripAxisChanged(SetControllerEvent(ref gripAxisChanged, true, currentGripAxis.x));
             }
 
-            gripAxis = (gripAxisChanged ? new Vector2(currentGripAxis.x, currentGripAxis.y) : gripAxis);
-            hairGripDelta = VRTK_SDK_Bridge.GetControllerHairlineDelta(SDK_BaseController.ButtonTypes.GripHairline, controllerReference);
-        }
-
-        protected virtual void CheckTouchpadEvents(VRTK_ControllerReference controllerReference)
-        {
-            Vector2 currentTouchpadAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Touchpad, controllerReference);
-            float currentTouchpadSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.Touchpad, controllerReference));
-
             //Touchpad Touched
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Touchpad, SDK_BaseController.ButtonPressTypes.TouchDown, controllerReference))
             {
                 OnTouchpadTouchStart(SetControllerEvent(ref touchpadTouched, true, 1f));
+                EmitAlias(ButtonAlias.TouchpadTouch, true, 1f, ref touchpadTouched);
             }
 
             //Touchpad Pressed
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Touchpad, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnTouchpadPressed(SetControllerEvent(ref touchpadPressed, true, 1f));
+                EmitAlias(ButtonAlias.TouchpadPress, true, 1f, ref touchpadPressed);
             }
             else if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Touchpad, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnTouchpadReleased(SetControllerEvent(ref touchpadPressed, false, 0f));
+                EmitAlias(ButtonAlias.TouchpadPress, false, 0f, ref touchpadPressed);
             }
 
             //Touchpad Untouched
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.Touchpad, SDK_BaseController.ButtonPressTypes.TouchUp, controllerReference))
             {
                 OnTouchpadTouchEnd(SetControllerEvent(ref touchpadTouched, false, 0f));
+                EmitAlias(ButtonAlias.TouchpadTouch, false, 0f, ref touchpadTouched);
                 touchpadAxis = Vector2.zero;
             }
 
@@ -1692,184 +1297,77 @@ namespace VRTK
                 OnTouchpadAxisChanged(SetControllerEvent(ref touchpadAxisChanged, true, 1f));
             }
 
-            //Touchpad Sense Axis
-            if (VRTK_SharedMethods.RoundFloat(touchpadSenseAxis, axisFidelity) == VRTK_SharedMethods.RoundFloat(currentTouchpadSenseAxis, axisFidelity))
-            {
-                touchpadSenseAxisChanged = false;
-            }
-            else
-            {
-                OnTouchpadSenseAxisChanged(SetControllerEvent(ref touchpadSenseAxisChanged, true, currentTouchpadSenseAxis));
-            }
-
-            touchpadAxis = (touchpadAxisChanged ? new Vector2(currentTouchpadAxis.x, currentTouchpadAxis.y) : touchpadAxis);
-            touchpadSenseAxis = (touchpadSenseAxisChanged ? currentTouchpadSenseAxis : touchpadSenseAxis);
-        }
-
-        protected virtual void CheckTouchpadTwoEvents(VRTK_ControllerReference controllerReference)
-        {
-            Vector2 currentTouchpadTwoAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.TouchpadTwo, controllerReference);
-
-            //Touchpad Two Touched
-            if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.TouchpadTwo, SDK_BaseController.ButtonPressTypes.TouchDown, controllerReference))
-            {
-                OnTouchpadTwoTouchStart(SetControllerEvent(ref touchpadTwoTouched, true, 1f));
-            }
-
-            //Touchpad Two Pressed
-            if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.TouchpadTwo, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
-            {
-                OnTouchpadTwoPressed(SetControllerEvent(ref touchpadTwoPressed, true, 1f));
-            }
-            else if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.TouchpadTwo, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
-            {
-                OnTouchpadTwoReleased(SetControllerEvent(ref touchpadTwoPressed, false, 0f));
-            }
-
-            //Touchpad Two Untouched
-            if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.TouchpadTwo, SDK_BaseController.ButtonPressTypes.TouchUp, controllerReference))
-            {
-                OnTouchpadTwoTouchEnd(SetControllerEvent(ref touchpadTwoTouched, false, 0f));
-                touchpadTwoAxis = Vector2.zero;
-            }
-
-            //Touchpad Two Axis
-            if (VRTK_SDK_Bridge.IsTouchpadStatic(true, touchpadTwoAxis, currentTouchpadTwoAxis, axisFidelity))
-            {
-                touchpadTwoAxisChanged = false;
-            }
-            else
-            {
-                OnTouchpadTwoAxisChanged(SetControllerEvent(ref touchpadTwoAxisChanged, true, 1f));
-            }
-
-            touchpadTwoAxis = (touchpadTwoAxisChanged ? new Vector2(currentTouchpadTwoAxis.x, currentTouchpadTwoAxis.y) : touchpadTwoAxis);
-        }
-
-        protected virtual void CheckButtonOneEvents(VRTK_ControllerReference controllerReference)
-        {
             //ButtonOne Touched
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonOne, SDK_BaseController.ButtonPressTypes.TouchDown, controllerReference))
             {
                 OnButtonOneTouchStart(SetControllerEvent(ref buttonOneTouched, true, 1f));
+                EmitAlias(ButtonAlias.ButtonOneTouch, true, 1f, ref buttonOneTouched);
             }
 
             //ButtonOne Pressed
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonOne, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnButtonOnePressed(SetControllerEvent(ref buttonOnePressed, true, 1f));
+                EmitAlias(ButtonAlias.ButtonOnePress, true, 1f, ref buttonOnePressed);
             }
             else if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonOne, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnButtonOneReleased(SetControllerEvent(ref buttonOnePressed, false, 0f));
+                EmitAlias(ButtonAlias.ButtonOnePress, false, 0f, ref buttonOnePressed);
             }
 
             //ButtonOne Touched End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonOne, SDK_BaseController.ButtonPressTypes.TouchUp, controllerReference))
             {
                 OnButtonOneTouchEnd(SetControllerEvent(ref buttonOneTouched, false, 0f));
+                EmitAlias(ButtonAlias.ButtonOneTouch, false, 0f, ref buttonOneTouched);
             }
-        }
 
-        protected virtual void CheckButtonTwoEvents(VRTK_ControllerReference controllerReference)
-        {
             //ButtonTwo Touched
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonTwo, SDK_BaseController.ButtonPressTypes.TouchDown, controllerReference))
             {
                 OnButtonTwoTouchStart(SetControllerEvent(ref buttonTwoTouched, true, 1f));
+                EmitAlias(ButtonAlias.ButtonTwoTouch, true, 1f, ref buttonTwoTouched);
             }
 
             //ButtonTwo Pressed
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonTwo, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnButtonTwoPressed(SetControllerEvent(ref buttonTwoPressed, true, 1f));
+                EmitAlias(ButtonAlias.ButtonTwoPress, true, 1f, ref buttonTwoPressed);
             }
             else if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonTwo, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnButtonTwoReleased(SetControllerEvent(ref buttonTwoPressed, false, 0f));
+                EmitAlias(ButtonAlias.ButtonTwoPress, false, 0f, ref buttonTwoPressed);
             }
 
             //ButtonTwo Touched End
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.ButtonTwo, SDK_BaseController.ButtonPressTypes.TouchUp, controllerReference))
             {
                 OnButtonTwoTouchEnd(SetControllerEvent(ref buttonTwoTouched, false, 0f));
+                EmitAlias(ButtonAlias.ButtonTwoTouch, false, 0f, ref buttonTwoTouched);
             }
-        }
 
-        protected virtual void CheckStartMenuEvents(VRTK_ControllerReference controllerReference)
-        {
             //StartMenu Pressed
             if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.StartMenu, SDK_BaseController.ButtonPressTypes.PressDown, controllerReference))
             {
                 OnStartMenuPressed(SetControllerEvent(ref startMenuPressed, true, 1f));
+                EmitAlias(ButtonAlias.StartMenuPress, true, 1f, ref startMenuPressed);
             }
             else if (VRTK_SDK_Bridge.GetControllerButtonState(SDK_BaseController.ButtonTypes.StartMenu, SDK_BaseController.ButtonPressTypes.PressUp, controllerReference))
             {
                 OnStartMenuReleased(SetControllerEvent(ref startMenuPressed, false, 0f));
-            }
-        }
-
-        protected virtual void CheckExtraFingerEvents(VRTK_ControllerReference controllerReference)
-        {
-            float currentMiddleFingerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.MiddleFinger, controllerReference));
-            float currentRingFingerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.RingFinger, controllerReference));
-            float currentPinkyFingerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.PinkyFinger, controllerReference));
-            float currentGripSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.Grip, controllerReference));
-
-            //Middle Finger Sense Axis
-            if (VRTK_SharedMethods.RoundFloat(middleFingerSenseAxis, axisFidelity) == VRTK_SharedMethods.RoundFloat(currentMiddleFingerSenseAxis, axisFidelity))
-            {
-                middleFingerSenseAxisChanged = false;
-            }
-            else
-            {
-                OnMiddleFingerSenseAxisChanged(SetControllerEvent(ref middleFingerSenseAxisChanged, true, currentMiddleFingerSenseAxis));
+                EmitAlias(ButtonAlias.StartMenuPress, false, 0f, ref startMenuPressed);
             }
 
-            //Ring Finger Sense Axis
-            if (VRTK_SharedMethods.RoundFloat(ringFingerSenseAxis, axisFidelity) == VRTK_SharedMethods.RoundFloat(currentRingFingerSenseAxis, axisFidelity))
-            {
-                ringFingerSenseAxisChanged = false;
-            }
-            else
-            {
-                OnRingFingerSenseAxisChanged(SetControllerEvent(ref ringFingerSenseAxisChanged, true, currentRingFingerSenseAxis));
-            }
+            // Save current touch and trigger settings to detect next change.
+            touchpadAxis = (touchpadAxisChanged ? new Vector2(currentTouchpadAxis.x, currentTouchpadAxis.y) : touchpadAxis);
+            triggerAxis = (triggerAxisChanged ? new Vector2(currentTriggerAxis.x, currentTriggerAxis.y) : triggerAxis);
+            gripAxis = (gripAxisChanged ? new Vector2(currentGripAxis.x, currentGripAxis.y) : gripAxis);
 
-            //Pinky Finger Sense Axis
-            if (VRTK_SharedMethods.RoundFloat(pinkyFingerSenseAxis, axisFidelity) == VRTK_SharedMethods.RoundFloat(currentPinkyFingerSenseAxis, axisFidelity))
-            {
-                pinkyFingerSenseAxisChanged = false;
-            }
-            else
-            {
-                OnPinkyFingerSenseAxisChanged(SetControllerEvent(ref pinkyFingerSenseAxisChanged, true, currentPinkyFingerSenseAxis));
-            }
-
-            //Grip Sense Axis Press
-            if (gripSenseAxisChanged && gripSensePressed && !IsButtonPressed(ButtonAlias.GripSense))
-            {
-                OnGripSenseReleased(SetControllerEvent(ref gripSensePressed, false, 0f));
-            }
-            else if (gripSenseAxisChanged && !gripSensePressed && IsButtonPressed(ButtonAlias.GripSense))
-            {
-                OnGripSensePressed(SetControllerEvent(ref gripSensePressed, true, 1f));
-            }
-
-            //Grip Sense Axis
-            if (VRTK_SharedMethods.RoundFloat(gripSenseAxis, axisFidelity) == VRTK_SharedMethods.RoundFloat(currentGripSenseAxis, axisFidelity))
-            {
-                gripSenseAxisChanged = false;
-            }
-            else
-            {
-                OnGripSenseAxisChanged(SetControllerEvent(ref gripSenseAxisChanged, true, currentGripSenseAxis));
-            }
-
-            middleFingerSenseAxis = (middleFingerSenseAxisChanged ? currentMiddleFingerSenseAxis : middleFingerSenseAxis);
-            ringFingerSenseAxis = (ringFingerSenseAxisChanged ? currentRingFingerSenseAxis : ringFingerSenseAxis);
-            pinkyFingerSenseAxis = (pinkyFingerSenseAxisChanged ? currentPinkyFingerSenseAxis : pinkyFingerSenseAxis);
-            gripSenseAxis = (gripSenseAxisChanged ? currentGripSenseAxis : gripSenseAxis);
+            hairTriggerDelta = VRTK_SDK_Bridge.GetControllerHairlineDelta(SDK_BaseController.ButtonTypes.TriggerHairline, controllerReference);
+            hairGripDelta = VRTK_SDK_Bridge.GetControllerHairlineDelta(SDK_BaseController.ButtonTypes.GripHairline, controllerReference);
         }
 
         protected virtual void ButtonAliasEventSubscription(bool subscribe, ButtonAlias givenButton, bool startEvent, ControllerInteractionEventHandler callbackMethod)
@@ -2116,54 +1614,6 @@ namespace VRTK
                         }
                     }
                     break;
-                case ButtonAlias.TouchpadTwoPress:
-                    if (subscribe)
-                    {
-                        if (startEvent)
-                        {
-                            TouchpadTwoPressed += callbackMethod;
-                        }
-                        else
-                        {
-                            TouchpadTwoReleased += callbackMethod;
-                        }
-                    }
-                    else
-                    {
-                        if (startEvent)
-                        {
-                            TouchpadTwoPressed -= callbackMethod;
-                        }
-                        else
-                        {
-                            TouchpadTwoReleased -= callbackMethod;
-                        }
-                    }
-                    break;
-                case ButtonAlias.TouchpadTwoTouch:
-                    if (subscribe)
-                    {
-                        if (startEvent)
-                        {
-                            TouchpadTwoTouchStart += callbackMethod;
-                        }
-                        else
-                        {
-                            TouchpadTwoTouchEnd += callbackMethod;
-                        }
-                    }
-                    else
-                    {
-                        if (startEvent)
-                        {
-                            TouchpadTwoTouchStart -= callbackMethod;
-                        }
-                        else
-                        {
-                            TouchpadTwoTouchEnd -= callbackMethod;
-                        }
-                    }
-                    break;
                 case ButtonAlias.ButtonOnePress:
                     if (subscribe)
                     {
@@ -2284,167 +1734,6 @@ namespace VRTK
                         }
                     }
                     break;
-                case ButtonAlias.GripSensePress:
-                    if (subscribe)
-                    {
-                        if (startEvent)
-                        {
-                            GripSensePressed += callbackMethod;
-                        }
-                        else
-                        {
-                            GripSenseReleased += callbackMethod;
-                        }
-                    }
-                    else
-                    {
-                        if (startEvent)
-                        {
-                            GripSensePressed -= callbackMethod;
-                        }
-                        else
-                        {
-                            GripSenseReleased -= callbackMethod;
-                        }
-                    }
-                    break;
-            }
-        }
-
-        protected virtual void AxisAliasEventSubscription(bool subscribe, SDK_BaseController.ButtonTypes buttonType, AxisType axisType, ControllerInteractionEventHandler callbackMethod)
-        {
-            switch (buttonType)
-            {
-                case SDK_BaseController.ButtonTypes.Trigger:
-                    switch (axisType)
-                    {
-                        case AxisType.Axis:
-                            if (subscribe)
-                            {
-                                TriggerAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                TriggerAxisChanged -= callbackMethod;
-                            }
-                            break;
-                        case AxisType.SenseAxis:
-                            if (subscribe)
-                            {
-                                TriggerSenseAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                TriggerSenseAxisChanged -= callbackMethod;
-                            }
-                            break;
-                    }
-                    break;
-                case SDK_BaseController.ButtonTypes.Grip:
-                    switch (axisType)
-                    {
-                        case AxisType.Axis:
-                            if (subscribe)
-                            {
-                                GripAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                GripAxisChanged -= callbackMethod;
-                            }
-                            break;
-                        case AxisType.SenseAxis:
-                            if (subscribe)
-                            {
-                                GripSenseAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                GripSenseAxisChanged -= callbackMethod;
-                            }
-                            break;
-                    }
-                    break;
-                case SDK_BaseController.ButtonTypes.Touchpad:
-                    switch (axisType)
-                    {
-                        case AxisType.Axis:
-                            if (subscribe)
-                            {
-                                TouchpadAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                TouchpadAxisChanged -= callbackMethod;
-                            }
-                            break;
-                        case AxisType.SenseAxis:
-                            if (subscribe)
-                            {
-                                TouchpadSenseAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                TouchpadSenseAxisChanged -= callbackMethod;
-                            }
-                            break;
-                    }
-                    break;
-                case SDK_BaseController.ButtonTypes.TouchpadTwo:
-                    if (subscribe)
-                    {
-                        TouchpadTwoAxisChanged += callbackMethod;
-                    }
-                    else
-                    {
-                        TouchpadTwoAxisChanged -= callbackMethod;
-                    }
-                    break;
-                case SDK_BaseController.ButtonTypes.MiddleFinger:
-                    switch (axisType)
-                    {
-                        case AxisType.SenseAxis:
-                            if (subscribe)
-                            {
-                                MiddleFingerSenseAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                MiddleFingerSenseAxisChanged -= callbackMethod;
-                            }
-                            break;
-                    }
-                    break;
-                case SDK_BaseController.ButtonTypes.RingFinger:
-                    switch (axisType)
-                    {
-                        case AxisType.SenseAxis:
-                            if (subscribe)
-                            {
-                                RingFingerSenseAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                RingFingerSenseAxisChanged -= callbackMethod;
-                            }
-                            break;
-                    }
-                    break;
-                case SDK_BaseController.ButtonTypes.PinkyFinger:
-                    switch (axisType)
-                    {
-                        case AxisType.SenseAxis:
-                            if (subscribe)
-                            {
-                                PinkyFingerSenseAxisChanged += callbackMethod;
-                            }
-                            else
-                            {
-                                PinkyFingerSenseAxisChanged -= callbackMethod;
-                            }
-                            break;
-                    }
-                    break;
             }
         }
 
@@ -2464,12 +1753,7 @@ namespace VRTK
             OnControllerIndexChanged(SetControllerEvent());
         }
 
-        protected virtual void TrackedControllerModelAvailable(object sender, VRTKTrackedControllerEventArgs e)
-        {
-            OnControllerModelAvailable(SetControllerEvent());
-        }
-
-        protected virtual float CalculateVector2AxisAngle(Vector2 axis)
+        protected virtual float CalculateTouchpadAxisAngle(Vector2 axis)
         {
             float angle = Mathf.Atan2(axis.y, axis.x) * Mathf.Rad2Deg;
             angle = 90.0f - angle;
@@ -2480,120 +1764,187 @@ namespace VRTK
             return angle;
         }
 
-        protected virtual void DisableEvents()
+#pragma warning disable 0618
+        /// <obsolete>
+        /// This is an obsolete method that will be removed in a future version
+        /// </obsolete>
+        protected virtual void EmitAlias(ButtonAlias type, bool touchDown, float buttonPressure, ref bool buttonBool)
         {
-            GameObject actualController = VRTK_DeviceFinder.GetActualController(gameObject);
-            if (actualController != null)
+            if (pointerToggleButton == type)
             {
-                if (trackedController != null)
+                if (touchDown)
                 {
-                    trackedController.ControllerEnabled -= TrackedControllerEnabled;
-                    trackedController.ControllerDisabled -= TrackedControllerDisabled;
-                    trackedController.ControllerIndexChanged -= TrackedControllerIndexChanged;
-                    trackedController.ControllerModelAvailable -= TrackedControllerModelAvailable;
+                    pointerPressed = true;
+                    OnAliasPointerOn(SetControllerEvent(ref buttonBool, true, buttonPressure));
+                }
+                else
+                {
+                    pointerPressed = false;
+                    OnAliasPointerOff(SetControllerEvent(ref buttonBool, false, buttonPressure));
                 }
             }
 
+            if (pointerSetButton == type)
+            {
+                if (!touchDown)
+                {
+                    OnAliasPointerSet(SetControllerEvent(ref buttonBool, false, buttonPressure));
+                }
+            }
+
+            if (grabToggleButton == type)
+            {
+                if (touchDown)
+                {
+                    grabPressed = true;
+                    OnAliasGrabOn(SetControllerEvent(ref buttonBool, true, buttonPressure));
+                }
+                else
+                {
+                    grabPressed = false;
+                    OnAliasGrabOff(SetControllerEvent(ref buttonBool, false, buttonPressure));
+                }
+            }
+
+            if (useToggleButton == type)
+            {
+                if (touchDown)
+                {
+                    usePressed = true;
+                    OnAliasUseOn(SetControllerEvent(ref buttonBool, true, buttonPressure));
+                }
+                else
+                {
+                    usePressed = false;
+                    OnAliasUseOff(SetControllerEvent(ref buttonBool, false, buttonPressure));
+                }
+            }
+
+            if (uiClickButton == type)
+            {
+                if (touchDown)
+                {
+                    uiClickPressed = true;
+                    OnAliasUIClickOn(SetControllerEvent(ref buttonBool, true, buttonPressure));
+                }
+                else
+                {
+                    uiClickPressed = false;
+                    OnAliasUIClickOff(SetControllerEvent(ref buttonBool, false, buttonPressure));
+                }
+            }
+
+            if (menuToggleButton == type)
+            {
+                if (touchDown)
+                {
+                    menuPressed = true;
+                    OnAliasMenuOn(SetControllerEvent(ref buttonBool, true, buttonPressure));
+                }
+                else
+                {
+                    menuPressed = false;
+                    OnAliasMenuOff(SetControllerEvent(ref buttonBool, false, buttonPressure));
+                }
+            }
+        }
+#pragma warning restore 0618
+
+        protected virtual void DisableEvents()
+        {
             if (triggerPressed)
             {
                 OnTriggerReleased(SetControllerEvent(ref triggerPressed, false, 0f));
+                EmitAlias(ButtonAlias.TriggerPress, false, 0f, ref triggerPressed);
             }
 
             if (triggerTouched)
             {
                 OnTriggerTouchEnd(SetControllerEvent(ref triggerTouched, false, 0f));
+                EmitAlias(ButtonAlias.TriggerTouch, false, 0f, ref triggerTouched);
             }
 
             if (triggerHairlinePressed)
             {
                 OnTriggerHairlineEnd(SetControllerEvent(ref triggerHairlinePressed, false, 0f));
+                EmitAlias(ButtonAlias.TriggerHairline, false, 0f, ref triggerHairlinePressed);
             }
 
             if (triggerClicked)
             {
                 OnTriggerUnclicked(SetControllerEvent(ref triggerClicked, false, 0f));
+                EmitAlias(ButtonAlias.TriggerClick, false, 0f, ref triggerClicked);
             }
 
             if (gripPressed)
             {
                 OnGripReleased(SetControllerEvent(ref gripPressed, false, 0f));
+                EmitAlias(ButtonAlias.GripPress, false, 0f, ref gripPressed);
             }
 
             if (gripTouched)
             {
                 OnGripTouchEnd(SetControllerEvent(ref gripTouched, false, 0f));
+                EmitAlias(ButtonAlias.GripTouch, false, 0f, ref gripTouched);
             }
 
             if (gripHairlinePressed)
             {
                 OnGripHairlineEnd(SetControllerEvent(ref gripHairlinePressed, false, 0f));
+                EmitAlias(ButtonAlias.GripHairline, false, 0f, ref gripHairlinePressed);
             }
 
             if (gripClicked)
             {
                 OnGripUnclicked(SetControllerEvent(ref gripClicked, false, 0f));
+                EmitAlias(ButtonAlias.GripClick, false, 0f, ref gripClicked);
             }
 
             if (touchpadPressed)
             {
                 OnTouchpadReleased(SetControllerEvent(ref touchpadPressed, false, 0f));
+                EmitAlias(ButtonAlias.TouchpadPress, false, 0f, ref touchpadPressed);
             }
 
             if (touchpadTouched)
             {
                 OnTouchpadTouchEnd(SetControllerEvent(ref touchpadTouched, false, 0f));
-            }
-
-            if (touchpadTwoPressed)
-            {
-                OnTouchpadTwoReleased(SetControllerEvent(ref touchpadTwoPressed, false, 0f));
-            }
-
-            if (touchpadTwoTouched)
-            {
-                OnTouchpadTwoTouchEnd(SetControllerEvent(ref touchpadTwoTouched, false, 0f));
+                EmitAlias(ButtonAlias.TouchpadTouch, false, 0f, ref touchpadTouched);
             }
 
             if (buttonOnePressed)
             {
                 OnButtonOneReleased(SetControllerEvent(ref buttonOnePressed, false, 0f));
+                EmitAlias(ButtonAlias.ButtonOnePress, false, 0f, ref buttonOnePressed);
             }
 
             if (buttonOneTouched)
             {
                 OnButtonOneTouchEnd(SetControllerEvent(ref buttonOneTouched, false, 0f));
+                EmitAlias(ButtonAlias.ButtonOneTouch, false, 0f, ref buttonOneTouched);
             }
 
             if (buttonTwoPressed)
             {
                 OnButtonTwoReleased(SetControllerEvent(ref buttonTwoPressed, false, 0f));
+                EmitAlias(ButtonAlias.ButtonTwoPress, false, 0f, ref buttonTwoPressed);
             }
 
             if (buttonTwoTouched)
             {
                 OnButtonTwoTouchEnd(SetControllerEvent(ref buttonTwoTouched, false, 0f));
+                EmitAlias(ButtonAlias.ButtonTwoTouch, false, 0f, ref buttonTwoTouched);
             }
 
             if (startMenuPressed)
             {
                 OnStartMenuReleased(SetControllerEvent(ref startMenuPressed, false, 0f));
-            }
-
-            if (gripSensePressed)
-            {
-                OnGripSenseReleased(SetControllerEvent(ref gripSensePressed, false, 0f));
+                EmitAlias(ButtonAlias.StartMenuPress, false, 0f, ref startMenuPressed);
             }
 
             triggerAxisChanged = false;
             gripAxisChanged = false;
             touchpadAxisChanged = false;
-            touchpadTwoAxisChanged = false;
-            triggerSenseAxisChanged = false;
-            touchpadSenseAxisChanged = false;
-            middleFingerSenseAxisChanged = false;
-            ringFingerSenseAxisChanged = false;
-            pinkyFingerSenseAxisChanged = false;
-            gripSenseAxisChanged = false;
 
             VRTK_ControllerReference controllerReference = VRTK_ControllerReference.GetControllerReference(gameObject);
 
@@ -2602,22 +1953,13 @@ namespace VRTK
                 Vector2 currentTriggerAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Trigger, controllerReference);
                 Vector2 currentGripAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Grip, controllerReference);
                 Vector2 currentTouchpadAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.Touchpad, controllerReference);
-                Vector2 currentTouchpadTwoAxis = VRTK_SDK_Bridge.GetControllerAxis(SDK_BaseController.ButtonTypes.TouchpadTwo, controllerReference);
 
                 // Save current touch and trigger settings to detect next change.
                 touchpadAxis = new Vector2(currentTouchpadAxis.x, currentTouchpadAxis.y);
-                touchpadTwoAxis = new Vector2(currentTouchpadTwoAxis.x, currentTouchpadTwoAxis.y);
                 triggerAxis = new Vector2(currentTriggerAxis.x, currentTriggerAxis.y);
                 gripAxis = new Vector2(currentGripAxis.x, currentGripAxis.y);
                 hairTriggerDelta = VRTK_SDK_Bridge.GetControllerHairlineDelta(SDK_BaseController.ButtonTypes.TriggerHairline, controllerReference);
                 hairGripDelta = VRTK_SDK_Bridge.GetControllerHairlineDelta(SDK_BaseController.ButtonTypes.GripHairline, controllerReference);
-
-                triggerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.Trigger, controllerReference));
-                touchpadSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.Touchpad, controllerReference));
-                middleFingerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.MiddleFinger, controllerReference));
-                ringFingerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.RingFinger, controllerReference));
-                pinkyFingerSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.PinkyFinger, controllerReference));
-                gripSenseAxis = ProcessSenseAxis(VRTK_SDK_Bridge.GetControllerSenseAxis(SDK_BaseController.ButtonTypes.Grip, controllerReference));
             }
         }
     }

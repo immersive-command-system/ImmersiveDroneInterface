@@ -1,4 +1,4 @@
-﻿// Controller Rigidbody Activator|Prefabs|0050
+﻿// Controller Rigidbody Activator|Prefabs|0033
 namespace VRTK
 {
     using UnityEngine;
@@ -20,23 +20,21 @@ namespace VRTK
     public delegate void ControllerRigidbodyActivatorEventHandler(object sender, ControllerRigidbodyActivatorEventArgs e);
 
     /// <summary>
-    /// Provides a simple trigger collider volume that when a controller enters will enable the rigidbody on the controller.
+    /// This adds a simple trigger collider volume that when a controller enters will enable the rigidbody on the controller.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/ControllerRigidbodyActivator/ControllerRigidbodyActivator` prefab in the scene at the location where the controller rigidbody should be automatically activated.
-    ///  * The prefab contains a default sphere collider to determine ths collision, this collider component can be customised in the inspector or can be replaced with another collider component (set to `Is Trigger`).
+    /// The prefab game object should be placed in the scene where another interactable game object (such as a button control) is located to turn the controller rigidbody on at the appropriate time for interaction with the control without needing to manually activate by pressing the grab.
+    /// 
+    /// If the prefab is placed as a child of the target interactable game object then the collider volume on the prefab will trigger collisions on the interactable object.
     ///
-    ///   > If the prefab is placed as a child of the target Interactable Object then the collider volume on the prefab will trigger collisions on the Interactable Object.
+    /// The sphere collider on the prefab can have the radius adjusted to determine how close the controller needs to be to the object before the rigidbody is activated.
+    ///
+    /// It's also possible to replace the sphere trigger collider with an alternative trigger collider for customised collision detection.
     /// </remarks>
     public class VRTK_ControllerRigidbodyActivator : MonoBehaviour
     {
-        [Tooltip("If this is checked then the Collider will have it's Rigidbody toggled on and off during a collision.")]
+        [Tooltip("If this is checked then the collider will have it's rigidbody toggled on and off during a collision.")]
         public bool isEnabled = true;
-        [Tooltip("If this is checked then the Rigidbody Activator will activate the rigidbody and colliders on the Interact Touch script.")]
-        public bool activateInteractTouch = true;
-        [Tooltip("If this is checked then the Rigidbody Activator will activate the rigidbody and colliders on the Controller Tracked Collider script.")]
-        public bool activateTrackedCollider = false;
 
         /// <summary>
         /// Emitted when the controller rigidbody is turned on.
@@ -75,27 +73,11 @@ namespace VRTK
 
         protected virtual void ToggleRigidbody(Collider collider, bool state)
         {
-            if (isEnabled || !state)
+            VRTK_InteractTouch touch = collider.GetComponentInParent<VRTK_InteractTouch>();
+            if (touch != null && (isEnabled || !state))
             {
-                if (activateTrackedCollider)
-                {
-                    VRTK_ControllerTrackedCollider trackedCollider = collider.GetComponentInParent<VRTK_ControllerTrackedCollider>();
-                    if (trackedCollider != null)
-                    {
-                        trackedCollider.ToggleColliders(state);
-                        EmitEvent(state, trackedCollider.interactTouch);
-                    }
-                }
-
-                if (activateInteractTouch)
-                {
-                    VRTK_InteractTouch touch = collider.GetComponentInParent<VRTK_InteractTouch>();
-                    if (touch != null)
-                    {
-                        touch.ToggleControllerRigidBody(state, state);
-                        EmitEvent(state, touch);
-                    }
-                }
+                touch.ToggleControllerRigidBody(state, state);
+                EmitEvent(state, touch);
             }
         }
 

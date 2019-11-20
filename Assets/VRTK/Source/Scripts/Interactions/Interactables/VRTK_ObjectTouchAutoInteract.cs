@@ -1,40 +1,25 @@
-﻿// Object Touch Auto Interact|Interactables|35050
+﻿// Object Touch Auto Interact|Interactions|30120
 namespace VRTK
 {
     using UnityEngine;
     using System.Collections.Generic;
 
     /// <summary>
-    /// Allows for Interact Grab or Interact Use interactions to automatically happen upon touching an Interactable Object.
+    /// The Object Touch Auto Interact script allows grab or use interactions on an object to automatically happen upon touching the interactable object.
     /// </summary>
-    /// <remarks>
-    /// **Required Components:**
-    ///  * `VRTK_InteractableObject` - The Interactable Object component to detect interactions on. This must be applied on the same GameObject as this script if one is not provided via the `Interactable Object` parameter.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_ObjectTouchAutoInteract` script on either:
-    ///    * The GameObject of the Interactable Object to detect interactions on.
-    ///    * Any other scene GameObject and provide a valid `VRTK_InteractableObject` component to the `Interactable Object` parameter of this script.
-    /// </remarks>
-    [AddComponentMenu("VRTK/Scripts/Interactions/Interactables/VRTK_ObjectTouchAutoInteract")]
-    public class VRTK_ObjectTouchAutoInteract : VRTK_InteractableListener
+    [AddComponentMenu("VRTK/Scripts/Interactions/VRTK_ObjectTouchAutoInteract")]
+    public class VRTK_ObjectTouchAutoInteract : MonoBehaviour
     {
         /// <summary>
         /// Situation when auto interaction can occur.
         /// </summary>
+        /// <param name="Never">Auto interaction can never occur on touch.</param>
+        /// <param name="NoButtonHeld">Auto interaction will occur on touch even if the specified interaction button is not held down.</param>
+        /// <param name="ButtonHeld">Auto interaction will only occur on touch if the specified interaction button is held down.</param>
         public enum AutoInteractions
         {
-            /// <summary>
-            /// Auto interaction can never occur on touch.
-            /// </summary>
             Never,
-            /// <summary>
-            /// Auto interaction will occur on touch even if the specified interaction button is not held down.
-            /// </summary>
             NoButtonHeld,
-            /// <summary>
-            /// Auto interaction will only occur on touch if the specified interaction button is held down.
-            /// </summary>
             ButtonHeld
         }
 
@@ -44,7 +29,7 @@ namespace VRTK
         public AutoInteractions grabOnTouchWhen = AutoInteractions.Never;
         [Tooltip("After being ungrabbed, another auto grab on touch can only occur after this time.")]
         public float regrabDelay = 0.1f;
-        [Tooltip("If this is checked then the grab on touch check will happen every frame and not only on the first touch of the Interactable Object.")]
+        [Tooltip("If this is checked then the grab on touch check will happen every frame and not only on the first touch of the object.")]
         public bool continuousGrabCheck = false;
 
         [Header("Auto Use")]
@@ -53,29 +38,44 @@ namespace VRTK
         public AutoInteractions useOnTouchWhen = AutoInteractions.Never;
         [Tooltip("After being unused, another auto use on touch can only occur after this time.")]
         public float reuseDelay = 0.1f;
-        [Tooltip("If this is checked then the use on touch check will happen every frame and not only on the first touch of the Interactable Object.")]
+        [Tooltip("If this is checked then the use on touch check will happen every frame and not only on the first touch of the object.")]
         public bool continuousUseCheck = false;
 
         [Header("Custom Settings")]
 
-        [Tooltip("The Interactable Object that the auto interaction will occur on. If this is blank then the script must be on the same GameObject as the Interactable Object script.")]
+        [Tooltip("The interactable object that the auto interaction will occur on. If this is blank then the script must be on the same GameObject as the Interactable Object script.")]
         public VRTK_InteractableObject interactableObject;
 
         protected float regrabTimer;
         protected float reuseTimer;
-        protected List<GameObject> touchers = new List<GameObject>();
+        protected List<GameObject> touchers;
 
         protected virtual void OnEnable()
         {
             regrabTimer = 0f;
             reuseTimer = 0f;
-            touchers.Clear();
-            EnableListeners();
+            touchers = new List<GameObject>();
+
+            interactableObject = (interactableObject != null ? interactableObject : GetComponent<VRTK_InteractableObject>());
+
+            if (interactableObject != null)
+            {
+                interactableObject.InteractableObjectTouched += InteractableObjectTouched;
+                interactableObject.InteractableObjectUntouched += InteractableObjectUntouched;
+                interactableObject.InteractableObjectUngrabbed += InteractableObjectUngrabbed;
+                interactableObject.InteractableObjectUnused += InteractableObjectUnused;
+            }
         }
 
         protected virtual void OnDisable()
         {
-            TearDownListeners();
+            if (interactableObject != null)
+            {
+                interactableObject.InteractableObjectTouched -= InteractableObjectTouched;
+                interactableObject.InteractableObjectUntouched -= InteractableObjectUntouched;
+                interactableObject.InteractableObjectUngrabbed -= InteractableObjectUngrabbed;
+                interactableObject.InteractableObjectUnused -= InteractableObjectUnused;
+            }
         }
 
         protected virtual void Update()
@@ -93,35 +93,6 @@ namespace VRTK
                         CheckUse(touchers[i]);
                     }
                 }
-            }
-        }
-
-        protected override bool SetupListeners(bool throwError)
-        {
-            interactableObject = (interactableObject != null ? interactableObject : GetComponentInParent<VRTK_InteractableObject>());
-            if (interactableObject != null)
-            {
-                interactableObject.InteractableObjectTouched += InteractableObjectTouched;
-                interactableObject.InteractableObjectUntouched += InteractableObjectUntouched;
-                interactableObject.InteractableObjectUngrabbed += InteractableObjectUngrabbed;
-                interactableObject.InteractableObjectUnused += InteractableObjectUnused;
-                return true;
-            }
-            else if (throwError)
-            {
-                VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_FROM_GAMEOBJECT, "VRTK_ObjectTouchAutoInteract", "VRTK_InteractableObject", "the same or parent"));
-            }
-            return false;
-        }
-
-        protected override void TearDownListeners()
-        {
-            if (interactableObject != null)
-            {
-                interactableObject.InteractableObjectTouched -= InteractableObjectTouched;
-                interactableObject.InteractableObjectUntouched -= InteractableObjectUntouched;
-                interactableObject.InteractableObjectUngrabbed -= InteractableObjectUngrabbed;
-                interactableObject.InteractableObjectUnused -= InteractableObjectUnused;
             }
         }
 
@@ -150,11 +121,11 @@ namespace VRTK
 
         protected virtual void ManageTouchers(GameObject interactingObject, bool add)
         {
-            if (add)
+            if (add && !touchers.Contains(interactingObject))
             {
-                VRTK_SharedMethods.AddListValue(touchers, interactingObject, true);
+                touchers.Add(interactingObject);
             }
-            else
+            else if (!add && touchers.Contains(interactingObject))
             {
                 touchers.Remove(interactingObject);
             }
@@ -164,7 +135,7 @@ namespace VRTK
         {
             if (grabOnTouchWhen != AutoInteractions.Never && regrabTimer < Time.time)
             {
-                VRTK_InteractGrab interactGrabScript = interactingObject.GetComponentInChildren<VRTK_InteractGrab>();
+                VRTK_InteractGrab interactGrabScript = interactingObject.GetComponent<VRTK_InteractGrab>();
                 if (interactGrabScript != null && (grabOnTouchWhen == AutoInteractions.NoButtonHeld || (grabOnTouchWhen == AutoInteractions.ButtonHeld && interactGrabScript.IsGrabButtonPressed())))
                 {
                     interactGrabScript.AttemptGrab();
@@ -176,7 +147,7 @@ namespace VRTK
         {
             if (useOnTouchWhen != AutoInteractions.Never && reuseTimer < Time.time)
             {
-                VRTK_InteractUse interactUseScript = interactingObject.GetComponentInChildren<VRTK_InteractUse>();
+                VRTK_InteractUse interactUseScript = interactingObject.GetComponent<VRTK_InteractUse>();
                 if (interactUseScript != null && (useOnTouchWhen == AutoInteractions.NoButtonHeld || (useOnTouchWhen == AutoInteractions.ButtonHeld && interactUseScript.IsUseButtonPressed())))
                 {
                     if (!interactableObject.holdButtonToUse && interactableObject.IsUsing())

@@ -4,26 +4,16 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// Provides a base that all object control actions can inherit from.
+    /// The Base Object Control Action script is an abstract class that all object control action scripts inherit.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///   > This is an abstract class that is to be inherited to a concrete class that provides object control action functionality, therefore this script should not be directly used.
+    /// As this is an abstract class, it cannot be applied directly to a game object and performs no logic.
     /// </remarks>
     public abstract class VRTK_BaseObjectControlAction : MonoBehaviour
     {
-        /// <summary>
-        /// The axis to listen to changes on.
-        /// </summary>
         public enum AxisListeners
         {
-            /// <summary>
-            /// Listen for changes on the horizontal X axis.
-            /// </summary>
             XAxisChanged,
-            /// <summary>
-            /// Listen for changes on the vertical y axis.
-            /// </summary>
             YAxisChanged
         }
 
@@ -38,17 +28,12 @@ namespace VRTK
         protected float colliderHeight = 0f;
         protected Transform controlledTransform;
         protected Transform playArea;
-        protected VRTK_BodyPhysics internalBodyPhysics;
-        
-        protected Vector3 playerHeadPositionBeforeRotation;
-        protected Transform headsetTransform;
-        protected bool validPlayerObject;
 
         protected abstract void Process(GameObject controlledGameObject, Transform directionDevice, Vector3 axisDirection, float axis, float deadzone, bool currentlyFalling, bool modifierActive);
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -66,7 +51,6 @@ namespace VRTK
                         break;
                 }
             }
-            internalBodyPhysics = (internalBodyPhysics == null ? VRTK_SharedMethods.FindEvenInactiveComponent<VRTK_BodyPhysics>(true) : internalBodyPhysics);
         }
 
         protected virtual void OnDisable()
@@ -87,7 +71,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void AxisChanged(object sender, ObjectControlEventArgs e)
@@ -126,22 +110,15 @@ namespace VRTK
 
                 if (checkObject == playArea)
                 {
-                    bool centerColliderSet = false;
-
-                    if (internalBodyPhysics != null && internalBodyPhysics.GetBodyColliderContainer() != null)
+                    CapsuleCollider playAreaCollider = playArea.GetComponentInChildren<CapsuleCollider>();
+                    centerCollider = playAreaCollider;
+                    if (playAreaCollider != null)
                     {
-                        CapsuleCollider playAreaCollider = internalBodyPhysics.GetBodyColliderContainer().GetComponent<CapsuleCollider>();
-                        centerCollider = playAreaCollider;
-                        if (playAreaCollider != null)
-                        {
-                            centerColliderSet = true;
-                            colliderRadius = playAreaCollider.radius;
-                            colliderHeight = playAreaCollider.height;
-                            colliderCenter = playAreaCollider.center;
-                        }
+                        colliderRadius = playAreaCollider.radius;
+                        colliderHeight = playAreaCollider.height;
+                        colliderCenter = playAreaCollider.center;
                     }
-
-                    if (!centerColliderSet)
+                    else
                     {
                         VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_FROM_GAMEOBJECT, "PlayArea", "CapsuleCollider", "the same or child"));
                     }
@@ -186,42 +163,6 @@ namespace VRTK
             Vector3 proposedDirection = (proposedPosition - currentPosition).normalized;
             float distance = Vector3.Distance(currentPosition, proposedPosition);
             return !givenBodyPhysics.SweepCollision(proposedDirection, distance);
-        }
-        
-        /// <summary>
-        /// Since rotation scripts may rotate the game object '[CameraRig]' in order to rotate the player and the player's head does not always have the local position (0,0,0), the rotation will result in a position offset of player's head. The game object '[CameraRig]' will moved relativly to compensate that. Therefore it will save the player's head position in this method. 
-        /// Call 'CheckForPlayerAfterRotation()' to correct the player's head position offset after rotation.
-        /// </summary>
-        /// <param name="controlledGameObject"></param>
-        protected virtual void CheckForPlayerBeforeRotation(GameObject controlledGameObject)
-        {
-            VRTK_PlayerObject playerObject = controlledGameObject.GetComponent<VRTK_PlayerObject>();
-            if (headsetTransform == null)
-            {
-                headsetTransform = VRTK_DeviceFinder.HeadsetTransform();
-            }
-            validPlayerObject = (playerObject != null && playerObject.objectType == VRTK_PlayerObject.ObjectTypes.CameraRig && headsetTransform != null);
-            if (validPlayerObject)
-            {
-                //Save the player's head position for use in method 'CheckForPlayerAfterRotation'.
-                playerHeadPositionBeforeRotation = headsetTransform.position;
-            }
-        }
-
-        /// <summary>
-        /// Corrects the player's head position offset after rotation. Call 'CheckForPlayerBeforeRotation' before execute rotation.
-        /// </summary>
-        /// <param name="controlledGameObject"></param>
-        protected virtual void CheckForPlayerAfterRotation(GameObject controlledGameObject)
-        {
-            //If necessary the player's head position will be corrected by translate the Gameobject [CameraRig] relativly.
-            if (validPlayerObject)
-            {
-                controlledGameObject.transform.position += playerHeadPositionBeforeRotation - headsetTransform.position;
-
-                //Prevents multiple calls of this method without call of 'CheckForPlayerBeforeRotation'.
-                validPlayerObject = false;
-            }
         }
     }
 }

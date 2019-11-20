@@ -1,8 +1,7 @@
-﻿// Interact Controller Appearance|Interactables|30040
+﻿// Interact Controller Appearance|Interactions|30040
 namespace VRTK
 {
     using UnityEngine;
-    using System;
     using System.Collections;
 
     /// <summary>
@@ -10,7 +9,6 @@ namespace VRTK
     /// </summary>
     /// <param name="interactingObject">The object that is interacting.</param>
     /// <param name="ignoredObject">The object that is being ignored.</param>
-    [Obsolete("`InteractControllerAppearanceEventArgs` will be removed in a future version of VRTK.")]
     public struct InteractControllerAppearanceEventArgs
     {
         public GameObject interactingObject;
@@ -22,7 +20,6 @@ namespace VRTK
     /// </summary>
     /// <param name="sender">this object</param>
     /// <param name="e"><see cref="InteractControllerAppearanceEventArgs"/></param>
-    [Obsolete("`InteractControllerAppearanceEventHandler` will be removed in a future version of VRTK.")]
     public delegate void InteractControllerAppearanceEventHandler(object sender, InteractControllerAppearanceEventArgs e);
 
     /// <summary>
@@ -31,8 +28,7 @@ namespace VRTK
     /// <example>
     /// `VRTK/Examples/008_Controller_UsingAGrabbedObject` shows that the controller can be hidden when touching, grabbing and using an object.
     /// </example>
-    [AddComponentMenu("VRTK/Scripts/Interactions/Interactables/VRTK_InteractControllerAppearance")]
-    [Obsolete("`VRTK_InteractControllerAppearance` has been replaced with `VRTK_InteractObjectAppearance`. This script will be removed in a future version of VRTK.")]
+    [AddComponentMenu("VRTK/Scripts/Interactions/VRTK_InteractControllerAppearance")]
     public class VRTK_InteractControllerAppearance : MonoBehaviour
     {
         [Header("Touch Visibility")]
@@ -191,7 +187,7 @@ namespace VRTK
         {
             if (hideControllerOnGrab)
             {
-                VRTK_InteractableObject objScript = (ignoredObject != null ? ignoredObject.GetComponentInParent<VRTK_InteractableObject>() : null);
+                var objScript = (ignoredObject != null ? ignoredObject.GetComponentInParent<VRTK_InteractableObject>() : null);
 
                 //if attempting to show the controller but it's touched and the touch should hide the controller
                 if (showController && !touchControllerShow && objScript && objScript.IsTouched())
@@ -222,7 +218,7 @@ namespace VRTK
         {
             if (hideControllerOnUse)
             {
-                VRTK_InteractableObject objScript = (ignoredObject != null ? ignoredObject.GetComponentInParent<VRTK_InteractableObject>() : null);
+                var objScript = (ignoredObject != null ? ignoredObject.GetComponentInParent<VRTK_InteractableObject>() : null);
 
                 //if attempting to show the controller but it's grabbed and the grab should hide the controller
                 if (showController && ((!grabControllerShow && objScript && objScript.IsGrabbed()) || (!touchControllerShow && objScript && objScript.IsTouched())))

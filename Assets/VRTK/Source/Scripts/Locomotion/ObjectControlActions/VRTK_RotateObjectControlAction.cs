@@ -4,18 +4,10 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// Provides the ability to rotate a GameObject through the world `y` axis in the scene by updating the Transform rotation when the corresponding Object Control axis changes.
+    /// The Rotate Object Control Action script is used to rotate the controlled GameObject around the up vector when changing the axis.
     /// </summary>
     /// <remarks>
-    ///   > The effect is a smooth rotation to simulate turning.
-    ///
-    /// **Required Components:**
-    ///  * `VRTK_ObjectControl` - The Object Control script to listen for the axis changes on.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_RotateObjectControlAction` script on any active scene GameObject.
-    ///  * Link the required Object Control script to the `Object Control Script` parameter of this script.
-    ///  * Set the `Listen On Axis Change` parameter on this script to the axis change to affect with this movement type.
+    /// The effect is a smooth rotation to simulate turning.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/017_CameraRig_TouchpadWalking` has a collection of walls and slopes that can be traversed by the user with the touchpad. There is also an area that can only be traversed if the user is crouching.
@@ -32,15 +24,11 @@ namespace VRTK
 
         protected override void Process(GameObject controlledGameObject, Transform directionDevice, Vector3 axisDirection, float axis, float deadzone, bool currentlyFalling, bool modifierActive)
         {
-            CheckForPlayerBeforeRotation(controlledGameObject);
-
             float angle = Rotate(axis, modifierActive);
             if (angle != 0f)
             {
                 RotateAroundPlayer(controlledGameObject, angle);
             }
-
-            CheckForPlayerAfterRotation(controlledGameObject);
         }
 
         protected virtual float Rotate(float axis, bool modifierActive)

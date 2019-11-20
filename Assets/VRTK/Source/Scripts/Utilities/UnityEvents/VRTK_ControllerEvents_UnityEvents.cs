@@ -64,7 +64,6 @@
         public ControllerInteractionEvent OnControllerEnabled = new ControllerInteractionEvent();
         public ControllerInteractionEvent OnControllerDisabled = new ControllerInteractionEvent();
         public ControllerInteractionEvent OnControllerIndexChanged = new ControllerInteractionEvent();
-        public ControllerInteractionEvent OnControllerModelAvailable = new ControllerInteractionEvent();
 
         public ControllerInteractionEvent OnControllerVisible = new ControllerInteractionEvent();
         public ControllerInteractionEvent OnControllerHidden = new ControllerInteractionEvent();
@@ -110,10 +109,23 @@
             component.StartMenuPressed += StartMenuPressed;
             component.StartMenuReleased += StartMenuReleased;
 
+#pragma warning disable 0618
+            component.AliasPointerOn += AliasPointerOn;
+            component.AliasPointerOff += AliasPointerOff;
+            component.AliasPointerSet += AliasPointerSet;
+            component.AliasGrabOn += AliasGrabOn;
+            component.AliasGrabOff += AliasGrabOff;
+            component.AliasUseOn += AliasUseOn;
+            component.AliasUseOff += AliasUseOff;
+            component.AliasUIClickOn += AliasUIClickOn;
+            component.AliasUIClickOff += AliasUIClickOff;
+            component.AliasMenuOn += AliasMenuOn;
+            component.AliasMenuOff += AliasMenuOff;
+#pragma warning restore 0618
+
             component.ControllerEnabled += ControllerEnabled;
             component.ControllerDisabled += ControllerDisabled;
             component.ControllerIndexChanged += ControllerIndexChanged;
-            component.ControllerModelAvailable += ControllerModelAvailable;
 
             component.ControllerVisible += ControllerVisible;
             component.ControllerHidden += ControllerHidden;
@@ -160,10 +172,23 @@
             component.StartMenuPressed -= StartMenuPressed;
             component.StartMenuReleased -= StartMenuReleased;
 
+#pragma warning disable 0618
+            component.AliasPointerOn -= AliasPointerOn;
+            component.AliasPointerOff -= AliasPointerOff;
+            component.AliasPointerSet -= AliasPointerSet;
+            component.AliasGrabOn -= AliasGrabOn;
+            component.AliasGrabOff -= AliasGrabOff;
+            component.AliasUseOn -= AliasUseOn;
+            component.AliasUseOff -= AliasUseOff;
+            component.AliasUIClickOn -= AliasUIClickOn;
+            component.AliasUIClickOff -= AliasUIClickOff;
+            component.AliasMenuOn -= AliasMenuOn;
+            component.AliasMenuOff -= AliasMenuOff;
+#pragma warning restore 0618
+
             component.ControllerEnabled -= ControllerEnabled;
             component.ControllerDisabled -= ControllerDisabled;
             component.ControllerIndexChanged -= ControllerIndexChanged;
-            component.ControllerModelAvailable -= ControllerModelAvailable;
 
             component.ControllerVisible -= ControllerVisible;
             component.ControllerHidden -= ControllerHidden;
@@ -402,11 +427,6 @@
         private void ControllerIndexChanged(object o, ControllerInteractionEventArgs e)
         {
             OnControllerIndexChanged.Invoke(o, e);
-        }
-
-        private void ControllerModelAvailable(object o, ControllerInteractionEventArgs e)
-        {
-            OnControllerModelAvailable.Invoke(o, e);
         }
 
         private void ControllerVisible(object o, ControllerInteractionEventArgs e)

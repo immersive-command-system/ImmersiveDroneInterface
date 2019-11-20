@@ -44,7 +44,7 @@
 
         protected virtual List<RaycastResult> CheckRaycasts(VRTK_UIPointer pointer)
         {
-            RaycastResult raycastResult = new RaycastResult();
+            var raycastResult = new RaycastResult();
             raycastResult.worldPosition = pointer.GetOriginPosition();
             raycastResult.worldNormal = pointer.GetOriginForward();
 
@@ -62,7 +62,7 @@
                 return false;
             }
 
-            if (target == source)
+            if (target.Equals(source))
             {
                 return true;
             }
@@ -77,10 +77,9 @@
 
         protected virtual bool IsHovering(VRTK_UIPointer pointer)
         {
-            for (int i = 0; i < pointer.pointerEventData.hovered.Count; i++)
+            foreach (var hoveredObject in pointer.pointerEventData.hovered)
             {
-                GameObject hoveredObject = pointer.pointerEventData.hovered[i];
-                if (pointer.pointerEventData.pointerEnter != null && hoveredObject != null && CheckTransformTree(hoveredObject.transform, pointer.pointerEventData.pointerEnter.transform))
+                if (pointer.pointerEventData.pointerEnter && hoveredObject && CheckTransformTree(hoveredObject.transform, pointer.pointerEventData.pointerEnter.transform))
                 {
                     return true;
                 }
@@ -90,8 +89,8 @@
 
         protected virtual bool ValidElement(GameObject obj)
         {
-            VRTK_UICanvas canvasCheck = obj.GetComponentInParent<VRTK_UICanvas>();
-            return (canvasCheck != null && canvasCheck.enabled ? true : false);
+            var canvasCheck = obj.GetComponentInParent<VRTK_UICanvas>();
+            return (canvasCheck && canvasCheck.enabled ? true : false);
         }
 
         protected virtual void CheckPointerHoverClick(VRTK_UIPointer pointer, List<RaycastResult> results)
@@ -110,7 +109,7 @@
 
         protected virtual void Hover(VRTK_UIPointer pointer, List<RaycastResult> results)
         {
-            if (pointer.pointerEventData.pointerEnter != null)
+            if (pointer.pointerEventData.pointerEnter)
             {
                 CheckPointerHoverClick(pointer, results);
                 if (!ValidElement(pointer.pointerEventData.pointerEnter))
@@ -128,30 +127,22 @@
             }
             else
             {
-                for (int i = 0; i < results.Count; i++)
+                foreach (var result in results)
                 {
-                    RaycastResult result = results[i];
                     if (!ValidElement(result.gameObject))
                     {
                         continue;
                     }
 
-                    GameObject target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.pointerEnterHandler);
-                    target = (target == null ? result.gameObject : target);
-
+                    var target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.pointerEnterHandler);
                     if (target != null)
                     {
-                        Selectable selectable = target.GetComponent<Selectable>();
-                        if (selectable != null)
+                        var selectable = target.GetComponent<Selectable>();
+                        if (selectable)
                         {
-                            Navigation noNavigation = new Navigation();
+                            var noNavigation = new Navigation();
                             noNavigation.mode = Navigation.Mode.None;
                             selectable.navigation = noNavigation;
-                        }
-
-                        if (pointer.hoveringElement != null && pointer.hoveringElement != target)
-                        {
-                            pointer.OnUIPointerElementExit(pointer.SetUIPointerEvent(result, null, pointer.hoveringElement));
                         }
 
                         pointer.OnUIPointerElementEnter(pointer.SetUIPointerEvent(result, target, pointer.hoveringElement));
@@ -161,12 +152,14 @@
                         pointer.pointerEventData.hovered.Add(pointer.pointerEventData.pointerEnter);
                         break;
                     }
-
-                    if (result.gameObject != pointer.hoveringElement)
+                    else
                     {
-                        pointer.OnUIPointerElementEnter(pointer.SetUIPointerEvent(result, result.gameObject, pointer.hoveringElement));
+                        if (result.gameObject != pointer.hoveringElement)
+                        {
+                            pointer.OnUIPointerElementEnter(pointer.SetUIPointerEvent(result, result.gameObject, pointer.hoveringElement));
+                        }
+                        pointer.hoveringElement = result.gameObject;
                     }
-                    pointer.hoveringElement = result.gameObject;
                 }
 
                 if (pointer.hoveringElement && results.Count == 0)
@@ -215,15 +208,14 @@
         {
             if (pointer.pointerEventData.eligibleForClick)
             {
-                for (int i = 0; i < results.Count; i++)
+                foreach (var result in results)
                 {
-                    RaycastResult result = results[i];
                     if (!ValidElement(result.gameObject))
                     {
                         continue;
                     }
 
-                    GameObject target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.pointerDownHandler);
+                    var target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.pointerDownHandler);
                     if (target != null)
                     {
                         pointer.pointerEventData.pressPosition = pointer.pointerEventData.position;
@@ -290,18 +282,17 @@
                 {
                     ExecuteEvents.ExecuteHierarchy(pointer.pointerEventData.pointerDrag, pointer.pointerEventData, ExecuteEvents.dragHandler);
                     ExecuteEvents.ExecuteHierarchy(pointer.pointerEventData.pointerDrag, pointer.pointerEventData, ExecuteEvents.endDragHandler);
-                    for (int i = 0; i < results.Count; i++)
+                    foreach (RaycastResult raycast in results)
                     {
-                        ExecuteEvents.ExecuteHierarchy(results[i].gameObject, pointer.pointerEventData, ExecuteEvents.dropHandler);
+                        ExecuteEvents.ExecuteHierarchy(raycast.gameObject, pointer.pointerEventData, ExecuteEvents.dropHandler);
                     }
                     pointer.pointerEventData.pointerDrag = null;
                 }
             }
             else if (pointer.pointerEventData.dragging)
             {
-                for (int i = 0; i < results.Count; i++)
+                foreach (var result in results)
                 {
-                    RaycastResult result = results[i];
                     if (!ValidElement(result.gameObject))
                     {
                         continue;
@@ -309,7 +300,7 @@
 
                     ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.initializePotentialDrag);
                     ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.beginDragHandler);
-                    GameObject target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.dragHandler);
+                    var target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.dragHandler);
                     if (target != null)
                     {
                         pointer.pointerEventData.pointerDrag = target;
@@ -321,21 +312,21 @@
 
         protected virtual void Scroll(VRTK_UIPointer pointer, List<RaycastResult> results)
         {
-            pointer.pointerEventData.scrollDelta = (pointer.controllerEvents != null ? pointer.controllerEvents.GetTouchpadAxis() : Vector2.zero);
-            bool scrollWheelVisible = false;
-            for (int i = 0; i < results.Count; i++)
+            pointer.pointerEventData.scrollDelta = pointer.controller.GetTouchpadAxis();
+            var scrollWheelVisible = false;
+            foreach (RaycastResult result in results)
             {
                 if (pointer.pointerEventData.scrollDelta != Vector2.zero)
                 {
-                    GameObject target = ExecuteEvents.ExecuteHierarchy(results[i].gameObject, pointer.pointerEventData, ExecuteEvents.scrollHandler);
-                    if (target != null)
+                    var target = ExecuteEvents.ExecuteHierarchy(result.gameObject, pointer.pointerEventData, ExecuteEvents.scrollHandler);
+                    if (target)
                     {
                         scrollWheelVisible = true;
                     }
                 }
             }
 
-            if (pointer.controllerRenderModel != null)
+            if (pointer.controllerRenderModel)
             {
                 VRTK_SDK_Bridge.SetControllerRenderModelWheel(pointer.controllerRenderModel, scrollWheelVisible);
             }

@@ -13,7 +13,6 @@ namespace VRTK
     /// `VRTK/Examples/025_Controls_Overview` has a selection of sliders at various angles with different step values to demonstrate their usage.
     /// </example>
     [AddComponentMenu("VRTK/Scripts/Controls/3D/VRTK_Slider")]
-    [System.Obsolete("`VRTK.VRTK_Drawer` has been deprecated and can be recreated with `VRTK.Controllables.PhysicsBased.VRTK_PhysicsSlider`. This script will be removed in a future version of VRTK.")]
     public class VRTK_Slider : VRTK_Control
     {
         [Tooltip("An optional game object to which the wheel will be connected. If the game object moves the wheel will follow along.")]
@@ -66,7 +65,7 @@ namespace VRTK
         {
             if (sliderJointCreated)
             {
-                if (connectedTo != null)
+                if (connectedTo)
                 {
                     sliderJoint.connectedBody = connectedTo.GetComponent<Rigidbody>();
                 }
@@ -87,7 +86,7 @@ namespace VRTK
                 Vector3 sliderDiff = transform.localScale / 2f;
 
                 //The right ray has found the min on the right, so max is on the left
-                if (rightHasHit && hitRight.collider.gameObject == minimumLimit.gameObject)
+                if (rightHasHit && hitRight.collider.gameObject.Equals(minimumLimit.gameObject))
                 {
                     finalDirection = Direction.x;
                     minimumLimitDiff = CalculateDiff(minimumLimit.transform.localPosition, Vector3.right, minimumLimit.transform.localScale.x, sliderDiff.x, false);
@@ -95,7 +94,7 @@ namespace VRTK
                 }
 
                 //The right ray has found the max on the right, so min is on the left
-                if (rightHasHit && hitRight.collider.gameObject == maximumLimit.gameObject)
+                if (rightHasHit && hitRight.collider.gameObject.Equals(maximumLimit.gameObject))
                 {
                     finalDirection = Direction.x;
                     minimumLimitDiff = CalculateDiff(minimumLimit.transform.localPosition, Vector3.right, minimumLimit.transform.localScale.x, sliderDiff.x, true);
@@ -103,7 +102,7 @@ namespace VRTK
                 }
 
                 // the up ray has found the min above, so max is below
-                if (upHasHit && hitUp.collider.gameObject == minimumLimit.gameObject)
+                if (upHasHit && hitUp.collider.gameObject.Equals(minimumLimit.gameObject))
                 {
                     finalDirection = Direction.y;
                     minimumLimitDiff = CalculateDiff(minimumLimit.transform.localPosition, Vector3.up, minimumLimit.transform.localScale.y, sliderDiff.y, false);
@@ -111,7 +110,7 @@ namespace VRTK
                 }
 
                 //the up ray has found the max above, so the min ix below
-                if (upHasHit && hitUp.collider.gameObject == maximumLimit.gameObject)
+                if (upHasHit && hitUp.collider.gameObject.Equals(maximumLimit.gameObject))
                 {
                     finalDirection = Direction.y;
                     minimumLimitDiff = CalculateDiff(minimumLimit.transform.localPosition, Vector3.up, minimumLimit.transform.localScale.y, sliderDiff.y, true);
@@ -119,7 +118,7 @@ namespace VRTK
                 }
 
                 //the forward ray has found the min in front, so the max is behind
-                if (forwardHasHit && hitForward.collider.gameObject == minimumLimit.gameObject)
+                if (forwardHasHit && hitForward.collider.gameObject.Equals(minimumLimit.gameObject))
                 {
                     finalDirection = Direction.z;
                     minimumLimitDiff = CalculateDiff(minimumLimit.transform.localPosition, Vector3.forward, minimumLimit.transform.localScale.y, sliderDiff.y, false);
@@ -127,7 +126,7 @@ namespace VRTK
                 }
 
                 //the forward ray has found the max in front, so the min is behind
-                if (forwardHasHit && hitForward.collider.gameObject == maximumLimit.gameObject)
+                if (forwardHasHit && hitForward.collider.gameObject.Equals(maximumLimit.gameObject))
                 {
                     finalDirection = Direction.z;
                     minimumLimitDiff = CalculateDiff(minimumLimit.transform.localPosition, Vector3.forward, minimumLimit.transform.localScale.z, sliderDiff.z, true);
@@ -158,9 +157,9 @@ namespace VRTK
 
         protected virtual Vector3 CalculateDiff(Vector3 initialPosition, Vector3 givenDirection, float scaleValue, float diffMultiplier, bool addition)
         {
-            Vector3 additionDiff = givenDirection * diffMultiplier;
+            var additionDiff = givenDirection * diffMultiplier;
 
-            Vector3 limitDiff = givenDirection * (scaleValue / 2f);
+            var limitDiff = givenDirection * (scaleValue / 2f);
             if (addition)
             {
                 limitDiff = initialPosition + limitDiff;
@@ -170,7 +169,7 @@ namespace VRTK
                 limitDiff = initialPosition - limitDiff;
             }
 
-            Vector3 answer = initialPosition - limitDiff;
+            var answer = initialPosition - limitDiff;
 
             if (addition)
             {
@@ -196,7 +195,7 @@ namespace VRTK
             sliderRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             sliderRigidbody.drag = releasedFriction;
 
-            if (connectedTo != null)
+            if (connectedTo)
             {
                 Rigidbody connectedToRigidbody = connectedTo.GetComponent<Rigidbody>();
                 if (connectedToRigidbody == null)

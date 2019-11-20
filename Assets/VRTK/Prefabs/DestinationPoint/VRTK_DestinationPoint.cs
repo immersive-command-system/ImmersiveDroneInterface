@@ -1,4 +1,4 @@
-﻿// Destination Point|Prefabs|0090
+﻿// Destination Point|Prefabs|0055
 namespace VRTK
 {
     using UnityEngine;
@@ -11,13 +11,12 @@ namespace VRTK
     public delegate void DestinationPointEventHandler(object sender);
 
     /// <summary>
-    /// Allows for a specific scene marker or specific area within the scene that can be teleported to.
+    /// The Destination Point allows for a specific scene marker that can be teleported to.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/DestinationPoint/DestinationPoint` prefab at the desired location within the scene.
-    ///  * Uncheck the `Enable Teleport` checkbox to lock the destination point and prevent teleporting to it.
-    ///  * Uncheck the `Snap To Point` checkbox to provide a destination area rather than a specific point to teleport to.
+    /// The destination points can provide a useful way of having specific teleport locations in a scene.
+    ///
+    /// The destination points can also have a locked state if the `Enable Teleport` flag is disabled.
     /// </remarks>
     /// <example>
     /// `044_CameraRig_RestrictedTeleportZones` uses the `VRTK_DestinationPoint` prefab to set up a collection of pre-defined teleport locations.
@@ -27,19 +26,13 @@ namespace VRTK
         /// <summary>
         /// Allowed snap to rotation types.
         /// </summary>
+        /// <param name="NoRotation">No rotation information will be emitted in the destination set payload.</param>
+        /// <param name="RotateWithNoHeadsetOffset">The destination point's rotation will be emitted without taking into consideration the current headset rotation.</param>
+        /// <param name="RotateWithHeadsetOffset">The destination point's rotation will be emitted and will take into consideration the current headset rotation.</param>
         public enum RotationTypes
         {
-            /// <summary>
-            /// No rotation information will be emitted in the destination set payload.
-            /// </summary>
             NoRotation,
-            /// <summary>
-            /// The destination point's rotation will be emitted without taking into consideration the current headset rotation.
-            /// </summary>
             RotateWithNoHeadsetOffset,
-            /// <summary>
-            /// The destination point's rotation will be emitted and will take into consideration the current headset rotation.
-            /// </summary>
             RotateWithHeadsetOffset
         }
 
@@ -61,11 +54,6 @@ namespace VRTK
         public bool hideDirectionIndicatorOnHover = false;
         [Tooltip("Determines if the play area will be rotated to the rotation of the destination point upon the destination marker being set.")]
         public RotationTypes snapToRotation = RotationTypes.NoRotation;
-
-        [Header("Custom Settings")]
-
-        [Tooltip("The scene teleporter that is used. If this is not specified then it will be auto looked up in the scene.")]
-        public VRTK_BasicTeleport teleporter;
 
         public static VRTK_DestinationPoint currentDestinationPoint;
 
@@ -98,8 +86,8 @@ namespace VRTK
         protected bool isActive;
         protected VRTK_BasePointerRenderer.VisibilityStates storedCursorState;
         protected bool storedDirectionIndicatorState;
+        protected Coroutine setDestination;
         protected bool currentTeleportState;
-        protected bool customTeleporter;
         protected Transform playArea;
         protected Transform headset;
 
@@ -153,13 +141,12 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
-            customTeleporter = (teleporter != null);
             CreateColliderIfRequired();
             SetupRigidbody();
             initaliseListeners = StartCoroutine(ManageDestinationMarkersAtEndOfFrame());
@@ -178,28 +165,25 @@ namespace VRTK
                 StopCoroutine(initaliseListeners);
             }
 
+            if (setDestination != null)
+            {
+                StopCoroutine(setDestination);
+            }
             ManageDestinationMarkers(false);
             if (createdCollider)
             {
                 Destroy(pointCollider);
-                pointCollider = null;
             }
 
             if (createdRigidbody)
             {
                 Destroy(pointRigidbody);
-                pointRigidbody = null;
-            }
-
-            if (!customTeleporter)
-            {
-                teleporter = null;
             }
         }
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -244,7 +228,6 @@ namespace VRTK
             {
                 ManageDestinationMarkers(true);
             }
-            teleporter = (teleporter == null && VRTK_ObjectCache.registeredTeleporters.Count > 0 ? VRTK_ObjectCache.registeredTeleporters[0] : teleporter);
         }
 
         protected virtual void ManageDestinationMarkers(bool state)
@@ -252,9 +235,8 @@ namespace VRTK
             ManageDestinationMarkerListeners(VRTK_DeviceFinder.GetControllerLeftHand(), state);
             ManageDestinationMarkerListeners(VRTK_DeviceFinder.GetControllerRightHand(), state);
 
-            for (int i = 0; i < VRTK_ObjectCache.registeredDestinationMarkers.Count; i++)
+            foreach (var destinationMarker in VRTK_ObjectCache.registeredDestinationMarkers)
             {
-                VRTK_DestinationMarker destinationMarker = VRTK_ObjectCache.registeredDestinationMarkers[i];
                 ManageDestinationMarkerListeners(destinationMarker.gameObject, state);
             }
         }
@@ -294,10 +276,6 @@ namespace VRTK
                 isActive = true;
                 ToggleCursor(sender, false);
                 EnablePoint();
-                if (snapToPoint && teleporter != null)
-                {
-                    teleporter.SetActualTeleportDestination(destinationLocation.position, GetRotation());
-                }
                 OnDestinationMarkerEnter(SetDestinationMarkerEvent(0f, e.raycastHit.transform, e.raycastHit, e.raycastHit.transform.position, e.controllerReference, false, GetRotation()));
             }
         }
@@ -309,10 +287,6 @@ namespace VRTK
                 isActive = false;
                 ToggleCursor(sender, true);
                 ResetPoint();
-                if (snapToPoint && teleporter != null)
-                {
-                    teleporter.ResetActualTeleportDestination();
-                }
                 OnDestinationMarkerExit(SetDestinationMarkerEvent(0f, e.raycastHit.transform, e.raycastHit, e.raycastHit.transform.position, e.controllerReference, false, GetRotation()));
             }
         }
@@ -324,11 +298,8 @@ namespace VRTK
                 currentDestinationPoint = this;
                 if (snapToPoint)
                 {
-                    if (teleporter != null)
-                    {
-                        teleporter.SetActualTeleportDestination(destinationLocation.position, GetRotation());
-                    }
-                    DisablePoint();
+                    e.raycastHit.point = destinationLocation.position;
+                    setDestination = StartCoroutine(DoDestinationMarkerSetAtEndOfFrame(e));
                 }
             }
             else if (currentDestinationPoint != this)
@@ -342,9 +313,20 @@ namespace VRTK
             }
         }
 
+        protected virtual IEnumerator DoDestinationMarkerSetAtEndOfFrame(DestinationMarkerEventArgs e)
+        {
+            yield return new WaitForEndOfFrame();
+            if (enabled)
+            {
+                e.raycastHit.point = destinationLocation.position;
+                DisablePoint();
+                OnDestinationMarkerSet(SetDestinationMarkerEvent(e.distance, transform, e.raycastHit, destinationLocation.position, e.controllerReference, false, GetRotation()));
+            }
+        }
+
         protected virtual void ToggleCursor(object sender, bool state)
         {
-            if ((hidePointerCursorOnHover || hideDirectionIndicatorOnHover) && sender.GetType() == typeof(VRTK_Pointer))
+            if ((hidePointerCursorOnHover || hideDirectionIndicatorOnHover) && sender.GetType().Equals(typeof(VRTK_Pointer)))
             {
                 VRTK_Pointer pointer = (VRTK_Pointer)sender;
                 if (pointer != null && pointer.pointerRenderer != null)
@@ -395,17 +377,9 @@ namespace VRTK
             OnDestinationPointEnabled();
         }
 
-        protected virtual void SetColliderState(bool state)
-        {
-            if (pointCollider != null)
-            {
-                pointCollider.enabled = state;
-            }
-        }
-
         protected virtual void DisablePoint()
         {
-            SetColliderState(false);
+            pointCollider.enabled = false;
             ToggleObject(lockedCursorObject, false);
             ToggleObject(defaultCursorObject, false);
             ToggleObject(hoverCursorObject, false);
@@ -422,14 +396,14 @@ namespace VRTK
             ToggleObject(hoverCursorObject, false);
             if (enableTeleport)
             {
-                SetColliderState(true);
+                pointCollider.enabled = true;
                 ToggleObject(defaultCursorObject, true);
                 ToggleObject(lockedCursorObject, false);
                 OnDestinationPointUnlocked();
             }
             else
             {
-                SetColliderState(false);
+                pointCollider.enabled = false;
                 ToggleObject(lockedCursorObject, true);
                 ToggleObject(defaultCursorObject, false);
                 OnDestinationPointLocked();
@@ -453,7 +427,7 @@ namespace VRTK
             }
 
             float offset = (snapToRotation == RotationTypes.RotateWithHeadsetOffset && playArea != null && headset != null ? playArea.eulerAngles.y - headset.eulerAngles.y : 0f);
-            return Quaternion.Euler(0f, destinationLocation.eulerAngles.y + offset, 0f);
+            return Quaternion.Euler(0f, destinationLocation.localEulerAngles.y + offset, 0f);
         }
     }
 }

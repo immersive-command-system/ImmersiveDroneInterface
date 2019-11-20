@@ -2,6 +2,8 @@
 namespace VRTK
 {
     using UnityEngine;
+    using UnityEngine.Events;
+    using System;
 
     /// <summary>
     /// Event Payload
@@ -25,9 +27,22 @@ namespace VRTK
     /// All 3D controls extend the `VRTK_Control` abstract class which provides a default set of methods and events that all of the subsequent controls expose.
     /// </summary>
     [ExecuteInEditMode]
-    [System.Obsolete("`VRTK_Control` has been deprecated. This script will be removed in a future version of VRTK.")]
     public abstract class VRTK_Control : MonoBehaviour
     {
+        [Serializable]
+        [Obsolete("`VRTK_Control.ValueChangedEvent` has been replaced with delegate events. `VRTK_Control_UnityEvents` is now required to access Unity events. This method will be removed in a future version of VRTK.")]
+        public class ValueChangedEvent : UnityEvent<float, float> { }
+
+        [Serializable]
+        [Obsolete("`VRTK_Control.DefaultControlEvents` has been replaced with delegate events. `VRTK_Control_UnityEvents` is now required to access Unity events. This method will be removed in a future version of VRTK.")]
+        public class DefaultControlEvents
+        {
+            /// <summary>
+            /// Emitted when the control is interacted with.
+            /// </summary>
+            public ValueChangedEvent OnValueChanged;
+        }
+
         /// <summary>
         /// The ControlValueRange struct provides a way for each inherited control to support value normalization.
         /// </summary>
@@ -40,25 +55,21 @@ namespace VRTK
         /// <summary>
         /// 3D Control Directions
         /// </summary>
+        /// <param name="autodetect">Attempt to auto detect the axis</param>
+        /// <param name="x">X axis</param>
+        /// <param name="y">Y axis</param>
+        /// <param name="z">Z axis</param>
         public enum Direction
         {
-            /// <summary>
-            /// Attempt to auto detect the axis.
-            /// </summary>
             autodetect,
-            /// <summary>
-            /// The world x direction.
-            /// </summary>
             x,
-            /// <summary>
-            /// The world y direction.
-            /// </summary>
             y,
-            /// <summary>
-            /// The world z direction.
-            /// </summary>
             z
         }
+
+        [Tooltip("The default events for the control. This parameter is deprecated and will be removed in a future version of VRTK.")]
+        [Obsolete("`VRTK_Control.defaultEvents` has been replaced with delegate events. `VRTK_Control_UnityEvents` is now required to access Unity events. This method will be removed in a future version of VRTK.")]
+        public DefaultControlEvents defaultEvents;
 
         [Tooltip("If active the control will react to the controller without the need to push the grab button.")]
         public bool interactWithoutGrab = false;
@@ -167,6 +178,14 @@ namespace VRTK
                 if (value != oldValue)
                 {
                     HandleInteractables();
+
+#pragma warning disable 0618
+                    /// <obsolete>
+                    /// This is an obsolete call that will be removed in a future version
+                    /// </obsolete>
+                    defaultEvents.OnValueChanged.Invoke(GetValue(), GetNormalizedValue());
+#pragma warning restore 0618
+
                     OnValueChanged(SetControlEvent());
                 }
             }
@@ -248,10 +267,9 @@ namespace VRTK
             }
 
             // do not cache objects since otherwise they would still be made inactive once taken out of the content
-            VRTK_InteractableObject[] foundInteractableObjects = controlContent.GetComponentsInChildren<VRTK_InteractableObject>(true);
-            for (int i = 0; i < foundInteractableObjects.Length; i++)
+            foreach (var io in controlContent.GetComponentsInChildren<VRTK_InteractableObject>(true))
             {
-                foundInteractableObjects[i].enabled = value > MIN_OPENING_DISTANCE;
+                io.enabled = value > MIN_OPENING_DISTANCE;
             }
         }
     }

@@ -132,11 +132,11 @@ namespace VRTK
             float stepSize = frequency * 1;
             if (Loop || stepSize == 1)
             {
-                stepSize = VRTK_SharedMethods.DividerToMultiplier(stepSize);
+                stepSize = 1f / stepSize;
             }
             else
             {
-                stepSize = VRTK_SharedMethods.DividerToMultiplier((stepSize - 1));
+                stepSize = 1f / (stepSize - 1);
             }
 
             for (int f = 0; f < frequency; f++)
@@ -152,14 +152,6 @@ namespace VRTK
             if (tracerLineRenderer != null)
             {
                 tracerLineRenderer.SetActive(state);
-            }
-        }
-
-        protected virtual void OnDisable()
-        {
-            if (tracerLineRenderer != null)
-            {
-                tracerLineRenderer.SetActive(false);
             }
         }
 
@@ -334,11 +326,11 @@ namespace VRTK
             float stepSize = frequency * 1;
             if (Loop || stepSize == 1)
             {
-                stepSize = VRTK_SharedMethods.DividerToMultiplier(stepSize);
+                stepSize = 1f / stepSize;
             }
             else
             {
-                stepSize = VRTK_SharedMethods.DividerToMultiplier((stepSize - 1));
+                stepSize = 1f / (stepSize - 1);
             }
 
             SetPointData(material, color, stepSize);
@@ -392,14 +384,14 @@ namespace VRTK
 
         protected virtual void SetItemMaterial(GameObject item, Material material, Color color)
         {
-            Renderer[] itemRenderers = item.GetComponentsInChildren<Renderer>();
-            for (int i = 0; i < itemRenderers.Length; i++)
+            foreach (Renderer mr in item.GetComponentsInChildren<Renderer>())
             {
                 if (material != null)
                 {
-                    itemRenderers[i].material = material;
+                    mr.material = material;
                 }
-                SetMaterial(itemRenderers[i].material, color);
+
+                SetMaterial(mr.material, color);
             }
         }
 

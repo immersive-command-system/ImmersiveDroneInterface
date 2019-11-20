@@ -2,11 +2,7 @@
 {
     using UnityEngine;
     using UnityEngine.SceneManagement;
-#if UNITY_2017_2_OR_NEWER
-    using UnityEngine.XR;
-#else
-    using XRSettings = UnityEngine.VR.VRSettings;
-#endif
+    using UnityEngine.VR;
     using UnityEditor;
     using UnityEditor.SceneManagement;
     using System;
@@ -346,7 +342,7 @@
                     VRTK_SDKManager.AvailableControllerSDKInfos
                 }
                 .SelectMany(infos => infos.Select(sdkInfo => sdkInfo.description.vrDeviceName))
-                .Concat(XRSettings.supportedDevices)
+                .Concat(VRSettings.supportedDevices)
                 .Concat(new[] { "None" })
                 .Distinct()
                 .Select(deviceName => GUI.skin.label.CalcSize(new GUIContent(deviceName)).x)
@@ -402,11 +398,7 @@
             [InitializeOnLoadMethod]
             private static void ListenToPlayModeChanges()
             {
-#if UNITY_2017_2_OR_NEWER
-                EditorApplication.playModeStateChanged += (PlayModeStateChange state) =>
-#else
                 EditorApplication.playmodeStateChanged += () =>
-#endif
                 {
                     if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
                     {
@@ -440,39 +432,37 @@
 
             private static void FixOpenAndUnsavedScenes()
             {
-
-                List<VRTK_SDKSetup> setups = Enumerable.Range(0, EditorSceneManager.loadedSceneCount)
-                                                       .SelectMany(sceneIndex => SceneManager.GetSceneAt(sceneIndex).GetRootGameObjects())
-                                                       .SelectMany(rootObject => rootObject.GetComponentsInChildren<VRTK_SDKManager>())
-                                                       .Select(manager => manager.setups.Where(setup => setup != null).ToArray())
-                                                       .Where(sdkSetups => sdkSetups.Length > 1)
-                                                       .SelectMany(sdkSetups => sdkSetups)
-                                                       .Where(setup => setup.gameObject.activeSelf)
-                                                       .ToList();
-                if (setups.Count == 0)
+                for (int index = 0; index < EditorSceneManager.loadedSceneCount; index++)
                 {
-                    return;
-                }
+                    Scene scene = SceneManager.GetSceneAt(index);
+                    if (scene.isLoaded && scene.isDirty)
+                    {
+                        VRTK_SDKSetup[] setups = FindObjectsOfType<VRTK_SDKSetup>();
+                        foreach (VRTK_SDKSetup setup in setups)
+                        {
+                            setup.gameObject.SetActive(false);
+                        }
 
-                setups.ForEach(setup => setup.gameObject.SetActive(false));
-
-                string infoMessage = string.Format(
-                    "The following game objects have been set inactive to allow for SDK loading and switching using the SDK Setups on them:\n{0}",
-                    string.Join(", ", setups.Select(setup => setup.name).ToArray()));
-                if (EditorApplication.isPlayingOrWillChangePlaymode)
-                {
+                        if (setups.Length != 0)
+                        {
+                            string infoMessage = string.Format("The following game objects have been set inactive to allow for SDK loading and switching using the SDK Setups on them:\n{0}", string.Join(", ", setups.Select(setup => setup.name).ToArray()));
+                            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                            {
 #if UNITY_5_6_OR_NEWER
-                    SessionState.SetString(
+                                SessionState.SetString(
 #else
-                    EditorPrefs.SetString(
+                                EditorPrefs.SetString(
 #endif
-                        PreferencesKey,
-                        infoMessage
-                    );
-                }
-                else
-                {
-                    VRTK_Logger.Info(infoMessage);
+                                    PreferencesKey,
+                                    infoMessage
+                                );
+                            }
+                            else
+                            {
+                                VRTK_Logger.Info(infoMessage);
+                            }
+                        }
+                    }
                 }
             }
         }

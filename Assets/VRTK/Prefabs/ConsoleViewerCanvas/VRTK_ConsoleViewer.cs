@@ -1,4 +1,4 @@
-﻿// Console Viewer Canvas|Prefabs|0020
+﻿// Console Viewer Canvas|Prefabs|0060
 namespace VRTK
 {
     using UnityEngine;
@@ -8,13 +8,10 @@ namespace VRTK
     using System.Linq;
 
     /// <summary>
-    /// Adds an in-scene representation of the Unity console on a world space canvas.
+    /// This canvas adds the unity console log to a world game object. To use the prefab, it simply needs to be placed into the scene and it will be visible in world space. It's also possible to child it to other objects such as the controller so it can track where the user is.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/ConsoleViewerCanvas/ConsoleViewerCanvas` prefab into the scene hierarchy.
-    ///
-    ///   > It is also possible to interact with the `ConsoleViewerCanvas` with a `VRTK_UIPointer`.
+    /// It's also recommended to use the Simple Pointer and UI Pointer on a controller to interact with the Console Viewer Canvas as it has a scrollable text area, a button to clear the log and a checkbox to toggle whether the log messages are collapsed.
     /// </remarks>
     public class VRTK_ConsoleViewer : MonoBehaviour
     {
@@ -31,21 +28,21 @@ namespace VRTK
         [Tooltip("The colour of the text for an exception log message.")]
         public Color exceptionMessage = Color.red;
 
-        protected Dictionary<LogType, Color> logTypeColors;
-        protected ScrollRect scrollWindow;
-        protected RectTransform consoleRect;
-        protected Text consoleOutput;
-        protected const string NEWLINE = "\n";
-        protected int lineBuffer = 50;
-        protected int currentBuffer;
-        protected string lastMessage;
-        protected bool collapseLog = false;
+        private Dictionary<LogType, Color> logTypeColors;
+        private ScrollRect scrollWindow;
+        private RectTransform consoleRect;
+        private Text consoleOutput;
+        private const string NEWLINE = "\n";
+        private int lineBuffer = 50;
+        private int currentBuffer;
+        private string lastMessage;
+        private bool collapseLog = false;
 
         /// <summary>
         /// The SetCollapse method determines whether the console will collapse same message output into the same line. A state of `true` will collapse messages and `false` will print the same message for each line.
         /// </summary>
         /// <param name="state">The state of whether to collapse the output messages, true will collapse and false will not collapse.</param>
-        public virtual void SetCollapse(bool state)
+        public void SetCollapse(bool state)
         {
             collapseLog = state;
         }
@@ -53,7 +50,7 @@ namespace VRTK
         /// <summary>
         /// The ClearLog method clears the current log view of all messages
         /// </summary>
-        public virtual void ClearLog()
+        public void ClearLog()
         {
             consoleOutput.text = "";
             currentBuffer = 0;
@@ -89,15 +86,15 @@ namespace VRTK
             consoleRect.sizeDelta = Vector2.zero;
         }
 
-        protected virtual string GetMessage(string message, LogType type)
+        private string GetMessage(string message, LogType type)
         {
-            string color = ColorUtility.ToHtmlStringRGBA(logTypeColors[type]);
+            var color = ColorUtility.ToHtmlStringRGBA(logTypeColors[type]);
             return "<color=#" + color + ">" + message + "</color>" + NEWLINE;
         }
 
-        protected virtual void HandleLog(string message, string stackTrace, LogType type)
+        private void HandleLog(string message, string stackTrace, LogType type)
         {
-            string logOutput = GetMessage(message, type);
+            var logOutput = GetMessage(message, type);
 
             if (!collapseLog || lastMessage != logOutput)
             {
@@ -110,7 +107,7 @@ namespace VRTK
             currentBuffer++;
             if (currentBuffer >= lineBuffer)
             {
-                IEnumerable<string> lines = Regex.Split(consoleOutput.text, NEWLINE).Skip(lineBuffer / 2);
+                var lines = Regex.Split(consoleOutput.text, NEWLINE).Skip(lineBuffer / 2);
                 consoleOutput.text = string.Join(NEWLINE, lines.ToArray());
                 currentBuffer = lineBuffer / 2;
             }

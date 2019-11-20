@@ -9,7 +9,6 @@ namespace VRTK
     /// The Oculus Boundaries SDK script provides a bridge to the Oculus SDK play area.
     /// </summary>
     [SDK_Description(typeof(SDK_OculusSystem))]
-    [SDK_Description(typeof(SDK_OculusSystem), 1)]
     public class SDK_OculusBoundaries
 #if VRTK_DEFINE_SDK_OCULUS
         : SDK_BaseBoundaries
@@ -37,8 +36,8 @@ namespace VRTK
             cachedPlayArea = GetSDKManagerPlayArea();
             if (cachedPlayArea == null)
             {
-                OVRManager ovrManager = VRTK_SharedMethods.FindEvenInactiveComponent<OVRManager>(true);
-                if (ovrManager != null)
+                var ovrManager = VRTK_SharedMethods.FindEvenInactiveComponent<OVRManager>();
+                if (ovrManager)
                 {
                     cachedPlayArea = ovrManager.transform;
                 }
@@ -53,13 +52,13 @@ namespace VRTK
         /// <returns>A Vector3 array of the points in the scene that represent the play area boundaries.</returns>
         public override Vector3[] GetPlayAreaVertices()
         {
-            OVRBoundary area = new OVRBoundary();
+            var area = new OVRBoundary();
             if (area.GetConfigured())
             {
-                Vector3 outerBoundary = area.GetDimensions(OVRBoundary.BoundaryType.OuterBoundary);
-                float thickness = 0.1f;
+                var outerBoundary = area.GetDimensions(OVRBoundary.BoundaryType.OuterBoundary);
+                var thickness = 0.1f;
 
-                Vector3[] vertices = new Vector3[8];
+                var vertices = new Vector3[8];
 
                 vertices[0] = new Vector3(outerBoundary.x - thickness, 0f, outerBoundary.z - thickness);
                 vertices[1] = new Vector3(0f + thickness, 0f, outerBoundary.z - thickness);
@@ -122,10 +121,10 @@ namespace VRTK
         {
             if (avatarContainer == null)
             {
-                avatarContainer = VRTK_SharedMethods.FindEvenInactiveComponent<OvrAvatar>(true);
+                avatarContainer = VRTK_SharedMethods.FindEvenInactiveComponent<OvrAvatar>();
                 if (avatarContainer != null && avatarContainer.GetComponent<VRTK_TransformFollow>() == null)
                 {
-                    VRTK_TransformFollow objectFollow = avatarContainer.gameObject.AddComponent<VRTK_TransformFollow>();
+                    var objectFollow = avatarContainer.gameObject.AddComponent<VRTK_TransformFollow>();
                     objectFollow.gameObjectToFollow = GetPlayArea().gameObject;
                 }
             }

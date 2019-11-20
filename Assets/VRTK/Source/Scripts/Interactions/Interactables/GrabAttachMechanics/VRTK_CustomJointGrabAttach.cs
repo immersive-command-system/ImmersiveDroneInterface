@@ -1,24 +1,20 @@
-﻿// Custom Joint Grab Attach|GrabAttachMechanics|50050
+﻿// Custom Joint Grab Attach|GrabAttachMechanics|50060
 namespace VRTK.GrabAttachMechanics
 {
     using UnityEngine;
 
     /// <summary>
-    /// Attaches the grabbed Interactable Object to the grabbing object via a custom Joint.
+    /// The Custom Joint Grab Attach script allows a custom joint to be provided for the grab attach mechanic.
     /// </summary>
     /// <remarks>
-    ///   > The Interactable Object will be attached to the grabbing object via a custom Joint and the Joint can be broken upon colliding the Interactable Object with other colliders.
+    /// The custom joint is placed on the interactable object and at runtime the joint is copied into a `JointHolder` game object that becomes a child of the interactable object.
     ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_CustomJointGrabAttach` script on either:
-    ///    * The GameObject of the Interactable Object to detect interactions on.
-    ///    * Any other scene GameObject and then link that GameObject to the Interactable Objects `Grab Attach Mechanic Script` parameter to denote use of the grab mechanic.
-    ///  * Create a `Joint` component suitable for attaching the grabbed Interactable Object to the grabbing object with and provide it to the `Custom Joint` parameter.
+    /// The custom joint is then copied from this `JointHolder` to the interactable object when a grab happens and is removed when a grab ends.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/021_Controller_GrabbingObjectsWithJoints` demonstrates this grab attach mechanic on the Lamp object in the scene.
     /// </example>
-    [AddComponentMenu("VRTK/Scripts/Interactions/Interactables/Grab Attach Mechanics/VRTK_CustomJointGrabAttach")]
+    [AddComponentMenu("VRTK/Scripts/Interactions/Grab Attach Mechanics/VRTK_CustomJointGrabAttach")]
     public class VRTK_CustomJointGrabAttach : VRTK_BaseJointGrabAttach
     {
         [Tooltip("The joint to use for the grab attach joint.")]
@@ -34,13 +30,13 @@ namespace VRTK.GrabAttachMechanics
 
         protected override void CreateJoint(GameObject obj)
         {
-            if (jointHolder == null)
+            if (!jointHolder)
             {
                 VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_NOT_INJECTED, "VRTK_CustomJointGrabAttach", "Joint", "customJoint", "the same"));
                 return;
             }
-            Joint storedJoint = jointHolder.GetComponent<Joint>();
-            string storeName = gameObject.name;
+            var storedJoint = jointHolder.GetComponent<Joint>();
+            var storeName = gameObject.name;
             VRTK_SharedMethods.CloneComponent(storedJoint, obj, true);
             gameObject.name = storeName;
             givenJoint = obj.GetComponent(storedJoint.GetType()) as Joint;
@@ -55,7 +51,7 @@ namespace VRTK.GrabAttachMechanics
 
         protected virtual void CopyCustomJoint()
         {
-            if (customJoint != null)
+            if (customJoint)
             {
                 jointHolder = new GameObject();
                 jointHolder.transform.SetParent(transform);

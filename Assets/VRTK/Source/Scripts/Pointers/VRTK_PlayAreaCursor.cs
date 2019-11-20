@@ -20,19 +20,8 @@ namespace VRTK
     public delegate void PlayAreaCursorEventHandler(object sender, PlayAreaCursorEventArgs e);
 
     /// <summary>
-    /// Provides a visual representation of the play area boundaries that tracks to the cursor position of a pointer.
+    /// The Play Area Cursor is used in conjunction with a Pointer script and displays a representation of the play area where the pointer cursor hits.
     /// </summary>
-    /// <remarks>
-    /// **Optional Components:**
-    ///  * `VRTK_PointerDirectionIndicator` - A Pointer Direction Indicator to set the cursor rotation to.
-    /// 
-    /// **Script Usage:**
-    ///  * Place the `VRTK_PlayAreaCursor` script on the same GameObject as the Pointer Renderer script it is linked to.
-    ///  * Link the required Play Area Cursor script to the `Playarea Cursor` parameter on the required Pointer Renderer script.
-    ///
-    /// **Script Dependencies:**
-    ///  * A Base Pointer Renderer script attached to a valid Pointer script is required so the PlayArea Cursor script can be linked to follow the valid Base Pointer Renderer cursor GameObject.
-    /// </remarks>
     /// <example>
     /// `VRTK/Examples/012_Controller_PointerWithAreaCollision` shows how a Bezier Pointer with the Play Area Cursor and Collision Detection enabled can be used to traverse a game area but not allow teleporting into areas where the walls or other objects would fall into the play area space enabling the user to enter walls.
     /// </example>
@@ -55,8 +44,7 @@ namespace VRTK
         public VRTK_PolicyList targetListPolicy;
 
         [Header("Custom Settings")]
-        [Tooltip("A custom Pointer Direction Indicator to use to determine the rotation of the Play Area Cursor.")]
-        public VRTK_PointerDirectionIndicator directionIndicator;
+
         [Tooltip("A custom GameObject to use for the play area cursor representation for when the location is valid.")]
         public GameObject validLocationObject;
         [Tooltip("A custom GameObject to use for the play area cursor representation for when the location is invalid.")]
@@ -111,7 +99,7 @@ namespace VRTK
         /// <summary>
         /// The HasCollided method returns the state of whether the play area cursor has currently collided with another valid object.
         /// </summary>
-        /// <returns>Returns `true` if the play area is colliding with a valid object and `false` if not.</returns>
+        /// <returns>A bool to determine the state of collision. `true` if the play area is colliding with a valid object and `false` if not.</returns>
         public virtual bool HasCollided()
         {
             return (playAreaCursorCollided || headsetOutOfBounds);
@@ -176,11 +164,11 @@ namespace VRTK
         /// <param name="location">The location where to draw the play area cursor.</param>
         public virtual void SetPlayAreaCursorTransform(Vector3 location)
         {
-            Vector3 offset = Vector3.zero;
+            var offset = Vector3.zero;
             if (headsetPositionCompensation)
             {
-                Vector3 playAreaPos = new Vector3(playArea.transform.position.x, 0f, playArea.transform.position.z);
-                Vector3 headsetPos = new Vector3(headset.position.x, 0f, headset.position.z);
+                var playAreaPos = new Vector3(playArea.transform.position.x, 0f, playArea.transform.position.z);
+                var headsetPos = new Vector3(headset.position.x, 0f, headset.position.z);
                 offset = playAreaPos - headsetPos;
             }
 
@@ -188,7 +176,7 @@ namespace VRTK
             {
                 if (playAreaCursor.activeInHierarchy && handlePlayAreaCursorCollisions && headsetOutOfBoundsIsCollision)
                 {
-                    Vector3 checkPoint = new Vector3(location.x, playAreaCursor.transform.position.y + (playAreaCursor.transform.localScale.y * 2), location.z);
+                    var checkPoint = new Vector3(location.x, playAreaCursor.transform.position.y + (playAreaCursor.transform.localScale.y * 2), location.z);
                     if (!playAreaCursorCollider.bounds.Contains(checkPoint))
                     {
                         headsetOutOfBounds = true;
@@ -198,7 +186,7 @@ namespace VRTK
                         headsetOutOfBounds = false;
                     }
                 }
-                playAreaCursor.transform.rotation = (directionIndicator != null && directionIndicator.gameObject.activeInHierarchy ? directionIndicator.transform.rotation : playArea.rotation);
+
                 playAreaCursor.transform.position = location + offset;
             }
         }
@@ -217,16 +205,16 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The IsActive method returns whether the play area cursor GameObject is active or not.
+        /// The IsActive method returns whether the play area cursor game object is active or not.
         /// </summary>
-        /// <returns>Returns `true` if the play area cursor GameObject is active.</returns>
+        /// <returns>Returns true if the play area cursor GameObject is active.</returns>
         public virtual bool IsActive()
         {
             return (playAreaCursor != null ? playAreaCursor.activeInHierarchy : false);
         }
 
         /// <summary>
-        /// The GetPlayAreaContainer method returns the created GameObject that holds the play area cursor representation.
+        /// The GetPlayAreaContainer method returns the created game object that holds the play area cursor representation.
         /// </summary>
         /// <returns>The GameObject that is the container of the play area cursor.</returns>
         public virtual GameObject GetPlayAreaContainer()
@@ -256,7 +244,7 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -279,7 +267,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -358,13 +346,13 @@ namespace VRTK
 
         protected virtual void SetCursorColor(GameObject cursorObject, Color color)
         {
-            Renderer playareaRenderer = cursorObject.GetComponentInChildren<Renderer>();
+            Renderer paRenderer = cursorObject.GetComponentInChildren<Renderer>();
 
-            if (playareaRenderer != null && playareaRenderer.material && playareaRenderer.material.HasProperty("_Color"))
+            if (paRenderer && paRenderer.material && paRenderer.material.HasProperty("_Color"))
             {
-                playareaRenderer.material.color = color;
-                playareaRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                playareaRenderer.receiveShadows = false;
+                paRenderer.material.color = color;
+                paRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                paRenderer.receiveShadows = false;
             }
         }
 
@@ -423,7 +411,7 @@ namespace VRTK
         {
             if (playAreaCursorDimensions != Vector2.zero)
             {
-                float customAreaPadding = VRTK_SDK_Bridge.GetPlayAreaBorderThickness();
+                var customAreaPadding = VRTK_SDK_Bridge.GetPlayAreaBorderThickness();
 
                 cursorDrawVertices[btmRightOuter] = new Vector3(playAreaCursorDimensions.x / 2, 0f, (playAreaCursorDimensions.y / 2) * -1);
                 cursorDrawVertices[btmLeftOuter] = new Vector3((playAreaCursorDimensions.x / 2) * -1, 0f, (playAreaCursorDimensions.y / 2) * -1);
@@ -484,9 +472,9 @@ namespace VRTK
 
         protected virtual void UpdateCollider()
         {
-            float playAreaHeightAdjustment = 1f;
-            float newBCYSize = (headset.transform.position.y - playArea.transform.position.y) * 100f;
-            float newBCYCenter = (newBCYSize != 0 ? (newBCYSize / 2) + playAreaHeightAdjustment : 0);
+            var playAreaHeightAdjustment = 1f;
+            var newBCYSize = (headset.transform.position.y - playArea.transform.position.y) * 100f;
+            var newBCYCenter = (newBCYSize != 0 ? (newBCYSize / 2) + playAreaHeightAdjustment : 0);
 
             playAreaCursorCollider.size = new Vector3(playAreaCursorCollider.size.x, newBCYSize, playAreaCursorCollider.size.z);
             playAreaCursorCollider.center = new Vector3(playAreaCursorCollider.center.x, newBCYCenter, playAreaCursorCollider.center.z);
@@ -534,7 +522,7 @@ namespace VRTK
 
         protected virtual bool ValidTarget(Collider collider)
         {
-            return (!collider.isTrigger && !VRTK_PlayerObject.IsPlayerObject(collider.gameObject) && !(VRTK_PolicyList.Check(collider.gameObject, targetListPolicy)));
+            return (!VRTK_PlayerObject.IsPlayerObject(collider.gameObject) && !(VRTK_PolicyList.Check(collider.gameObject, targetListPolicy)));
         }
     }
 }

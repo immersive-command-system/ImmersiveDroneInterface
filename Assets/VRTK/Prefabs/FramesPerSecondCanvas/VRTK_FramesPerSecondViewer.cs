@@ -1,17 +1,18 @@
-﻿// Frames Per Second Canvas|Prefabs|0030
+﻿// Frames Per Second Canvas|Prefabs|0010
 namespace VRTK
 {
     using UnityEngine;
     using UnityEngine.UI;
 
     /// <summary>
-    /// Provides a frames per second text element to the HMD view. To use the prefab it must be placed into the scene then the headset camera needs attaching to the canvas:
+    /// This canvas adds a frames per second text element to the headset. To use the prefab it must be placed into the scene then the headset camera needs attaching to the canvas:
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/FramesPerSecondCanvas/FramesPerSecondCanvas` prefab in the scene hierarchy.
+    ///   * Select `FramesPerSecondCanvas` object from the scene objects
+    ///   * Find the `Canvas` component
+    ///   * Set the `Render Camera` parameter to the camera used by the VR Headset (e.g. SteamVR: [CameraRig]-> Camera(Head) -> Camera(eye)])
     ///
-    ///   > This script is largely based on the script at: http://talesfromtherift.com/vr-fps-counter/ So all credit to Peter Koch for his work. Twitter: @peterept
+    /// This script is pretty much a copy and paste from the script at: http://talesfromtherift.com/vr-fps-counter/ So all credit to Peter Koch for his work. Twitter: @peterept
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/018_CameraRig_FramesPerSecondCounter` displays the frames per second in the centre of the headset view. Pressing the trigger generates a new sphere and pressing the touchpad generates ten new spheres. Eventually when lots of spheres are present the FPS will drop and demonstrate the prefab.
@@ -38,18 +39,23 @@ namespace VRTK
         protected float framesTime;
         protected Canvas canvas;
         protected Text text;
+        protected VRTK_SDKManager sdkManager;
 
         protected virtual void OnEnable()
         {
-            VRTK_SDKManager.SubscribeLoadedSetupChanged(LoadedSetupChanged);
+            sdkManager = VRTK_SDKManager.instance;
+            if (sdkManager != null)
+            {
+                sdkManager.LoadedSetupChanged += LoadedSetupChanged;
+            }
             InitCanvas();
         }
 
         protected virtual void OnDisable()
         {
-            if (!gameObject.activeSelf)
+            if (sdkManager != null && !gameObject.activeSelf)
             {
-                VRTK_SDKManager.UnsubscribeLoadedSetupChanged(LoadedSetupChanged);
+                sdkManager.LoadedSetupChanged -= LoadedSetupChanged;
             }
         }
 
@@ -82,10 +88,7 @@ namespace VRTK
 
         protected virtual void LoadedSetupChanged(VRTK_SDKManager sender, VRTK_SDKManager.LoadedSetupChangeEventArgs e)
         {
-            if (this != null && VRTK_SDKManager.ValidInstance() && gameObject.activeInHierarchy)
-            {
-                SetCanvasCamera();
-            }
+            SetCanvasCamera();
         }
 
         protected virtual void InitCanvas()

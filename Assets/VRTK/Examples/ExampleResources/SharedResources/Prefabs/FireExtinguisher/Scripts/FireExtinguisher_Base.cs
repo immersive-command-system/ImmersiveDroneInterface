@@ -1,25 +1,24 @@
 ﻿namespace VRTK.Examples
 {
+    using System;
     using UnityEngine;
 
     public class FireExtinguisher_Base : VRTK_InteractableObject
     {
-        [Header("Fire Extinguisher Base Settings")]
-
         public Animation leverAnimation;
         public FireExtinguisher_Sprayer sprayer;
 
-        protected VRTK_ControllerEvents controllerEvents;
+        private VRTK_ControllerEvents controllerEvents;
 
-        public override void StartUsing(VRTK_InteractUse currentUsingObject = null)
+        public override void StartUsing(VRTK_InteractUse usingObject)
         {
-            base.StartUsing(currentUsingObject);
-            controllerEvents = currentUsingObject.GetComponent<VRTK_ControllerEvents>();
+            base.StartUsing(usingObject);
+            controllerEvents = usingObject.GetComponent<VRTK_ControllerEvents>();
         }
 
-        public override void StopUsing(VRTK_InteractUse previousUsingObject = null, bool resetUsingObjectState = true)
+        public override void StopUsing(VRTK_InteractUse previousUsingObject)
         {
-            base.StopUsing(previousUsingObject, resetUsingObjectState);
+            base.StopUsing(previousUsingObject);
             controllerEvents = null;
         }
 
@@ -38,13 +37,13 @@
             }
         }
 
-        protected virtual void Spray(float power)
+        private void Spray(float power)
         {
             SetHandleFrame(power);
             sprayer.Spray(power);
         }
 
-        protected virtual void SetHandleFrame(float frame)
+        private void SetHandleFrame(float frame)
         {
             leverAnimation["FireExtinguisherLever"].speed = 0;
             leverAnimation["FireExtinguisherLever"].time = frame;

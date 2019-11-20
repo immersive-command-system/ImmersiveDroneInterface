@@ -10,7 +10,6 @@ namespace VRTK
     /// The Oculus Headset SDK script provides a bridge to the Oculus SDK.
     /// </summary>
     [SDK_Description(typeof(SDK_OculusSystem))]
-    [SDK_Description(typeof(SDK_OculusSystem), 1)]
     public class SDK_OculusHeadset
 #if VRTK_DEFINE_SDK_OCULUS
         : SDK_BaseHeadset
@@ -19,7 +18,8 @@ namespace VRTK
 #endif
     {
 #if VRTK_DEFINE_SDK_OCULUS
-        protected VRTK_VelocityEstimator cachedHeadsetVelocityEstimator;
+        private Quaternion previousHeadsetRotation;
+        private Quaternion currentHeadsetRotation;
 
         /// <summary>
         /// The ProcessUpdate method enables an SDK to run logic for every Unity Update
@@ -27,6 +27,9 @@ namespace VRTK
         /// <param name="options">A dictionary of generic options that can be used to within the update.</param>
         public override void ProcessUpdate(Dictionary<string, object> options)
         {
+#if VRTK_DEFINE_OCULUS_UTILITIES_1_11_0_OR_OLDER
+            CalculateAngularVelocity();
+#endif
         }
 
         /// <summary>
@@ -35,6 +38,9 @@ namespace VRTK
         /// <param name="options">A dictionary of generic options that can be used to within the fixed update.</param>
         public override void ProcessFixedUpdate(Dictionary<string, object> options)
         {
+#if VRTK_DEFINE_OCULUS_UTILITIES_1_12_0_OR_NEWER
+            CalculateAngularVelocity();
+#endif
         }
 
         /// <summary>
@@ -46,7 +52,7 @@ namespace VRTK
             cachedHeadset = GetSDKManagerHeadset();
             if (cachedHeadset == null)
             {
-                cachedHeadset = VRTK_SharedMethods.FindEvenInactiveGameObject<OVRCameraRig>("TrackingSpace/CenterEyeAnchor", true).transform;
+                cachedHeadset = VRTK_SharedMethods.FindEvenInactiveGameObject<OVRCameraRig>("TrackingSpace/CenterEyeAnchor").transform;
             }
             return cachedHeadset;
         }
@@ -63,29 +69,6 @@ namespace VRTK
                 cachedHeadsetCamera = GetHeadset();
             }
             return cachedHeadsetCamera;
-        }
-
-        /// <summary>
-        /// The GetHeadsetType method returns a string representing the type of headset connected.
-        /// </summary>
-        /// <returns>The string of the headset connected.</returns>
-        public override string GetHeadsetType()
-        {
-            switch (OVRPlugin.GetSystemHeadsetType())
-            {
-                case OVRPlugin.SystemHeadset.Rift_CV1:
-                    return CleanPropertyString("oculusrift");
-                case OVRPlugin.SystemHeadset.GearVR_R320:
-                case OVRPlugin.SystemHeadset.GearVR_R321:
-                case OVRPlugin.SystemHeadset.GearVR_R322:
-                case OVRPlugin.SystemHeadset.GearVR_R323:
-                    return CleanPropertyString("oculusgearvr");
-                case OVRPlugin.SystemHeadset.Rift_DK1:
-                    return CleanPropertyString("oculusriftdk1");
-                case OVRPlugin.SystemHeadset.Rift_DK2:
-                    return CleanPropertyString("oculusriftdk2");
-            }
-            return CleanPropertyString("");
         }
 
         /// <summary>
@@ -109,8 +92,8 @@ namespace VRTK
         /// <returns>A Vector3 containing the current angular velocity of the headset.</returns>
         public override Vector3 GetHeadsetAngularVelocity()
         {
-            SetHeadsetCaches();
-            return cachedHeadsetVelocityEstimator.GetAngularVelocityEstimate();
+            var deltaRotation = currentHeadsetRotation * Quaternion.Inverse(previousHeadsetRotation);
+            return new Vector3(Mathf.DeltaAngle(0, deltaRotation.eulerAngles.x), Mathf.DeltaAngle(0, deltaRotation.eulerAngles.y), Mathf.DeltaAngle(0, deltaRotation.eulerAngles.z));
         }
 
         /// <summary>
@@ -150,13 +133,10 @@ namespace VRTK
             }
         }
 
-        protected virtual void SetHeadsetCaches()
+        private void CalculateAngularVelocity()
         {
-            Transform currentHeadset = GetHeadset();
-            if (cachedHeadsetVelocityEstimator == null && currentHeadset != null)
-            {
-                cachedHeadsetVelocityEstimator = (currentHeadset.GetComponent<VRTK_VelocityEstimator>() != null ? currentHeadset.GetComponent<VRTK_VelocityEstimator>() : currentHeadset.gameObject.AddComponent<VRTK_VelocityEstimator>());
-            }
+            previousHeadsetRotation = currentHeadsetRotation;
+            currentHeadsetRotation = GetHeadset().transform.rotation;
         }
 #endif
     }

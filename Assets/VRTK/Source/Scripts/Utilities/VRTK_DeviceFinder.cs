@@ -1,12 +1,8 @@
-﻿// Device Finder|Utilities|90050
+﻿// Device Finder|Utilities|90020
 namespace VRTK
 {
     using UnityEngine;
-#if UNITY_2017_2_OR_NEWER
-    using UnityEngine.XR;
-#else
-    using XRDevice = UnityEngine.VR.VRDevice;
-#endif
+    using UnityEngine.VR;
 
     /// <summary>
     /// The Device Finder offers a collection of static methods that can be called to find common game devices such as the headset or controllers, or used to determine key information about the connected devices.
@@ -16,71 +12,43 @@ namespace VRTK
         /// <summary>
         /// Possible devices.
         /// </summary>
+        /// <param name="Headset">The headset.</param>
+        /// <param name="LeftController">The left hand controller.</param>
+        /// <param name="RightController">The right hand controller.</param>
         public enum Devices
         {
-            /// <summary>
-            /// The headset.
-            /// </summary>
             Headset,
-            /// <summary>
-            /// The left hand controller.
-            /// </summary>
             LeftController,
-            /// <summary>
-            /// The right hand controller.
-            /// </summary>
             RightController,
         }
 
         /// <summary>
         /// Possible headsets
         /// </summary>
-        [System.Obsolete("`VRTK_DeviceFinder.Headsets` has been deprecated and has been replaced with a manufacturer string. This enum will be removed in a future version of VRTK.")]
+        /// <param name="Unknown">An unknown headset.</param>
+        /// <param name="OculusRift">A summary of all Oculus Rift headset versions.</param>
+        /// <param name="OculusRiftCV1">A specific version of the Oculus Rift headset, the Consumer Version 1.</param>
+        /// <param name="Vive">A summary of all HTC Vive headset versions.</param>
+        /// <param name="ViveMV">A specific version of the HTC Vive headset, the first consumer version.</param>
         public enum Headsets
         {
-            /// <summary>
-            /// An unknown headset.
-            /// </summary>
             Unknown,
-            /// <summary>
-            /// A summary of all Oculus Rift headset versions.
-            /// </summary>
             OculusRift,
-            /// <summary>
-            /// A specific version of the Oculus Rift headset, the Consumer Version 1.
-            /// </summary>
             OculusRiftCV1,
-            /// <summary>
-            /// A summary of all HTC Vive headset versions.
-            /// </summary>
             Vive,
-            /// <summary>
-            /// A specific version of the HTC Vive headset, the first consumer version.
-            /// </summary>
             ViveMV,
-            /// <summary>
-            /// A specific version of the HTC Vive headset, the first consumer version.
-            /// </summary>
-            ViveDVT,
-            /// <summary>
-            /// A specific version of the Oculus Rift headset, the rare ES07.
-            /// </summary>
-            OculusRiftES07
+            ViveDVT
         }
 
-        /// <summary>
-        /// Obsolete
-        /// </summary>
         private static string cachedHeadsetType = "";
 
         /// <summary>
         /// The GetCurrentControllerType method returns the current used ControllerType based on the SDK and headset being used.
         /// </summary>
-        /// <param name="controllerReference">The reference to the controller to get type of.</param>
         /// <returns>The ControllerType based on the SDK and headset being used.</returns>
-        public static SDK_BaseController.ControllerType GetCurrentControllerType(VRTK_ControllerReference controllerReference = null)
+        public static SDK_BaseController.ControllerType GetCurrentControllerType()
         {
-            return VRTK_SDK_Bridge.GetCurrentControllerType(controllerReference);
+            return VRTK_SDK_Bridge.GetCurrentControllerType();
         }
 
         /// <summary>
@@ -102,6 +70,17 @@ namespace VRTK
         public static GameObject GetControllerByIndex(uint index, bool getActual)
         {
             return VRTK_SDK_Bridge.GetControllerByIndex(index, getActual);
+        }
+
+        /// <summary>
+        /// The GetControllerOrigin method is used to find the controller's origin.
+        /// </summary>
+        /// <param name="controller">The GameObject to get the origin for.</param>
+        /// <returns>The transform of the controller origin or if an origin is not set then the transform parent.</returns>
+        [System.Obsolete("`VRTK_DeviceFinder.GetControllerOrigin(controller)` has been replaced with `VRTK_DeviceFinder.GetControllerOrigin(controllerReference)`. This method will be removed in a future version of VRTK.")]
+        public static Transform GetControllerOrigin(GameObject controller)
+        {
+            return GetControllerOrigin(VRTK_ControllerReference.GetControllerReference(controller));
         }
 
         /// <summary>
@@ -193,33 +172,6 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The GetControllerReferenceLeftHand returns a Controller Reference for the left hand controller.
-        /// </summary>
-        /// <returns>The Controller Reference for the left hand controller.</returns>
-        public static VRTK_ControllerReference GetControllerReferenceLeftHand()
-        {
-            return VRTK_ControllerReference.GetControllerReference(SDK_BaseController.ControllerHand.Left);
-        }
-
-        /// <summary>
-        /// The GetControllerReferenceRightHand returns a Controller Reference for the right hand controller.
-        /// </summary>
-        /// <returns>The Controller Reference for the right hand controller.</returns>
-        public static VRTK_ControllerReference GetControllerReferenceRightHand()
-        {
-            return VRTK_ControllerReference.GetControllerReference(SDK_BaseController.ControllerHand.Right);
-        }
-
-        /// <summary>
-        /// The GetControllerReferenceForHand returns a Controller Reference for the given hand controller.
-        /// </summary>
-        /// <returns>The Controller Reference for the given hand controller.</returns>
-        public static VRTK_ControllerReference GetControllerReferenceForHand(SDK_BaseController.ControllerHand hand)
-        {
-            return VRTK_ControllerReference.GetControllerReference(hand);
-        }
-
-        /// <summary>
         /// The IsControllerOfHand method is used to check if a given controller game object is of the hand type provided.
         /// </summary>
         /// <param name="checkController">The actual controller object that is being checked.</param>
@@ -256,23 +208,6 @@ namespace VRTK
         public static bool IsControllerRightHand(GameObject checkController)
         {
             return VRTK_SDK_Bridge.IsControllerRightHand(checkController);
-        }
-
-        /// <summary>
-        /// The GetOppositeHand method returns the other hand type from the current hand given.
-        /// </summary>
-        /// <param name="currentHand">The current hand.</param>
-        /// <returns>The opposite hand.</returns>
-        public static SDK_BaseController.ControllerHand GetOppositeHand(SDK_BaseController.ControllerHand currentHand)
-        {
-            switch (currentHand)
-            {
-                case SDK_BaseController.ControllerHand.Left:
-                    return SDK_BaseController.ControllerHand.Right;
-                case SDK_BaseController.ControllerHand.Right:
-                    return SDK_BaseController.ControllerHand.Left;
-            }
-            return currentHand;
         }
 
         /// <summary>
@@ -356,11 +291,33 @@ namespace VRTK
         /// <summary>
         /// The GetControllerVelocity method is used for getting the current velocity of the physical game controller. This can be useful to determine the speed at which the controller is being swung or the direction it is being moved in.
         /// </summary>
+        /// <param name="givenController">The GameObject of the controller.</param>
+        /// <returns>A 3 dimensional vector containing the current real world physical controller velocity.</returns>
+        [System.Obsolete("`VRTK_DeviceFinder.GetControllerVelocity(givenController)` has been replaced with `VRTK_DeviceFinder.GetControllerVelocity(controllerReference)`. This method will be removed in a future version of VRTK.")]
+        public static Vector3 GetControllerVelocity(GameObject givenController)
+        {
+            return GetControllerVelocity(VRTK_ControllerReference.GetControllerReference(givenController));
+        }
+
+        /// <summary>
+        /// The GetControllerVelocity method is used for getting the current velocity of the physical game controller. This can be useful to determine the speed at which the controller is being swung or the direction it is being moved in.
+        /// </summary>
         /// <param name="controllerReference">The reference to the controller.</param>
         /// <returns>A 3 dimensional vector containing the current real world physical controller velocity.</returns>
         public static Vector3 GetControllerVelocity(VRTK_ControllerReference controllerReference)
         {
             return VRTK_SDK_Bridge.GetControllerVelocity(controllerReference);
+        }
+
+        /// <summary>
+        /// The GetControllerAngularVelocity method is used for getting the current rotational velocity of the physical game controller. This can be useful for determining which way the controller is being rotated and at what speed the rotation is occurring.
+        /// </summary>
+        /// <param name="givenController">The GameObject of the controller.</param>
+        /// <returns>A 3 dimensional vector containing the current real world physical controller angular (rotational) velocity.</returns>
+        [System.Obsolete("`VRTK_DeviceFinder.GetControllerAngularVelocity(givenController)` has been replaced with `VRTK_DeviceFinder.GetControllerAngularVelocity(controllerReference)`. This method will be removed in a future version of VRTK.")]
+        public static Vector3 GetControllerAngularVelocity(GameObject givenController)
+        {
+            return GetControllerAngularVelocity(VRTK_ControllerReference.GetControllerReference(givenController));
         }
 
         /// <summary>
@@ -412,7 +369,6 @@ namespace VRTK
         /// <summary>
         /// The ResetHeadsetTypeCache resets the cache holding the current headset type value.
         /// </summary>
-        [System.Obsolete("`VRTK_DeviceFinder.ResetHeadsetTypeCache()` has been deprecated. This method will be removed in a future version of VRTK.")]
         public static void ResetHeadsetTypeCache()
         {
             cachedHeadsetType = "";
@@ -421,20 +377,16 @@ namespace VRTK
         /// <summary>
         /// The GetHeadsetType method returns the type of headset connected to the computer.
         /// </summary>
-        /// <param name="summary">If this is `true`, then the generic name for the headset is returned not including the version type (e.g. OculusRift will be returned for DK2 and CV1).</param>
+        /// <param name="summary">If this is true, then the generic name for the headset is returned not including the version type (e.g. OculusRift will be returned for DK2 and CV1).</param>
         /// <returns>The Headset type that is connected.</returns>
-        [System.Obsolete("`VRTK_DeviceFinder.GetHeadsetType(summary) -> VRTK_DeviceFinder.Headsets` has been replaced with `VRTK_DeviceFinder.GetHeadsetType() -> SDK_BaseHeadset.HeadsetType`. This method will be removed in a future version of VRTK.")]
         public static Headsets GetHeadsetType(bool summary = false)
         {
             Headsets returnValue = Headsets.Unknown;
-            cachedHeadsetType = (cachedHeadsetType == "" ? XRDevice.model.Replace(" ", "").Replace(".", "").ToLowerInvariant() : cachedHeadsetType);
+            cachedHeadsetType = (cachedHeadsetType == "" ? VRDevice.model.Replace(" ", "").Replace(".", "").ToLowerInvariant() : cachedHeadsetType);
             switch (cachedHeadsetType)
             {
                 case "oculusriftcv1":
                     returnValue = (summary ? Headsets.OculusRift : Headsets.OculusRiftCV1);
-                    break;
-                case "oculusriftes07":
-                    returnValue = (summary ? Headsets.OculusRift : Headsets.OculusRiftES07);
                     break;
                 case "vivemv":
                     returnValue = (summary ? Headsets.Vive : Headsets.ViveMV);
@@ -466,47 +418,6 @@ namespace VRTK
             }
 
             return returnValue;
-        }
-
-        /// <summary>
-        /// The GetHeadsetTypeAsString method returns a string representing the type of headset connected.
-        /// </summary>
-        /// <returns>The string of the headset connected.</returns>
-        public static string GetHeadsetTypeAsString()
-        {
-            return VRTK_SDK_Bridge.GetHeadsetType();
-        }
-
-        /// <summary>
-        /// The GetHeadsetType method returns the type of headset currently connected.
-        /// </summary>
-        /// <returns>The Headset type that is connected.</returns>
-        public static SDK_BaseHeadset.HeadsetType GetHeadsetType()
-        {
-            switch (GetHeadsetTypeAsString())
-            {
-                case "simulator":
-                    return SDK_BaseHeadset.HeadsetType.Simulator;
-                case "htcvive":
-                    return SDK_BaseHeadset.HeadsetType.HTCVive;
-                case "oculusrift":
-                    return SDK_BaseHeadset.HeadsetType.OculusRift;
-                case "oculusgearvr":
-                    return SDK_BaseHeadset.HeadsetType.OculusGearVR;
-                case "googledaydream":
-                    return SDK_BaseHeadset.HeadsetType.GoogleDaydream;
-                case "googlecardboard":
-                    return SDK_BaseHeadset.HeadsetType.GoogleCardboard;
-                case "hyperealvr":
-                    return SDK_BaseHeadset.HeadsetType.HyperealVR;
-                case "oculusriftdk1":
-                    return SDK_BaseHeadset.HeadsetType.OculusRiftDK1;
-                case "oculusriftdk2":
-                    return SDK_BaseHeadset.HeadsetType.OculusRiftDK2;
-                case "windowsmixedreality":
-                    return SDK_BaseHeadset.HeadsetType.WindowsMixedReality;
-            }
-            return SDK_BaseHeadset.HeadsetType.Undefined;
         }
 
         /// <summary>

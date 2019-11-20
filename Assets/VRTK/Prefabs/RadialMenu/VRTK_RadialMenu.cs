@@ -1,4 +1,4 @@
-﻿// Radial Menu|Prefabs|0110
+// Radial Menu|Prefabs|0040
 namespace VRTK
 {
     using UnityEngine;
@@ -8,31 +8,15 @@ namespace VRTK
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
 
-    public struct TouchAngleDeflection
-    {
-        public float angle;
-        public float deflection;
-
-        /// <summary>
-        /// Constructs an object to hold the angle and deflection of the user's touch on the touchpad
-        /// </summary>
-        /// <param name="angle">The angle of the touch on the radial menu.</param>
-        /// <param name="deflection">Deflection of the touch, where 0 is the centre and 1 is the edge.</param>
-        public TouchAngleDeflection(float angle, float deflection)
-        {
-            this.angle = angle;
-            this.deflection = deflection;
-        }
-    }
-
     public delegate void HapticPulseEventHandler(float strength);
 
     /// <summary>
-    /// Provides a UI element into the world space that can be dropped into a Controller GameObject and used to create and use Radial Menus from the touchpad.
+    /// This adds a UI element into the world space that can be dropped into a Controller object and used to create and use Radial Menus from the touchpad.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/RadialMenu/RadialMenu` prefab as a child of a Controller script alias GameObject.
+    /// If the RadialMenu is placed inside a controller, it will automatically find a `VRTK_ControllerEvents` in its parent to use at the input. However, a `VRTK_ControllerEvents` can be defined explicitly by setting the `Events` parameter of the `Radial Menu Controller` script also attached to the prefab.
+    ///
+    /// The RadialMenu can also be placed inside a `VRTK_InteractableObject` for the RadialMenu to be anchored to a world object instead of the controller. The `Events Manager` parameter will automatically be set if the RadialMenu is a child of an InteractableObject, but it can also be set manually in the inspector. Additionally, for the RadialMenu to be anchored in the world, the `RadialMenuController` script in the prefab must be replaced with `VRTK_IndependentRadialMenuController`. See the script information for further details on making the RadialMenu independent of the controllers.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/030_Controls_RadialTouchpadMenu` displays a radial menu for each controller. The left controller uses the `Hide On Release` variable, so it will only be visible if the left touchpad is being touched. It also uses the `Execute On Unclick` variable to delay execution until the touchpad button is unclicked. The example scene also contains a demonstration of anchoring the RadialMenu to an interactable cube instead of a controller.
@@ -59,7 +43,7 @@ namespace VRTK
         }
 
         [Tooltip("An array of Buttons that define the interactive buttons required to be displayed as part of the radial menu.")]
-        public List<RadialMenuButton> buttons = new List<RadialMenuButton>();
+        public List<RadialMenuButton> buttons;
         [Tooltip("The base for each button in the menu, by default set to a dynamic circle arc that will fill up a portion of the menu.")]
         public GameObject buttonPrefab;
         [Tooltip("If checked, then the buttons will be auto generated on awake.")]
@@ -87,75 +71,41 @@ namespace VRTK
         [Tooltip("The base strength of the haptic pulses when the selected button is changed, or a button is pressed. Set to zero to disable.")]
         [Range(0, 1)]
         public float baseHapticStrength;
-        [Tooltip("The dead zone in the middle of the dial where the menu does not consider a button is selected. Set to zero to disable.")]
-        [Range(0, 1)]
-        public float deadZone = 0;
 
         public event HapticPulseEventHandler FireHapticPulse;
 
         //Has to be public to keep state from editor -> play mode?
         [Tooltip("The actual GameObjects that make up the radial menu.")]
-        public List<GameObject> menuButtons = new List<GameObject>();
+        public List<GameObject> menuButtons;
 
         protected int currentHover = -1;
         protected int currentPress = -1;
-        protected Coroutine tweenMenuScaleRoutine;
 
         /// <summary>
         /// The HoverButton method is used to set the button hover at a given angle.
         /// </summary>
         /// <param name="angle">The angle on the radial menu.</param>
-        [System.Obsolete("`VRTK_RadialMenu.HoverButton(float)` has been replaced with `VRTK_RadialMenu.HoverButton(TouchAngleDeflection)`. This method will be removed in a future version of VRTK.")]
         public virtual void HoverButton(float angle)
         {
-            HoverButton(new TouchAngleDeflection(angle, 1));
-        }
-
-        /// <summary>
-        /// The HoverButton method is used to set the button hover at a given angle and deflection.
-        /// </summary>
-        /// <param name="givenTouchAngleDeflection">The angle and deflection on the radial menu.</param>
-        public virtual void HoverButton(TouchAngleDeflection givenTouchAngleDeflection)
-        {
-            InteractButton(givenTouchAngleDeflection, ButtonEvent.hoverOn);
+            InteractButton(angle, ButtonEvent.hoverOn);
         }
 
         /// <summary>
         /// The ClickButton method is used to set the button click at a given angle.
         /// </summary>
         /// <param name="angle">The angle on the radial menu.</param>
-        [System.Obsolete("`VRTK_RadialMenu.ClickButton(float)` has been replaced with `VRTK_RadialMenu.ClickButton(TouchAngleDeflection)`. This method will be removed in a future version of VRTK.")]
         public virtual void ClickButton(float angle)
         {
-            ClickButton(new TouchAngleDeflection(angle, 1));
-        }
-
-        /// <summary>
-        /// The ClickButton method is used to set the button click at a given angle and deflection.
-        /// </summary>
-        /// <param name="givenTouchAngleDeflection">The angle and deflection on the radial menu.</param>
-        public virtual void ClickButton(TouchAngleDeflection givenTouchAngleDeflection)
-        {
-            InteractButton(givenTouchAngleDeflection, ButtonEvent.click);
+            InteractButton(angle, ButtonEvent.click);
         }
 
         /// <summary>
         /// The UnClickButton method is used to set the button unclick at a given angle.
         /// </summary>
         /// <param name="angle">The angle on the radial menu.</param>
-        [System.Obsolete("`VRTK_RadialMenu.UnClickButton(float)` has been replaced with `VRTK_RadialMenu.UnClickButton(TouchAngleDeflection)`. This method will be removed in a future version of VRTK.")]
         public virtual void UnClickButton(float angle)
         {
-            UnClickButton(new TouchAngleDeflection(angle, 1));
-        }
-
-        /// <summary>
-        /// The UnClickButton method is used to set the button unclick at a given angle and deflection.
-        /// </summary>
-        /// <param name="givenTouchAngleDeflection">The angle and deflection on the radial menu.</param>
-        public virtual void UnClickButton(TouchAngleDeflection givenTouchAngleDeflection)
-        {
-            InteractButton(givenTouchAngleDeflection, ButtonEvent.unclick);
+            InteractButton(angle, ButtonEvent.unclick);
         }
 
         /// <summary>
@@ -180,7 +130,7 @@ namespace VRTK
         {
             if (currentHover != -1)
             {
-                PointerEventData pointer = new PointerEventData(EventSystem.current);
+                var pointer = new PointerEventData(EventSystem.current);
                 ExecuteEvents.Execute(menuButtons[currentHover], pointer, ExecuteEvents.pointerExitHandler);
                 buttons[currentHover].OnHoverExit.Invoke();
                 currentHover = -1;
@@ -195,7 +145,8 @@ namespace VRTK
             if (!isShown)
             {
                 isShown = true;
-                InitTweenMenuScale(isShown);
+                StopCoroutine("TweenMenuScale");
+                StartCoroutine("TweenMenuScale", isShown);
             }
         }
 
@@ -222,7 +173,8 @@ namespace VRTK
             if (isShown && (hideOnRelease || force))
             {
                 isShown = false;
-                InitTweenMenuScale(isShown);
+                StopCoroutine("TweenMenuScale");
+                StartCoroutine("TweenMenuScale", isShown);
             }
         }
 
@@ -243,7 +195,7 @@ namespace VRTK
 
                 //Setup button arc
                 UICircle circle = newButton.GetComponent<UICircle>();
-                if (buttonThickness == 1f)
+                if (buttonThickness == 1)
                 {
                     circle.fill = true;
                 }
@@ -256,7 +208,7 @@ namespace VRTK
                 circle.color = buttonColor;
 
                 //Final placement/rotation
-                float angle = ((360f / buttons.Count) * i) + offsetRotation;
+                float angle = ((360 / buttons.Count) * i) + offsetRotation;
                 newButton.transform.localEulerAngles = new Vector3(0, 0, angle);
                 newButton.layer = 4; //UI Layer
                 newButton.transform.localPosition = Vector3.zero;
@@ -279,9 +231,9 @@ namespace VRTK
                     buttonIcon.transform.localPosition = new Vector2(-1 * ((newButton.GetComponent<RectTransform>().rect.width / 2f) - (circle.thickness / 2f)), 0);
                     //Min icon size from thickness and arc
                     float scale1 = Mathf.Abs(circle.thickness);
-                    float absButtonIconXPos = Mathf.Abs(buttonIcon.transform.localPosition.x);
+                    float R = Mathf.Abs(buttonIcon.transform.localPosition.x);
                     float bAngle = (359f * circle.fillPercent * 0.01f * Mathf.PI) / 180f;
-                    float scale2 = (absButtonIconXPos * 2f * Mathf.Sin(bAngle / 2f));
+                    float scale2 = (R * 2 * Mathf.Sin(bAngle / 2f));
                     if (circle.fillPercent > 24) //Scale calc doesn't work for > 90 degrees
                     {
                         scale2 = float.MaxValue;
@@ -295,7 +247,8 @@ namespace VRTK
                         buttonIcon.transform.eulerAngles = GetComponentInParent<Canvas>().transform.eulerAngles;
                     }
                 }
-                VRTK_SharedMethods.AddListValue(menuButtons, newButton, true);
+                menuButtons.Add(newButton);
+
             }
         }
 
@@ -305,7 +258,7 @@ namespace VRTK
         /// <param name="newButton">The button to add.</param>
         public void AddButton(RadialMenuButton newButton)
         {
-            VRTK_SharedMethods.AddListValue(buttons, newButton, true);
+            buttons.Add(newButton);
             RegenerateButtons();
         }
 
@@ -334,20 +287,14 @@ namespace VRTK
         }
 
         //Turns and Angle and Event type into a button action
-        protected virtual void InteractButton(TouchAngleDeflection givenTouchAngleDeflection, ButtonEvent evt) //Can't pass ExecuteEvents as parameter? Unity gives error
+        protected virtual void InteractButton(float angle, ButtonEvent evt) //Can't pass ExecuteEvents as parameter? Unity gives error
         {
             //Get button ID from angle
             float buttonAngle = 360f / buttons.Count; //Each button is an arc with this angle
-            givenTouchAngleDeflection.angle = VRTK_SharedMethods.Mod((givenTouchAngleDeflection.angle + -offsetRotation), 360f); //Offset the touch coordinate with our offset
+            angle = VRTK_SharedMethods.Mod((angle + -offsetRotation), 360); //Offset the touch coordinate with our offset
 
-            int buttonID = (int)VRTK_SharedMethods.Mod(((givenTouchAngleDeflection.angle + (buttonAngle / 2f)) / buttonAngle), buttons.Count); //Convert angle into ButtonID (This is the magic)
-            PointerEventData pointer = new PointerEventData(EventSystem.current); //Create a new EventSystem (UI) Event
-
-            if (givenTouchAngleDeflection.deflection <= deadZone)
-            {
-                //No button selected. Use -1 to represent this
-                buttonID = -1;
-            }
+            int buttonID = (int)VRTK_SharedMethods.Mod(((angle + (buttonAngle / 2f)) / buttonAngle), buttons.Count); //Convert angle into ButtonID (This is the magic)
+            var pointer = new PointerEventData(EventSystem.current); //Create a new EventSystem (UI) Event
 
             //If we changed buttons while moving, un-hover and un-click the last button we were on
             if (currentHover != buttonID && currentHover != -1)
@@ -355,7 +302,7 @@ namespace VRTK
                 ExecuteEvents.Execute(menuButtons[currentHover], pointer, ExecuteEvents.pointerUpHandler);
                 ExecuteEvents.Execute(menuButtons[currentHover], pointer, ExecuteEvents.pointerExitHandler);
                 buttons[currentHover].OnHoverExit.Invoke();
-                if (executeOnUnclick && currentPress != -1 && buttonID != -1)
+                if (executeOnUnclick && currentPress != -1)
                 {
                     ExecuteEvents.Execute(menuButtons[buttonID], pointer, ExecuteEvents.pointerDownHandler);
                     AttempHapticPulse(baseHapticStrength * 1.666f);
@@ -363,12 +310,9 @@ namespace VRTK
             }
             if (evt == ButtonEvent.click) //Click button if click, and keep track of current press (executes button action)
             {
-                if (buttonID != -1)
-                {
-                    ExecuteEvents.Execute(menuButtons[buttonID], pointer, ExecuteEvents.pointerDownHandler);
-                }
+                ExecuteEvents.Execute(menuButtons[buttonID], pointer, ExecuteEvents.pointerDownHandler);
                 currentPress = buttonID;
-                if (!executeOnUnclick && buttonID != -1)
+                if (!executeOnUnclick)
                 {
                     buttons[buttonID].OnClick.Invoke();
                     AttempHapticPulse(baseHapticStrength * 2.5f);
@@ -376,18 +320,16 @@ namespace VRTK
             }
             else if (evt == ButtonEvent.unclick) //Clear press id to stop invoking OnHold method (hide menu)
             {
-                if (buttonID != -1)
-                {
-                    ExecuteEvents.Execute(menuButtons[buttonID], pointer, ExecuteEvents.pointerUpHandler);
-                }
+                ExecuteEvents.Execute(menuButtons[buttonID], pointer, ExecuteEvents.pointerUpHandler);
                 currentPress = -1;
-                if (executeOnUnclick && buttonID != -1)
+
+                if (executeOnUnclick)
                 {
                     AttempHapticPulse(baseHapticStrength * 2.5f);
                     buttons[buttonID].OnClick.Invoke();
                 }
             }
-            else if (evt == ButtonEvent.hoverOn && currentHover != buttonID && buttonID != -1) // Show hover UI event (darken button etc). Show menu
+            else if (evt == ButtonEvent.hoverOn && currentHover != buttonID) // Show hover UI event (darken button etc). Show menu
             {
                 ExecuteEvents.Execute(menuButtons[buttonID], pointer, ExecuteEvents.pointerEnterHandler);
                 buttons[buttonID].OnHoverEnter.Invoke();
@@ -396,20 +338,10 @@ namespace VRTK
             currentHover = buttonID; //Set current hover ID, need this to un-hover if selected button changes
         }
 
-
-        protected virtual void InitTweenMenuScale(bool isShown)
-        {
-            if (tweenMenuScaleRoutine != null)
-            {
-                StopCoroutine(tweenMenuScaleRoutine);
-            }
-            tweenMenuScaleRoutine = StartCoroutine(TweenMenuScale(isShown));
-        }
-
         //Simple tweening for menu, scales linearly from 0 to 1 and 1 to 0
         protected virtual IEnumerator TweenMenuScale(bool show)
         {
-            float targetScale = 0f;
+            float targetScale = 0;
             Vector3 Dir = -1 * Vector3.one;
             if (show)
             {
@@ -424,11 +356,12 @@ namespace VRTK
                 i++;
             }
             transform.localScale = Dir * targetScale;
+            StopCoroutine("TweenMenuScale");
         }
 
         protected virtual void AttempHapticPulse(float strength)
         {
-            if (strength > 0f && FireHapticPulse != null)
+            if (strength > 0 && FireHapticPulse != null)
             {
                 FireHapticPulse(strength);
             }
@@ -436,14 +369,15 @@ namespace VRTK
 
         protected virtual void RemoveAllButtons()
         {
-            if (menuButtons != null)
+            if (menuButtons == null)
             {
-                for (int i = 0; i < menuButtons.Count; i++)
-                {
-                    DestroyImmediate(menuButtons[i]);
-                }
-                menuButtons.Clear();
+                menuButtons = new List<GameObject>();
             }
+            for (int i = 0; i < menuButtons.Count; i++)
+            {
+                DestroyImmediate(menuButtons[i]);
+            }
+            menuButtons = new List<GameObject>();
         }
     }
 }

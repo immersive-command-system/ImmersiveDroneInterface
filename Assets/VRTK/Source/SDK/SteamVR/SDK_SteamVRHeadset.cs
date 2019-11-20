@@ -4,7 +4,6 @@ namespace VRTK
 #if VRTK_DEFINE_SDK_STEAMVR
     using UnityEngine;
     using System.Collections.Generic;
-    using Valve.VR;
 #endif
 
     /// <summary>
@@ -45,11 +44,11 @@ namespace VRTK
             if (cachedHeadset == null)
             {
 #if (UNITY_5_4_OR_NEWER)
-                SteamVR_Camera foundCamera = VRTK_SharedMethods.FindEvenInactiveComponent<SteamVR_Camera>(true);
+                var foundCamera = VRTK_SharedMethods.FindEvenInactiveComponent<SteamVR_Camera>();
 #else
-                SteamVR_GameView foundCamera = VRTK_SharedMethods.FindEvenInactiveComponent<SteamVR_GameView>(true);
+                var foundCamera = VRTK_SharedMethods.FindEvenInactiveComponent<SteamVR_GameView>();
 #endif
-                if (foundCamera != null)
+                if (foundCamera)
                 {
                     cachedHeadset = foundCamera.transform;
                 }
@@ -66,45 +65,13 @@ namespace VRTK
             cachedHeadsetCamera = GetSDKManagerHeadset();
             if (cachedHeadsetCamera == null)
             {
-                SteamVR_Camera foundCamera = VRTK_SharedMethods.FindEvenInactiveComponent<SteamVR_Camera>(true);
-                if (foundCamera != null)
+                var foundCamera = VRTK_SharedMethods.FindEvenInactiveComponent<SteamVR_Camera>();
+                if (foundCamera)
                 {
                     cachedHeadsetCamera = foundCamera.transform;
                 }
             }
             return cachedHeadsetCamera;
-        }
-
-        /// <summary>
-        /// The GetHeadsetType method returns a string representing the type of headset connected.
-        /// </summary>
-        /// <returns>The string of the headset connected.</returns>
-        public override string GetHeadsetType()
-        {
-            if (SteamVR.instance != null)
-            {
-                string manufactuer = CleanPropertyString(SteamVR.instance.GetStringProperty(ETrackedDeviceProperty.Prop_ManufacturerName_String));
-                string model = CleanPropertyString(SteamVR.instance.GetStringProperty(ETrackedDeviceProperty.Prop_ModelNumber_String));
-
-                //Check for specific manufacturer models
-                switch (manufactuer)
-                {
-                    case "htc":
-                        if (model.Contains("vive"))
-                        {
-                            return "htcvive";
-                        }
-                        break;
-                    case "oculus":
-                        return "oculusrift";
-                    case "windowsmr":
-                        return "windowsmixedreality";
-                }
-
-                //If no model check required then just return manufacturer
-                return CleanPropertyString(manufactuer);
-            }
-            return CleanPropertyString("");
         }
 
         /// <summary>
@@ -143,7 +110,7 @@ namespace VRTK
         /// <returns>Returns true if the headset has fade functionality on it.</returns>
         public override bool HasHeadsetFade(Transform obj)
         {
-            if (obj.GetComponentInChildren<SteamVR_Fade>() != null)
+            if (obj.GetComponentInChildren<SteamVR_Fade>())
             {
                 return true;
             }
@@ -156,7 +123,7 @@ namespace VRTK
         /// <param name="camera">The Transform to with the camera on to add the fade functionality to.</param>
         public override void AddHeadsetFade(Transform camera)
         {
-            if (camera != null && camera.GetComponent<SteamVR_Fade>() == null)
+            if (camera && !camera.GetComponent<SteamVR_Fade>())
             {
                 camera.gameObject.AddComponent<SteamVR_Fade>();
             }

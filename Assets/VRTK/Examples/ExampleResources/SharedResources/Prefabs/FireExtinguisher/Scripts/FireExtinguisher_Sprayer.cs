@@ -4,14 +4,12 @@
 
     public class FireExtinguisher_Sprayer : VRTK_InteractableObject
     {
-        [Header("Fire Extinguisher Sprayer Settings")]
-
         public FireExtinguisher_Base baseCan;
         public float breakDistance = 0.12f;
         public float maxSprayPower = 5f;
 
-        protected GameObject waterSpray;
-        protected ParticleSystem particles;
+        private GameObject waterSpray;
+        private ParticleSystem particles;
 
         public void Spray(float power)
         {
@@ -19,9 +17,20 @@
             {
                 particles.Stop();
             }
-            else
+
+            if (power > 0)
             {
-                PlayParticles(power);
+                if (particles.isPaused || particles.isStopped)
+                {
+                    particles.Play();
+                }
+
+#if UNITY_5_5_OR_NEWER
+                var mainModule = particles.main;
+                mainModule.startSpeedMultiplier = maxSprayPower * power;
+#else
+                particles.startSpeed = maxSprayPower * power;
+#endif
             }
         }
 
@@ -40,21 +49,6 @@
             {
                 ForceStopInteracting();
             }
-        }
-
-        protected virtual void PlayParticles(float power)
-        {
-            if (particles.isPaused || particles.isStopped)
-            {
-                particles.Play();
-            }
-
-#if UNITY_5_5_OR_NEWER
-            ParticleSystem.MainModule mainModule = particles.main;
-            mainModule.startSpeedMultiplier = maxSprayPower * power;
-#else
-                particles.startSpeed = maxSprayPower * power;
-#endif
         }
     }
 }

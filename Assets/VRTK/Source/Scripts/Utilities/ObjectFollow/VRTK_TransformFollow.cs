@@ -1,10 +1,10 @@
-﻿// Transform Follow|Utilities|90130
+﻿// Transform Follow|Utilities|90062
 namespace VRTK
 {
     using UnityEngine;
 
     /// <summary>
-    /// Changes one GameObject's transform to follow another GameObject's transform.
+    /// Changes one game object's transform to follow another game object's transform.
     /// </summary>
     [AddComponentMenu("VRTK/Scripts/Utilities/Object Follow/VRTK_TransformFollow")]
     public class VRTK_TransformFollow : VRTK_ObjectFollow
@@ -12,31 +12,17 @@ namespace VRTK
         /// <summary>
         /// The moment at which to follow.
         /// </summary>
+        /// <param name="OnUpdate">Follow in the Update method.</param>
+        /// <param name="OnLateUpdate">Follow in the LateUpdate method.</param>
+        /// <param name="OnPreRender">Follow in the OnPreRender method. (This script doesn't have to be attached to a camera.)</param>
+        /// <param name="OnPreCull">Follow in the OnPreCull method. (This script doesn't have to be attached to a camera.)</param>
         public enum FollowMoment
         {
-            /// <summary>
-            /// Follow in the FixedUpdate method.
-            /// </summary>
-            OnFixedUpdate,
-            /// <summary>
-            /// Follow in the Update method.
-            /// </summary>
             OnUpdate,
-            /// <summary>
-            /// Follow in the LateUpdate method.
-            /// </summary>
             OnLateUpdate,
-            /// <summary>
-            /// Follow in the OnPreRender method. (This script doesn't have to be attached to a camera).
-            /// </summary>
             OnPreRender,
-            /// <summary>
-            /// Follow in the OnPreCull method. (This script doesn't have to be attached to a camera).
-            /// </summary>
             OnPreCull
         }
-
-        [Header("Follow Settings")]
 
         [Tooltip("The moment at which to follow.")]
         [SerializeField]
@@ -82,9 +68,6 @@ namespace VRTK
         protected Transform transformToFollow;
         protected Transform transformToChange;
 
-        /// <summary>
-        /// Follow `gameObjectToFollow` using the current settings.
-        /// </summary>
         public override void Follow()
         {
             CacheTransforms();
@@ -112,14 +95,6 @@ namespace VRTK
             transformToChange = null;
             Camera.onPreRender -= OnCamPreRender;
             Camera.onPreCull -= OnCamPreCull;
-        }
-
-        protected void FixedUpdate()
-        {
-            if (moment == FollowMoment.OnFixedUpdate)
-            {
-                Follow();
-            }
         }
 
         protected void Update()

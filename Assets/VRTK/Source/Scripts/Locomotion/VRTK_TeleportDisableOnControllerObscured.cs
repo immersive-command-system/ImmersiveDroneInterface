@@ -5,81 +5,59 @@ namespace VRTK
     using System.Collections;
 
     /// <summary>
-    /// Prevents teleportation when the controllers are obscured from line of sight of the HMD.
+    /// The purpose of the Teleport Disable On Controller Obscured script is to detect when the headset does not have a line of sight to the controllers and prevent teleportation from working. This is to ensure that if a user is clipping their controllers through a wall then they cannot teleport to an area beyond the wall.
     /// </summary>
-    /// <remarks>
-    /// **Required Components:**
-    ///  * `VRTK_BasicTeleport` - A Teleport script to utilise for teleporting the play area.
-    ///  * `VRTK_HeadsetControllerAware` - A Headset Controller Aware script to determine when the HMD has line of sight to the controllers.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_TeleportDisableOnControllerObscured` script on any active scene GameObject.
-    /// </remarks>
+    [RequireComponent(typeof(VRTK_HeadsetControllerAware))]
     [AddComponentMenu("VRTK/Scripts/Locomotion/VRTK_TeleportDisableOnControllerObscured")]
     public class VRTK_TeleportDisableOnControllerObscured : MonoBehaviour
     {
-        [Header("Custom Settings")]
-
-        [Tooltip("The Teleporter script to deal play area teleporting. If the script is being applied onto an object that already has a VRTK_BasicTeleport component, this parameter can be left blank as it will be auto populated by the script at runtime.")]
-        public VRTK_BasicTeleport teleporter;
-        [Tooltip("The VRTK Headset Controller Aware script to use when dealing with the headset to controller awareness. If this is left blank then the script will need to be applied to the same GameObject.")]
-        public VRTK_HeadsetControllerAware headsetControllerAware;
-
-        protected Coroutine enableAtEndOfFrameRoutine;
+        protected VRTK_BasicTeleport basicTeleport;
+        protected VRTK_HeadsetControllerAware headset;
 
         protected virtual void OnEnable()
         {
-            teleporter = (teleporter != null ? teleporter : FindObjectOfType<VRTK_BasicTeleport>());
-            enableAtEndOfFrameRoutine = StartCoroutine(EnableAtEndOfFrame());
+            basicTeleport = GetComponent<VRTK_BasicTeleport>();
+            StartCoroutine(EnableAtEndOfFrame());
         }
 
         protected virtual void OnDisable()
         {
-            if (enableAtEndOfFrameRoutine != null)
-            {
-                StopCoroutine(enableAtEndOfFrameRoutine);
-            }
-
-            if (teleporter == null)
+            if (basicTeleport == null)
             {
                 return;
             }
 
-            if (headsetControllerAware != null)
+            if (headset)
             {
-                headsetControllerAware.ControllerObscured -= new HeadsetControllerAwareEventHandler(DisableTeleport);
-                headsetControllerAware.ControllerUnobscured -= new HeadsetControllerAwareEventHandler(EnableTeleport);
+                headset.ControllerObscured -= new HeadsetControllerAwareEventHandler(DisableTeleport);
+                headset.ControllerUnobscured -= new HeadsetControllerAwareEventHandler(EnableTeleport);
             }
         }
 
         protected virtual IEnumerator EnableAtEndOfFrame()
         {
-            if (teleporter == null)
+            if (basicTeleport == null)
             {
                 yield break;
             }
             yield return new WaitForEndOfFrame();
 
-            headsetControllerAware = (headsetControllerAware != null ? headsetControllerAware : FindObjectOfType<VRTK_HeadsetControllerAware>());
-            if (headsetControllerAware == null)
+            headset = VRTK_ObjectCache.registeredHeadsetControllerAwareness;
+            if (headset)
             {
-                VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_FROM_SCENE, "VRTK_TeleportDisableOnControllerObscured", "VRTK_HeadsetControllerAware"));
-            }
-            else
-            {
-                headsetControllerAware.ControllerObscured += new HeadsetControllerAwareEventHandler(DisableTeleport);
-                headsetControllerAware.ControllerUnobscured += new HeadsetControllerAwareEventHandler(EnableTeleport);
+                headset.ControllerObscured += new HeadsetControllerAwareEventHandler(DisableTeleport);
+                headset.ControllerUnobscured += new HeadsetControllerAwareEventHandler(EnableTeleport);
             }
         }
 
         protected virtual void DisableTeleport(object sender, HeadsetControllerAwareEventArgs e)
         {
-            teleporter.ToggleTeleportEnabled(false);
+            basicTeleport.ToggleTeleportEnabled(false);
         }
 
         protected virtual void EnableTeleport(object sender, HeadsetControllerAwareEventArgs e)
         {
-            teleporter.ToggleTeleportEnabled(true);
+            basicTeleport.ToggleTeleportEnabled(true);
         }
     }
 }

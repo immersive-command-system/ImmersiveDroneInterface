@@ -1,18 +1,19 @@
-﻿// Panel Menu|Prefabs|0130
+﻿// Panel Menu Controller|Prefabs|0070
 namespace VRTK
 {
     using System.Collections;
     using UnityEngine;
 
     /// <summary>
-    /// Adds a top-level controller to handle the display of up to four child PanelMenuItemController items which are displayed as a canvas UI panel.
+    /// Purpose: top-level controller class to handle the display of up to four child PanelMenuItemController items which are displayed as a canvas UI panel.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/PanelMenu/PanelMenu` prefab as a child of the `VRTK_InteractableObject` the panel menu is for.
-    ///  * Optionally remove the panel control menu item child GameObjects if they are not required, e.g. `PanelTopControls`.
-    ///  * Set the panel menu item controllers on the `VRTK_PanelMenuController` script to determine which panel control menu items are available.
-    ///  * The available panel control menu items can be activated by pressing the corresponding direction on the touchpad.
+    /// This script should be attached to a VRTK_InteractableObject > first child GameObject [PanelMenuController].
+    /// The [PanelMenuController] must have a child GameObject [panel items container].
+    /// The [panel items container] must have a Canvas component.
+    /// A [panel items container] can have up to four child GameObject, each of these contains the UI for a panel that can be displayed by [PanelMenuController].
+    /// They also have the [PanelMenuItemController] script attached to them. The [PanelMenuItemController] script intercepts the controller events sent from this [PanelMenuController] and passes them onto additional custom event subscriber scripts, which then carry out the required custom UI actions.
+    /// To show / hide a UI panel, you must first pick up the VRTK_InteractableObject and then by pressing the touchpad top/bottom/left/right you can open/close the child UI panel that has been assigned via the Unity Editor panel. Button type UI actions are handled by a trigger press when the panel is open.
     /// </remarks>
     /// <example>
     /// `040_Controls_Panel_Menu` contains three basic interactive object examples of the PanelMenu in use.
@@ -63,7 +64,6 @@ namespace VRTK
         protected bool isPendingSwipeCheck = false;
         protected bool isGrabbed = false;
         protected bool isShown = false;
-        protected Coroutine tweenMenuScaleRoutine;
 
         /// <summary>
         /// The ToggleMenu method is used to show or hide the menu.
@@ -88,7 +88,11 @@ namespace VRTK
             if (!isShown)
             {
                 isShown = true;
-                InitTweenMenuScale(isShown);
+                StopCoroutine("TweenMenuScale");
+                if (enabled)
+                {
+                    StartCoroutine("TweenMenuScale", isShown);
+                }
             }
         }
 
@@ -101,7 +105,11 @@ namespace VRTK
             if (isShown && force)
             {
                 isShown = false;
-                InitTweenMenuScale(isShown);
+                StopCoroutine("TweenMenuScale");
+                if (enabled)
+                {
+                    StartCoroutine("TweenMenuScale", isShown);
+                }
             }
         }
 
@@ -122,7 +130,7 @@ namespace VRTK
         protected virtual void Awake()
         {
             Initialize();
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Start()
@@ -146,7 +154,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -240,18 +248,6 @@ namespace VRTK
             }
         }
 
-        protected virtual void InitTweenMenuScale(bool show)
-        {
-            if (tweenMenuScaleRoutine != null)
-            {
-                StopCoroutine(tweenMenuScaleRoutine);
-            }
-            if (enabled)
-            {
-                tweenMenuScaleRoutine = StartCoroutine(TweenMenuScale(show));
-            }
-        }
-
         protected virtual IEnumerator TweenMenuScale(bool show)
         {
             float targetScale = 0;
@@ -270,6 +266,7 @@ namespace VRTK
                 i++;
             }
             transform.localScale = direction * targetScale;
+            StopCoroutine("TweenMenuScale");
 
             if (!show)
             {
@@ -306,7 +303,7 @@ namespace VRTK
         {
             if (isGrabbed)
             {
-                TouchpadPressPosition pressPosition = CalculateTouchpadPressPosition();
+                var pressPosition = CalculateTouchpadPressPosition();
                 switch (pressPosition)
                 {
                     case TouchpadPressPosition.Top:

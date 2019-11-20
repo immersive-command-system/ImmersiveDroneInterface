@@ -17,7 +17,6 @@ namespace VRTK
     /// `VRTK/Examples/025_Controls_Overview` shows a drawer with contents that can be opened and closed freely and the contents can be removed from the drawer.
     /// </example>
     [AddComponentMenu("VRTK/Scripts/Controls/3D/VRTK_Drawer")]
-    [System.Obsolete("`VRTK.VRTK_Drawer` has been deprecated and can be recreated with `VRTK.Controllables.PhysicsBased.VRTK_PhysicsSlider`. This script will be removed in a future version of VRTK.")]
     public class VRTK_Drawer : VRTK_Control
     {
         [Tooltip("An optional game object to which the drawer will be connected. If the game object moves the drawer will follow along.")]
@@ -170,7 +169,7 @@ namespace VRTK
             }
             if (drawerSnapForceCreated)
             {
-                drawerSnapForce.force = transform.TransformDirection(drawerJoint.axis) * (subDirection * 50f);
+                drawerSnapForce.force = GetThirdDirection(drawerJoint.axis, drawerJoint.secondaryAxis) * (subDirection * -50f);
             }
 
             return true;

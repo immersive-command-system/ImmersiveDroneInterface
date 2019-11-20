@@ -6,140 +6,141 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/VRTK/Examples/001_CameraRig_VRPlayArea.unity
+    path: Assets/VRTK/LegacyExampleFiles/001_CameraRig_VRPlayArea.unity
     guid: a4ba916f2807f7948b86d88e859e307b
   - enabled: 1
-    path: Assets/VRTK/Examples/002_Controller_Events.unity
+    path: Assets/VRTK/LegacyExampleFiles/002_Controller_Events.unity
     guid: 6b736d8c81b40974bb88eb03aeeb507c
   - enabled: 1
-    path: Assets/VRTK/Examples/003_Controller_SimplePointer.unity
+    path: Assets/VRTK/LegacyExampleFiles/003_Controller_SimplePointer.unity
     guid: de2d2543eea46794f963a7d7a221da53
   - enabled: 1
-    path: Assets/VRTK/Examples/004_CameraRig_BasicTeleport.unity
+    path: Assets/VRTK/LegacyExampleFiles/004_CameraRig_BasicTeleport.unity
     guid: 4e1e9f3e596a6ca46aa2e5eeac865fc1
   - enabled: 1
-    path: Assets/VRTK/Examples/005_Controller_BasicObjectGrabbing.unity
+    path: Assets/VRTK/LegacyExampleFiles/005_Controller_BasicObjectGrabbing.unity
     guid: 05a9fcd8c10d7b74da0aab19606660f4
   - enabled: 1
-    path: Assets/VRTK/Examples/006_Controller_UsingADoor.unity
+    path: Assets/VRTK/LegacyExampleFiles/006_Controller_UsingADoor.unity
     guid: 2a46a9d1974d3fa459716d994bd48357
   - enabled: 1
-    path: Assets/VRTK/Examples/007_CameraRig_HeightAdjustTeleport.unity
+    path: Assets/VRTK/LegacyExampleFiles/007_CameraRig_HeightAdjustTeleport.unity
     guid: eb6e8985d96362a478e840a0900a358d
   - enabled: 1
-    path: Assets/VRTK/Examples/008_Controller_UsingAGrabbedObject.unity
+    path: Assets/VRTK/LegacyExampleFiles/008_Controller_UsingAGrabbedObject.unity
     guid: 608fa314af22b7044b813d2ff2d3b51d
   - enabled: 1
-    path: Assets/VRTK/Examples/009_Controller_BezierPointer.unity
+    path: Assets/VRTK/LegacyExampleFiles/009_Controller_BezierPointer.unity
     guid: 0fede8df72c9b624aa5612921f646ee8
   - enabled: 1
-    path: Assets/VRTK/Examples/010_CameraRig_TerrainTeleporting.unity
+    path: Assets/VRTK/LegacyExampleFiles/010_CameraRig_TerrainTeleporting.unity
     guid: 246642cd92af6764fa0e4fc507e86d64
   - enabled: 1
-    path: Assets/VRTK/Examples/011_Camera_HeadSetCollisionFading.unity
+    path: Assets/VRTK/LegacyExampleFiles/011_Camera_HeadSetCollisionFading.unity
     guid: d5a6197ef3161724db8afee2b02d3f53
   - enabled: 1
-    path: Assets/VRTK/Examples/012_Controller_PointerWithAreaCollision.unity
+    path: Assets/VRTK/LegacyExampleFiles/012_Controller_PointerWithAreaCollision.unity
     guid: c79881fda02cbf845b464c7285b7971c
   - enabled: 1
-    path: Assets/VRTK/Examples/013_Controller_UsingAndGrabbingMultipleObjects.unity
+    path: Assets/VRTK/LegacyExampleFiles/013_Controller_UsingAndGrabbingMultipleObjects.unity
     guid: c8490da4970ffa44b92f9ac4c9f12823
   - enabled: 1
-    path: Assets/VRTK/Examples/014_Controller_SnappingObjectsOnGrab.unity
+    path: Assets/VRTK/LegacyExampleFiles/014_Controller_SnappingObjectsOnGrab.unity
     guid: f199cdb1d105b444fb643b37c4ea143f
   - enabled: 1
-    path: Assets/VRTK/Examples/015_Controller_TouchpadAxisControl.unity
+    path: Assets/VRTK/LegacyExampleFiles/015_Controller_TouchpadAxisControl.unity
     guid: 10434639a1f9dbd4ebda4a82a036dc88
   - enabled: 1
-    path: Assets/VRTK/Examples/016_Controller_HapticRumble.unity
+    path: Assets/VRTK/LegacyExampleFiles/016_Controller_HapticRumble.unity
     guid: fceae7d56ebd76846ba9067c795969dc
   - enabled: 1
-    path: Assets/VRTK/Examples/017_CameraRig_TouchpadWalking.unity
+    path: Assets/VRTK/LegacyExampleFiles/017_CameraRig_TouchpadWalking.unity
     guid: 976602924483e6d4bbfa2e37b4dcdda6
   - enabled: 1
-    path: Assets/VRTK/Examples/018_CameraRig_FramesPerSecondCounter.unity
+    path: Assets/VRTK/LegacyExampleFiles/018_CameraRig_FramesPerSecondCounter.unity
     guid: 9b45bc9823254a84a8e8697b1caec07a
   - enabled: 1
-    path: Assets/VRTK/Examples/019_Controller_InteractingWithPointer.unity
+    path: Assets/VRTK/LegacyExampleFiles/019_Controller_InteractingWithPointer.unity
     guid: d1be9c4b44ac84e4bb09cbf118f21d02
   - enabled: 1
-    path: Assets/VRTK/Examples/020_CameraRig_MeshTeleporting.unity
+    path: Assets/VRTK/LegacyExampleFiles/020_CameraRig_MeshTeleporting.unity
     guid: d47322b2047765245ac42e0b4d9eb5f7
   - enabled: 1
-    path: Assets/VRTK/Examples/021_Controller_GrabbingObjectsWithJoints.unity
+    path: Assets/VRTK/LegacyExampleFiles/021_Controller_GrabbingObjectsWithJoints.unity
     guid: 85f86f7020235d943a21f8692edccf10
   - enabled: 1
-    path: Assets/VRTK/Examples/022_Controller_CustomBezierPointer.unity
+    path: Assets/VRTK/LegacyExampleFiles/022_Controller_CustomBezierPointer.unity
     guid: 6682dc195f97df948a5429b45e43fa8e
   - enabled: 1
-    path: Assets/VRTK/Examples/023_Controller_ChildOfControllerOnGrab.unity
+    path: Assets/VRTK/LegacyExampleFiles/023_Controller_ChildOfControllerOnGrab.unity
     guid: d116105ceea04fa4a82d28d67417c71e
   - enabled: 1
-    path: Assets/VRTK/Examples/024_CameraRig_ExcludeTeleportLocations.unity
+    path: Assets/VRTK/LegacyExampleFiles/024_CameraRig_ExcludeTeleportLocations.unity
     guid: 74770ab1fd3824749bf4df8d2fd186d2
   - enabled: 1
-    path: Assets/VRTK/Examples/025_Controls_Overview.unity
+    path: Assets/VRTK/LegacyExampleFiles/025_Controls_Overview.unity
     guid: b62e5ac17f705524cad1b16219dba697
   - enabled: 1
-    path: Assets/VRTK/Examples/026_Controller_ForceHoldObject.unity
+    path: Assets/VRTK/LegacyExampleFiles/026_Controller_ForceHoldObject.unity
     guid: 6b87536044609b445b07e52eda9cbfbe
   - enabled: 1
-    path: Assets/VRTK/Examples/027_CameraRig_TeleportByModelVillage.unity
+    path: Assets/VRTK/LegacyExampleFiles/027_CameraRig_TeleportByModelVillage.unity
     guid: fb0f6782109195b4ba5c1378137cde23
   - enabled: 1
-    path: Assets/VRTK/Examples/028_CameraRig_RoomExtender.unity
+    path: Assets/VRTK/LegacyExampleFiles/028_CameraRig_RoomExtender.unity
     guid: a23f7495b42c0174a8dabfa4185da5de
   - enabled: 1
-    path: Assets/VRTK/Examples/029_Controller_Tooltips.unity
+    path: Assets/VRTK/LegacyExampleFiles/029_Controller_Tooltips.unity
     guid: b807e68727d26394bbf738f615a1cf76
   - enabled: 1
-    path: Assets/VRTK/Examples/030_Controls_RadialTouchpadMenu.unity
+    path: Assets/VRTK/LegacyExampleFiles/030_Controls_RadialTouchpadMenu.unity
     guid: 73dc9c5291d40ae45bf592c6d516b323
   - enabled: 1
-    path: Assets/VRTK/Examples/031_CameraRig_HeadsetGazePointer.unity
+    path: Assets/VRTK/LegacyExampleFiles/031_CameraRig_HeadsetGazePointer.unity
     guid: f46e0df0e8157dc4f96731e7b716286e
   - enabled: 1
-    path: Assets/VRTK/Examples/032_Controller_CustomControllerModel.unity
+    path: Assets/VRTK/LegacyExampleFiles/032_Controller_CustomControllerModel.unity
     guid: fd1c18cbbdbe8b24d817b74094e6f49b
   - enabled: 1
-    path: Assets/VRTK/Examples/033_CameraRig_TeleportingInNavMesh.unity
+    path: Assets/VRTK/LegacyExampleFiles/033_CameraRig_TeleportingInNavMesh.unity
     guid: 520989f91a00b3540b4c4ecefab0f80a
   - enabled: 1
-    path: Assets/VRTK/Examples/034_Controls_InteractingWithUnityUI.unity
+    path: Assets/VRTK/LegacyExampleFiles/034_Controls_InteractingWithUnityUI.unity
     guid: 2ce499512664316478fc7632f4bb4674
   - enabled: 1
-    path: Assets/VRTK/Examples/035_Controller_OpacityAndHighlighting.unity
+    path: Assets/VRTK/LegacyExampleFiles/035_Controller_OpacityAndHighlighting.unity
     guid: 1b1e814fc06685244a71c5e03ac47047
   - enabled: 1
-    path: Assets/VRTK/Examples/036_Controller_CustomCompoundPointer.unity
+    path: Assets/VRTK/LegacyExampleFiles/036_Controller_CustomCompoundPointer.unity
     guid: 1d53371de5361d243bf3af6efca4759c
   - enabled: 1
-    path: Assets/VRTK/Examples/037_CameraRig_ClimbingFalling.unity
+    path: Assets/VRTK/LegacyExampleFiles/037_CameraRig_ClimbingFalling.unity
     guid: 4afe6b510c29b90418f10c26d31329cf
   - enabled: 1
-    path: Assets/VRTK/Examples/038_CameraRig_DashTeleport.unity
+    path: Assets/VRTK/LegacyExampleFiles/038_CameraRig_DashTeleport.unity
     guid: 01a136f67aafeb946b7d70c65c66f78f
   - enabled: 1
-    path: Assets/VRTK/Examples/039_CameraRig_AdaptiveQuality.unity
+    path: Assets/VRTK/LegacyExampleFiles/039_CameraRig_AdaptiveQuality.unity
     guid: 7322b7f39d2c2794aa3d0725ed3ef1f2
   - enabled: 1
-    path: Assets/VRTK/Examples/040_Controls_PanelMenu.unity
+    path: Assets/VRTK/LegacyExampleFiles/040_Controls_PanelMenu.unity
     guid: 7d8296787302ebb45a065a84a0bc8d40
   - enabled: 1
-    path: Assets/VRTK/Examples/041_Controller_ObjectSnappingToDropZones.unity
+    path: Assets/VRTK/LegacyExampleFiles/041_Controller_ObjectSnappingToDropZones.unity
     guid: e1f78999f64dbba48ada7e6cdd560233
   - enabled: 1
-    path: Assets/VRTK/Examples/042_CameraRig_MoveInPlace.unity
+    path: Assets/VRTK/LegacyExampleFiles/042_CameraRig_MoveInPlace.unity
     guid: 0d5d2cf9877cf22448ccf1713cc3da50
   - enabled: 1
-    path: Assets/VRTK/Examples/043_Controller_SecondaryControllerActions.unity
+    path: Assets/VRTK/LegacyExampleFiles/043_Controller_SecondaryControllerActions.unity
     guid: 351a7292587fcbe45a69dbf15df44024
   - enabled: 1
-    path: Assets/VRTK/Examples/044_CameraRig_RestrictedTeleportZones.unity
+    path: Assets/VRTK/LegacyExampleFiles/044_CameraRig_RestrictedTeleportZones.unity
     guid: bd7af403def3edb458ff7277c7838194
-  - enabled: 1
-    path: Assets/Scenes/Tutorial.unity
-    guid: 6a24f01a8cb676548b92840e442b4000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
     path: Assets/Scenes/Main.unity
     guid: c0a0d090a06ad5e4cbb280f24836278b
+  m_configObjects: {}

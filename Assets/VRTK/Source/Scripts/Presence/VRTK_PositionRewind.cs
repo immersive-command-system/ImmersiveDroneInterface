@@ -22,16 +22,8 @@ namespace VRTK
     public delegate void PositionRewindEventHandler(object sender, PositionRewindEventArgs e);
 
     /// <summary>
-    /// Attempts to rewind the position of the play area to a last know valid position upon the headset collision event.
+    /// The Position Rewind script is used to reset the user back to a good known standing position upon receiving a headset collision event.
     /// </summary>
-    /// <remarks>
-    /// **Required Components:**
-    ///  * `VRTK_BodyPhysics` - A Body Physics script to manage the collisions of the body presence within the scene.
-    ///  * `VRTK_HeadsetCollision` - A Headset Collision script to determine when the headset is colliding with valid geometry.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_PositionRewind` script on any active scene GameObject.
-    /// </remarks>
     /// <example>
     /// `VRTK/Examples/017_CameraRig_TouchpadWalking` has the position rewind script to reset the user's position if they walk into objects.
     /// </example>
@@ -41,19 +33,13 @@ namespace VRTK
         /// <summary>
         /// Valid collision detectors.
         /// </summary>
+        /// <param name="HeadsetOnly">Listen for collisions on the headset collider only.</param>
+        /// <param name="BodyOnly">Listen for collisions on the body physics collider only.</param>
+        /// <param name="HeadsetAndBody">Listen for collisions on both the headset collider and body physics collider.</param>
         public enum CollisionDetectors
         {
-            /// <summary>
-            /// Listen for collisions on the headset collider only.
-            /// </summary>
             HeadsetOnly,
-            /// <summary>
-            /// Listen for collisions on the body physics collider only.
-            /// </summary>
             BodyOnly,
-            /// <summary>
-            /// Listen for collisions on both the headset collider and body physics collider.
-            /// </summary>
             HeadsetAndBody
         }
 
@@ -141,7 +127,7 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -149,6 +135,11 @@ namespace VRTK
             lastGoodPositionSet = false;
             headset = VRTK_DeviceFinder.HeadsetTransform();
             playArea = VRTK_DeviceFinder.PlayAreaTransform();
+            if (playArea == null)
+            {
+                VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.SDK_OBJECT_NOT_FOUND, "PlayArea", "Boundaries SDK"));
+            }
+
             bodyPhysics = (bodyPhysics != null ? bodyPhysics : FindObjectOfType<VRTK_BodyPhysics>());
             headsetCollision = (headsetCollision != null ? headsetCollision : GetComponentInChildren<VRTK_HeadsetCollision>());
             ManageListeners(true);
@@ -161,7 +152,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()

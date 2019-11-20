@@ -1,4 +1,4 @@
-﻿// Shared Methods|Utilities|90060
+﻿// Shared Methods|Utilities|90030
 namespace VRTK
 {
     using UnityEngine;
@@ -10,12 +10,7 @@ namespace VRTK
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-#if UNITY_2017_2_OR_NEWER
-    using UnityEngine.XR;
-#else
-    using XRSettings = UnityEngine.VR.VRSettings;
-    using XRStats = UnityEngine.VR.VRStats;
-#endif
+    using UnityEngine.VR;
 
     /// <summary>
     /// The Shared Methods script is a collection of reusable static methods that are used across a range of different scripts.
@@ -32,7 +27,7 @@ namespace VRTK
         public static Bounds GetBounds(Transform transform, Transform excludeRotation = null, Transform excludeTransform = null)
         {
             Quaternion oldRotation = Quaternion.identity;
-            if (excludeRotation != null)
+            if (excludeRotation)
             {
                 oldRotation = excludeRotation.rotation;
                 excludeRotation.rotation = Quaternion.identity;
@@ -42,9 +37,8 @@ namespace VRTK
             Bounds bounds = new Bounds(transform.position, Vector3.zero);
 
             Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();
-            for (int i = 0; i < renderers.Length; i++)
+            foreach (Renderer renderer in renderers)
             {
-                Renderer renderer = renderers[i];
                 if (excludeTransform != null && renderer.transform.IsChildOf(excludeTransform))
                 {
                     continue;
@@ -63,9 +57,8 @@ namespace VRTK
             {
                 // do second pass as there were no renderers, this time with colliders
                 BoxCollider[] colliders = transform.GetComponentsInChildren<BoxCollider>();
-                for (int i = 0; i < colliders.Length; i++)
+                foreach (BoxCollider collider in colliders)
                 {
-                    BoxCollider collider = colliders[i];
                     if (excludeTransform != null && collider.transform.IsChildOf(excludeTransform))
                     {
                         continue;
@@ -81,7 +74,7 @@ namespace VRTK
                 }
             }
 
-            if (excludeRotation != null)
+            if (excludeRotation)
             {
                 excludeRotation.rotation = oldRotation;
             }
@@ -97,9 +90,9 @@ namespace VRTK
         /// <returns>Returns true if the value is lower than all numbers in the given array, returns false if it is not the lowest.</returns>
         public static bool IsLowest(float value, float[] others)
         {
-            for (int i = 0; i < others.Length; i++)
+            foreach (float o in others)
             {
-                if (others[i] <= value)
+                if (o <= value)
                 {
                     return false;
                 }
@@ -113,7 +106,7 @@ namespace VRTK
         /// <returns>The transform of the headset camera.</returns>
         public static Transform AddCameraFade()
         {
-            Transform camera = VRTK_DeviceFinder.HeadsetCamera();
+            var camera = VRTK_DeviceFinder.HeadsetCamera();
             VRTK_SDK_Bridge.AddHeadsetFade(camera);
             return camera;
         }
@@ -125,46 +118,13 @@ namespace VRTK
         public static void CreateColliders(GameObject obj)
         {
             Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
-            for (int i = 0; i < renderers.Length; i++)
+            foreach (Renderer renderer in renderers)
             {
-                Renderer renderer = renderers[i];
-                if (renderer.gameObject.GetComponent<Collider>() == null)
+                if (!renderer.gameObject.GetComponent<Collider>())
                 {
                     renderer.gameObject.AddComponent<BoxCollider>();
                 }
             }
-        }
-
-        /// <summary>
-        /// The ColliderExclude method reduces the colliders in the setA array by those matched in the setB array.
-        /// </summary>
-        /// <param name="setA">The array that contains all of the relevant colliders.</param>
-        /// <param name="setB">The array that contains the colliders to remove from setA.</param>
-        /// <returns>A Collider array that is a subset of setA that doesn't contain the colliders from setB.</returns>
-        public static Collider[] ColliderExclude(Collider[] setA, Collider[] setB)
-        {
-            return setA.Except(setB).ToArray<Collider>();
-        }
-
-        /// <summary>
-        /// The GetCollidersInGameObjects method iterates through a GameObject array and returns all of the unique found colliders for all GameObejcts.
-        /// </summary>
-        /// <param name="gameObjects">An array of GameObjects to get the colliders for.</param>
-        /// <param name="searchChildren">If this is `true` then the given GameObjects will also have their child GameObjects searched for colliders.</param>
-        /// <param name="includeInactive">If this is `true` then the inactive GameObjects in the array will also be checked for Colliders. Only relevant if `searchChildren` is `true`.</param>
-        /// <returns>An array of Colliders that are found in the given GameObject array.</returns>
-        public static Collider[] GetCollidersInGameObjects(GameObject[] gameObjects, bool searchChildren, bool includeInactive)
-        {
-            HashSet<Collider> foundColliders = new HashSet<Collider>();
-            for (int i = 0; i < gameObjects.Length; i++)
-            {
-                Collider[] gameObjectColliders = (searchChildren ? gameObjects[i].GetComponentsInChildren<Collider>(includeInactive) : gameObjects[i].GetComponents<Collider>());
-                for (int j = 0; j < gameObjectColliders.Length; j++)
-                {
-                    foundColliders.Add(gameObjectColliders[j]);
-                }
-            }
-            return foundColliders.ToArray();
         }
 
         /// <summary>
@@ -179,22 +139,18 @@ namespace VRTK
             Component tmpComponent = destination.gameObject.AddComponent(source.GetType());
             if (copyProperties)
             {
-                PropertyInfo[] foundProperties = source.GetType().GetProperties();
-                for (int i = 0; i < foundProperties.Length; i++)
+                foreach (PropertyInfo p in source.GetType().GetProperties())
                 {
-                    PropertyInfo foundProperty = foundProperties[i];
-                    if (foundProperty.CanWrite)
+                    if (p.CanWrite)
                     {
-                        foundProperty.SetValue(tmpComponent, foundProperty.GetValue(source, null), null);
+                        p.SetValue(tmpComponent, p.GetValue(source, null), null);
                     }
                 }
             }
 
-            FieldInfo[] foundFields = source.GetType().GetFields();
-            for (int i = 0; i < foundFields.Length; i++)
+            foreach (FieldInfo f in source.GetType().GetFields())
             {
-                FieldInfo foundField = foundFields[i];
-                foundField.SetValue(tmpComponent, foundField.GetValue(source));
+                f.SetValue(tmpComponent, f.GetValue(source));
             }
             return tmpComponent;
         }
@@ -237,6 +193,108 @@ namespace VRTK
         }
 
         /// <summary>
+        /// The TriggerHapticPulse/1 method calls a single haptic pulse call on the controller for a single tick.
+        /// </summary>
+        /// <param name="controllerIndex">The controller index to activate the haptic feedback on.</param>
+        /// <param name="strength">The intensity of the rumble of the controller motor. `0` to `1`.</param>
+        [Obsolete("`VRTK_SharedMethods.TriggerHapticPulse(controllerIndex, strength)` has been replaced with `VRTK_ControllerHaptics.TriggerHapticPulse(controllerReference, strength)`. This method will be removed in a future version of VRTK.")]
+        public static void TriggerHapticPulse(uint controllerIndex, float strength)
+        {
+            VRTK_ControllerHaptics.TriggerHapticPulse(VRTK_ControllerReference.GetControllerReference(controllerIndex), strength);
+        }
+
+        /// <summary>
+        /// The TriggerHapticPulse/3 method calls a haptic pulse for a specified amount of time rather than just a single tick. Each pulse can be separated by providing a `pulseInterval` to pause between each haptic pulse.
+        /// </summary>
+        /// <param name="controllerIndex">The controller index to activate the haptic feedback on.</param>
+        /// <param name="strength">The intensity of the rumble of the controller motor. `0` to `1`.</param>
+        /// <param name="duration">The length of time the rumble should continue for.</param>
+        /// <param name="pulseInterval">The interval to wait between each haptic pulse.</param>
+        [Obsolete("`VRTK_SharedMethods.TriggerHapticPulse(controllerIndex, strength, duration, pulseInterval)` has been replaced with `VRTK_ControllerHaptics.TriggerHapticPulse(controllerReference, strength, duration, pulseInterval)`. This method will be removed in a future version of VRTK.")]
+        public static void TriggerHapticPulse(uint controllerIndex, float strength, float duration, float pulseInterval)
+        {
+            VRTK_ControllerHaptics.TriggerHapticPulse(VRTK_ControllerReference.GetControllerReference(controllerIndex), strength, duration, pulseInterval);
+        }
+
+        /// <summary>
+        /// The CancelHapticPulse method cancels the existing running haptic pulse on the given controller index.
+        /// </summary>
+        /// <param name="controllerIndex">The controller index to cancel the haptic feedback on.</param>
+        [Obsolete("`VRTK_SharedMethods.CancelHapticPulse(controllerIndex)` has been replaced with `VRTK_SharedMethods.CancelHapticPulse(controllerReference)`. This method will be removed in a future version of VRTK.")]
+        public static void CancelHapticPulse(uint controllerIndex)
+        {
+            VRTK_ControllerHaptics.CancelHapticPulse(VRTK_ControllerReference.GetControllerReference(controllerIndex));
+        }
+
+        /// <summary>
+        /// The SetOpacity method allows the opacity of the given GameObject to be changed. A lower alpha value will make the object more transparent, such as `0.5f` will make the controller partially transparent where as `0f` will make the controller completely transparent.
+        /// </summary>
+        /// <param name="model">The GameObject to change the renderer opacity on.</param>
+        /// <param name="alpha">The alpha level to apply to opacity of the controller object. `0f` to `1f`.</param>
+        /// <param name="transitionDuration">The time to transition from the current opacity to the new opacity.</param>
+        [Obsolete("`VRTK_SharedMethods.SetOpacity(model, alpha, transitionDuration)` has been replaced with `VRTK_ObjectAppearance.SetOpacity(model, alpha, transitionDuration)`. This method will be removed in a future version of VRTK.")]
+        public static void SetOpacity(GameObject model, float alpha, float transitionDuration = 0f)
+        {
+            VRTK_ObjectAppearance.SetOpacity(model, alpha, transitionDuration);
+        }
+
+        /// <summary>
+        /// The SetRendererVisible method turns on renderers of a given GameObject. It can also be provided with an optional model to ignore the render toggle on.
+        /// </summary>
+        /// <param name="model">The GameObject to show the renderers for.</param>
+        /// <param name="ignoredModel">An optional GameObject to ignore the renderer toggle on.</param>
+        [Obsolete("`VRTK_SharedMethods.SetRendererVisible(model, ignoredModel)` has been replaced with `VRTK_ObjectAppearance.SetRendererVisible(model, ignoredModel)`. This method will be removed in a future version of VRTK.")]
+        public static void SetRendererVisible(GameObject model, GameObject ignoredModel = null)
+        {
+            VRTK_ObjectAppearance.SetRendererVisible(model, ignoredModel);
+        }
+
+        /// <summary>
+        /// The SetRendererHidden method turns off renderers of a given GameObject. It can also be provided with an optional model to ignore the render toggle on.
+        /// </summary>
+        /// <param name="model">The GameObject to hide the renderers for.</param>
+        /// <param name="ignoredModel">An optional GameObject to ignore the renderer toggle on.</param>
+        [Obsolete("`VRTK_SharedMethods.SetRendererHidden(model, ignoredModel)` has been replaced with `VRTK_ObjectAppearance.SetRendererHidden(model, ignoredModel)`. This method will be removed in a future version of VRTK.")]
+        public static void SetRendererHidden(GameObject model, GameObject ignoredModel = null)
+        {
+            VRTK_ObjectAppearance.SetRendererHidden(model, ignoredModel);
+        }
+
+        /// <summary>
+        /// The ToggleRenderer method turns on or off the renderers of a given GameObject. It can also be provided with an optional model to ignore the render toggle of.
+        /// </summary>
+        /// <param name="state">If true then the renderers will be enabled, if false the renderers will be disabled.</param>
+        /// <param name="model">The GameObject to toggle the renderer states of.</param>
+        /// <param name="ignoredModel">An optional GameObject to ignore the renderer toggle on.</param>
+        [Obsolete("`VRTK_SharedMethods.ToggleRenderer(state, model, ignoredModel)` has been replaced with `VRTK_ObjectAppearance.ToggleRenderer(state, model, ignoredModel)`. This method will be removed in a future version of VRTK.")]
+        public static void ToggleRenderer(bool state, GameObject model, GameObject ignoredModel = null)
+        {
+            VRTK_ObjectAppearance.ToggleRenderer(state, model, ignoredModel);
+        }
+
+        /// <summary>
+        /// The HighlightObject method calls the Highlight method on the highlighter attached to the given GameObject with the provided colour.
+        /// </summary>
+        /// <param name="model">The GameObject to attempt to call the Highlight on.</param>
+        /// <param name="highlightColor">The colour to highlight to.</param>
+        /// <param name="fadeDuration">The duration in time to fade from the initial colour to the target colour.</param>
+        [Obsolete("`VRTK_SharedMethods.HighlightObject(model, highlightColor, fadeDuration)` has been replaced with `VRTK_ObjectAppearance.HighlightObject(model, highlightColor, fadeDuration)`. This method will be removed in a future version of VRTK.")]
+        public static void HighlightObject(GameObject model, Color? highlightColor, float fadeDuration = 0f)
+        {
+            VRTK_ObjectAppearance.HighlightObject(model, highlightColor, fadeDuration);
+        }
+
+        /// <summary>
+        /// The UnhighlightObject method calls the Unhighlight method on the highlighter attached to the given GameObject.
+        /// </summary>
+        /// <param name="model">The GameObject to attempt to call the Unhighlight on.</param>
+        [Obsolete("`VRTK_SharedMethods.UnhighlightObject(model)` has been replaced with `VRTK_ObjectAppearance.UnhighlightObject(model)`. This method will be removed in a future version of VRTK.")]
+        public static void UnhighlightObject(GameObject model)
+        {
+            VRTK_ObjectAppearance.UnhighlightObject(model);
+        }
+
+        /// <summary>
         /// The Mod method is used to find the remainder of the sum a/b.
         /// </summary>
         /// <param name="a">The dividend value.</param>
@@ -248,62 +306,79 @@ namespace VRTK
         }
 
         /// <summary>
-        /// Finds the first GameObject with a given name and an ancestor that has a specific component.
+        /// Finds the first <see cref="GameObject"/> with a given name and an ancestor that has a specific component.
         /// </summary>
         /// <remarks>
-        /// This method returns active as well as inactive GameObjects in all scenes. It doesn't return assets.
+        /// This method returns active as well as inactive <see cref="GameObject"/>s in the scene. It doesn't return assets.
         /// For performance reasons it is recommended to not use this function every frame. Cache the result in a member variable at startup instead.
         /// </remarks>
-        /// <typeparam name="T">The component type that needs to be on an ancestor of the wanted GameObject. Must be a subclass of `Component`.</typeparam>
-        /// <param name="gameObjectName">The name of the wanted GameObject. If it contains a '/' character, this method traverses the hierarchy like a path name, beginning on the game object that has a component of type `T`.</param>
-        /// <param name="searchAllScenes">If this is true, all loaded scenes will be searched. If this is false, only the active scene will be searched.</param>
-        /// <returns>The GameObject with name `gameObjectName` and an ancestor that has a `T`. If no such GameObject is found then `null` is returned.</returns>
-        public static GameObject FindEvenInactiveGameObject<T>(string gameObjectName = null, bool searchAllScenes = false) where T : Component
+        /// <typeparam name="T">The component type that needs to be on an ancestor of the wanted <see cref="GameObject"/>. Must be a subclass of <see cref="Component"/>.</typeparam>
+        /// <param name="gameObjectName">The name of the wanted <see cref="GameObject"/>. If it contains a '/' character, this method traverses the hierarchy like a path name, beginning on the game object that has a component of type <typeparamref name="T"/>.</param>
+        /// <returns>The <see cref="GameObject"/> with name <paramref name="gameObjectName"/> and an ancestor that has a <typeparamref name="T"/>. If no such <see cref="GameObject"/> is found <see langword="null"/> is returned.</returns>
+        public static GameObject FindEvenInactiveGameObject<T>(string gameObjectName = null) where T : Component
         {
             if (string.IsNullOrEmpty(gameObjectName))
             {
-                T foundComponent = FindEvenInactiveComponentsInValidScenes<T>(searchAllScenes, true).FirstOrDefault();
+                T foundComponent = FindEvenInactiveComponent<T>();
                 return foundComponent == null ? null : foundComponent.gameObject;
             }
 
-            return FindEvenInactiveComponentsInValidScenes<T>(searchAllScenes)
-                       .Select(component =>
-                       {
-                           Transform transform = component.gameObject.transform.Find(gameObjectName);
-                           return transform == null ? null : transform.gameObject;
-                       })
-                       .FirstOrDefault(gameObject => gameObject != null);
+            Scene activeScene = SceneManager.GetActiveScene();
+            IEnumerable<GameObject> gameObjects = Resources.FindObjectsOfTypeAll<T>()
+                                                           .Select(component => component.gameObject)
+                                                           .Where(gameObject => gameObject.scene == activeScene);
+
+#if UNITY_EDITOR
+            gameObjects = gameObjects.Where(gameObject => !AssetDatabase.Contains(gameObject));
+#endif
+
+            return gameObjects.Select(gameObject =>
+                              {
+                                  Transform transform = gameObject.transform.Find(gameObjectName);
+                                  return transform == null ? null : transform.gameObject;
+                              })
+                              .FirstOrDefault(gameObject => gameObject != null);
         }
 
         /// <summary>
         /// Finds all components of a given type.
         /// </summary>
         /// <remarks>
-        /// This method returns components from active as well as inactive GameObjects in all scenes. It doesn't return assets.
+        /// This method returns components from active as well as inactive <see cref="GameObject"/>s in the scene. It doesn't return assets.
         /// For performance reasons it is recommended to not use this function every frame. Cache the result in a member variable at startup instead.
         /// </remarks>
-        /// <typeparam name="T">The component type to search for. Must be a subclass of `Component`.</typeparam>
-        /// <param name="searchAllScenes">If this is true, all loaded scenes will be searched. If this is false, only the active scene will be searched.</param>
+        /// <typeparam name="T">The component type to search for. Must be a subclass of <see cref="Component"/>.</typeparam>
         /// <returns>All the found components. If no component is found an empty array is returned.</returns>
-        public static T[] FindEvenInactiveComponents<T>(bool searchAllScenes = false) where T : Component
+        public static T[] FindEvenInactiveComponents<T>() where T : Component
         {
-            IEnumerable<T> results = FindEvenInactiveComponentsInValidScenes<T>(searchAllScenes);
-            return results.ToArray();
+            Scene activeScene = SceneManager.GetActiveScene();
+            return Resources.FindObjectsOfTypeAll<T>()
+                            .Where(@object => @object.gameObject.scene == activeScene)
+#if UNITY_EDITOR
+                            .Where(@object => !AssetDatabase.Contains(@object))
+#endif
+                            .ToArray();
         }
 
         /// <summary>
         /// Finds the first component of a given type.
         /// </summary>
         /// <remarks>
-        /// This method returns components from active as well as inactive GameObjects in all scenes. It doesn't return assets.
+        /// This method returns components from active as well as inactive <see cref="GameObject"/>s in the scene. It doesn't return assets.
         /// For performance reasons it is recommended to not use this function every frame. Cache the result in a member variable at startup instead.
         /// </remarks>
-        /// <typeparam name="T">The component type to search for. Must be a subclass of `Component`.</typeparam>
-        /// <param name="searchAllScenes">If this is true, all loaded scenes will be searched. If this is false, only the active scene will be searched.</param>
-        /// <returns>The found component. If no component is found `null` is returned.</returns>
-        public static T FindEvenInactiveComponent<T>(bool searchAllScenes = false) where T : Component
+        /// <typeparam name="T">The component type to search for. Must be a subclass of <see cref="Component"/>.</typeparam>
+        /// <returns>The found component. If no component is found <see langword="null"/> is returned.</returns>
+        public static T FindEvenInactiveComponent<T>() where T : Component
         {
-            return FindEvenInactiveComponentsInValidScenes<T>(searchAllScenes, true).FirstOrDefault();
+            Scene activeScene = SceneManager.GetActiveScene();
+            return Resources.FindObjectsOfTypeAll<T>()
+                            .Where(@object => @object.gameObject.scene == activeScene)
+#if UNITY_EDITOR
+                            .FirstOrDefault(@object => !AssetDatabase.Contains(@object));
+#else
+                            .FirstOrDefault();
+#endif
         }
 
         /// <summary>
@@ -334,9 +409,13 @@ namespace VRTK
         {
 #if UNITY_5_6_OR_NEWER
             float gpuTimeLastFrame;
-            return (XRStats.TryGetGPUTimeLastFrame(out gpuTimeLastFrame) ? gpuTimeLastFrame : 0f);
+            if (VRStats.TryGetGPUTimeLastFrame(out gpuTimeLastFrame))
+            {
+                return gpuTimeLastFrame;
+            }
+            return 0f;
 #else
-            return XRStats.gpuTimeLastFrame;
+            return VRStats.gpuTimeLastFrame;
 #endif
         }
 
@@ -346,24 +425,12 @@ namespace VRTK
         /// <param name="vectorA">The Vector2 to compare against.</param>
         /// <param name="vectorB">The Vector2 to compare with</param>
         /// <param name="compareFidelity">The number of decimal places to use when doing the comparison on the float elements within the Vector2.</param>
-        /// <returns>Returns `true` if the given Vector2 objects match based on the given fidelity.</returns>
+        /// <returns>Returns true if the given Vector2 objects match based on the given fidelity.</returns>
         public static bool Vector2ShallowCompare(Vector2 vectorA, Vector2 vectorB, int compareFidelity)
         {
-            Vector2 distanceVector = vectorA - vectorB;
+            var distanceVector = vectorA - vectorB;
             return (Math.Round(Mathf.Abs(distanceVector.x), compareFidelity, MidpointRounding.AwayFromZero) < float.Epsilon &&
                     Math.Round(Mathf.Abs(distanceVector.y), compareFidelity, MidpointRounding.AwayFromZero) < float.Epsilon);
-        }
-
-        /// <summary>
-        /// The Vector3ShallowCompare method compares two given Vector3 objects based on the given threshold, which is the equavelent of checking the distance between two Vector3 objects are above the threshold distance.
-        /// </summary>
-        /// <param name="vectorA">The Vector3 to compare against.</param>
-        /// <param name="vectorB">The Vector3 to compare with</param>
-        /// <param name="threshold">The distance in which the two Vector3 objects can be within to be considered true</param>
-        /// <returns>Returns `true` if the given Vector3 objects are within the given threshold distance.</returns>
-        public static bool Vector3ShallowCompare(Vector3 vectorA, Vector3 vectorB, float threshold)
-        {
-            return (Vector3.Distance(vectorA, vectorB) < threshold);
         }
 
         /// <summary>
@@ -390,167 +457,6 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The VectorHeading method calculates the current heading of the target position in relation to the origin position.
-        /// </summary>
-        /// <param name="originPosition">The point to use as the originating position for the heading calculation.</param>
-        /// <param name="targetPosition">The point to use as the target position for the heading calculation.</param>
-        /// <returns>A Vector3 containing the heading changes of the target position in relation to the origin position.</returns>
-        public static Vector3 VectorHeading(Vector3 originPosition, Vector3 targetPosition)
-        {
-            return targetPosition - originPosition;
-        }
-
-        /// <summary>
-        /// The VectorDirection method calculates the direction the target position is in relation to the origin position.
-        /// </summary>
-        /// <param name="originPosition">The point to use as the originating position for the direction calculation.</param>
-        /// <param name="targetPosition">The point to use as the target position for the direction calculation.</param>
-        /// <returns>A Vector3 containing the direction of the target position in relation to the origin position.</returns>
-        public static Vector3 VectorDirection(Vector3 originPosition, Vector3 targetPosition)
-        {
-            Vector3 heading = VectorHeading(originPosition, targetPosition);
-            return heading * DividerToMultiplier(heading.magnitude);
-        }
-
-        /// <summary>
-        /// The DividerToMultiplier method takes a number to be used in a division and converts it to be used for multiplication. (e.g. 2 / 2 becomes 2 * 0.5)
-        /// </summary>
-        /// <param name="value">The number to convert into the multplier value.</param>
-        /// <returns>The calculated number that can replace the divider number in a multiplication sum.</returns>
-        public static float DividerToMultiplier(float value)
-        {
-            return (value != 0f ? 1f / value : 1f);
-        }
-
-        /// <summary>
-        /// The NormalizeValue method takes a given value between a specified range and returns the normalized value between 0f and 1f.
-        /// </summary>
-        /// <param name="value">The actual value to normalize.</param>
-        /// <param name="minValue">The minimum value the actual value can be.</param>
-        /// <param name="maxValue">The maximum value the actual value can be.</param>
-        /// <param name="threshold">The threshold to force to the minimum or maximum value if the normalized value is within the threhold limits.</param>
-        /// <returns></returns>
-        public static float NormalizeValue(float value, float minValue, float maxValue, float threshold = 0f)
-        {
-            float normalizedMax = maxValue - minValue;
-            float normalizedValue = normalizedMax - (maxValue - value);
-            float result = normalizedValue * DividerToMultiplier(normalizedMax); ;
-            result = (result < threshold ? 0f : result);
-            result = (result > 1f - threshold ? 1f : result);
-            return Mathf.Clamp(result, 0f, 1f);
-        }
-
-        /// <summary>
-        /// The AxisDirection method returns the relevant direction Vector3 based on the axis index in relation to x,y,z.
-        /// </summary>
-        /// <param name="axisIndex">The axis index of the axis. `0 = x` `1 = y` `2 = z`</param>
-        /// <param name="givenTransform">An optional Transform to get the Axis Direction for. If this is `null` then the World directions will be used.</param>
-        /// <returns>The direction Vector3 based on the given axis index.</returns>
-        public static Vector3 AxisDirection(int axisIndex, Transform givenTransform = null)
-        {
-            Vector3[] worldDirections = (givenTransform != null ? new Vector3[] { givenTransform.right, givenTransform.up, givenTransform.forward } : new Vector3[] { Vector3.right, Vector3.up, Vector3.forward });
-            return worldDirections[(int)Mathf.Clamp(axisIndex, 0f, worldDirections.Length)];
-        }
-
-        /// <summary>
-        /// The AddListValue method adds the given value to the given list. If `preventDuplicates` is `true` then the given value will only be added if it doesn't already exist in the given list.
-        /// </summary>
-        /// <typeparam name="TValue">The datatype for the list value.</typeparam>
-        /// <param name="list">The list to retrieve the value from.</param>
-        /// <param name="value">The value to attempt to add to the list.</param>
-        /// <param name="preventDuplicates">If this is `false` then the value provided will always be appended to the list. If this is `true` the value provided will only be added to the list if it doesn't already exist.</param>
-        /// <returns>Returns `true` if the given value was successfully added to the list. Returns `false` if the given value already existed in the list and `preventDuplicates` is `true`.</returns>
-        public static bool AddListValue<TValue>(List<TValue> list, TValue value, bool preventDuplicates = false)
-        {
-            if (list != null && (!preventDuplicates || !list.Contains(value)))
-            {
-                list.Add(value);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The GetDictionaryValue method attempts to retrieve a value from a given dictionary for the given key. It removes the need for a double dictionary lookup to ensure the key is valid and has the option of also setting the missing key value to ensure the dictionary entry is valid.
-        /// </summary>
-        /// <typeparam name="TKey">The datatype for the dictionary key.</typeparam>
-        /// <typeparam name="TValue">The datatype for the dictionary value.</typeparam>
-        /// <param name="dictionary">The dictionary to retrieve the value from.</param>
-        /// <param name="key">The key to retrieve the value for.</param>
-        /// <param name="defaultValue">The value to utilise when either setting the missing key (if `setMissingKey` is `true`) or the default value to return when no key is found (if `setMissingKey` is `false`).</param>
-        /// <param name="setMissingKey">If this is `true` and the given key is not present, then the dictionary value for the given key will be set to the `defaultValue` parameter. If this is `false` and the given key is not present then the `defaultValue` parameter will be returned as the value.</param>
-        /// <returns>The found value for the given key in the given dictionary, or the default value if no key is found.</returns>
-        public static TValue GetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default(TValue), bool setMissingKey = false)
-        {
-            bool keyExists;
-            return GetDictionaryValue(dictionary, key, out keyExists, defaultValue, setMissingKey);
-        }
-
-        /// <summary>
-        /// The GetDictionaryValue method attempts to retrieve a value from a given dictionary for the given key. It removes the need for a double dictionary lookup to ensure the key is valid and has the option of also setting the missing key value to ensure the dictionary entry is valid.
-        /// </summary>
-        /// <typeparam name="TKey">The datatype for the dictionary key.</typeparam>
-        /// <typeparam name="TValue">The datatype for the dictionary value.</typeparam>
-        /// <param name="dictionary">The dictionary to retrieve the value from.</param>
-        /// <param name="key">The key to retrieve the value for.</param>
-        /// <param name="keyExists">Sets the given parameter to `true` if the key exists in the given dictionary or sets to `false` if the key didn't existing in the given dictionary.</param>
-        /// <param name="defaultValue">The value to utilise when either setting the missing key (if `setMissingKey` is `true`) or the default value to return when no key is found (if `setMissingKey` is `false`).</param>
-        /// <param name="setMissingKey">If this is `true` and the given key is not present, then the dictionary value for the given key will be set to the `defaultValue` parameter. If this is `false` and the given key is not present then the `defaultValue` parameter will be returned as the value.</param>
-        /// <returns>The found value for the given key in the given dictionary, or the default value if no key is found.</returns>
-        public static TValue GetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, out bool keyExists, TValue defaultValue = default(TValue), bool setMissingKey = false)
-        {
-            keyExists = false;
-            if (dictionary == null)
-            {
-                return defaultValue;
-            }
-
-            TValue outputValue;
-            if (dictionary.TryGetValue(key, out outputValue))
-            {
-                keyExists = true;
-            }
-            else
-            {
-                if (setMissingKey)
-                {
-                    dictionary.Add(key, defaultValue);
-                }
-                outputValue = defaultValue;
-            }
-            return outputValue;
-        }
-
-        /// <summary>
-        /// The AddDictionaryValue method attempts to add a value for the given key in the given dictionary if the key does not already exist. If `overwriteExisting` is `true` then it always set the value even if they key exists.
-        /// </summary>
-        /// <typeparam name="TKey">The datatype for the dictionary key.</typeparam>
-        /// <typeparam name="TValue">The datatype for the dictionary value.</typeparam>
-        /// <param name="dictionary">The dictionary to set the value for.</param>
-        /// <param name="key">The key to set the value for.</param>
-        /// <param name="value">The value to set at the given key in the given dictionary.</param>
-        /// <param name="overwriteExisting">If this is `true` then the value for the given key will always be set to the provided value. If this is `false` then the value for the given key will only be set if the given key is not found in the given dictionary.</param>
-        /// <returns>Returns `true` if the given value was successfully added to the dictionary at the given key. Returns `false` if the given key already existed in the dictionary and `overwriteExisting` is `false`.</returns>
-        public static bool AddDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value, bool overwriteExisting = false)
-        {
-            if (dictionary != null)
-            {
-                if (overwriteExisting)
-                {
-                    dictionary[key] = value;
-                    return true;
-                }
-                else
-                {
-                    bool keyExists;
-                    GetDictionaryValue(dictionary, key, out keyExists, value, true);
-                    return !keyExists;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
         /// The GetTypeUnknownAssembly method is used to find a Type without knowing the exact assembly it is in.
         /// </summary>
         /// <param name="typeName">The name of the type to get.</param>
@@ -562,192 +468,15 @@ namespace VRTK
             {
                 return type;
             }
-#if !UNITY_WSA
-            Assembly[] foundAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-            for (int i = 0; i < foundAssemblies.Length; i++)
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
-                type = foundAssemblies[i].GetType(typeName);
+                type = a.GetType(typeName);
                 if (type != null)
                 {
                     return type;
                 }
             }
-#endif
             return null;
-        }
-
-        /// <summary>
-        /// The GetEyeTextureResolutionScale method returns the render scale for the resolution.
-        /// </summary>
-        /// <returns>Returns a float with the render scale for the resolution.</returns>
-        public static float GetEyeTextureResolutionScale()
-        {
-#if UNITY_2017_2_OR_NEWER
-            return XRSettings.eyeTextureResolutionScale;
-#else
-            return XRSettings.renderScale;
-#endif
-        }
-
-        /// <summary>
-        /// The SetEyeTextureResolutionScale method sets the render scale for the resolution.
-        /// </summary>
-        /// <param name="value">The value to set the render scale to.</param>
-        public static void SetEyeTextureResolutionScale(float value)
-        {
-#if UNITY_2017_2_OR_NEWER
-            XRSettings.eyeTextureResolutionScale = value;
-#else
-            XRSettings.renderScale = value;
-#endif
-        }
-
-        /// <summary>
-        /// The IsTypeSubclassOf checks if a given Type is a subclass of another given Type.
-        /// </summary>
-        /// <param name="givenType">The Type to check.</param>
-        /// <param name="givenBaseType">The base Type to check.</param>
-        /// <returns>Returns `true` if the given type is a subclass of the given base type.</returns>
-        public static bool IsTypeSubclassOf(Type givenType, Type givenBaseType)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return (givenType.GetTypeInfo().IsSubclassOf(givenBaseType));
-#else
-            return (givenType.IsSubclassOf(givenBaseType));
-#endif
-        }
-
-        /// <summary>
-        /// The GetTypeCustomAttributes method gets the custom attributes of a given type.
-        /// </summary>
-        /// <param name="givenType">The type to get the custom attributes for.</param>
-        /// <param name="attributeType">The attribute type.</param>
-        /// <param name="inherit">Whether to inherit attributes.</param>
-        /// <returns>Returns an object array of custom attributes.</returns>
-        public static object[] GetTypeCustomAttributes(Type givenType, Type attributeType, bool inherit)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return ((object[])givenType.GetTypeInfo().GetCustomAttributes(attributeType, inherit));
-#else
-            return (givenType.GetCustomAttributes(attributeType, inherit));
-#endif
-        }
-
-        /// <summary>
-        /// The GetBaseType method returns the base Type for the given Type.
-        /// </summary>
-        /// <param name="givenType">The type to return the base Type for.</param>
-        /// <returns>Returns the base Type.</returns>
-        public static Type GetBaseType(Type givenType)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return (givenType.GetTypeInfo().BaseType);
-#else
-            return (givenType.BaseType);
-#endif
-        }
-
-        /// <summary>
-        /// The IsTypeAssignableFrom method determines if the given Type is assignable from the source Type.
-        /// </summary>
-        /// <param name="givenType">The Type to check on.</param>
-        /// <param name="sourceType">The Type to check if the given Type is assignable from.</param>
-        /// <returns>Returns `true` if the given Type is assignable from the source Type.</returns>
-        public static bool IsTypeAssignableFrom(Type givenType, Type sourceType)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return (givenType.GetTypeInfo().IsAssignableFrom(sourceType.GetTypeInfo()));
-#else
-            return (givenType.IsAssignableFrom(sourceType));
-#endif
-        }
-
-        /// <summary>
-        /// The GetNestedType method returns the nested Type of the given Type.
-        /// </summary>
-        /// <param name="givenType">The Type to check on.</param>
-        /// <param name="name">The name of the nested Type.</param>
-        /// <returns>Returns the nested Type.</returns>
-        public static Type GetNestedType(Type givenType, string name)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return (givenType.GetTypeInfo().GetDeclaredNestedType(name).GetType());
-#else
-            return (givenType.GetNestedType(name));
-#endif
-        }
-
-        /// <summary>
-        /// The GetPropertyFirstName method returns the string name of the first property on a given Type.
-        /// </summary>
-        /// <typeparam name="T">The type to check the first property on.</typeparam>
-        /// <returns>Returns a string representation of the first property name for the given Type.</returns>
-        public static string GetPropertyFirstName<T>()
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return (typeof(T).GetTypeInfo().DeclaredProperties.First().Name);
-#else
-            return (typeof(T).GetProperties()[0].Name);
-#endif
-        }
-
-        /// <summary>
-        /// The GetCommandLineArguements method returns the command line arguements for the environment.
-        /// </summary>
-        /// <returns>Returns an array of command line arguements as strings.</returns>
-        public static string[] GetCommandLineArguements()
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return new string[0];
-#else
-
-            return Environment.GetCommandLineArgs();
-#endif
-        }
-
-        /// <summary>
-        /// The GetTypesOfType method returns an array of Types for the given Type.
-        /// </summary>
-        /// <param name="givenType">The Type to check on.</param>
-        /// <returns>An array of Types found.</returns>
-        public static Type[] GetTypesOfType(Type givenType)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return givenType.GetTypeInfo().Assembly.GetTypes();
-#else
-
-            return givenType.Assembly.GetTypes();
-#endif
-        }
-
-        /// <summary>
-        /// The GetExportedTypesOfType method returns an array of Exported Types for the given Type.
-        /// </summary>
-        /// <param name="givenType">The Type to check on.</param>
-        /// <returns>An array of Exported Types found.</returns>
-        public static Type[] GetExportedTypesOfType(Type givenType)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return givenType.GetTypeInfo().Assembly.GetExportedTypes();
-#else
-
-            return givenType.Assembly.GetExportedTypes();
-#endif
-        }
-
-        /// <summary>
-        /// The IsTypeAbstract method determines if a given Type is abstract.
-        /// </summary>
-        /// <param name="givenType">The Type to check on.</param>
-        /// <returns>Returns `true` if the given type is abstract.</returns>
-        public static bool IsTypeAbstract(Type givenType)
-        {
-#if UNITY_WSA && !UNITY_EDITOR
-            return givenType.GetTypeInfo().IsAbstract;
-#else
-
-            return givenType.IsAbstract;
-#endif
         }
 
 #if UNITY_EDITOR
@@ -762,77 +491,10 @@ namespace VRTK
 
                 string targetGroupName = Enum.GetName(typeof(BuildTargetGroup), group);
                 FieldInfo targetGroupFieldInfo = typeof(BuildTargetGroup).GetField(targetGroupName, BindingFlags.Public | BindingFlags.Static);
-                bool validReturn = (targetGroupFieldInfo != null && targetGroupFieldInfo.GetCustomAttributes(typeof(ObsoleteAttribute), false).Length == 0);
-#if UNITY_WSA
-                if (targetGroupName == "Metro" || targetGroupName == "WSA")
-                {
-                    validReturn = (targetGroupFieldInfo != null);
-                }
-#endif
-                return validReturn;
+
+                return targetGroupFieldInfo != null && targetGroupFieldInfo.GetCustomAttributes(typeof(ObsoleteAttribute), false).Length == 0;
             }).ToArray();
         }
 #endif
-
-        /// <summary>
-        /// The FindEvenInactiveComponentsInLoadedScenes method searches active and inactive game objects in all
-        /// loaded scenes for components matching the type supplied. 
-        /// </summary>
-        /// <param name="searchAllScenes">If true, will search all loaded scenes, otherwise just the active scene.</param>
-        /// <param name="stopOnMatch">If true, will stop searching objects as soon as a match is found.</param>
-        /// <returns></returns>
-        private static IEnumerable<T> FindEvenInactiveComponentsInValidScenes<T>(bool searchAllScenes, bool stopOnMatch = false) where T : Component
-        {
-            IEnumerable<T> results;
-            if (searchAllScenes)
-            {
-                List<T> allSceneResults = new List<T>();
-                for (int sceneIndex = 0; sceneIndex < SceneManager.sceneCount; sceneIndex++)
-                {
-                    allSceneResults.AddRange(FindEvenInactiveComponentsInScene<T>(SceneManager.GetSceneAt(sceneIndex), stopOnMatch));
-                }
-                results = allSceneResults;
-            }
-            else
-            {
-                results = FindEvenInactiveComponentsInScene<T>(SceneManager.GetActiveScene(), stopOnMatch);
-            }
-
-            return results;
-        }
-
-        /// <summary>
-        /// The FIndEvenInactiveComponentsInScene method searches the specified scene for components matching the type supplied.
-        /// </summary>
-        /// <param name="scene">The scene to search. This scene must be valid, either loaded or loading.</param>
-        /// <param name="stopOnMatch">If true, will stop searching objects as soon as a match is found.</param>
-        /// <returns></returns>
-        private static IEnumerable<T> FindEvenInactiveComponentsInScene<T>(Scene scene, bool stopOnMatch = false)
-        {
-            List<T> results = new List<T>();
-            if(!scene.isLoaded)
-            {
-                return results;
-            }
-
-            foreach (GameObject rootObject in scene.GetRootGameObjects())
-            {
-                if (stopOnMatch)
-                {
-                    T foundComponent = rootObject.GetComponentInChildren<T>(true);
-                    if (foundComponent != null)
-                    {
-                        results.Add(foundComponent);
-                        return results;
-                    }
-                }
-                else
-                {
-                    results.AddRange(rootObject.GetComponentsInChildren<T>(true));
-                }
-            }
-
-            return results;
-        }
     }
 }

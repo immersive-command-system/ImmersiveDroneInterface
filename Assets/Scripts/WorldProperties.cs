@@ -1,5 +1,6 @@
 ﻿namespace ISAACS
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
@@ -170,10 +171,17 @@
         /// <returns></returns>
         public static Vector2 M210_RosSpaceToWorld(float _lat, float _long, float _alt)
         {
+            /// 6371000 is the radius of the earth in meters
+            float x = 6371000 * (float)Math.Cos(_lat * Mathf.PI / 180) * (float)Math.Cos(_long * Mathf.PI / 180);
+            float y = 6371000 * (float)Math.Sin(_lat * Mathf.PI / 180);
+            float z = 6371000 * (float)Math.Cos(_lat * Mathf.PI / 180) * (float)Math.Sin(_long * Mathf.PI / 180);
+
+
+
             return new Vector3(
-                _lat,
-                _alt,
-                _long
+                x,
+                y,
+                z
                 );
         }
 

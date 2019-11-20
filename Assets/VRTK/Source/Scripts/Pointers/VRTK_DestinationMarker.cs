@@ -2,6 +2,7 @@
 namespace VRTK
 {
     using UnityEngine;
+    using System;
 
     /// <summary>
     /// Event Payload
@@ -13,6 +14,7 @@ namespace VRTK
     /// <param name="destinationRotation">The world rotation of the destination marker.</param>
     /// <param name="forceDestinationPosition">If true then the given destination position should not be altered by anything consuming the payload.</param>
     /// <param name="enableTeleport">Whether the destination set event should trigger teleport.</param>
+    /// <param name="controllerIndex">**OBSOLETE** The optional index of the controller controlling the destination marker.</param>
     /// <param name="controllerReference">The optional reference to the controller controlling the destination marker.</param>
     public struct DestinationMarkerEventArgs
     {
@@ -23,6 +25,8 @@ namespace VRTK
         public Quaternion? destinationRotation;
         public bool forceDestinationPosition;
         public bool enableTeleport;
+        [Obsolete("`DestinationMarkerEventArgs.controllerIndex` has been replaced with `DestinationMarkerEventArgs.controllerReference`. This parameter will be removed in a future version of VRTK.")]
+        public uint controllerIndex;
         public VRTK_ControllerReference controllerReference;
     }
 
@@ -34,11 +38,10 @@ namespace VRTK
     public delegate void DestinationMarkerEventHandler(object sender, DestinationMarkerEventArgs e);
 
     /// <summary>
-    /// Provides a base that all destination markers can inherit from.
+    /// This abstract class provides the ability to emit events of destination markers within the game world. It can be useful for tagging locations for specific purposes such as teleporting.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///   > This is an abstract class that is to be inherited to a concrete class that provides object control action functionality, therefore this script should not be directly used.
+    /// It is utilised by the `VRTK_BasePointer` for dealing with pointer events when the pointer cursor touches areas within the game world.
     /// </remarks>
     public abstract class VRTK_DestinationMarker : MonoBehaviour
     {
@@ -65,10 +68,7 @@ namespace VRTK
         /// </summary>
         public event DestinationMarkerEventHandler DestinationMarkerSet;
 
-        [System.Obsolete("`VRTK_DestinationMarker.navMeshCheckDistance` is no longer used. This parameter will be removed in a future version of VRTK.")]
-        protected float navMeshCheckDistance = 0f;
-
-        protected VRTK_NavMeshData navmeshData;
+        protected float navMeshCheckDistance;
         protected bool headsetPositionCompensation;
         protected bool forceHoverOnRepeatedEnter = true;
         protected Collider existingCollider;
@@ -113,24 +113,22 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The SetNavMeshCheckDistance method sets the max distance the destination marker position can be from the edge of a nav mesh to be considered a valid destination.
+        /// The SetInvalidTarget method is used to set objects that contain the given tag or class matching the name as invalid destination targets. It accepts a VRTK_PolicyList for a custom level of policy management.
         /// </summary>
-        /// <param name="distance">The max distance the nav mesh can be from the sample point to be valid.</param>
-        [System.Obsolete("`DestinationMarker.SetNavMeshCheckDistance(distance)` has been replaced with the method `DestinationMarker.SetNavMeshCheckDistance(givenData)`. This method will be removed in a future version of VRTK.")]
-        public virtual void SetNavMeshCheckDistance(float distance)
+        /// <param name="list">The Tag Or Script list policy to check the set operation on.</param>
+        [Obsolete("`DestinationMarkerEventArgs.SetInvalidTarget(list)` has been replaced with the public variable `DestinationMarkerEventArgs.targetListPolicy`. This method will be removed in a future version of VRTK.")]
+        public virtual void SetInvalidTarget(VRTK_PolicyList list = null)
         {
-            VRTK_NavMeshData givenData = gameObject.AddComponent<VRTK_NavMeshData>();
-            givenData.distanceLimit = distance;
-            SetNavMeshData(givenData);
+            targetListPolicy = list;
         }
 
         /// <summary>
-        /// The SetNavMeshData method is used to limit the destination marker to the scene NavMesh based on the settings in the given NavMeshData object.
+        /// The SetNavMeshCheckDistance method sets the max distance the destination marker position can be from the edge of a nav mesh to be considered a valid destination.
         /// </summary>
-        /// <param name="givenData">The NavMeshData object that contains the NavMesh restriction settings.</param>
-        public virtual void SetNavMeshData(VRTK_NavMeshData givenData)
+        /// <param name="distance">The max distance the nav mesh can be from the sample point to be valid.</param>
+        public virtual void SetNavMeshCheckDistance(float distance)
         {
-            navmeshData = givenData;
+            navMeshCheckDistance = distance;
         }
 
         /// <summary>
@@ -164,6 +162,9 @@ namespace VRTK
         protected virtual DestinationMarkerEventArgs SetDestinationMarkerEvent(float distance, Transform target, RaycastHit raycastHit, Vector3 position, VRTK_ControllerReference controllerReference, bool forceDestinationPosition = false, Quaternion? rotation = null)
         {
             DestinationMarkerEventArgs e;
+#pragma warning disable 0618
+            e.controllerIndex = VRTK_ControllerReference.GetRealIndex(controllerReference);
+#pragma warning restore 0618
             e.controllerReference = controllerReference;
             e.distance = distance;
             e.target = target;

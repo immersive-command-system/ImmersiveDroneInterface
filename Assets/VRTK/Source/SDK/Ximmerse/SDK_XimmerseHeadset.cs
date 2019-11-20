@@ -50,15 +50,6 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The GetHeadsetType method returns a string representing the type of headset connected.
-        /// </summary>
-        /// <returns>The string of the headset connected.</returns>
-        public override string GetHeadsetType()
-        {
-            return ScrapeHeadsetType();
-        }
-
-        /// <summary>
         /// The GetHeadsetVelocity method is used to determine the current velocity of the headset.
         /// </summary>
         /// <returns>A Vector3 containing the current velocity of the headset.</returns>
@@ -88,7 +79,7 @@ namespace VRTK
             cachedHeadset = GetSDKManagerHeadset();
             if (cachedHeadset == null)
             {
-                var foundHeadset = VRTK_SharedMethods.FindEvenInactiveGameObject<VRContext>("TrackingSpace/CenterEyeAnchor", true);
+                var foundHeadset = VRTK_SharedMethods.FindEvenInactiveGameObject<VRContext>("TrackingSpace/CenterEyeAnchor");
                 if (foundHeadset)
                 {
                     cachedHeadset = foundHeadset.transform;

@@ -1,4 +1,4 @@
-﻿// Adaptive Quality|Utilities|90100
+// Adaptive Quality|Utilities|90050
 
 // Adapted from The Lab Renderer's ValveCamera.cs, available at
 // https://github.com/ValveSoftware/the_lab_renderer/blob/ae64c48a8ccbe5406aba1e39b160d4f2f7156c2c/Assets/TheLabRenderer/Scripts/ValveCamera.cs
@@ -14,12 +14,7 @@ namespace VRTK
     using System.Linq;
     using System.Text;
     using UnityEngine;
-#if UNITY_2017_2_OR_NEWER
-    using UnityEngine.XR;
-#else
-    using XRSettings = UnityEngine.VR.VRSettings;
-    using XRDevice = UnityEngine.VR.VRDevice;
-#endif
+    using UnityEngine.VR;
 
     /// <summary>
     /// Adaptive Quality dynamically changes rendering settings to maintain VR framerate while maximizing GPU utilization.
@@ -80,23 +75,23 @@ namespace VRTK
         public bool drawDebugVisualization;
 
         [Tooltip("Toggles whether to allow keyboard shortcuts to control this script.\n\n"
-                 + " * The supported shortcuts are:\n"
-                 + "  * `Shift+F1`: Toggle debug visualization on/off\n"
-                 + "  * `Shift+F2`: Toggle usage of override render scale on/off\n"
-                 + "  * `Shift+F3`: Decrease override render scale level\n"
-                 + "  * `Shift+F4`: Increase override render scale level")]
+                 + "* The supported shortcuts are:\n"
+                 + " * `Shift+F1`: Toggle debug visualization on/off\n"
+                 + " * `Shift+F2`: Toggle usage of override render scale on/off\n"
+                 + " * `Shift+F3`: Decrease override render scale level\n"
+                 + " * `Shift+F4`: Increase override render scale level")]
         public bool allowKeyboardShortcuts = true;
 
         [Tooltip("Toggles whether to allow command line arguments to control this script at startup of the standalone build.\n\n"
-                 + " * The supported command line arguments all begin with '-' and are:\n"
-                 + "  * `-noaq`: Disable adaptive quality\n"
-                 + "  * `-aqminscale X`: Set minimum render scale to X\n"
-                 + "  * `-aqmaxscale X`: Set maximum render scale to X\n"
-                 + "  * `-aqmaxres X`: Set maximum render target dimension to X\n"
-                 + "  * `-aqfillratestep X`: Set render scale fill rate step size in percent to X (X from 1 to 100)\n"
-                 + "  * `-aqoverride X`: Set override render scale level to X\n"
-                 + "  * `-vrdebug`: Enable debug visualization\n"
-                 + "  * `-msaa X`: Set MSAA level to X")]
+                 + "* The supported command line arguments all begin with '-' and are:\n"
+                 + " * `-noaq`: Disable adaptive quality\n"
+                 + " * `-aqminscale X`: Set minimum render scale to X\n"
+                 + " * `-aqmaxscale X`: Set maximum render scale to X\n"
+                 + " * `-aqmaxres X`: Set maximum render target dimension to X\n"
+                 + " * `-aqfillratestep X`: Set render scale fill rate step size in percent to X (X from 1 to 100)\n"
+                 + " * `-aqoverride X`: Set override render scale level to X\n"
+                 + " * `-vrdebug`: Enable debug visualization\n"
+                 + " * `-msaa X`: Set MSAA level to X")]
         public bool allowCommandLineArguments = true;
 
         [Tooltip("The MSAA level to use.")]
@@ -107,17 +102,11 @@ namespace VRTK
         [Tooltip("Toggles whether the render viewport scale is dynamically adjusted to maintain VR framerate.\n\n"
                  + "If unchecked, the renderer will render at the recommended resolution provided by the current `VRDevice`.")]
         public bool scaleRenderViewport = true;
-        [Tooltip("The minimum and maximum allowed render scale.")]
-        [MinMaxRange(0.01f, 5f)]
-        public Limits2D renderScaleLimits = new Limits2D(0.8f, 1.4f);
-
-        [Obsolete("`VRTK_AdaptiveQuality.minimumRenderScale` has been replaced with the `VRTK_AdaptiveQuality.renderScaleLimits`. This parameter will be removed in a future version of VRTK.")]
-        [ObsoleteInspector]
+        [Tooltip("The minimum allowed render scale.")]
+        [Range(0.01f, 5)]
         public float minimumRenderScale = 0.8f;
-        [Obsolete("`VRTK_AdaptiveQuality.maximumRenderScale` has been replaced with the `VRTK_AdaptiveQuality.renderScaleLimits`. This parameter will be removed in a future version of VRTK.")]
-        [ObsoleteInspector]
+        [Tooltip("The maximum allowed render scale.")]
         public float maximumRenderScale = 1.4f;
-
         [Tooltip("The maximum allowed render target dimension.\n\n"
                  + "This puts an upper limit on the size of the render target regardless of the maximum render scale.")]
         public int maximumRenderTargetDimension = 4096;
@@ -156,7 +145,7 @@ namespace VRTK
         /// </remarks>
         public static float CurrentRenderScale
         {
-            get { return VRTK_SharedMethods.GetEyeTextureResolutionScale() * XRSettings.renderViewportScale; }
+            get { return VRSettings.renderScale * VRSettings.renderViewportScale; }
         }
 
         /// <summary>
@@ -221,8 +210,8 @@ namespace VRTK
         /// </returns>
         public static Vector2 RenderTargetResolutionForRenderScale(float renderScale)
         {
-            return new Vector2((int)(XRSettings.eyeTextureWidth / VRTK_SharedMethods.GetEyeTextureResolutionScale() * renderScale),
-                               (int)(XRSettings.eyeTextureHeight / VRTK_SharedMethods.GetEyeTextureResolutionScale() * renderScale));
+            return new Vector2((int)(VRSettings.eyeTextureWidth / VRSettings.renderScale * renderScale),
+                               (int)(VRSettings.eyeTextureHeight / VRSettings.renderScale * renderScale));
         }
 
         /// <summary>
@@ -234,15 +223,15 @@ namespace VRTK
         /// </returns>
         public float BiggestAllowedMaximumRenderScale()
         {
-            if (XRSettings.eyeTextureWidth == 0 || XRSettings.eyeTextureHeight == 0)
+            if (VRSettings.eyeTextureWidth == 0 || VRSettings.eyeTextureHeight == 0)
             {
-                return renderScaleLimits.maximum;
+                return maximumRenderScale;
             }
 
-            float maximumHorizontalRenderScale = maximumRenderTargetDimension * VRTK_SharedMethods.GetEyeTextureResolutionScale()
-                                                 / XRSettings.eyeTextureWidth;
-            float maximumVerticalRenderScale = maximumRenderTargetDimension * VRTK_SharedMethods.GetEyeTextureResolutionScale()
-                                               / XRSettings.eyeTextureHeight;
+            float maximumHorizontalRenderScale = maximumRenderTargetDimension * VRSettings.renderScale
+                                                 / VRSettings.eyeTextureWidth;
+            float maximumVerticalRenderScale = maximumRenderTargetDimension * VRSettings.renderScale
+                                               / VRSettings.eyeTextureHeight;
             return Mathf.Min(maximumHorizontalRenderScale, maximumVerticalRenderScale);
         }
 
@@ -255,14 +244,14 @@ namespace VRTK
         /// </returns>
         public override string ToString()
         {
-            StringBuilder stringBuilder = new StringBuilder("Adaptive Quality\n");
+            var stringBuilder = new StringBuilder("Adaptive Quality\n");
             stringBuilder.AppendLine("Render Scale:");
             stringBuilder.AppendLine("Level - Resolution - Multiplier");
 
             for (int index = 0; index < allRenderScales.Count; index++)
             {
                 float renderScale = allRenderScales[index];
-                Vector2 renderTargetResolution = RenderTargetResolutionForRenderScale(renderScale);
+                var renderTargetResolution = RenderTargetResolutionForRenderScale(renderScale);
 
                 stringBuilder.AppendFormat(
                     "{0, 3} {1, 5}x{2, -5} {3, -8}",
@@ -303,7 +292,7 @@ namespace VRTK
 
         private void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         private void OnEnable()
@@ -311,8 +300,8 @@ namespace VRTK
             Camera.onPreCull += OnCameraPreCull;
 
             hmdDisplayIsOnDesktop = VRTK_SDK_Bridge.IsDisplayOnDesktop();
-            singleFrameDurationInMilliseconds = XRDevice.refreshRate > 0.0f
-                                                ? 1000.0f / XRDevice.refreshRate
+            singleFrameDurationInMilliseconds = VRDevice.refreshRate > 0.0f
+                                                ? 1000.0f / VRDevice.refreshRate
                                                 : DefaultFrameDurationInMilliseconds;
 
             HandleCommandLineArguments();
@@ -331,13 +320,13 @@ namespace VRTK
 
         private void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         private void OnValidate()
         {
-            renderScaleLimits.minimum = Mathf.Max(0.01f, renderScaleLimits.minimum);
-            renderScaleLimits.maximum = Mathf.Max(renderScaleLimits.minimum, renderScaleLimits.maximum);
+            minimumRenderScale = Mathf.Max(0.01f, minimumRenderScale);
+            maximumRenderScale = Mathf.Max(minimumRenderScale, maximumRenderScale);
             maximumRenderTargetDimension = Mathf.Max(2, maximumRenderTargetDimension);
             renderScaleFillRateStepSizeInPercent = Mathf.Max(1, renderScaleFillRateStepSizeInPercent);
             msaaLevel = msaaLevel == 1 ? 0 : Mathf.Clamp(Mathf.ClosestPowerOfTwo(msaaLevel), 0, 8);
@@ -382,7 +371,7 @@ namespace VRTK
                 return;
             }
 
-            string[] commandLineArguments = VRTK_SharedMethods.GetCommandLineArguements();
+            var commandLineArguments = Environment.GetCommandLineArgs();
 
             for (int index = 0; index < commandLineArguments.Length; index++)
             {
@@ -395,10 +384,10 @@ namespace VRTK
                         scaleRenderViewport = false;
                         break;
                     case CommandLineArguments.MinimumRenderScale:
-                        renderScaleLimits.minimum = float.Parse(nextArgument);
+                        minimumRenderScale = float.Parse(nextArgument);
                         break;
                     case CommandLineArguments.MaximumRenderScale:
-                        renderScaleLimits.maximum = float.Parse(nextArgument);
+                        maximumRenderScale = float.Parse(nextArgument);
                         break;
                     case CommandLineArguments.MaximumRenderTargetDimension:
                         maximumRenderTargetDimension = int.Parse(nextArgument);
@@ -457,28 +446,28 @@ namespace VRTK
 
         private void UpdateRenderScaleLevels()
         {
-            if (Mathf.Abs(previousMinimumRenderScale - renderScaleLimits.minimum) <= float.Epsilon
-                && Mathf.Abs(previousMaximumRenderScale - renderScaleLimits.maximum) <= float.Epsilon
+            if (Mathf.Abs(previousMinimumRenderScale - minimumRenderScale) <= float.Epsilon
+                && Mathf.Abs(previousMaximumRenderScale - maximumRenderScale) <= float.Epsilon
                 && Mathf.Abs(previousRenderScaleFillRateStepSizeInPercent - renderScaleFillRateStepSizeInPercent) <= float.Epsilon)
             {
                 return;
             }
 
-            previousMinimumRenderScale = renderScaleLimits.minimum;
-            previousMaximumRenderScale = renderScaleLimits.maximum;
+            previousMinimumRenderScale = minimumRenderScale;
+            previousMaximumRenderScale = maximumRenderScale;
             previousRenderScaleFillRateStepSizeInPercent = renderScaleFillRateStepSizeInPercent;
 
             allRenderScales.Clear();
 
             // Respect maximumRenderTargetDimension
             float allowedMaximumRenderScale = BiggestAllowedMaximumRenderScale();
-            float renderScaleToAdd = Mathf.Min(renderScaleLimits.minimum, allowedMaximumRenderScale);
+            float renderScaleToAdd = Mathf.Min(minimumRenderScale, allowedMaximumRenderScale);
 
             // Add min scale as the reprojection scale
             allRenderScales.Add(renderScaleToAdd);
 
             // Add all entries
-            while (renderScaleToAdd <= renderScaleLimits.maximum)
+            while (renderScaleToAdd <= maximumRenderScale)
             {
                 allRenderScales.Add(renderScaleToAdd);
                 renderScaleToAdd =
@@ -655,13 +644,13 @@ namespace VRTK
 
         private static void SetRenderScale(float renderScale, float renderViewportScale)
         {
-            if (Mathf.Abs(VRTK_SharedMethods.GetEyeTextureResolutionScale() - renderScale) > float.Epsilon)
+            if (Mathf.Abs(VRSettings.renderScale - renderScale) > float.Epsilon)
             {
-                VRTK_SharedMethods.SetEyeTextureResolutionScale(renderScale);
+                VRSettings.renderScale = renderScale;
             }
-            if (Mathf.Abs(XRSettings.renderViewportScale - renderViewportScale) > float.Epsilon)
+            if (Mathf.Abs(VRSettings.renderViewportScale - renderViewportScale) > float.Epsilon)
             {
-                XRSettings.renderViewportScale = renderViewportScale;
+                VRSettings.renderViewportScale = renderViewportScale;
             }
         }
 
@@ -683,7 +672,7 @@ namespace VRTK
 
             if (enabled && drawDebugVisualization && debugVisualizationQuad == null)
             {
-                Mesh mesh = new Mesh
+                var mesh = new Mesh
                 {
                     vertices =
                         new[]

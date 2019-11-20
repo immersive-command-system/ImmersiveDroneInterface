@@ -10,38 +10,14 @@ namespace VRTK
     using UnityEngine;
     public sealed class VRTK_PlayerObject : MonoBehaviour
     {
-        /// <summary>
-        /// The type of object associated to the player.
-        /// </summary>
         public enum ObjectTypes
         {
-            /// <summary>
-            /// No defined object.
-            /// </summary>
             Null,
-            /// <summary>
-            /// The object that represents the VR camera rig.
-            /// </summary>
             CameraRig,
-            /// <summary>
-            /// The object that represents the VR headset.
-            /// </summary>
             Headset,
-            /// <summary>
-            /// An object that represents a VR controller.
-            /// </summary>
             Controller,
-            /// <summary>
-            /// An object that represents a player generated pointer.
-            /// </summary>
             Pointer,
-            /// <summary>
-            /// An object that represents a player generated highlighter.
-            /// </summary>
             Highlighter,
-            /// <summary>
-            /// An object that represents a player collider.
-            /// </summary>
             Collider
         }
 
@@ -54,7 +30,7 @@ namespace VRTK
         /// <param name="objType">The type of player object that is to be assigned.</param>
         public static void SetPlayerObject(GameObject obj, ObjectTypes objType)
         {
-            VRTK_PlayerObject currentPlayerObject = obj.GetComponent<VRTK_PlayerObject>();
+            var currentPlayerObject = obj.GetComponent<VRTK_PlayerObject>();
             if (currentPlayerObject == null)
             {
                 currentPlayerObject = obj.AddComponent<VRTK_PlayerObject>();
@@ -70,10 +46,9 @@ namespace VRTK
         /// <returns>Returns true if the object is a player object with the optional given type.</returns>
         public static bool IsPlayerObject(GameObject obj, ObjectTypes ofType = ObjectTypes.Null)
         {
-            VRTK_PlayerObject[] playerObjects = obj.GetComponentsInParent<VRTK_PlayerObject>(true);
-            for (int i = 0; i < playerObjects.Length; i++)
+            foreach (var playerObject in obj.GetComponentsInParent<VRTK_PlayerObject>(true))
             {
-                if (ofType == ObjectTypes.Null || ofType == playerObjects[i].objectType)
+                if (ofType == ObjectTypes.Null || ofType == playerObject.objectType)
                 {
                     return true;
                 }

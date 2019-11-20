@@ -2,19 +2,11 @@
 namespace VRTK
 {
     using UnityEngine;
+    using System;
 
     /// <summary>
-    /// Updates the `x/y/z` position of the SDK Camera Rig with an optional screen fade.
+    /// The height adjust teleporter extends the basic teleporter and allows for the y position of the user's position to be altered based on whether the teleport location is on top of another object.
     /// </summary>
-    /// <remarks>
-    ///   > The Camera Rig can be automatically teleported to the nearest floor `y` position when utilising this teleporter.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_HeightAdjustTeleport` script on any active scene GameObject.
-    ///
-    /// **Script Dependencies:**
-    ///  * An optional Destination Marker (such as a Pointer) to set the destination of the teleport location.
-    /// </remarks>
     /// <example>
     /// `VRTK/Examples/007_CameraRig_HeightAdjustTeleport` has a collection of varying height objects that the user can either walk up and down or use the laser pointer to climb on top of them.
     ///
@@ -29,16 +21,16 @@ namespace VRTK
 
         [Tooltip("If this is checked, then the teleported Y position will snap to the nearest available below floor. If it is unchecked, then the teleported Y position will be where ever the destination Y position is.")]
         public bool snapToNearestFloor = true;
-        [Tooltip("If this is checked then the teleported Y position will also be offset by the play area parent Transform Y position (if the play area has a parent).")]
-        public bool applyPlayareaParentOffset = false;
         [Tooltip("A custom raycaster to use when raycasting to find floors.")]
         public VRTK_CustomRaycast customRaycast;
+        [Tooltip("**OBSOLETE [Use customRaycast]** The layers to ignore when raycasting to find floors.")]
+        [Obsolete("`VRTK_HeightAdjustTeleport.layersToIgnore` is no longer used in the `VRTK_HeightAdjustTeleport` class, use the `customRaycast` parameter instead. This parameter will be removed in a future version of VRTK.")]
+        public LayerMask layersToIgnore = Physics.IgnoreRaycastLayer;
 
         protected override void OnEnable()
         {
             base.OnEnable();
             adjustYForTerrain = true;
-            AdjustForParentOffset();
         }
 
         protected override void OnDisable()
@@ -56,30 +48,11 @@ namespace VRTK
             return basePosition;
         }
 
-        protected virtual void AdjustForParentOffset()
-        {
-            if (snapToNearestFloor && applyPlayareaParentOffset && playArea != null && playArea.parent != null)
-            {
-                Ray ray = new Ray(playArea.parent.position, -playArea.up);
-                RaycastHit rayCollidedWith;
-                if (VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, Physics.IgnoreRaycastLayer, Mathf.Infinity, QueryTriggerInteraction.Ignore))
-                {
-                    playArea.position = new Vector3(playArea.position.x, playArea.position.y + rayCollidedWith.point.y, playArea.position.z);
-                }
-            }
-        }
-
-        protected virtual float GetParentOffset()
-        {
-            return (applyPlayareaParentOffset && playArea.parent != null ? playArea.parent.transform.localPosition.y : 0f);
-        }
-
         protected virtual float GetTeleportY(Transform target, Vector3 tipPosition)
         {
-            float parentOffset = GetParentOffset();
             if (!snapToNearestFloor || !ValidRigObjects())
             {
-                return tipPosition.y + parentOffset;
+                return tipPosition.y;
             }
 
             float newY = playArea.position.y;
@@ -88,11 +61,13 @@ namespace VRTK
             Vector3 rayStartPositionOffset = Vector3.up * heightOffset;
             Ray ray = new Ray(tipPosition + rayStartPositionOffset, -playArea.up);
             RaycastHit rayCollidedWith;
-            if (target != null && VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, Physics.IgnoreRaycastLayer, Mathf.Infinity, QueryTriggerInteraction.Ignore))
+#pragma warning disable 0618
+            if (target != null && VRTK_CustomRaycast.Raycast(customRaycast, ray, out rayCollidedWith, layersToIgnore, Mathf.Infinity, QueryTriggerInteraction.Ignore))
+#pragma warning restore 0618
             {
                 newY = (tipPosition.y - rayCollidedWith.distance) + heightOffset;
             }
-            return newY + parentOffset;
+            return newY;
         }
     }
 }

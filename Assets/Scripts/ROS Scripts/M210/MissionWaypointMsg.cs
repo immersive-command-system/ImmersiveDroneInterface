@@ -11,47 +11,50 @@ namespace ROSBridgeLib
     {
         public class MissionWaypointMsg : ROSBridgeMsg
         {
-            private double _latitude, _longitude;
-            private float _altitude, _damping_distance;
-            private int _target_yaw, _target_gimbal_pitch;
+            //changed type double to type float for lat and long
+            public float latitude, longitude;
+            public float altitude, damping_distance;
+            public int target_yaw, target_gimbal_pitch;
 
             public enum TurnMode
             {
                 CLOCKWISE = 0,
                 COUNTERCLOCKWISE = 1
             };
-            private TurnMode _turn_mode;
+            private TurnMode turn_mode;
 
-            private bool _has_action;
-            private uint _action_time_limit;
-            private MissionWaypointActionMsg _waypoint_action;
+            private int has_action;
+            private uint action_time_limit;
+            private MissionWaypointActionMsg waypoint_action;
 
             public MissionWaypointMsg(JSONNode msg)
             {
-                _latitude = msg["latitude"].AsDouble;
-                _longitude = msg["longitude"].AsDouble;
-                _altitude = msg["altitude"].AsFloat;
-                _damping_distance = msg["damping_distance"].AsFloat;
-                _target_yaw = msg["target_yaw"].AsInt;
-                _target_gimbal_pitch = msg["target_gimbal_pitch"].AsInt;
-                _turn_mode = (TurnMode)msg["turn_mode"].AsInt;
-                _has_action = (msg["has_action"].AsInt != 0);
-                _action_time_limit = (uint)msg["action_time_limit"].AsInt;
-                _waypoint_action = new MissionWaypointActionMsg(msg["waypoint_action"]);
+                //changes "asDouble" to AsFloat
+                latitude = msg["latitude"].AsFloat;
+                longitude = msg["longitude"].AsFloat;
+                altitude = msg["altitude"].AsFloat;
+                damping_distance = msg["damping_distance"].AsFloat;
+                target_yaw = msg["target_yaw"].AsInt;
+                target_gimbal_pitch = msg["target_gimbal_pitch"].AsInt;
+                turn_mode = (TurnMode)msg["turn_mode"].AsInt;
+                //_has_action = (msg["has_action"].AsInt != 0);
+                has_action = (msg["has_action"].AsInt);
+                action_time_limit = (uint)msg["action_time_limit"].AsInt;
+                waypoint_action = new MissionWaypointActionMsg(msg["waypoint_action"]);
             }
-
-            public MissionWaypointMsg(double latitude, double longitude, float altitude, float damping_distance, int target_yaw, int target_gimbal_pitch, TurnMode turn_mode, bool has_action, uint action_time_limit, MissionWaypointActionMsg waypoint_action)
+            //changed lat and long to floats from doubles, changes has-action from bool to int
+            public MissionWaypointMsg(float _latitude, float _longitude, float _altitude, float _damping_distance, int _target_yaw, int _target_gimbal_pitch, TurnMode _turn_mode, int _has_action, uint _action_time_limit, MissionWaypointActionMsg _waypoint_action)
             {
-                _latitude = latitude;
-                _longitude = longitude;
-                _altitude = altitude;
-                _damping_distance = damping_distance;
-                _target_yaw = target_yaw;
-                _target_gimbal_pitch = target_gimbal_pitch;
-                _turn_mode = turn_mode;
-                _has_action = has_action;
-                _action_time_limit = action_time_limit;
-                _waypoint_action = waypoint_action;
+                latitude = _latitude;
+                longitude = _longitude;
+                altitude = _altitude;
+                damping_distance = _damping_distance;
+                target_yaw = _target_yaw;
+                target_gimbal_pitch = _target_gimbal_pitch;
+                turn_mode = _turn_mode;
+                has_action = _has_action;
+                action_time_limit = _action_time_limit;
+                waypoint_action = _waypoint_action;
             }
 
             public static string GetMessageType()
@@ -59,59 +62,59 @@ namespace ROSBridgeLib
                 return "dji_sdk/MissionWaypoint";
             }
 
-            public double GetLatitude()
+            public float GetLatitude()
             {
-                return _latitude;
+                return latitude;
             }
 
-            public double GetLongitude()
+            public float GetLongitude()
             {
-                return _longitude;
+                return longitude;
             }
 
             public float GetAltitude()
             {
-                return _altitude;
+                return altitude;
             }
 
             public float GetDampingDistance()
             {
-                return _damping_distance;
+                return damping_distance;
             }
 
             public int GetTargetYaw()
             {
-                return _target_yaw;
+                return target_yaw;
             }
 
             public int GetTargetGimbalPitch()
             {
-                return _target_gimbal_pitch;
+                return target_gimbal_pitch;
             }
 
             public TurnMode GetTurnMode()
             {
-                return _turn_mode;
+                return turn_mode;
             }
-
-            public bool HasAction()
+            //changed from bool to int 
+            public int HasAction()
             {
-                return _has_action;
+                return has_action;
             }
 
             public uint GetActionTimeLimit()
             {
-                return _action_time_limit;
+                return action_time_limit;
             }
 
             public MissionWaypointActionMsg GetWaypointAction()
             {
-                return _waypoint_action;
+                return waypoint_action;
             }
 
             public override string ToString()
             {
-                return string.Format("MissionWaypoint: latitude/longitude: {0}, {1}, altitude: {2}", _latitude, _longitude, _altitude);
+                return string.Format("MissionWaypoint: latitude/longitude: {0}, {1}, altitude: {2}", latitude, longitude, altitude);
             }
 
             public override string ToYAMLString()

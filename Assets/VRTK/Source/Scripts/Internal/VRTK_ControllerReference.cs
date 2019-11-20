@@ -12,10 +12,9 @@
         {
             if (controllerIndex < uint.MaxValue)
             {
-                VRTK_ControllerReference foundReference = VRTK_SharedMethods.GetDictionaryValue(controllerReferences, controllerIndex);
-                if (foundReference != null)
+                if (controllerReferences.ContainsKey(controllerIndex))
                 {
-                    return foundReference;
+                    return controllerReferences[controllerIndex];
                 }
                 return new VRTK_ControllerReference(controllerIndex);
             }
@@ -33,10 +32,9 @@
                 controllerIndex = VRTK_SDK_Bridge.GetControllerIndex(GetValidObjectFromHand(VRTK_SDK_Bridge.GetControllerModelHand(controllerObject)));
             }
 
-            VRTK_ControllerReference foundReference = VRTK_SharedMethods.GetDictionaryValue(controllerReferences, controllerIndex);
-            if (foundReference != null)
+            if (controllerReferences.ContainsKey(controllerIndex))
             {
-                return foundReference;
+                return controllerReferences[controllerIndex];
             }
             return new VRTK_ControllerReference(controllerIndex);
         }
@@ -45,10 +43,9 @@
         {
             GameObject scriptAlias = GetValidObjectFromHand(controllerHand);
             uint controllerIndex = VRTK_SDK_Bridge.GetControllerIndex(scriptAlias);
-            VRTK_ControllerReference foundReference = VRTK_SharedMethods.GetDictionaryValue(controllerReferences, controllerIndex);
-            if (foundReference != null)
+            if (controllerReferences.ContainsKey(controllerIndex))
             {
-                return foundReference;
+                return controllerReferences[controllerIndex];
             }
             return new VRTK_ControllerReference(scriptAlias);
         }
@@ -163,7 +160,7 @@
             {
                 return false;
             }
-            return (index == other.index);
+            return (index.Equals(other.index));
         }
 
         protected virtual GameObject GetValidObjectFromIndex()
@@ -174,9 +171,14 @@
 
         protected virtual void AddToCache()
         {
-            if (IsValid())
+            if (IsValid() && controllerReferences.ContainsKey(storedControllerIndex))
             {
-                VRTK_SharedMethods.AddDictionaryValue(controllerReferences, storedControllerIndex, this, true);
+                controllerReferences.Remove(storedControllerIndex);
+            }
+
+            if (IsValid() && !controllerReferences.ContainsKey(storedControllerIndex))
+            {
+                controllerReferences.Add(storedControllerIndex, this);
             }
         }
 

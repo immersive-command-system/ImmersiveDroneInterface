@@ -5,19 +5,10 @@ namespace VRTK
     using System.Collections.Generic;
 
     /// <summary>
-    /// Moves the SDK Camera Rig based on the motion of the headset and/or the controllers. Attempts to recreate the concept of physically walking on the spot to create scene movement.
+    /// Move In Place allows the user to move the play area by calculating the y-movement of the user's headset and/or controllers. The user is propelled forward the more they are moving. This simulates moving in game by moving in real life.
     /// </summary>
     /// <remarks>
     ///   > This locomotion method is based on Immersive Movement, originally created by Highsight. Thanks to KJack (author of Arm Swinger) for additional work.
-    ///
-    /// **Optional Components:**
-    ///  * `VRTK_BodyPhysics` - A Body Physics script to help determine potential collisions in the moving direction and prevent collision tunnelling.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_MoveInPlace` script on any active scene GameObject.
-    ///
-    /// **Script Dependencies:**
-    ///  * The Controller Events script on the controller Script Alias to determine when the engage button is pressed.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/042_CameraRig_MoveInPlace` demonstrates how the user can move and traverse colliders by either swinging the controllers in a walking fashion or by running on the spot utilisng the head bob for movement.
@@ -26,81 +17,61 @@ namespace VRTK
     public class VRTK_MoveInPlace : MonoBehaviour
     {
         /// <summary>
-        /// Valid control options
+        /// Options for testing if a play space fall is valid.
         /// </summary>
+        /// <param name="HeadsetAndControllers">Track both headset and controllers for movement calculations.</param>
+        /// <param name="ControllersOnly">Track only the controllers for movement calculations.</param>
+        /// <param name="HeadsetOnly">Track only headset for movement caluclations.</param>
         public enum ControlOptions
         {
-            /// <summary>
-            /// Track both headset and controllers for movement calculations.
-            /// </summary>
             HeadsetAndControllers,
-            /// <summary>
-            /// Track only the controllers for movement calculations.
-            /// </summary>
             ControllersOnly,
-            /// <summary>
-            /// Track only headset for movement caluclations.
-            /// </summary>
             HeadsetOnly,
         }
 
         /// <summary>
-        /// Options for which method is used to determine direction while moving.
+        /// Options for which method is used to determine player direction while moving.
         /// </summary>
+        /// <param name="Gaze">Player will always move in the direction they are currently looking.</param>
+        /// <param name="ControllerRotation">Player will move in the direction that the controllers are pointing (averaged).</param>
+        /// <param name="DumbDecoupling">Player will move in the direction they were first looking when they engaged Move In Place.</param>
+        /// <param name="SmartDecoupling">Player will move in the direction they are looking only if their headset point the same direction as their controllers.</param>
+        /// <param name="EngageControllerRotationOnly">Player will move in the direction that the controller with the engage button pressed is pointing.</param>
+        /// <param name="LeftControllerRotationOnly">Player will move in the direction that the left controller is pointing.</param>
+        /// <param name="RightControllerRotationOnly">Player will move in the direction that the right controller is pointing.</param>
         public enum DirectionalMethod
         {
-            /// <summary>
-            /// Will always move in the direction they are currently looking.
-            /// </summary>
             Gaze,
-            /// <summary>
-            /// Will move in the direction that the controllers are pointing (averaged).
-            /// </summary>
             ControllerRotation,
-            /// <summary>
-            /// Will move in the direction they were first looking when they engaged Move In Place.
-            /// </summary>
             DumbDecoupling,
-            /// <summary>
-            /// Will move in the direction they are looking only if their headset point the same direction as their controllers.
-            /// </summary>
             SmartDecoupling,
-            /// <summary>
-            /// Will move in the direction that the controller with the engage button pressed is pointing.
-            /// </summary>
             EngageControllerRotationOnly,
-            /// <summary>
-            /// Will move in the direction that the left controller is pointing.
-            /// </summary>
             LeftControllerRotationOnly,
-            /// <summary>
-            /// Will move in the direction that the right controller is pointing.
-            /// </summary>
             RightControllerRotationOnly
         }
 
         [Header("Control Settings")]
 
-        [Tooltip("If this is checked then the left controller engage button will be enabled to move the play area.")]
+        [Tooltip("If this is checked then the left controller touchpad will be enabled to move the play area.")]
         public bool leftController = true;
-        [Tooltip("If this is checked then the right controller engage button will be enabled to move the play area.")]
+        [Tooltip("If this is checked then the right controller touchpad will be enabled to move the play area.")]
         public bool rightController = true;
-        [Tooltip("The button to press to activate the movement.")]
+        [Tooltip("Select which button to hold to engage Move In Place.")]
         public VRTK_ControllerEvents.ButtonAlias engageButton = VRTK_ControllerEvents.ButtonAlias.TouchpadPress;
-        [Tooltip("The device to determine the movement paramters from.")]
+        [Tooltip("Select which trackables are used to determine movement.")]
         public ControlOptions controlOptions = ControlOptions.HeadsetAndControllers;
-        [Tooltip("The method in which to determine the direction of forward movement.")]
+        [Tooltip("How the user's movement direction will be determined.  The Gaze method tends to lead to the least motion sickness.  Smart decoupling is still a Work In Progress.")]
         public DirectionalMethod directionMethod = DirectionalMethod.Gaze;
 
         [Header("Speed Settings")]
 
-        [Tooltip("The speed in which to move the play area.")]
+        [Tooltip("Lower to decrease speed, raise to increase.")]
         public float speedScale = 1;
-        [Tooltip("The maximun speed in game units. (If 0 or less, max speed is uncapped)")]
+        [Tooltip("The max speed the user can move in game units. (If 0 or less, max speed is uncapped)")]
         public float maxSpeed = 4;
-        [Tooltip("The speed in which the play area slows down to a complete stop when the engage button is released. This deceleration effect can ease any motion sickness that may be suffered.")]
+        [Tooltip("The speed in which the play area slows down to a complete stop when the user is no longer pressing the engage button. This deceleration effect can ease any motion sickness that may be suffered.")]
         public float deceleration = 0.1f;
-        [Tooltip("The speed in which the play area slows down to a complete stop when falling is occuring.")]
+        [Tooltip("The speed in which the play area slows down to a complete stop when the user is falling.")]
         public float fallingDeceleration = 0.01f;
 
         [Header("Advanced Settings")]
@@ -112,7 +83,6 @@ namespace VRTK
         public float sensitivity = 0.02f;
 
         [Header("Custom Settings")]
-
         [Tooltip("An optional Body Physics script to check for potential collisions in the moving direction. If any potential collision is found then the move will not take place. This can help reduce collision tunnelling.")]
         public VRTK_BodyPhysics bodyPhysics;
 
@@ -128,15 +98,22 @@ namespace VRTK
         protected VRTK_ControllerEvents.ButtonAlias previousEngageButton;
         protected bool currentlyFalling;
 
+        // The maximum number of updates we should hold to process movements. The higher the number, the slower the acceleration/deceleration & vice versa.
         protected int averagePeriod;
-        protected List<Transform> trackedObjects = new List<Transform>();
-        protected Dictionary<Transform, List<float>> movementList = new Dictionary<Transform, List<float>>();
-        protected Dictionary<Transform, float> previousYPositions = new Dictionary<Transform, float>();
-        protected Vector3 initialGaze;
+        // Which tracked objects to use to determine amount of movement.
+        protected List<Transform> trackedObjects;
+        // List of all the update's movements over the average period.
+        protected Dictionary<Transform, List<float>> movementList;
+        protected Dictionary<Transform, float> previousYPositions;
+        // Used to determine the direction when using a decoupling method.
+        protected Vector3 initalGaze;
+        // The current move speed of the player. If Move In Place is not active, it will be set to 0.00f.
         protected float currentSpeed;
-        protected Vector3 currentDirection;
+        // The current direction the player is moving. If Move In Place is not active, it will be set to Vector.zero.
+        protected Vector3 direction;
         protected Vector3 previousDirection;
-        protected bool movementEngaged;
+        // True if Move In Place is currently engaged.
+        protected bool active;
 
         /// <summary>
         /// Set the control options and modify the trackables to match.
@@ -147,31 +124,31 @@ namespace VRTK
             controlOptions = givenControlOptions;
             trackedObjects.Clear();
 
-            if (controllerLeftHand != null && controllerRightHand != null && (controlOptions == ControlOptions.HeadsetAndControllers || controlOptions == ControlOptions.ControllersOnly))
+            if (controllerLeftHand != null && controllerRightHand != null && (controlOptions.Equals(ControlOptions.HeadsetAndControllers) || controlOptions.Equals(ControlOptions.ControllersOnly)))
             {
-                VRTK_SharedMethods.AddListValue(trackedObjects, VRTK_DeviceFinder.GetActualController(controllerLeftHand).transform, true);
-                VRTK_SharedMethods.AddListValue(trackedObjects, VRTK_DeviceFinder.GetActualController(controllerRightHand).transform, true);
+                trackedObjects.Add(VRTK_DeviceFinder.GetActualController(controllerLeftHand).transform);
+                trackedObjects.Add(VRTK_DeviceFinder.GetActualController(controllerRightHand).transform);
             }
 
-            if (headset != null && (controlOptions == ControlOptions.HeadsetAndControllers || controlOptions == ControlOptions.HeadsetOnly))
+            if (headset != null && (controlOptions.Equals(ControlOptions.HeadsetAndControllers) || controlOptions.Equals(ControlOptions.HeadsetOnly)))
             {
-                VRTK_SharedMethods.AddListValue(trackedObjects, headset.transform, true);
+                trackedObjects.Add(headset.transform);
             }
         }
 
         /// <summary>
-        /// The GetMovementDirection method will return the direction the play area is currently moving in.
+        /// The GetMovementDirection method will return the direction the player is moving.
         /// </summary>
-        /// <returns>Returns a Vector3 representing the current movement direction.</returns>
+        /// <returns>Returns a vector representing the player's current movement direction.</returns>
         public virtual Vector3 GetMovementDirection()
         {
-            return currentDirection;
+            return direction;
         }
 
         /// <summary>
-        /// The GetSpeed method will return the current speed the play area is moving at.
+        /// The GetSpeed method will return the current speed the player is moving at.
         /// </summary>
-        /// <returns>Returns a float representing the current movement speed.</returns>
+        /// <returns>Returns a float representing the player's current movement speed.</returns>
         public virtual float GetSpeed()
         {
             return currentSpeed;
@@ -179,23 +156,23 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
         {
-            trackedObjects.Clear();
-            movementList.Clear();
-            previousYPositions.Clear();
-            initialGaze = Vector3.zero;
-            currentDirection = Vector3.zero;
+            trackedObjects = new List<Transform>();
+            movementList = new Dictionary<Transform, List<float>>();
+            previousYPositions = new Dictionary<Transform, float>();
+            initalGaze = Vector3.zero;
+            direction = Vector3.zero;
             previousDirection = Vector3.zero;
             averagePeriod = 60;
             currentSpeed = 0f;
-            movementEngaged = false;
+            active = false;
             previousEngageButton = engageButton;
 
-            bodyPhysics = (bodyPhysics != null ? bodyPhysics : FindObjectOfType<VRTK_BodyPhysics>());
+            bodyPhysics = (bodyPhysics != null ? bodyPhysics : GetComponentInChildren<VRTK_BodyPhysics>());
             controllerLeftHand = VRTK_DeviceFinder.GetControllerLeftHand();
             controllerRightHand = VRTK_DeviceFinder.GetControllerRightHand();
 
@@ -212,8 +189,12 @@ namespace VRTK
             for (int i = 0; i < trackedObjects.Count; i++)
             {
                 Transform trackedObj = trackedObjects[i];
-                VRTK_SharedMethods.AddDictionaryValue(movementList, trackedObj, new List<float>(), true);
-                VRTK_SharedMethods.AddDictionaryValue(previousYPositions, trackedObj, trackedObj.transform.localPosition.y, true);
+                movementList.Add(trackedObj, new List<float>());
+                previousYPositions.Add(trackedObj, trackedObj.transform.localPosition.y);
+            }
+            if (playArea == null)
+            {
+                VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.SDK_OBJECT_NOT_FOUND, "PlayArea", "Boundaries SDK"));
             }
         }
 
@@ -230,13 +211,13 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
         {
             CheckControllerState(controllerLeftHand, leftController, ref leftSubscribed, ref previousLeftControllerState);
-            CheckControllerState(controllerRightHand, rightController, ref rightSubscribed, ref previousRightControllerState);
+            CheckControllerState(controllerRightHand, rightController, ref leftSubscribed, ref previousRightControllerState);
             previousEngageButton = engageButton;
         }
 
@@ -248,8 +229,8 @@ namespace VRTK
             {
                 // Initialize the list average.
                 float speed = Mathf.Clamp(((speedScale * 350) * (CalculateListAverage() / trackedObjects.Count)), 0f, maxSpeed);
-                previousDirection = currentDirection;
-                currentDirection = SetDirection();
+                previousDirection = direction;
+                direction = SetDirection();
                 // Update our current speed.
                 currentSpeed = speed;
             }
@@ -260,17 +241,17 @@ namespace VRTK
             else
             {
                 currentSpeed = 0f;
-                currentDirection = Vector3.zero;
+                direction = Vector3.zero;
                 previousDirection = Vector3.zero;
             }
 
             SetDeltaTransformData();
-            MovePlayArea(currentDirection, currentSpeed);
+            MovePlayArea(direction, currentSpeed);
         }
 
         protected virtual bool MovementActivated()
         {
-            return (movementEngaged || engageButton == VRTK_ControllerEvents.ButtonAlias.Undefined);
+            return (active || engageButton == VRTK_ControllerEvents.ButtonAlias.Undefined);
         }
 
         protected virtual void CheckControllerState(GameObject controller, bool controllerState, ref bool subscribedState, ref bool previousState)
@@ -290,20 +271,19 @@ namespace VRTK
             {
                 Transform trackedObj = trackedObjects[i];
                 // Get the amount of Y movement that's occured since the last update.
-                float previousYPosition = VRTK_SharedMethods.GetDictionaryValue(previousYPositions, trackedObj);
-                float deltaYPostion = Mathf.Abs(previousYPosition - trackedObj.transform.localPosition.y);
+                float deltaYPostion = Mathf.Abs(previousYPositions[trackedObj] - trackedObj.transform.localPosition.y);
 
                 // Convenience code.
-                List<float> trackedObjList = VRTK_SharedMethods.GetDictionaryValue(movementList, trackedObj, new List<float>(), true);
+                List<float> trackedObjList = movementList[trackedObj];
 
                 // Cap off the speed.
                 if (deltaYPostion > sensitivity)
                 {
-                    VRTK_SharedMethods.AddListValue(trackedObjList, sensitivity);
+                    trackedObjList.Add(sensitivity);
                 }
                 else
                 {
-                    VRTK_SharedMethods.AddListValue(trackedObjList, deltaYPostion);
+                    trackedObjList.Add(deltaYPostion);
                 }
 
                 // Keep our tracking list at m_averagePeriod number of elements.
@@ -328,62 +308,72 @@ namespace VRTK
             return listAverage;
         }
 
-        protected virtual Vector3 HeadsetPosition()
-        {
-            return (headset != null ? new Vector3(headset.forward.x, 0, headset.forward.z) : Vector3.zero);
-        }
-
         protected virtual Vector3 SetDirection()
         {
-            switch (directionMethod)
-            {
-                case DirectionalMethod.SmartDecoupling:
-                case DirectionalMethod.DumbDecoupling:
-                    return CalculateCouplingDirection();
-                case DirectionalMethod.ControllerRotation:
-                    return CalculateControllerRotationDirection(DetermineAverageControllerRotation() * Vector3.forward);
-                case DirectionalMethod.LeftControllerRotationOnly:
-                    return CalculateControllerRotationDirection((controllerLeftHand != null ? controllerLeftHand.transform.rotation : Quaternion.identity) * Vector3.forward);
-                case DirectionalMethod.RightControllerRotationOnly:
-                    return CalculateControllerRotationDirection((controllerRightHand != null ? controllerRightHand.transform.rotation : Quaternion.identity) * Vector3.forward);
-                case DirectionalMethod.EngageControllerRotationOnly:
-                    return CalculateControllerRotationDirection((engagedController != null ? engagedController.scriptAlias.transform.rotation : Quaternion.identity) * Vector3.forward);
-                case DirectionalMethod.Gaze:
-                    return HeadsetPosition();
-            }
+            Vector3 returnDirection = Vector3.zero;
 
-            return Vector2.zero;
-        }
-
-        protected virtual Vector3 CalculateCouplingDirection()
-        {
-            // If we haven't set an inital gaze yet, set it now.
-            // If we're doing dumb decoupling, this is what we'll be sticking with.
-            if (initialGaze == Vector3.zero)
+            // If we're doing a decoupling method...
+            if (directionMethod == DirectionalMethod.SmartDecoupling || directionMethod == DirectionalMethod.DumbDecoupling)
             {
-                initialGaze = HeadsetPosition();
-            }
-
-            // If we're doing smart decoupling, check to see if we want to reset our distance.
-            if (directionMethod == DirectionalMethod.SmartDecoupling)
-            {
-                bool closeEnough = true;
-                float curXDir = (headset != null ? headset.rotation.eulerAngles.y : 0f);
-                if (curXDir <= smartDecoupleThreshold)
+                // If we haven't set an inital gaze yet, set it now.
+                // If we're doing dumb decoupling, this is what we'll be sticking with.
+                if (initalGaze.Equals(Vector3.zero))
                 {
-                    curXDir += 360;
+                    initalGaze = new Vector3(headset.forward.x, 0, headset.forward.z);
                 }
 
-                closeEnough = closeEnough && (Mathf.Abs(curXDir - controllerLeftHand.transform.rotation.eulerAngles.y) <= smartDecoupleThreshold);
-                closeEnough = closeEnough && (Mathf.Abs(curXDir - controllerRightHand.transform.rotation.eulerAngles.y) <= smartDecoupleThreshold);
-
-                // If the controllers and the headset are pointing the same direction (within the threshold) reset the direction the player's moving.
-                if (closeEnough)
+                // If we're doing smart decoupling, check to see if we want to reset our distance.
+                if (directionMethod == DirectionalMethod.SmartDecoupling)
                 {
-                    initialGaze = HeadsetPosition();
+                    bool closeEnough = true;
+                    float curXDir = headset.rotation.eulerAngles.y;
+                    if (curXDir <= smartDecoupleThreshold)
+                    {
+                        curXDir += 360;
+                    }
+
+                    closeEnough = closeEnough && (Mathf.Abs(curXDir - controllerLeftHand.transform.rotation.eulerAngles.y) <= smartDecoupleThreshold);
+                    closeEnough = closeEnough && (Mathf.Abs(curXDir - controllerRightHand.transform.rotation.eulerAngles.y) <= smartDecoupleThreshold);
+
+                    // If the controllers and the headset are pointing the same direction (within the threshold) reset the direction the player's moving.
+                    if (closeEnough)
+                    {
+                        initalGaze = new Vector3(headset.forward.x, 0, headset.forward.z);
+                    }
                 }
+                returnDirection = initalGaze;
             }
-            return initialGaze;
+            // if we're doing controller rotation movement
+            else if (directionMethod.Equals(DirectionalMethod.ControllerRotation))
+            {
+                Vector3 calculatedControllerDirection = DetermineAverageControllerRotation() * Vector3.forward;
+                returnDirection = CalculateControllerRotationDirection(calculatedControllerDirection);
+            }
+            // if we're doing left controller only rotation movement
+            else if (directionMethod.Equals(DirectionalMethod.LeftControllerRotationOnly))
+            {
+                Vector3 calculatedControllerDirection = (controllerLeftHand != null ? controllerLeftHand.transform.rotation : Quaternion.identity) * Vector3.forward;
+                returnDirection = CalculateControllerRotationDirection(calculatedControllerDirection);
+            }
+            // if we're doing right controller only rotation movement
+            else if (directionMethod.Equals(DirectionalMethod.RightControllerRotationOnly))
+            {
+                Vector3 calculatedControllerDirection = (controllerRightHand != null ? controllerRightHand.transform.rotation : Quaternion.identity) * Vector3.forward;
+                returnDirection = CalculateControllerRotationDirection(calculatedControllerDirection);
+            }
+            // if we're doing engaged controller only rotation movement
+            else if (directionMethod.Equals(DirectionalMethod.EngageControllerRotationOnly))
+            {
+                Vector3 calculatedControllerDirection = (engagedController != null ? engagedController.scriptAlias.transform.rotation : Quaternion.identity) * Vector3.forward;
+                returnDirection = CalculateControllerRotationDirection(calculatedControllerDirection);
+            }
+            // Otherwise if we're just doing Gaze movement, always set the direction to where we're looking.
+            else if (directionMethod.Equals(DirectionalMethod.Gaze))
+            {
+                returnDirection = (new Vector3(headset.forward.x, 0, headset.forward.z));
+            }
+
+            return returnDirection;
         }
 
         protected virtual Vector3 CalculateControllerRotationDirection(Vector3 calculatedControllerDirection)
@@ -397,20 +387,17 @@ namespace VRTK
             {
                 Transform trackedObj = trackedObjects[i];
                 // Get delta postions and rotations
-                VRTK_SharedMethods.AddDictionaryValue(previousYPositions, trackedObj, trackedObj.transform.localPosition.y, true);
+                previousYPositions[trackedObj] = trackedObj.transform.localPosition.y;
             }
         }
 
         protected virtual void MovePlayArea(Vector3 moveDirection, float moveSpeed)
         {
             Vector3 movement = (moveDirection * moveSpeed) * Time.fixedDeltaTime;
-            if (playArea != null)
+            Vector3 finalPosition = new Vector3(movement.x + playArea.position.x, playArea.position.y, movement.z + playArea.position.z);
+            if (playArea != null && CanMove(bodyPhysics, playArea.position, finalPosition))
             {
-                Vector3 finalPosition = new Vector3(movement.x + playArea.position.x, playArea.position.y, movement.z + playArea.position.z);
-                if (CanMove(bodyPhysics, playArea.position, finalPosition))
-                {
-                    playArea.position = finalPosition;
-                }
+                playArea.position = finalPosition;
             }
         }
 
@@ -443,7 +430,7 @@ namespace VRTK
         protected virtual void EngageButtonPressed(object sender, ControllerInteractionEventArgs e)
         {
             engagedController = e.controllerReference;
-            movementEngaged = true;
+            active = true;
         }
 
         protected virtual void EngageButtonReleased(object sender, ControllerInteractionEventArgs e)
@@ -452,11 +439,11 @@ namespace VRTK
             for (int i = 0; i < trackedObjects.Count; i++)
             {
                 Transform trackedObj = trackedObjects[i];
-                VRTK_SharedMethods.GetDictionaryValue(movementList, trackedObj, new List<float>()).Clear();
+                movementList[trackedObj].Clear();
             }
-            initialGaze = Vector3.zero;
+            initalGaze = Vector3.zero;
 
-            movementEngaged = false;
+            active = false;
             engagedController = null;
         }
 
@@ -506,27 +493,27 @@ namespace VRTK
 
         protected virtual void ToggleControllerListeners(GameObject controller, bool toggle, ref bool subscribed)
         {
-            VRTK_ControllerEvents controllerEvents = controller.GetComponentInChildren<VRTK_ControllerEvents>();
-            if (controllerEvents != null)
+            VRTK_ControllerEvents controllerEvent = controller.GetComponent<VRTK_ControllerEvents>();
+            if (controllerEvent != null)
             {
                 //If engage button has changed, then unsubscribe the previous engage button from the events
                 if (engageButton != previousEngageButton && subscribed)
                 {
-                    controllerEvents.UnsubscribeToButtonAliasEvent(previousEngageButton, true, EngageButtonPressed);
-                    controllerEvents.UnsubscribeToButtonAliasEvent(previousEngageButton, false, EngageButtonReleased);
+                    controllerEvent.UnsubscribeToButtonAliasEvent(previousEngageButton, true, EngageButtonPressed);
+                    controllerEvent.UnsubscribeToButtonAliasEvent(previousEngageButton, false, EngageButtonReleased);
                     subscribed = false;
                 }
 
                 if (toggle && !subscribed)
                 {
-                    controllerEvents.SubscribeToButtonAliasEvent(engageButton, true, EngageButtonPressed);
-                    controllerEvents.SubscribeToButtonAliasEvent(engageButton, false, EngageButtonReleased);
+                    controllerEvent.SubscribeToButtonAliasEvent(engageButton, true, EngageButtonPressed);
+                    controllerEvent.SubscribeToButtonAliasEvent(engageButton, false, EngageButtonReleased);
                     subscribed = true;
                 }
                 else if (!toggle && subscribed)
                 {
-                    controllerEvents.UnsubscribeToButtonAliasEvent(engageButton, true, EngageButtonPressed);
-                    controllerEvents.UnsubscribeToButtonAliasEvent(engageButton, false, EngageButtonReleased);
+                    controllerEvent.UnsubscribeToButtonAliasEvent(engageButton, true, EngageButtonPressed);
+                    controllerEvent.UnsubscribeToButtonAliasEvent(engageButton, false, EngageButtonReleased);
                     subscribed = false;
                 }
             }

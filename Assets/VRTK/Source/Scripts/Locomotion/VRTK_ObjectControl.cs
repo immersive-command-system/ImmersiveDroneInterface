@@ -32,39 +32,32 @@ namespace VRTK
     public delegate void ObjectControlEventHandler(object sender, ObjectControlEventArgs e);
 
     /// <summary>
-    /// Provides a base that all object control locomotions can inherit from.
+    /// An abstract class to provide a mechanism to control an object based on controller input.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///   > This is an abstract class that is to be inherited to a concrete class that provides object control locomotion functionality, therefore this script should not be directly used.
+    /// As this is an abstract class, it cannot be applied directly to a game object and performs no logic.
     /// </remarks>
     public abstract class VRTK_ObjectControl : MonoBehaviour
     {
         /// <summary>
         /// Devices for providing direction.
         /// </summary>
+        /// <param name="Headset">The headset device.</param>
+        /// <param name="LeftController">The left controller device.</param>
+        /// <param name="RightController">The right controller device.</param>
+        /// <param name="ControlledObject">The controlled object.</param>
         public enum DirectionDevices
         {
-            /// <summary>
-            /// The headset device.
-            /// </summary>
             Headset,
-            /// <summary>
-            /// The left controller device.
-            /// </summary>
             LeftController,
-            /// <summary>
-            /// The right controller device.
-            /// </summary>
             RightController,
-            /// <summary>
-            /// The controlled object.
-            /// </summary>
             ControlledObject
         }
 
         [Header("Control Settings")]
 
+        [Tooltip("The controller to read the controller events from. If this is blank then it will attempt to get a controller events script from the same GameObject.")]
+        public VRTK_ControllerEvents controller;
         [Tooltip("The direction that will be moved in is the direction of this device.")]
         public DirectionDevices deviceForDirection = DirectionDevices.Headset;
         [Tooltip("If this is checked then whenever the axis on the attached controller is being changed, all other object control scripts of the same type on other controllers will be disabled.")]
@@ -73,13 +66,6 @@ namespace VRTK
         public bool affectOnFalling = false;
         [Tooltip("An optional game object to apply the object control to. If this is blank then the PlayArea will be controlled.")]
         public GameObject controlOverrideObject;
-
-        [Header("Custom Settings")]
-
-        [Tooltip("The controller to read the controller events from. If this is blank then it will attempt to get a controller events script from the same GameObject.")]
-        public VRTK_ControllerEvents controller;
-        [Tooltip("An optional Body Physics script to check for potential collisions in the moving direction.")]
-        public VRTK_BodyPhysics bodyPhysics;
 
         /// <summary>
         /// Emitted when the X Axis Changes.
@@ -92,6 +78,7 @@ namespace VRTK
         public event ObjectControlEventHandler YAxisChanged;
 
         protected VRTK_ControllerEvents controllerEvents;
+        protected VRTK_BodyPhysics bodyPhysics;
         protected VRTK_ObjectControl otherObjectControl;
         protected GameObject controlledGameObject;
         protected GameObject setControlOverrideObject;
@@ -127,21 +114,21 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
         {
             currentAxis = Vector2.zero;
             storedAxis = Vector2.zero;
-            controllerEvents = (controller != null ? controller : GetComponentInParent<VRTK_ControllerEvents>());
+            controllerEvents = (controller != null ? controller : GetComponent<VRTK_ControllerEvents>());
             if (!controllerEvents)
             {
                 VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_NOT_INJECTED, "VRTK_ObjectControl", "VRTK_ControllerEvents", "controller", "the same"));
                 return;
             }
             SetControlledObject();
-            bodyPhysics = (!controlOverrideObject ? (bodyPhysics != null ? bodyPhysics : FindObjectOfType<VRTK_BodyPhysics>()) : null);
+            bodyPhysics = (!controlOverrideObject ? FindObjectOfType<VRTK_BodyPhysics>() : null);
 
             directionDevice = GetDirectionDevice();
             SetListeners(true);
@@ -155,7 +142,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -189,19 +176,14 @@ namespace VRTK
 
         protected virtual void SetControlledObject()
         {
-            Transform playArea = VRTK_DeviceFinder.PlayAreaTransform();
-
             setControlOverrideObject = controlOverrideObject;
-            controlledGameObject = (controlOverrideObject ? controlOverrideObject : (playArea != null ? playArea.gameObject : null));
-            if (controlledGameObject != null)
-            {
-                controlledGameObjectPreviousY = controlledGameObject.transform.position.y;
-            }
+            controlledGameObject = (controlOverrideObject ? controlOverrideObject : VRTK_DeviceFinder.PlayAreaTransform().gameObject);
+            controlledGameObjectPreviousY = controlledGameObject.transform.position.y;
         }
 
         protected virtual void CheckFalling()
         {
-            if (bodyPhysics != null && bodyPhysics.IsFalling() && ObjectHeightChange())
+            if (bodyPhysics && bodyPhysics.IsFalling() && ObjectHeightChange())
             {
                 if (!affectOnFalling)
                 {
@@ -214,7 +196,7 @@ namespace VRTK
                 currentlyFalling = true;
             }
 
-            if (bodyPhysics != null && !bodyPhysics.IsFalling() && currentlyFalling)
+            if (bodyPhysics && !bodyPhysics.IsFalling() && currentlyFalling)
             {
                 currentAxis = (IsInAction() ? storedAxis : Vector2.zero);
                 storedAxis = Vector2.zero;

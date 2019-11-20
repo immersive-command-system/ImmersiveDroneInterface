@@ -16,8 +16,6 @@
         public string rightGripModelPath = "";
         [Tooltip("The model that represents the touchpad.")]
         public string touchpadModelPath = "";
-        [Tooltip("The model that represents the touchpad two.")]
-        public string touchpadTwoModelPath = "";
         [Tooltip("The model that represents button one.")]
         public string buttonOneModelPath = "";
         [Tooltip("The model that represents button two.")]

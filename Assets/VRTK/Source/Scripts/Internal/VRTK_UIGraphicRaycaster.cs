@@ -25,13 +25,13 @@
 
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
-            if (canvas == null || eventCamera == null)
+            if (canvas == null)
             {
                 return;
             }
 
-            Ray ray = new Ray(eventData.pointerCurrentRaycast.worldPosition, eventData.pointerCurrentRaycast.worldNormal);
-            Raycast(canvas, eventCamera, eventData, ray, ref s_RaycastResults);
+            var ray = new Ray(eventData.pointerCurrentRaycast.worldPosition, eventData.pointerCurrentRaycast.worldNormal);
+            Raycast(canvas, eventCamera, ray, ref s_RaycastResults);
             SetNearestRaycast(ref eventData, ref resultAppendList, ref s_RaycastResults);
             s_RaycastResults.Clear();
         }
@@ -40,7 +40,7 @@
         protected virtual void SetNearestRaycast(ref PointerEventData eventData, ref List<RaycastResult> resultAppendList, ref List<RaycastResult> raycastResults)
         {
             RaycastResult? nearestRaycast = null;
-            for (int index = 0; index < raycastResults.Count; index++)
+            for (var index = 0; index < raycastResults.Count; index++)
             {
                 RaycastResult castResult = raycastResults[index];
                 castResult.index = resultAppendList.Count;
@@ -48,7 +48,7 @@
                 {
                     nearestRaycast = castResult;
                 }
-                VRTK_SharedMethods.AddListValue(resultAppendList, castResult);
+                resultAppendList.Add(castResult);
             }
 
             if (nearestRaycast.HasValue)
@@ -61,17 +61,19 @@
         }
 
         //[Pure]
-        protected virtual float GetHitDistance(Ray ray, float hitDistance)
+        protected virtual float GetHitDistance(Ray ray)
         {
+            var hitDistance = float.MaxValue;
+
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && blockingObjects != BlockingObjects.None)
             {
-                float maxDistance = Vector3.Distance(ray.origin, canvas.transform.position);
+                var maxDistance = Vector3.Distance(ray.origin, canvas.transform.position);
 
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
                     RaycastHit hit;
-                    Physics.Raycast(ray, out hit, maxDistance, m_BlockingMask);
-                    if (hit.collider != null && !VRTK_PlayerObject.IsPlayerObject(hit.collider.gameObject))
+                    Physics.Raycast(ray, out hit, maxDistance);
+                    if (hit.collider && !VRTK_PlayerObject.IsPlayerObject(hit.collider.gameObject))
                     {
                         hitDistance = hit.distance;
                     }
@@ -91,20 +93,20 @@
         }
 
         //[Pure]
-        protected virtual void Raycast(Canvas canvas, Camera eventCamera, PointerEventData eventData, Ray ray, ref List<RaycastResult> results)
+        protected virtual void Raycast(Canvas canvas, Camera eventCamera, Ray ray, ref List<RaycastResult> results)
         {
-            float hitDistance = GetHitDistance(ray, VRTK_UIPointer.GetPointerLength(eventData.pointerId));
-            IList<Graphic> canvasGraphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
+            var hitDistance = GetHitDistance(ray);
+            var canvasGraphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
             for (int i = 0; i < canvasGraphics.Count; ++i)
             {
-                Graphic graphic = canvasGraphics[i];
+                var graphic = canvasGraphics[i];
 
                 if (graphic.depth == -1 || !graphic.raycastTarget)
                 {
                     continue;
                 }
 
-                Transform graphicTransform = graphic.transform;
+                var graphicTransform = graphic.transform;
                 Vector3 graphicForward = graphicTransform.forward;
                 float distance = Vector3.Dot(graphicForward, graphicTransform.position - ray.origin) / Vector3.Dot(graphicForward, ray.direction);
 
@@ -129,7 +131,7 @@
 
                 if (graphic.Raycast(pointerPosition, eventCamera))
                 {
-                    RaycastResult result = new RaycastResult()
+                    var result = new RaycastResult()
                     {
                         gameObject = graphic.gameObject,
                         module = this,
@@ -140,7 +142,7 @@
                         sortingLayer = canvas.sortingLayerID,
                         sortingOrder = canvas.sortingOrder,
                     };
-                    VRTK_SharedMethods.AddListValue(results, result);
+                    results.Add(result);
                 }
             }
 

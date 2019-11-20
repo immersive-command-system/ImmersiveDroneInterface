@@ -5,7 +5,6 @@
     public class Arrow : MonoBehaviour
     {
         public float maxArrowLife = 10f;
-        public float maxCollidedLife = 1f;
         [HideInInspector]
         public bool inFlight = false;
 
@@ -15,7 +14,6 @@
         private Vector3 originalPosition;
         private Quaternion originalRotation;
         private Vector3 originalScale;
-        private AudioSource source;
 
         public void SetArrowHolder(GameObject holder)
         {
@@ -31,16 +29,11 @@
 
         public void Fired()
         {
-            if (source != null)
-            {
-                source.Play();
-            }
             DestroyArrow(maxArrowLife);
         }
 
         public void ResetArrow()
         {
-            DestroyArrow(maxCollidedLife);
             collided = true;
             inFlight = false;
             RecreateNotch();
@@ -51,7 +44,6 @@
         {
             rigidBody = GetComponent<Rigidbody>();
             SetOrigns();
-            source = GetComponent<AudioSource>();
         }
 
         private void SetOrigns()
@@ -71,7 +63,7 @@
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (inFlight && isActiveAndEnabled && gameObject.activeInHierarchy)
+            if (inFlight)
             {
                 ResetArrow();
             }

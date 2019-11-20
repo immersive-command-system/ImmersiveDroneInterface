@@ -53,9 +53,8 @@ namespace VRTK
         /// <summary>
         /// The GetCurrentControllerType method returns the current used ControllerType based on the SDK and headset being used.
         /// </summary>
-        /// <param name="controllerReference">The reference to the controller to get type of.</param>
         /// <returns>The ControllerType based on the SDK and headset being used.</returns>
-        public override ControllerType GetCurrentControllerType(VRTK_ControllerReference controllerReference = null)
+        public override ControllerType GetCurrentControllerType()
         {
             return ControllerType.Simulator_Hand;
         }
@@ -99,7 +98,7 @@ namespace VRTK
                 case ControllerElements.Body:
                     return "";
             }
-            return "";
+            return null;
         }
 
         /// <summary>
@@ -156,7 +155,6 @@ namespace VRTK
         /// </summary>
         /// <param name="parent">The GameObject that the origin will become parent of. If it is a controller then it will also be used to determine the hand if required.</param>
         /// <returns>A generated Transform that contains the custom pointer origin.</returns>
-        [System.Obsolete("GenerateControllerPointerOrigin has been deprecated and will be removed in a future version of VRTK.")]
         public override Transform GenerateControllerPointerOrigin(GameObject parent)
         {
             return null;
@@ -238,16 +236,6 @@ namespace VRTK
         public override bool IsControllerRightHand(GameObject controller, bool actual)
         {
             return CheckControllerRightHand(controller, actual);
-        }
-
-        /// <summary>
-        /// The WaitForControllerModel method determines whether the controller model for the given hand requires waiting to load in on scene start.
-        /// </summary>
-        /// <param name="hand">The hand to determine if the controller model will be ready for.</param>
-        /// <returns>Returns true if the controller model requires loading in at runtime and therefore needs waiting for. Returns false if the controller model will be available at start.</returns>
-        public override bool WaitForControllerModel(ControllerHand hand)
-        {
-            return false;
         }
 
         /// <summary>
@@ -396,17 +384,6 @@ namespace VRTK
         }
 
         /// <summary>
-        /// The GetButtonSenseAxis method retrieves the current sense axis value for the given button type on the given controller reference.
-        /// </summary>
-        /// <param name="buttonType">The type of button to check for the sense axis on.</param>
-        /// <param name="controllerReference">The reference to the controller to check the sense axis on.</param>
-        /// <returns>The current sense axis value.</returns>
-        public override float GetButtonSenseAxis(ButtonTypes buttonType, VRTK_ControllerReference controllerReference)
-        {
-            return 0f;
-        }
-
-        /// <summary>
         /// The GetButtonHairlineDelta method is used to get the difference between the current button press and the previous frame button press.
         /// </summary>
         /// <param name="buttonType">The type of button to get the hairline delta for.</param>
@@ -473,7 +450,7 @@ namespace VRTK
         /// <returns>whether or not the TouchModifier is active</returns>
         protected virtual bool IsTouchModifierPressed()
         {
-            return Input.GetKey(VRTK_SharedMethods.GetDictionaryValue(keyMappings, "TouchModifier", KeyCode.None));
+            return Input.GetKey(keyMappings["TouchModifier"]);
         }
 
         /// <summary>
@@ -484,7 +461,7 @@ namespace VRTK
         /// <returns>whether or not the HairTouchModifier is active</returns>
         protected virtual bool IsHairTouchModifierPressed()
         {
-            return Input.GetKey(VRTK_SharedMethods.GetDictionaryValue(keyMappings, "HairTouchModifier", KeyCode.None));
+            return Input.GetKey(keyMappings["HairTouchModifier"]);
         }
 
         /// <summary>
@@ -518,30 +495,29 @@ namespace VRTK
         /// <returns>Returns true if the button state matches the given data.</returns>
         protected virtual bool GetControllerButtonState(uint index, string keyMapping, ButtonPressTypes pressType)
         {
-            KeyCode buttonCode = VRTK_SharedMethods.GetDictionaryValue(keyMappings, keyMapping, KeyCode.None);
             if (pressType == ButtonPressTypes.Touch)
             {
-                return IsButtonPressed(index, ButtonPressTypes.Press, buttonCode);
+                return IsButtonPressed(index, ButtonPressTypes.Press, keyMappings[keyMapping]);
             }
             else if (pressType == ButtonPressTypes.TouchDown)
             {
-                return IsButtonPressed(index, ButtonPressTypes.PressDown, buttonCode);
+                return IsButtonPressed(index, ButtonPressTypes.PressDown, keyMappings[keyMapping]);
             }
             else if (pressType == ButtonPressTypes.TouchUp)
             {
-                return IsButtonPressed(index, ButtonPressTypes.PressUp, buttonCode);
+                return IsButtonPressed(index, ButtonPressTypes.PressUp, keyMappings[keyMapping]);
             }
             else if (pressType == ButtonPressTypes.Press)
             {
-                return !IsButtonPressIgnored() && IsButtonPressed(index, ButtonPressTypes.Press, buttonCode);
+                return !IsButtonPressIgnored() && IsButtonPressed(index, ButtonPressTypes.Press, keyMappings[keyMapping]);
             }
             else if (pressType == ButtonPressTypes.PressDown)
             {
-                return !IsButtonPressIgnored() && IsButtonPressed(index, ButtonPressTypes.PressDown, buttonCode);
+                return !IsButtonPressIgnored() && IsButtonPressed(index, ButtonPressTypes.PressDown, keyMappings[keyMapping]);
             }
             else if (pressType == ButtonPressTypes.PressUp)
             {
-                return !IsButtonPressIgnored() && IsButtonPressed(index, ButtonPressTypes.PressUp, buttonCode);
+                return !IsButtonPressIgnored() && IsButtonPressed(index, ButtonPressTypes.PressUp, keyMappings[keyMapping]);
             }
             return false;
         }
@@ -564,14 +540,14 @@ namespace VRTK
 
             if (index == 1)
             {
-                if (rightController == null || !rightController.selected)
+                if (!rightController.Selected)
                 {
                     return false;
                 }
             }
             else if (index == 2)
             {
-                if (leftController == null || !leftController.selected)
+                if (!leftController.Selected)
                 {
                     return false;
                 }

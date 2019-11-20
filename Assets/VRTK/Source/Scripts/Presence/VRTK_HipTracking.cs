@@ -4,12 +4,12 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// Attempts to provide the relative position of a hip without the need for additional hardware sensors.
+    /// Hip Tracking attempts to reasonably track hip position in the absence of a hip position sensor.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///  * Place the `VRTK_HipTracking` script on any active scene GameObject and this GameObject will then track to the estimated hip position.
+    /// The Hip Tracking script is placed on an empty GameObject which will be positioned at the estimated hip position.
     /// </remarks>
+
     [AddComponentMenu("VRTK/Scripts/Presence/VRTK_HipTracking")]
     public class VRTK_HipTracking : MonoBehaviour
     {
@@ -26,7 +26,7 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -36,7 +36,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void LateUpdate()

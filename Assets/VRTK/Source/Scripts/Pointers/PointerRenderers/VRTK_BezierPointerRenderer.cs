@@ -4,21 +4,12 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// A visual pointer representation of a curved beam made from multiple objects with an optional cursor at the end.
+    /// The Bezier Pointer Renderer emits a curved line (made out of game objects) from the end of the attached object to a point on a ground surface (at any height).
     /// </summary>
     /// <remarks>
-    ///   > The bezier curve generation code is in another script located at `VRTK/Source/Scripts/Internal/VRTK_CurveGenerator.cs` and was heavily inspired by the tutorial and code from [Catlike Coding](http://catlikecoding.com/unity/tutorials/curves-and-splines/).
+    /// It is more useful than the Simple Pointer Renderer for traversing objects of various heights as the end point can be curved on top of objects that are not visible to the user.
     ///
-    /// **Optional Components:**
-    ///  * `VRTK_PlayAreaCursor` - A Play Area Cursor that will track the position of the pointer cursor.
-    ///  * `VRTK_PointerDirectionIndicator` - A Pointer Direction Indicator that will track the position of the pointer cursor.
-    /// 
-    /// **Script Usage:**
-    ///  * Place the `VRTK_BezierPointerRenderer` script on the same GameObject as the Pointer script it is linked to.
-    ///  * Link this Pointer Renderer script to the `Pointer Renderer` parameter on the required Pointer script.
-    ///
-    /// **Script Dependencies:**
-    ///  * A Pointer script to control the activation of this Pointer Renderer script.
+    ///   > The bezier curve generation code is in another script located at `VRTK/Scripts/Internal/VRTK_CurveGenerator.cs` and was heavily inspired by the tutorial and code from [Catlike Coding](http://catlikecoding.com/unity/tutorials/curves-and-splines/).
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/009_Controller_BezierPointer` is used in conjunction with the Height Adjust Teleporter shows how it is possible to traverse different height objects using the curved pointer without needing to see the top of the object.
@@ -74,7 +65,7 @@ namespace VRTK
         /// </summary>
         public override void UpdateRenderer()
         {
-            if ((controllingPointer != null && (controllingPointer.IsPointerActive()) || IsVisible()))
+            if ((controllingPointer && controllingPointer.IsPointerActive()) || IsVisible())
             {
                 Vector3 jointPosition = ProjectForwardBeam();
                 Vector3 downPosition = ProjectDownBeam(jointPosition);
@@ -113,7 +104,7 @@ namespace VRTK
             CreateTracer();
             CreateCursor();
             Toggle(false, false);
-            if (controllingPointer != null)
+            if (controllingPointer)
             {
                 controllingPointer.ResetActivationTimer(true);
                 controllingPointer.ResetSelectionTimer(true);
@@ -140,7 +131,7 @@ namespace VRTK
         {
             base.UpdateObjectInteractor();
             //if the object interactor is too far from the pointer tip then set it to the pointer tip position to prevent glitching.
-            if (objectInteractor != null && actualCursor != null && Vector3.Distance(objectInteractor.transform.position, actualCursor.transform.position) > 0f)
+            if (objectInteractor && actualCursor && Vector3.Distance(objectInteractor.transform.position, actualCursor.transform.position) > 0f)
             {
                 objectInteractor.transform.position = actualCursor.transform.position;
             }
@@ -196,7 +187,7 @@ namespace VRTK
 
         protected virtual void CreateCursor()
         {
-            actualCursor = (customCursor != null ? Instantiate(customCursor) : CreateCursorObject());
+            actualCursor = (customCursor ? Instantiate(customCursor) : CreateCursorObject());
             CreateCursorLocations();
             actualCursor.name = VRTK_SharedMethods.GenerateVRTKObjectName(true, gameObject.name, "BezierPointerRenderer_Cursor");
             VRTK_PlayerObject.SetPlayerObject(actualCursor, VRTK_PlayerObject.ObjectTypes.Pointer);
@@ -225,7 +216,9 @@ namespace VRTK
             Ray pointerRaycast = new Ray(origin.position, useForward);
 
             RaycastHit collidedWith;
-            bool hasRayHit = VRTK_CustomRaycast.Raycast(customRaycast, pointerRaycast, out collidedWith, defaultIgnoreLayer, calculatedLength);
+#pragma warning disable 0618
+            bool hasRayHit = VRTK_CustomRaycast.Raycast(customRaycast, pointerRaycast, out collidedWith, layersToIgnore, calculatedLength);
+#pragma warning restore 0618
 
             float contactDistance = 0f;
             //reset if beam not hitting or hitting new target
@@ -256,7 +249,9 @@ namespace VRTK
             Ray projectedBeamDownRaycast = new Ray(jointPosition, Vector3.down);
             RaycastHit collidedWith;
 
-            bool downRayHit = VRTK_CustomRaycast.Raycast(customRaycast, projectedBeamDownRaycast, out collidedWith, defaultIgnoreLayer, maximumLength.y);
+#pragma warning disable 0618
+            bool downRayHit = VRTK_CustomRaycast.Raycast(customRaycast, projectedBeamDownRaycast, out collidedWith, layersToIgnore, maximumLength.y);
+#pragma warning restore 0618
 
             if (!downRayHit || (destinationHit.collider && destinationHit.collider != collidedWith.collider))
             {
@@ -306,13 +301,17 @@ namespace VRTK
                     Ray checkCollisionRay = new Ray(currentPoint, nextPointDirection);
                     RaycastHit checkCollisionHit;
 
-                    if (VRTK_CustomRaycast.Raycast(customRaycast, checkCollisionRay, out checkCollisionHit, defaultIgnoreLayer, nextPointDistance))
+#pragma warning disable 0618
+                    if (VRTK_CustomRaycast.Raycast(customRaycast, checkCollisionRay, out checkCollisionHit, layersToIgnore, nextPointDistance))
+#pragma warning restore 0618
                     {
                         Vector3 collisionPoint = checkCollisionRay.GetPoint(checkCollisionHit.distance);
                         Ray downwardCheckRay = new Ray(collisionPoint + (Vector3.up * 0.01f), Vector3.down);
                         RaycastHit downwardCheckHit;
 
-                        if (VRTK_CustomRaycast.Raycast(customRaycast, downwardCheckRay, out downwardCheckHit, defaultIgnoreLayer, float.PositiveInfinity))
+#pragma warning disable 0618
+                        if (VRTK_CustomRaycast.Raycast(customRaycast, downwardCheckRay, out downwardCheckHit, layersToIgnore, float.PositiveInfinity))
+#pragma warning restore 0618
                         {
                             destinationHit = downwardCheckHit;
                             newDownPosition = downwardCheckRay.GetPoint(downwardCheckHit.distance); ;
@@ -338,13 +337,13 @@ namespace VRTK
                 downPosition,
                 downPosition,
                 };
-                Material tracerMaterial = (customTracer != null ? null : defaultMaterial);
+                Material tracerMaterial = (customTracer ? null : defaultMaterial);
                 actualTracer.SetPoints(beamPoints, tracerMaterial, currentColor);
                 if (tracerVisibility == VisibilityStates.AlwaysOff)
                 {
                     TogglePointerTracer(false, false);
                 }
-                else if (controllingPointer != null)
+                else if (controllingPointer)
                 {
                     TogglePointerTracer(controllingPointer.IsPointerActive(), controllingPointer.IsPointerActive());
                 }
@@ -367,7 +366,7 @@ namespace VRTK
 
         protected virtual void SetPointerCursor()
         {
-            if (controllingPointer != null && destinationHit.transform)
+            if (controllingPointer && destinationHit.transform)
             {
                 TogglePointerCursor(controllingPointer.IsPointerActive(), controllingPointer.IsPointerActive());
                 actualCursor.transform.position = destinationHit.point;
@@ -378,11 +377,11 @@ namespace VRTK
                 base.UpdateDependencies(actualCursor.transform.position);
 
                 ChangeColor(validCollisionColor);
-                if (actualValidLocationObject != null)
+                if (actualValidLocationObject)
                 {
                     actualValidLocationObject.SetActive(ValidDestination() && IsValidCollision());
                 }
-                if (actualInvalidLocationObject != null)
+                if (actualInvalidLocationObject)
                 {
                     actualInvalidLocationObject.SetActive(!ValidDestination() || !IsValidCollision());
                 }

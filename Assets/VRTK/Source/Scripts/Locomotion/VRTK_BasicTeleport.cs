@@ -15,43 +15,31 @@ namespace VRTK
     public delegate void TeleportEventHandler(object sender, DestinationMarkerEventArgs e);
 
     /// <summary>
-    /// Updates the `x/z` position of the SDK Camera Rig with an optional screen fade.
+    /// The basic teleporter updates the user's x/z position in the game world to the position of a Base Pointer's tip location which is set via the `DestinationMarkerSet` event.
     /// </summary>
     /// <remarks>
-    ///   > The `y` position is not altered by the Basic Teleport so it only allows for movement across a 2D plane.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_BasicTeleport` script on any active scene GameObject.
-    ///
-    /// **Script Dependencies:**
-    ///  * An optional Destination Marker (such as a Pointer) to set the destination of the teleport location.
+    /// The y position is never altered so the basic teleporter cannot be used to move up and down game objects as it only allows for travel across a flat plane.
     /// </remarks>
     /// <example>
-    /// `VRTK/Examples/004_CameraRig_BasicTeleport` uses the `VRTK_Pointer` script on the Controllers to initiate a laser pointer by pressing the `Touchpad` on the controller and when the laser pointer is deactivated (release the `Touchpad`) then the user is teleported to the location of the laser pointer tip as this is where the pointer destination marker position is set to.
+    /// `VRTK/Examples/004_CameraRig_BasicTeleport` uses the `VRTK_SimplePointer` script on the Controllers to initiate a laser pointer by pressing the `Touchpad` on the controller and when the laser pointer is deactivated (release the `Touchpad`) then the user is teleported to the location of the laser pointer tip as this is where the pointer destination marker position is set to.
     /// </example>
     [AddComponentMenu("VRTK/Scripts/Locomotion/VRTK_BasicTeleport")]
     public class VRTK_BasicTeleport : MonoBehaviour
     {
         [Header("Base Settings")]
 
-        [Tooltip("The colour to fade to when fading on teleport.")]
+        [Tooltip("The colour to fade to when blinking on teleport.")]
         public Color blinkToColor = Color.black;
-        [Tooltip("The time taken to fade to the `Blink To Color`. Setting the speed to `0` will mean no fade effect is present.")]
+        [Tooltip("The fade blink speed can be changed on the basic teleport script to provide a customised teleport experience. Setting the speed to 0 will mean no fade blink effect is present.")]
         public float blinkTransitionSpeed = 0.6f;
-        [Tooltip("Determines how long the fade will stay present out depending on the distance being teleported. A value of `0` will not delay the teleport fade effect over any distance, a max value will delay the teleport fade in even when the distance teleported is very close to the original position.")]
+        [Tooltip("A range between 0 and 32 that determines how long the blink transition will stay blacked out depending on the distance being teleported. A value of 0 will not delay the teleport blink effect over any distance, a value of 32 will delay the teleport blink fade in even when the distance teleported is very close to the original position. This can be used to simulate time taking longer to pass the further a user teleports. A value of 16 provides a decent basis to simulate this to the user.")]
         [Range(0f, 32f)]
         public float distanceBlinkDelay = 0f;
         [Tooltip("If this is checked then the teleported location will be the position of the headset within the play area. If it is unchecked then the teleported location will always be the centre of the play area even if the headset position is not in the centre of the play area.")]
         public bool headsetPositionCompensation = true;
-        [Tooltip("A specified VRTK_PolicyList to use to determine whether destination targets will be acted upon by the teleporter.")]
+        [Tooltip("A specified VRTK_PolicyList to use to determine whether destination targets will be acted upon by the Teleporter.")]
         public VRTK_PolicyList targetListPolicy;
-        [Tooltip("An optional NavMeshData object that will be utilised for limiting the teleport to within any scene NavMesh.")]
-        public VRTK_NavMeshData navMeshData;
-
-        [Header("Obsolete Settings")]
-
-        [System.Obsolete("`VRTK_BasicTeleport.navMeshLimitDistance` is no longer used, use `VRTK_BasicTeleport.processNavMesh` instead. This parameter will be removed in a future version of VRTK.")]
-        [ObsoleteInspector]
+        [Tooltip("The max distance the teleport destination can be outside the nav mesh to be considered valid. If a value of `0` is given then the nav mesh restrictions will be ignored.")]
         public float navMeshLimitDistance = 0f;
 
         /// <summary>
@@ -73,9 +61,6 @@ namespace VRTK
         protected float maxBlinkTransitionSpeed = 1.5f;
         protected float maxBlinkDistance = 33f;
         protected Coroutine initaliseListeners;
-        protected bool useGivenForcedPosition = false;
-        protected Vector3 givenForcedPosition = Vector3.zero;
-        protected Quaternion? givenForcedRotation = null;
 
         /// <summary>
         /// The InitDestinationSetListener method is used to register the teleport script to listen to events from the given game object that is used to generate destination markers. Any destination set event emitted by a registered game object will initiate the teleport to the given destination location.
@@ -97,7 +82,7 @@ namespace VRTK
                         {
                             worldMarker.targetListPolicy = targetListPolicy;
                         }
-                        worldMarker.SetNavMeshData(navMeshData);
+                        worldMarker.SetNavMeshCheckDistance(navMeshLimitDistance);
                         worldMarker.SetHeadsetPositionCompensation(headsetPositionCompensation);
                     }
                     else
@@ -122,27 +107,27 @@ namespace VRTK
         /// </summary>
         /// <param name="target">The Transform that the destination marker is touching.</param>
         /// <param name="destinationPosition">The position in world space that is the destination.</param>
-        /// <returns>Returns `true` if the target is a valid location.</returns>
+        /// <returns>Returns true if the target is a valid location.</returns>
         public virtual bool ValidLocation(Transform target, Vector3 destinationPosition)
         {
-            //If the target is null, one of the player objects, or a UI Canvas then it's never a valid location
-            if (target == null || VRTK_PlayerObject.IsPlayerObject(target.gameObject) || target.GetComponent<VRTK_UIGraphicRaycaster>())
+            //If the target is one of the player objects or a UI Canvas then it's never a valid location
+            if (VRTK_PlayerObject.IsPlayerObject(target.gameObject) || target.GetComponent<VRTK_UIGraphicRaycaster>())
             {
                 return false;
             }
 
             bool validNavMeshLocation = false;
-            if (navMeshData != null)
+            if (target != null)
             {
                 NavMeshHit hit;
-                validNavMeshLocation = NavMesh.SamplePosition(destinationPosition, out hit, navMeshData.distanceLimit, navMeshData.validAreas);
+                validNavMeshLocation = NavMesh.SamplePosition(destinationPosition, out hit, navMeshLimitDistance, NavMesh.AllAreas);
             }
-            else
+            if (navMeshLimitDistance == 0f)
             {
                 validNavMeshLocation = true;
             }
 
-            return (validNavMeshLocation && !(VRTK_PolicyList.Check(target.gameObject, targetListPolicy)));
+            return (validNavMeshLocation && target != null && !(VRTK_PolicyList.Check(target.gameObject, targetListPolicy)));
         }
 
         /// <summary>
@@ -161,7 +146,7 @@ namespace VRTK
         /// <param name="target">The Transform of the destination object.</param>
         /// <param name="destinationPosition">The world position to teleport to.</param>
         /// <param name="destinationRotation">The world rotation to teleport to.</param>
-        /// <param name="forceDestinationPosition">If `true` then the given destination position should not be altered by anything consuming the payload.</param>
+        /// <param name="forceDestinationPosition">If true then the given destination position should not be altered by anything consuming the payload.</param>
         public virtual void Teleport(Transform target, Vector3 destinationPosition, Quaternion? destinationRotation = null, bool forceDestinationPosition = false)
         {
             DestinationMarkerEventArgs teleportArgs = BuildTeleportArgs(target, destinationPosition, destinationRotation, forceDestinationPosition);
@@ -177,41 +162,20 @@ namespace VRTK
         {
             DestinationMarkerEventArgs teleportArgs = BuildTeleportArgs(null, destinationPosition, destinationRotation);
             StartTeleport(this, teleportArgs);
-            Quaternion updatedRotation = SetNewRotation(destinationRotation);
-            Vector3 finalDestination = GetCompensatedPosition(destinationPosition, destinationPosition);
-            CalculateBlinkDelay(blinkTransitionSpeed, finalDestination);
+            CalculateBlinkDelay(blinkTransitionSpeed, destinationPosition);
             Blink(blinkTransitionSpeed);
             if (ValidRigObjects())
             {
-                playArea.position = finalDestination;
+                playArea.position = destinationPosition;
             }
-            ProcessOrientation(this, teleportArgs, finalDestination, updatedRotation);
+            Quaternion updatedRotation = SetNewRotation(destinationRotation);
+            ProcessOrientation(this, teleportArgs, destinationPosition, updatedRotation);
             EndTeleport(this, teleportArgs);
-        }
-
-        /// <summary>
-        /// The SetActualTeleportDestination method forces the destination of a teleport event to the given Vector3.
-        /// </summary>
-        /// <param name="actualPosition">The actual position that the teleport event should use as the final location.</param>
-        /// <param name="actualRotation">The actual rotation that the teleport event should use as the final location.</param>
-        public virtual void SetActualTeleportDestination(Vector3 actualPosition, Quaternion? actualRotation)
-        {
-            useGivenForcedPosition = true;
-            givenForcedPosition = actualPosition;
-            givenForcedRotation = actualRotation;
-        }
-
-        /// <summary>
-        /// The ResetActualTeleportDestination method removes any previous forced destination position that was set by the SetActualTeleportDestination method.
-        /// </summary>
-        public virtual void ResetActualTeleportDestination()
-        {
-            useGivenForcedPosition = false;
         }
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -238,7 +202,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Blink(float transitionSpeed)
@@ -283,18 +247,12 @@ namespace VRTK
         {
             if (enableTeleport && ValidLocation(e.target, e.destinationPosition) && e.enableTeleport)
             {
-                if (useGivenForcedPosition)
-                {
-                    e.destinationPosition = givenForcedPosition;
-                    e.destinationRotation = (givenForcedRotation != null ? givenForcedRotation : e.destinationRotation);
-                    ResetActualTeleportDestination();
-                }
                 StartTeleport(sender, e);
-                Quaternion updatedRotation = SetNewRotation(e.destinationRotation);
                 Vector3 newPosition = GetNewPosition(e.destinationPosition, e.target, e.forceDestinationPosition);
                 CalculateBlinkDelay(blinkTransitionSpeed, newPosition);
                 Blink(blinkTransitionSpeed);
                 Vector3 updatedPosition = SetNewPosition(newPosition, e.target, e.forceDestinationPosition);
+                Quaternion updatedRotation = SetNewRotation(e.destinationRotation);
                 ProcessOrientation(sender, e, updatedPosition, updatedRotation);
                 EndTeleport(sender, e);
             }
@@ -305,7 +263,7 @@ namespace VRTK
             OnTeleporting(sender, e);
         }
 
-        protected virtual void ProcessOrientation(object sender, DestinationMarkerEventArgs e, Vector3 targetPosition, Quaternion targetRotation)
+        protected virtual void ProcessOrientation(object sender, DestinationMarkerEventArgs e, Vector3 updatedPosition, Quaternion updatedRotation)
         {
         }
 
@@ -344,20 +302,15 @@ namespace VRTK
                 return tipPosition;
             }
 
-            return GetCompensatedPosition(tipPosition, playArea.position);
-        }
-
-        protected virtual Vector3 GetCompensatedPosition(Vector3 givenPosition, Vector3 defaultPosition)
-        {
             float newX = 0f;
             float newY = 0f;
             float newZ = 0f;
 
             if (ValidRigObjects())
             {
-                newX = (headsetPositionCompensation ? (givenPosition.x - (headset.position.x - playArea.position.x)) : givenPosition.x);
-                newY = defaultPosition.y;
-                newZ = (headsetPositionCompensation ? (givenPosition.z - (headset.position.z - playArea.position.z)) : givenPosition.z);
+                newX = (headsetPositionCompensation ? (tipPosition.x - (headset.position.x - playArea.position.x)) : tipPosition.x);
+                newY = playArea.position.y;
+                newZ = (headsetPositionCompensation ? (tipPosition.z - (headset.position.z - playArea.position.z)) : tipPosition.z);
             }
 
             return new Vector3(newX, newY, newZ);
@@ -425,9 +378,8 @@ namespace VRTK
 
             InitDestinationSetListener(leftHand, state);
             InitDestinationSetListener(rightHand, state);
-            for (int i = 0; i < VRTK_ObjectCache.registeredDestinationMarkers.Count; i++)
+            foreach (VRTK_DestinationMarker destinationMarker in VRTK_ObjectCache.registeredDestinationMarkers)
             {
-                VRTK_DestinationMarker destinationMarker = VRTK_ObjectCache.registeredDestinationMarkers[i];
                 if (destinationMarker.gameObject != leftHand && destinationMarker.gameObject != rightHand)
                 {
                     InitDestinationSetListener(destinationMarker.gameObject, state);

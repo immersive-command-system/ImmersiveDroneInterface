@@ -1,4 +1,4 @@
-﻿// Pointer Direction Indicator|Prefabs|0100
+﻿// Pointer Direction Indicator|Prefabs|0057
 namespace VRTK
 {
     using UnityEngine;
@@ -10,39 +10,15 @@ namespace VRTK
     public delegate void PointerDirectionIndicatorEventHandler(object sender);
 
     /// <summary>
-    /// Adds a Pointer Direction Indicator to a pointer renderer and determines a given world rotation that can be used by a Destiantion Marker.
+    /// The Pointer Direction Indicator is used to determine a given world rotation that can be used by a Destiantion Marker.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/PointerDirectionIndicator/PointerDirectionIndicator` prefab into the scene hierarchy.
-    ///  * Attach the `PointerDirectionIndicator` scene GameObejct to the `Direction Indicator` inspector parameter on a `VRTK_BasePointerRenderer` component.
+    /// The Pointer Direction Indicator can be attached to a VRTK_Pointer in the `Direction Indicator` parameter and will the be used to send rotation data when the destination marker events are emitted.
     ///
-    ///   > This can be useful for rotating the play area upon teleporting to face the user in a new direction without expecting them to physically turn in the play space.
+    /// This can be useful for rotating the play area upon teleporting to face the user in a new direction without expecting them to physically turn in the play space.
     /// </remarks>
     public class VRTK_PointerDirectionIndicator : MonoBehaviour
     {
-        /// <summary>
-        /// States of Direction Indicator Visibility.
-        /// </summary>
-        public enum VisibilityState
-        {
-            /// <summary>
-            /// Only shows the direction indicator when the pointer is active.
-            /// </summary>
-            OnWhenPointerActive,
-            /// <summary>
-            /// Only shows the direction indicator when the pointer cursor is visible or if the cursor is hidden and the pointer is active.
-            /// </summary>
-            AlwaysOnWithPointerCursor
-        }
-
-        [Header("Control Settings")]
-
-        [Tooltip("The touchpad axis needs to be above this deadzone for it to register as a valid touchpad angle.")]
-        public Vector2 touchpadDeadzone = Vector2.zero;
-        [Tooltip("The axis to use for the direction coordinates.")]
-        public VRTK_ControllerEvents.Vector2AxisAlias coordinateAxis = VRTK_ControllerEvents.Vector2AxisAlias.Touchpad;
-
         [Header("Appearance Settings")]
 
         [Tooltip("If this is checked then the reported rotation will include the offset of the headset rotation in relation to the play area.")]
@@ -51,8 +27,6 @@ namespace VRTK
         public bool displayOnInvalidLocation = true;
         [Tooltip("If this is checked then the pointer valid/invalid colours will also be used to change the colour of the direction indicator.")]
         public bool usePointerColor = false;
-        [Tooltip("Determines when the direction indicator will be visible.")]
-        public VisibilityState indicatorVisibility = VisibilityState.OnWhenPointerActive;
 
         [HideInInspector]
         public bool isActive = true;
@@ -116,15 +90,8 @@ namespace VRTK
         /// <param name="validity">Determines if the colour being set is based from a valid location or invalid location.</param>
         public virtual void SetMaterialColor(Color color, bool validity)
         {
-            if (validLocation != null)
-            {
-                validLocation.SetActive(validity);
-            }
-
-            if (invalidLocation != null)
-            {
-                invalidLocation.SetActive((displayOnInvalidLocation ? !validity : validity));
-            }
+            validLocation.SetActive(validity);
+            invalidLocation.SetActive((displayOnInvalidLocation ? !validity : validity));
 
             if (usePointerColor)
             {
@@ -136,15 +103,6 @@ namespace VRTK
             }
         }
 
-        /// <summary>
-        /// The GetControllerEvents method returns the associated Controller Events script with the Pointer Direction Indicator script.
-        /// </summary>
-        /// <returns>The associated Controller Events script.</returns>
-        public virtual VRTK_ControllerEvents GetControllerEvents()
-        {
-            return controllerEvents;
-        }
-
         protected virtual void Awake()
         {
             validLocation = transform.Find("ValidLocation").gameObject;
@@ -154,17 +112,12 @@ namespace VRTK
 
         protected virtual void Update()
         {
-            if (controllerEvents != null && controllerEvents.GetAxisState(coordinateAxis, SDK_BaseController.ButtonPressTypes.Touch) && !InsideDeadzone(controllerEvents.GetAxis(coordinateAxis)))
+            if (controllerEvents != null)
             {
-                float touchpadAngle = controllerEvents.GetAxisAngle(coordinateAxis);
+                float touchpadAngle = controllerEvents.GetTouchpadAxisAngle();
                 float angle = ((touchpadAngle > 180) ? touchpadAngle -= 360 : touchpadAngle) + headset.eulerAngles.y;
                 transform.localEulerAngles = new Vector3(0f, angle, 0f);
             }
-        }
-
-        protected virtual bool InsideDeadzone(Vector2 currentAxis)
-        {
-            return (currentAxis == Vector2.zero || (Mathf.Abs(currentAxis.x) <= touchpadDeadzone.x && Mathf.Abs(currentAxis.y) <= touchpadDeadzone.y));
         }
     }
 }

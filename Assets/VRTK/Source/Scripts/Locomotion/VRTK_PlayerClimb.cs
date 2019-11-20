@@ -7,10 +7,13 @@ namespace VRTK
     /// <summary>
     /// Event Payload
     /// </summary>
+    /// <param name="controllerIndex">**OBSOLETE** The index of the controller doing the interaction.</param>
     /// <param name="controllerReference">The reference to the controller doing the interaction.</param>
     /// <param name="target">The GameObject of the interactable object that is being interacted with by the controller.</param>
     public struct PlayerClimbEventArgs
     {
+        [System.Obsolete("`PlayerClimbEventArgs.controllerIndex` has been replaced with `PlayerClimbEventArgs.controllerReference`. This parameter will be removed in a future version of VRTK.")]
+        public uint controllerIndex;
         public VRTK_ControllerReference controllerReference;
         public GameObject target;
     }
@@ -23,27 +26,12 @@ namespace VRTK
     public delegate void PlayerClimbEventHandler(object sender, PlayerClimbEventArgs e);
 
     /// <summary>
-    /// Provides the ability for the SDK Camera Rig to be moved around based on whether an Interact Grab is interacting with a Climbable Interactable Object to simulate climbing.
+    /// The Player Climb allows player movement based on grabbing of `VRTK_InteractableObject` objects that have a `Climbable` grab attach script. Because it works by grabbing, each controller should have a `VRTK_InteractGrab` and `VRTK_InteractTouch` component attached.
     /// </summary>
-    /// <remarks>
-    /// **Required Components:**
-    ///  * `VRTK_BodyPhysics` - A Body Physics script to deal with the effects of physics and gravity on the play area.
-    ///
-    /// **Optional Components:**
-    ///  * `VRTK_BasicTeleport` - A Teleporter script to use when snapping the play area to the nearest floor when releasing from grab.
-    ///  * `VRTK_HeadsetCollision` - A Headset Collision script to determine when the headset is colliding with geometry to know when to reset to a valid location.
-    ///  * `VRTK_PositionRewind` - A Position Rewind script to utilise when resetting to a valid location upon ungrabbing whilst colliding with geometry.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_PlayerClimb` script on any active scene GameObject.
-    ///
-    /// **Script Dependencies:**
-    ///  * The controller Script Alias GameObject requires the Interact Touch and Interact Grab scripts to allow for touching and grabbing of Interactable Objects.
-    ///  * An Interactable Object in the scene that has the Climbable Grab Attach Mechanic.
-    /// </remarks>
     /// <example>
     /// `VRTK/Examples/037_CameraRig_ClimbingFalling` shows how to set up a scene with player climbing. There are many different examples showing how the same system can be used in unique ways.
     /// </example>
+    [RequireComponent(typeof(VRTK_BodyPhysics))]
     [AddComponentMenu("VRTK/Scripts/Locomotion/VRTK_PlayerClimb")]
     public class VRTK_PlayerClimb : MonoBehaviour
     {
@@ -54,13 +42,13 @@ namespace VRTK
 
         [Header("Custom Settings")]
 
-        [Tooltip("The Body Physics script to use for dealing with climbing and falling. If this is left blank then the script will need to be applied to the same GameObject.")]
+        [Tooltip("The VRTK Body Physics script to use for dealing with climbing and falling. If this is left blank then the script will need to be applied to the same GameObject.")]
         public VRTK_BodyPhysics bodyPhysics;
-        [Tooltip("The Teleport script to use when snapping to nearest floor on release. If this is left blank then a Teleport script will need to be applied to the same GameObject.")]
+        [Tooltip("The VRTK Teleport script to use when snapping to nearest floor on release. If this is left blank then a Teleport script will need to be applied to the same GameObject.")]
         public VRTK_BasicTeleport teleporter;
-        [Tooltip("The Headset Collision script to use for determining if the user is climbing inside a collidable object. If this is left blank then the script will need to be applied to the same GameObject.")]
+        [Tooltip("The VRTK Headset Collision script to use for determining if the user is climbing inside a collidable object. If this is left blank then the script will need to be applied to the same GameObject.")]
         public VRTK_HeadsetCollision headsetCollision;
-        [Tooltip("The Position Rewind script to use for dealing resetting invalid positions. If this is left blank then the script will need to be applied to the same GameObject.")]
+        [Tooltip("The VRTK Position Rewind script to use for dealing resetting invalid positions. If this is left blank then the script will need to be applied to the same GameObject.")]
         public VRTK_PositionRewind positionRewind;
 
         /// <summary>
@@ -82,29 +70,14 @@ namespace VRTK
         protected bool isClimbing;
         protected bool useGrabbedObjectRotation;
 
-        /// <summary>
-        /// The IsClimbing method will return if climbing is currently taking place or not.
-        /// </summary>
-        /// <returns>Returns `true` if climbing is currently taking place.</returns>
-        public virtual bool IsClimbing()
-        {
-            return isClimbing;
-        }
-
         protected virtual void Awake()
         {
-            bodyPhysics = (bodyPhysics != null ? bodyPhysics : FindObjectOfType<VRTK_BodyPhysics>());
+            bodyPhysics = (bodyPhysics != null ? bodyPhysics : GetComponentInChildren<VRTK_BodyPhysics>());
+            teleporter = (teleporter != null ? teleporter : GetComponentInChildren<VRTK_BasicTeleport>());
+            headsetCollision = (headsetCollision != null ? headsetCollision : GetComponentInChildren<VRTK_HeadsetCollision>());
+            positionRewind = (positionRewind != null ? positionRewind : GetComponentInChildren<VRTK_PositionRewind>());
 
-            if (bodyPhysics == null)
-            {
-                VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_FROM_SCENE, "VRTK_PlayerClimb", "VRTK_BodyPhysics"));
-            }
-
-            teleporter = (teleporter != null ? teleporter : FindObjectOfType<VRTK_BasicTeleport>());
-            headsetCollision = (headsetCollision != null ? headsetCollision : FindObjectOfType<VRTK_HeadsetCollision>());
-            positionRewind = (positionRewind != null ? positionRewind : FindObjectOfType<VRTK_PositionRewind>());
-
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -121,7 +94,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -169,6 +142,9 @@ namespace VRTK
         protected virtual PlayerClimbEventArgs SetPlayerClimbEvent(VRTK_ControllerReference controllerReference, GameObject target)
         {
             PlayerClimbEventArgs e;
+#pragma warning disable 0618
+            e.controllerIndex = VRTK_ControllerReference.GetRealIndex(controllerReference);
+#pragma warning restore 0618
             e.controllerReference = controllerReference;
             e.target = target;
             return e;
@@ -209,27 +185,27 @@ namespace VRTK
         {
             if (usePlayerScale)
             {
-                return (playArea.localRotation * Vector3.Scale(objTransform.localPosition, playArea.localScale));
+                return playArea.localRotation * Vector3.Scale(objTransform.localPosition, playArea.localScale);
             }
 
-            return (playArea.localRotation * objTransform.localPosition);
+            return playArea.localRotation * objTransform.localPosition;
         }
 
         protected virtual void OnGrabObject(object sender, ObjectInteractEventArgs e)
         {
             if (IsClimbableObject(e.target))
             {
-                GameObject controller = ((VRTK_InteractGrab)sender).gameObject;
-                GameObject actualController = VRTK_DeviceFinder.GetActualController(controller);
+                var controller = ((VRTK_InteractGrab)sender).gameObject;
+                var actualController = VRTK_DeviceFinder.GetActualController(controller);
                 Grab(actualController, e.controllerReference, e.target);
             }
         }
 
         protected virtual void OnUngrabObject(object sender, ObjectInteractEventArgs e)
         {
-            GameObject controller = ((VRTK_InteractGrab)sender).gameObject;
-            GameObject actualController = VRTK_DeviceFinder.GetActualController(controller);
-            if (e.target != null && IsClimbableObject(e.target) && IsActiveClimbingController(actualController))
+            var controller = ((VRTK_InteractGrab)sender).gameObject;
+            var actualController = VRTK_DeviceFinder.GetActualController(controller);
+            if (e.target && IsClimbableObject(e.target) && IsActiveClimbingController(actualController))
             {
                 Ungrab(true, e.controllerReference, e.target);
             }
@@ -237,11 +213,6 @@ namespace VRTK
 
         protected virtual void Grab(GameObject currentGrabbingController, VRTK_ControllerReference controllerReference, GameObject target)
         {
-            if (bodyPhysics == null)
-            {
-                return;
-            }
-
             bodyPhysics.ResetFalling();
             bodyPhysics.TogglePreventSnapToFloor(true);
             bodyPhysics.enableBodyCollisions = false;
@@ -261,11 +232,6 @@ namespace VRTK
 
         protected virtual void Ungrab(bool carryMomentum, VRTK_ControllerReference controllerReference, GameObject target)
         {
-            if (bodyPhysics == null)
-            {
-                return;
-            }
-
             isClimbing = false;
             if (positionRewind != null && IsHeadsetColliding())
             {
@@ -311,16 +277,16 @@ namespace VRTK
 
         protected virtual bool IsClimbableObject(GameObject obj)
         {
-            VRTK_InteractableObject interactObject = obj.GetComponent<VRTK_InteractableObject>();
-            return (interactObject != null && interactObject.grabAttachMechanicScript && interactObject.grabAttachMechanicScript.IsClimbable());
+            var interactObject = obj.GetComponent<VRTK_InteractableObject>();
+            return (interactObject && interactObject.grabAttachMechanicScript && interactObject.grabAttachMechanicScript.IsClimbable());
         }
 
         protected virtual void InitControllerListeners(GameObject controller, bool state)
         {
-            if (controller != null)
+            if (controller)
             {
-                VRTK_InteractGrab grabScript = controller.GetComponentInChildren<VRTK_InteractGrab>();
-                if (grabScript != null)
+                var grabScript = controller.GetComponent<VRTK_InteractGrab>();
+                if (grabScript)
                 {
                     if (state)
                     {

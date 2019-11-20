@@ -1,4 +1,5 @@
-﻿namespace VRTK
+﻿// VR Simulator|Prefabs|0005
+namespace VRTK
 {
     using UnityEngine;
     using UnityEngine.UI;
@@ -6,7 +7,7 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// The `[VRSimulator_CameraRig]` prefab is a mock Camera Rig set up that can be used to develop with VRTK without the need for VR Hardware.
+    /// The `VRSimulatorCameraRig` prefab is a mock Camera Rig set up that can be used to develop with VRTK without the need for VR Hardware.
     /// </summary>
     /// <remarks>
     /// Use the mouse and keyboard to move around both play area and hands and interacting with objects without the need of a hmd or VR controls.
@@ -16,21 +17,15 @@
         /// <summary>
         /// Mouse input mode types
         /// </summary>
+        /// <param name="Always">Mouse movement is always treated as mouse input.</param>
+        /// <param name="RequiresButtonPress">Mouse movement is only treated as movement when a button is pressed.</param>
         public enum MouseInputMode
         {
-            /// <summary>
-            /// Mouse movement is always treated as mouse input.
-            /// </summary>
             Always,
-            /// <summary>
-            /// Mouse movement is only treated as movement when a button is pressed.
-            /// </summary>
             RequiresButtonPress
         }
 
         #region Public fields
-
-        [Header("General Settings")]
 
         [Tooltip("Show control information in the upper left corner of the screen.")]
         public bool showControlHints = true;
@@ -38,43 +33,30 @@
         public bool hideHandsAtSwitch = false;
         [Tooltip("Reset hand position and rotation when enabling them.")]
         public bool resetHandsAtSwitch = true;
-        [Tooltip("Displays an axis helper to show which axis the hands will be moved through.")]
-        public bool showHandAxisHelpers = true;
-
-        [Header("Mouse Cursor Lock Settings")]
-
-        [Tooltip("Lock the mouse cursor to the game window.")]
-        public bool lockMouseToView = true;
-        [Tooltip("Whether the mouse movement always acts as input or requires a button press.")]
+        [Tooltip("Whether mouse movement always acts as input or requires a button press.")]
         public MouseInputMode mouseMovementInput = MouseInputMode.Always;
+        [Tooltip("Lock the mouse cursor to the game window when the mouse movement key is pressed.")]
+        public bool lockMouseToView = true;
 
-        [Header("Manual Adjustment Settings")]
+        [Header("Adjustments")]
 
         [Tooltip("Adjust hand movement speed.")]
         public float handMoveMultiplier = 0.002f;
         [Tooltip("Adjust hand rotation speed.")]
         public float handRotationMultiplier = 0.5f;
         [Tooltip("Adjust player movement speed.")]
-        public float playerMoveMultiplier = 5f;
+        public float playerMoveMultiplier = 5;
         [Tooltip("Adjust player rotation speed.")]
         public float playerRotationMultiplier = 0.5f;
         [Tooltip("Adjust player sprint speed.")]
-        public float playerSprintMultiplier = 2f;
-        [Tooltip("Adjust the speed of the cursor movement in locked mode.")]
-        public float lockedCursorMultiplier = 5f;
-        [Tooltip("The Colour of the GameObject representing the left hand.")]
-        public Color leftHandColor = Color.red;
-        [Tooltip("The Colour of the GameObject representing the right hand.")]
-        public Color rightHandColor = Color.green;
+        public float playerSprintMultiplier = 2;
 
-        [Header("Operation Key Binding Settings")]
+        [Header("Operation Key Bindings")]
 
         [Tooltip("Key used to enable mouse input if a button press is required.")]
         public KeyCode mouseMovementKey = KeyCode.Mouse1;
         [Tooltip("Key used to toggle control hints on/off.")]
         public KeyCode toggleControlHints = KeyCode.F1;
-        [Tooltip("Key used to toggle control hints on/off.")]
-        public KeyCode toggleMouseLock = KeyCode.F4;
         [Tooltip("Key used to switch between left and righ hand.")]
         public KeyCode changeHands = KeyCode.Tab;
         [Tooltip("Key used to switch hands On/Off.")]
@@ -90,7 +72,7 @@
         [Tooltip("Key used to enable distance pickup.")]
         public KeyCode distancePickupModifier = KeyCode.LeftControl;
 
-        [Header("Movement Key Binding Settings")]
+        [Header("Movement Key Bindings")]
 
         [Tooltip("Key used to move forward.")]
         public KeyCode moveForward = KeyCode.W;
@@ -103,8 +85,7 @@
         [Tooltip("Key used to sprint.")]
         public KeyCode sprint = KeyCode.LeftShift;
 
-        [Header("Controller Key Binding Settings")]
-
+        [Header("Controller Key Bindings")]
         [Tooltip("Key used to simulate trigger button.")]
         public KeyCode triggerAlias = KeyCode.Mouse1;
         [Tooltip("Key used to simulate grip button.")]
@@ -123,52 +104,48 @@
         public KeyCode hairTouchModifier = KeyCode.H;
 
         #endregion
-        #region Protected fields
+        #region Private fields
 
-        protected bool isHand = false;
-        protected GameObject hintCanvas;
-        protected Text hintText;
-        protected Transform rightHand;
-        protected Transform leftHand;
-        protected Transform currentHand;
-        protected Vector3 oldPos;
-        protected Transform neck;
-        protected SDK_ControllerSim rightController;
-        protected SDK_ControllerSim leftController;
-        protected static GameObject cachedCameraRig;
-        protected static bool destroyed = false;
-        protected float sprintMultiplier = 1;
-        protected GameObject crossHairPanel;
-        protected Transform leftHandHorizontalAxisGuide;
-        protected Transform leftHandVerticalAxisGuide;
-        protected Transform rightHandHorizontalAxisGuide;
-        protected Transform rightHandVerticalAxisGuide;
+        private bool isHand = false;
+        private GameObject hintCanvas;
+        private Text hintText;
+        private Transform rightHand;
+        private Transform leftHand;
+        private Transform currentHand;
+        private Vector3 oldPos;
+        private Transform neck;
+        private SDK_ControllerSim rightController;
+        private SDK_ControllerSim leftController;
+        private static GameObject cachedCameraRig;
+        private static bool destroyed = false;
+        private float sprintMultiplier = 1;
+        private GameObject crossHairPanel;
 
         #endregion
 
         /// <summary>
-        /// The FindInScene method is used to find the `[VRSimulator_CameraRig]` GameObject within the current scene.
+        /// The FindInScene method is used to find the `VRSimulatorCameraRig` GameObject within the current scene.
         /// </summary>
-        /// <returns>Returns the found `[VRSimulator_CameraRig]` GameObject if it is found. If it is not found then it prints a debug log error.</returns>
+        /// <returns>Returns the found `VRSimulatorCameraRig` GameObject if it is found. If it is not found then it prints a debug log error.</returns>
         public static GameObject FindInScene()
         {
             if (cachedCameraRig == null && !destroyed)
             {
-                cachedCameraRig = VRTK_SharedMethods.FindEvenInactiveGameObject<SDK_InputSimulator>(null, true);
+                cachedCameraRig = VRTK_SharedMethods.FindEvenInactiveGameObject<SDK_InputSimulator>();
                 if (!cachedCameraRig)
                 {
-                    VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_FROM_SCENE, "[VRSimulator_CameraRig]", "SDK_InputSimulator", ". check that the `VRTK/Prefabs/CameraRigs/[VRSimulator_CameraRig]` prefab been added to the scene."));
+                    VRTK_Logger.Error(VRTK_Logger.GetCommonMessage(VRTK_Logger.CommonMessageKeys.REQUIRED_COMPONENT_MISSING_FROM_SCENE, "VRSimulatorCameraRig", "SDK_InputSimulator", ". check that the `VRTK/Prefabs/VRSimulatorCameraRig` prefab been added to the scene."));
                 }
             }
             return cachedCameraRig;
         }
 
-        protected virtual void Awake()
+        private void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
-        protected virtual void OnEnable()
+        private void OnEnable()
         {
             hintCanvas = transform.Find("Canvas/Control Hints").gameObject;
             crossHairPanel = transform.Find("Canvas/CrosshairPanel").gameObject;
@@ -178,22 +155,18 @@
             rightHand.gameObject.SetActive(false);
             leftHand = transform.Find("LeftHand");
             leftHand.gameObject.SetActive(false);
-            leftHandHorizontalAxisGuide = leftHand.Find("Guides/HorizontalPlane");
-            leftHandVerticalAxisGuide = leftHand.Find("Guides/VerticalPlane");
-            rightHandHorizontalAxisGuide = rightHand.Find("Guides/HorizontalPlane");
-            rightHandVerticalAxisGuide = rightHand.Find("Guides/VerticalPlane");
             currentHand = rightHand;
             oldPos = Input.mousePosition;
             neck = transform.Find("Neck");
-            SetHandColor(leftHand, leftHandColor);
-            SetHandColor(rightHand, rightHandColor);
+            leftHand.Find("Hand").GetComponent<Renderer>().material.color = Color.red;
+            rightHand.Find("Hand").GetComponent<Renderer>().material.color = Color.green;
             rightController = rightHand.GetComponent<SDK_ControllerSim>();
             leftController = leftHand.GetComponent<SDK_ControllerSim>();
-            rightController.selected = true;
-            leftController.selected = false;
+            rightController.Selected = true;
+            leftController.Selected = false;
             destroyed = false;
 
-            SDK_SimController controllerSDK = VRTK_SDK_Bridge.GetControllerSDK() as SDK_SimController;
+            var controllerSDK = VRTK_SDK_Bridge.GetControllerSDK() as SDK_SimController;
             if (controllerSDK != null)
             {
                 Dictionary<string, KeyCode> keyMappings = new Dictionary<string, KeyCode>()
@@ -214,23 +187,18 @@
             crossHairPanel.SetActive(false);
         }
 
-        protected virtual void OnDestroy()
+        private void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
             destroyed = true;
         }
 
-        protected virtual void Update()
+        private void Update()
         {
             if (Input.GetKeyDown(toggleControlHints))
             {
                 showControlHints = !showControlHints;
                 hintCanvas.SetActive(showControlHints);
-            }
-
-            if (Input.GetKeyDown(toggleMouseLock))
-            {
-                lockMouseToView = !lockMouseToView;
             }
 
             if (mouseMovementInput == MouseInputMode.RequiresButtonPress)
@@ -244,17 +212,12 @@
                     oldPos = Input.mousePosition;
                 }
             }
-            else
-            {
-                Cursor.lockState = lockMouseToView ? CursorLockMode.Locked : CursorLockMode.None;
-            }
 
             if (Input.GetKeyDown(handsOnOff))
             {
                 if (isHand)
                 {
                     SetMove();
-                    ToggleGuidePlanes(false, false);
                 }
                 else
                 {
@@ -267,14 +230,14 @@
                 if (currentHand.name == "LeftHand")
                 {
                     currentHand = rightHand;
-                    rightController.selected = true;
-                    leftController.selected = false;
+                    rightController.Selected = true;
+                    leftController.Selected = false;
                 }
                 else
                 {
                     currentHand = leftHand;
-                    rightController.selected = false;
-                    leftController.selected = true;
+                    rightController.Selected = false;
+                    leftController.Selected = true;
                 }
             }
 
@@ -285,15 +248,15 @@
             else
             {
                 UpdateRotation();
-                if (Input.GetKeyDown(distancePickupRight) && Input.GetKey(distancePickupModifier))
+                if(Input.GetKeyDown(distancePickupRight) && Input.GetKey(distancePickupModifier))
                 {
                     TryPickup(true);
                 }
-                else if (Input.GetKeyDown(distancePickupLeft) && Input.GetKey(distancePickupModifier))
+                else if(Input.GetKeyDown(distancePickupLeft) && Input.GetKey(distancePickupModifier))
                 {
                     TryPickup(false);
                 }
-                if (Input.GetKey(sprint))
+                if(Input.GetKey(sprint))
                 {
                     sprintMultiplier = playerSprintMultiplier;
                 }
@@ -301,11 +264,11 @@
                 {
                     sprintMultiplier = 1;
                 }
-                if (Input.GetKeyDown(distancePickupModifier))
+                if(Input.GetKeyDown(distancePickupModifier))
                 {
                     crossHairPanel.SetActive(true);
                 }
-                else if (Input.GetKeyUp(distancePickupModifier))
+                else if(Input.GetKeyUp(distancePickupModifier))
                 {
                     crossHairPanel.SetActive(false);
                 }
@@ -319,30 +282,17 @@
             }
         }
 
-        protected virtual void SetHandColor(Transform hand, Color givenColor)
-        {
-            Transform foundHand = hand.Find("Hand");
-            if (foundHand != null && givenColor != Color.clear)
-            {
-                Renderer[] renderers = foundHand.GetComponentsInChildren<Renderer>(true);
-                for (int i = 0; i < renderers.Length; i++)
-                {
-                    renderers[i].material.color = givenColor;
-                }
-            }
-        }
-
-        protected virtual void TryPickup(bool rightHand)
+        private void TryPickup(bool rightHand)
         {
             Ray screenRay = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             RaycastHit hit;
-            if (Physics.Raycast(screenRay, out hit))
+            if(Physics.Raycast(screenRay, out hit))
             {
                 VRTK_InteractableObject io = hit.collider.gameObject.GetComponent<VRTK_InteractableObject>();
-                if (io != null)
+                if(io)
                 {
                     GameObject hand;
-                    if (rightHand)
+                    if(rightHand)
                     {
                         hand = VRTK_DeviceFinder.GetControllerRightHand();
                     }
@@ -351,7 +301,7 @@
                         hand = VRTK_DeviceFinder.GetControllerLeftHand();
                     }
                     VRTK_InteractGrab grab = hand.GetComponent<VRTK_InteractGrab>();
-                    if (grab.GetGrabbedObject() == null)
+                    if(grab.GetGrabbedObject() == null)
                     {
                         hand.GetComponent<VRTK_InteractTouch>().ForceTouch(hit.collider.gameObject);
                         grab.AttemptGrab();
@@ -360,16 +310,15 @@
             }
         }
 
-        protected virtual void UpdateHands()
+        private void UpdateHands()
         {
             Vector3 mouseDiff = GetMouseDelta();
 
             if (IsAcceptingMouseInput())
             {
-                if (Input.GetKey(changeAxis))
+                if (Input.GetKey(rotationPosition)) //Rotation
                 {
-                    ToggleGuidePlanes(false, true);
-                    if (Input.GetKey(rotationPosition))
+                    if (Input.GetKey(changeAxis))
                     {
                         Vector3 rot = Vector3.zero;
                         rot.x += (mouseDiff * handRotationMultiplier).y;
@@ -378,20 +327,19 @@
                     }
                     else
                     {
-                        Vector3 pos = Vector3.zero;
-                        pos += mouseDiff * handMoveMultiplier;
-                        currentHand.transform.Translate(pos * Time.deltaTime);
-                    }
-                }
-                else
-                {
-                    ToggleGuidePlanes(true, false);
-                    if (Input.GetKey(rotationPosition))
-                    {
                         Vector3 rot = Vector3.zero;
                         rot.z += (mouseDiff * handRotationMultiplier).x;
                         rot.x += (mouseDiff * handRotationMultiplier).y;
                         currentHand.transform.Rotate(rot * Time.deltaTime);
+                    }
+                }
+                else //Position
+                {
+                    if (Input.GetKey(changeAxis))
+                    {
+                        Vector3 pos = Vector3.zero;
+                        pos += mouseDiff * handMoveMultiplier;
+                        currentHand.transform.Translate(pos * Time.deltaTime);
                     }
                     else
                     {
@@ -404,7 +352,7 @@
             }
         }
 
-        protected virtual void UpdateRotation()
+        private void UpdateRotation()
         {
             Vector3 mouseDiff = GetMouseDelta();
 
@@ -430,7 +378,7 @@
             }
         }
 
-        protected virtual void UpdatePosition()
+        private void UpdatePosition()
         {
             float moveMod = Time.deltaTime * playerMoveMultiplier * sprintMultiplier;
             if (Input.GetKey(moveForward))
@@ -451,7 +399,7 @@
             }
         }
 
-        protected virtual void SetHand()
+        private void SetHand()
         {
             Cursor.visible = false;
             isHand = true;
@@ -467,7 +415,7 @@
             }
         }
 
-        protected virtual void SetMove()
+        private void SetMove()
         {
             Cursor.visible = true;
             isHand = false;
@@ -478,7 +426,7 @@
             }
         }
 
-        protected virtual void UpdateHints()
+        private void UpdateHints()
         {
             string hints = "";
             Func<KeyCode, string> key = (k) => "<b>" + k.ToString() + "</b>";
@@ -492,7 +440,6 @@
             // WASD Movement
             string movementKeys = moveForward.ToString() + moveLeft.ToString() + moveBackward.ToString() + moveRight.ToString();
             hints += "Toggle Control Hints: " + key(toggleControlHints) + "\n\n";
-            hints += "Toggle Mouse Lock: " + key(toggleMouseLock) + "\n";
             hints += "Move Player/Playspace: <b>" + movementKeys + "</b>\n";
             hints += "Sprint Modifier: (" + key(sprint) + ")\n\n";
 
@@ -550,51 +497,22 @@
             hintText.text = hints.TrimEnd();
         }
 
-        protected virtual bool IsAcceptingMouseInput()
+        private bool IsAcceptingMouseInput()
         {
             return mouseMovementInput == MouseInputMode.Always || Input.GetKey(mouseMovementKey);
         }
 
-        protected virtual Vector3 GetMouseDelta()
+        private Vector3 GetMouseDelta()
         {
             if (Cursor.lockState == CursorLockMode.Locked)
             {
-                return new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * lockedCursorMultiplier;
+                return new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
             }
             else
             {
                 Vector3 mouseDiff = Input.mousePosition - oldPos;
                 oldPos = Input.mousePosition;
                 return mouseDiff;
-            }
-        }
-
-        protected virtual void ToggleGuidePlanes(bool horizontalState, bool verticalState)
-        {
-            if (!showHandAxisHelpers)
-            {
-                horizontalState = false;
-                verticalState = false;
-            }
-
-            if (leftHandHorizontalAxisGuide != null)
-            {
-                leftHandHorizontalAxisGuide.gameObject.SetActive(horizontalState);
-            }
-
-            if (leftHandVerticalAxisGuide != null)
-            {
-                leftHandVerticalAxisGuide.gameObject.SetActive(verticalState);
-            }
-
-            if (rightHandHorizontalAxisGuide != null)
-            {
-                rightHandHorizontalAxisGuide.gameObject.SetActive(horizontalState);
-            }
-
-            if (rightHandVerticalAxisGuide != null)
-            {
-                rightHandVerticalAxisGuide.gameObject.SetActive(verticalState);
             }
         }
     }

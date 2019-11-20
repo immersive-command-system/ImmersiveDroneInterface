@@ -22,11 +22,10 @@ namespace VRTK
     public delegate void HeadsetCollisionEventHandler(object sender, HeadsetCollisionEventArgs e);
 
     /// <summary>
-    /// Denotes when the HMD is colliding with valid geometry.
+    /// The purpose of the Headset Collision is to detect when the user's VR headset collides with another game object.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///  * Place the `VRTK_HeadsetCollision` script on any active scene GameObject.
+    /// The Headset Collision script will automatically create a script on the headset to deal with the collision events.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/011_Camera_HeadSetCollisionFading` has collidable walls around the play area and if the user puts their head into any of the walls then the headset will fade to black.
@@ -86,7 +85,7 @@ namespace VRTK
         /// <summary>
         /// The IsColliding method is used to determine if the headset is currently colliding with a valid game object and returns true if it is and false if it is not colliding with anything or an invalid game object.
         /// </summary>
-        /// <returns>Returns `true` if the headset is currently colliding with a valid game object.</returns>
+        /// <returns>Returns true if the headset is currently colliding with a valid game object.</returns>
         public virtual bool IsColliding()
         {
             return headsetColliding;
@@ -103,11 +102,12 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
         {
+            VRTK_ObjectCache.registeredHeadsetCollider = this;
             headset = VRTK_DeviceFinder.HeadsetTransform();
             if (headset != null)
             {
@@ -122,13 +122,14 @@ namespace VRTK
             if (headset != null && headsetColliderScript != null)
             {
                 headsetColliderScript.EndCollision(collidingWith);
+                VRTK_ObjectCache.registeredHeadsetCollider = null;
                 TearDownHeadset();
             }
         }
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()

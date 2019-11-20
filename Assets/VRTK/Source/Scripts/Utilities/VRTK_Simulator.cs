@@ -1,4 +1,4 @@
-﻿// Simulating Headset Movement|Utilities|90171
+﻿// Simulating Headset Movement|Utilities|90070
 namespace VRTK
 {
     using UnityEngine;
@@ -12,7 +12,6 @@ namespace VRTK
     /// Supported movements are: forward, backward, strafe left, strafe right, turn left, turn right, up, down.
     /// </remarks>
     [AddComponentMenu("VRTK/Scripts/Utilities/VRTK_Simulator")]
-    [System.Obsolete("`VRTK_Simulator` has been superseded by the VRTK SDK Simulator. This script will be removed in a future version of VRTK.")]
     public class VRTK_Simulator : MonoBehaviour
     {
         [System.Serializable]
@@ -45,7 +44,7 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -78,7 +77,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()

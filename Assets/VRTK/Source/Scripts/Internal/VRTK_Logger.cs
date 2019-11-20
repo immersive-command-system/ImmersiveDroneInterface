@@ -34,8 +34,7 @@
             SDK_NOT_FOUND,
             SDK_MANAGER_ERRORS,
             SCRIPTING_DEFINE_SYMBOLS_ADDED,
-            SCRIPTING_DEFINE_SYMBOLS_REMOVED,
-            SCRIPTING_DEFINE_SYMBOLS_NOT_FOUND
+            SCRIPTING_DEFINE_SYMBOLS_REMOVED
         }
 
         public static VRTK_Logger instance = null;
@@ -92,16 +91,15 @@
             CreateIfNotExists();
 
             string returnMessage = "";
-            string outputMessage = VRTK_SharedMethods.GetDictionaryValue(commonMessages, messageKey);
-            if (outputMessage != null)
+            if (commonMessages.ContainsKey(messageKey))
             {
-                int outputMessageParts = VRTK_SharedMethods.GetDictionaryValue(commonMessageParts, messageKey);
-                if (parameters.Length != outputMessageParts)
+                if (parameters.Length != commonMessageParts[messageKey])
                 {
-                    Array.Resize(ref parameters, outputMessageParts);
+                    Array.Resize(ref parameters, commonMessageParts[messageKey]);
                 }
-                returnMessage = string.Format(outputMessage, parameters);
+                returnMessage = string.Format(commonMessages[messageKey], parameters);
             }
+
             return returnMessage;
         }
 
@@ -125,22 +123,22 @@
             Log(LogLevels.Warn, message);
         }
 
-        public static void Error(string message, bool forcePause = false)
+        public static void Error(string message)
         {
-            Log(LogLevels.Error, message, forcePause);
+            Log(LogLevels.Error, message);
         }
 
-        public static void Fatal(string message, bool forcePause = false)
+        public static void Fatal(string message)
         {
-            Log(LogLevels.Fatal, message, forcePause);
+            Log(LogLevels.Fatal, message);
         }
 
-        public static void Fatal(Exception exception, bool forcePause = false)
+        public static void Fatal(Exception exception)
         {
-            Log(LogLevels.Fatal, exception.Message, forcePause);
+            Log(LogLevels.Fatal, exception.Message);
         }
 
-        public static void Log(LogLevels level, string message, bool forcePause = false)
+        public static void Log(LogLevels level, string message)
         {
 #if VRTK_NO_LOGGING
             return;
@@ -164,11 +162,6 @@
                     break;
                 case LogLevels.Error:
                 case LogLevels.Fatal:
-                    if (forcePause)
-                    {
-                        UnityEngine.Debug.Break();
-                    }
-
                     if (instance.throwExceptions)
                     {
                         throw new Exception(message);

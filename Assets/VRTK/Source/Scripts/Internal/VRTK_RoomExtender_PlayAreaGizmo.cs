@@ -3,7 +3,6 @@
     using UnityEngine;
 
     [ExecuteInEditMode]
-    [System.Obsolete("`VRTK_RoomExtender_PlayAreaGizmo` will be removed in a future version of VRTK.")]
     public class VRTK_RoomExtender_PlayAreaGizmo : MonoBehaviour
     {
         public Color color = Color.red;
@@ -15,7 +14,7 @@
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -31,7 +30,7 @@
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnDrawGizmos()
@@ -57,24 +56,24 @@
                 return;
             }
 
-            Vector3[] vertices = VRTK_SDK_Bridge.GetPlayAreaVertices();
+            var vertices = VRTK_SDK_Bridge.GetPlayAreaVertices();
             if (vertices == null || vertices.Length == 0)
             {
                 return;
             }
 
-            int btmRight = 4;
-            int btmLeft = 5;
-            int topLeft = 6;
-            int topRight = 7;
+            var btmRight = 4;
+            var btmLeft = 5;
+            var topLeft = 6;
+            var topRight = 7;
 
-            Vector3 btmRightVertex = vertices[btmRight] * roomExtender.additionalMovementMultiplier;
-            Vector3 btmLeftVertex = vertices[btmLeft] * roomExtender.additionalMovementMultiplier;
-            Vector3 topLeftVertex = vertices[topLeft] * roomExtender.additionalMovementMultiplier;
-            Vector3 topRightVertex = vertices[topRight] * roomExtender.additionalMovementMultiplier;
+            var btmRightVertex = vertices[btmRight] * roomExtender.additionalMovementMultiplier;
+            var btmLeftVertex = vertices[btmLeft] * roomExtender.additionalMovementMultiplier;
+            var topLeftVertex = vertices[topLeft] * roomExtender.additionalMovementMultiplier;
+            var topRightVertex = vertices[topRight] * roomExtender.additionalMovementMultiplier;
 
-            Vector3 btmOffset = new Vector3(0f, roomExtender.transform.localPosition.y, 0f);
-            Vector3 topOffset = btmOffset + playArea.TransformVector(Vector3.up * wireframeHeight);
+            var btmOffset = new Vector3(0f, roomExtender.transform.localPosition.y, 0f);
+            var topOffset = btmOffset + playArea.TransformVector(Vector3.up * wireframeHeight);
             Gizmos.color = color;
             //bottom rectangle
             Gizmos.DrawLine(btmRightVertex + btmOffset, btmLeftVertex + btmOffset);

@@ -4,13 +4,6 @@ namespace VRTK
     using UnityEngine;
     using System.Collections.Generic;
 
-    public struct VRTKSDKBaseControllerEventArgs
-    {
-        public VRTK_ControllerReference controllerReference;
-    }
-
-    public delegate void VRTKSDKBaseControllerEventHandler(object sender, VRTKSDKBaseControllerEventArgs e);
-
     /// <summary>
     /// The Base Controller SDK script provides a bridge to SDK methods that deal with the input devices.
     /// </summary>
@@ -22,254 +15,106 @@ namespace VRTK
         /// <summary>
         /// Types of buttons on a controller
         /// </summary>
+        /// <param name="ButtonOne">Button One on the controller.</param>
+        /// <param name="ButtonTwo">Button Two on the controller.</param>
+        /// <param name="Grip">Grip on the controller.</param>
+        /// <param name="GripHairline">Grip Hairline on the controller.</param>
+        /// <param name="StartMenu">Start Menu on the controller.</param>
+        /// <param name="Trigger">Trigger on the controller.</param>
+        /// <param name="TriggerHairline">Trigger Hairline on the controller.</param>
+        /// <param name="Touchpad">Touchpad on the controller.</param>
         public enum ButtonTypes
         {
-            /// <summary>
-            /// Button One on the controller.
-            /// </summary>
             ButtonOne,
-            /// <summary>
-            /// Button Two on the controller.
-            /// </summary>
             ButtonTwo,
-            /// <summary>
-            /// Grip on the controller.
-            /// </summary>
             Grip,
-            /// <summary>
-            /// Grip Hairline on the controller.
-            /// </summary>
             GripHairline,
-            /// <summary>
-            /// Start Menu on the controller.
-            /// </summary>
             StartMenu,
-            /// <summary>
-            /// Trigger on the controller.
-            /// </summary>
             Trigger,
-            /// <summary>
-            /// Trigger Hairline on the controller.
-            /// </summary>
             TriggerHairline,
-            /// <summary>
-            /// Touchpad on the controller.
-            /// </summary>
             Touchpad,
-            /// <summary>
-            /// Touchpad Two on the controller.
-            /// </summary>
-            TouchpadTwo,
-            /// <summary>
-            /// Middle Finger on the controller.
-            /// </summary>
-            MiddleFinger,
-            /// <summary>
-            /// Ring Finger on the controller.
-            /// </summary>
-            RingFinger,
-            /// <summary>
-            /// Pinky Finger on the controller.
-            /// </summary>
-            PinkyFinger
         }
 
         /// <summary>
         /// Concepts of controller button press
         /// </summary>
+        /// <param name="Press">The button is currently being pressed.</param>
+        /// <param name="PressDown">The button has just been pressed down.</param>
+        /// <param name="PressUp">The button has just been released.</param>
+        /// <param name="Touch">The button is currently being touched.</param>
+        /// <param name="TouchDown">The button has just been touched.</param>
+        /// <param name="TouchUp">The button is no longer being touched.</param>
         public enum ButtonPressTypes
         {
-            /// <summary>
-            /// The button is currently being pressed.
-            /// </summary>
             Press,
-            /// <summary>
-            /// The button has just been pressed down.
-            /// </summary>
             PressDown,
-            /// <summary>
-            /// The button has just been released.
-            /// </summary>
             PressUp,
-            /// <summary>
-            /// The button is currently being touched.
-            /// </summary>
             Touch,
-            /// <summary>
-            /// The button has just been touched.
-            /// </summary>
             TouchDown,
-            /// <summary>
-            /// The button is no longer being touched.
-            /// </summary>
             TouchUp
         }
 
         /// <summary>
         /// The elements of a generic controller
         /// </summary>
+        /// <param name="AttachPoint">The default point on the controller to attach grabbed objects to.</param>
+        /// <param name="Trigger">The trigger button.</param>
+        /// <param name="GripLeft">The left part of the grip button collection.</param>
+        /// <param name="GripRight">The right part of the grip button collection.</param>
+        /// <param name="Touchpad">The touch pad/stick.</param>
+        /// <param name="ButtonOne">The first generic button.</param>
+        /// <param name="ButtonTwo">The second generic button.</param>
+        /// <param name="SystemMenu">The system menu button.</param>
+        /// <param name="Body">The encompassing mesh of the controller body.</param>
+        /// <param name="StartMenu">The start menu button.</param>
         public enum ControllerElements
         {
-            /// <summary>
-            /// The default point on the controller to attach grabbed objects to.
-            /// </summary>
             AttachPoint,
-            /// <summary>
-            /// The trigger button.
-            /// </summary>
             Trigger,
-            /// <summary>
-            /// The left part of the grip button collection.
-            /// </summary>
             GripLeft,
-            /// <summary>
-            /// The right part of the grip button collection.
-            /// </summary>
             GripRight,
-            /// <summary>
-            /// The touch pad/stick.
-            /// </summary>
             Touchpad,
-            /// <summary>
-            /// The first generic button.
-            /// </summary>
             ButtonOne,
-            /// <summary>
-            /// The second generic button.
-            /// </summary>
             ButtonTwo,
-            /// <summary>
-            /// The system menu button.
-            /// </summary>
             SystemMenu,
-            /// <summary>
-            /// The encompassing mesh of the controller body.
-            /// </summary>
             Body,
-            /// <summary>
-            /// The start menu button.
-            /// </summary>
-            StartMenu,
-            /// <summary>
-            /// The touch pad/stick two.
-            /// </summary>
-            TouchpadTwo
+            StartMenu
         }
 
         /// <summary>
         /// Controller hand reference.
         /// </summary>
+        /// <param name="None">No hand is assigned.</param>
+        /// <param name="Left">The left hand is assigned.</param>
+        /// <param name="Right">The right hand is assigned.</param>
         public enum ControllerHand
         {
-            /// <summary>
-            /// No hand is assigned.
-            /// </summary>
             None,
-            /// <summary>
-            /// The left hand is assigned.
-            /// </summary>
             Left,
-            /// <summary>
-            /// The right hand is assigned.
-            /// </summary>
             Right
         }
 
         /// <summary>
         /// SDK Controller types.
         /// </summary>
+        /// <param name="Undefined">No controller type.</param>
+        /// <param name="Custom">A custom controller type.</param>
+        /// <param name="Simulator_Hand">The Simulator default hand controller.</param>
+        /// <param name="SteamVR_ViveWand">The HTC Vive wand controller for SteamVR.</param>
+        /// <param name="SteamVR_OculusTouch">The Oculus Touch controller for SteamVR.</param>
+        /// <param name="Oculus_OculusTouch">The Oculus Touch controller for Oculus Utilities.</param>
+        /// <param name="Daydream_Controller">The Daydream controller for Google Daydream SDK.</param>
+        /// <param name="Ximmerse_Flip">The Flip controller for Ximmerse SDK.</param>
         public enum ControllerType
         {
-            /// <summary>
-            /// No controller type.
-            /// </summary>
             Undefined,
-            /// <summary>
-            /// A custom controller type.
-            /// </summary>
             Custom,
-            /// <summary>
-            /// The Simulator default hand controller.
-            /// </summary>
             Simulator_Hand,
-            /// <summary>
-            /// The HTC Vive wand controller for SteamVR.
-            /// </summary>
             SteamVR_ViveWand,
-            /// <summary>
-            /// The Oculus Touch controller for SteamVR.
-            /// </summary>
             SteamVR_OculusTouch,
-            /// <summary>
-            /// The Oculus Touch controller for Oculus Utilities.
-            /// </summary>
             Oculus_OculusTouch,
-            /// <summary>
-            /// The Daydream controller for Google Daydream SDK.
-            /// </summary>
             Daydream_Controller,
-            /// <summary>
-            /// The Flip controller for Ximmerse SDK.
-            /// </summary>
-            Ximmerse_Flip,
-            /// <summary>
-            /// The Valve Knuckles controller for SteamVR.
-            /// </summary>
-            SteamVR_ValveKnuckles,
-            /// <summary>
-            /// The Oculus Gamepad for Oculus Utilities.
-            /// </summary>
-            Oculus_OculusGamepad,
-            /// <summary>
-            /// The Oculus Remote for Oculus Utilities.
-            /// </summary>
-            Oculus_OculusRemote,
-            /// <summary>
-            /// The Oculus GearVR HMD controls for Oculus Utilities.
-            /// </summary>
-            Oculus_GearVRHMD,
-            /// <summary>
-            /// The Oculus GearVR controller for Oculus Utilities.
-            /// </summary>
-            Oculus_GearVRController,
-            /// <summary>
-            /// The Windows Mixed Reality Motion Controller for Windows Mixed Reality.
-            /// </summary>
-            WindowsMR_MotionController,
-            /// <summary>
-            /// The Windows Mixed Reality Motion Controller for SteamVR.
-            /// </summary>
-            SteamVR_WindowsMRController
-        }
-
-        public event VRTKSDKBaseControllerEventHandler LeftControllerReady;
-        public event VRTKSDKBaseControllerEventHandler RightControllerReady;
-        public event VRTKSDKBaseControllerEventHandler LeftControllerModelReady;
-        public event VRTKSDKBaseControllerEventHandler RightControllerModelReady;
-
-        protected Transform defaultSDKLeftControllerModel = null;
-        protected Transform defaultSDKRightControllerModel = null;
-
-        public virtual void OnControllerReady(ControllerHand hand)
-        {
-            VRTKSDKBaseControllerEventArgs e;
-            e.controllerReference = VRTK_ControllerReference.GetControllerReference(hand);
-
-            switch (hand)
-            {
-                case ControllerHand.Left:
-                    if (LeftControllerReady != null)
-                    {
-                        LeftControllerReady(this, e);
-                    }
-                    break;
-                case ControllerHand.Right:
-                    if (RightControllerReady != null)
-                    {
-                        RightControllerReady(this, e);
-                    }
-                    break;
-            }
+            Ximmerse_Flip
         }
 
         /// <summary>
@@ -289,9 +134,8 @@ namespace VRTK
         /// <summary>
         /// The GetCurrentControllerType method returns the current used ControllerType based on the SDK and headset being used.
         /// </summary>
-        /// <param name="controllerReference">The reference to the controller to get type of.</param>
         /// <returns>The ControllerType based on the SDK and headset being used.</returns>
-        public abstract ControllerType GetCurrentControllerType(VRTK_ControllerReference controllerReference = null);
+        public abstract ControllerType GetCurrentControllerType();
 
         /// <summary>
         /// The GetControllerDefaultColliderPath returns the path to the prefab that contains the collider objects for the default controller of this SDK.
@@ -336,7 +180,6 @@ namespace VRTK
         /// </summary>
         /// <param name="parent">The GameObject that the origin will become parent of. If it is a controller then it will also be used to determine the hand if required.</param>
         /// <returns>A generated Transform that contains the custom pointer origin.</returns>
-        [System.Obsolete("GenerateControllerPointerOrigin has been deprecated and will be removed in a future version of VRTK.")]
         public abstract Transform GenerateControllerPointerOrigin(GameObject parent);
 
         /// <summary>
@@ -382,13 +225,6 @@ namespace VRTK
         /// <param name="actual">If true it will check the actual controller, if false it will check the script alias controller.</param>
         /// <returns>Returns true if the given controller is the right hand controller.</returns>
         public abstract bool IsControllerRightHand(GameObject controller, bool actual);
-
-        /// <summary>
-        /// The WaitForControllerModel method determines whether the controller model for the given hand requires waiting to load in on scene start.
-        /// </summary>
-        /// <param name="hand">The hand to determine if the controller model will be ready for.</param>
-        /// <returns>Returns true if the controller model requires loading in at runtime and therefore needs waiting for. Returns false if the controller model will be available at start.</returns>
-        public abstract bool WaitForControllerModel(ControllerHand hand);
 
         /// <summary>
         /// The GetControllerModel method returns the model alias for the given GameObject.
@@ -492,14 +328,6 @@ namespace VRTK
         public abstract Vector2 GetButtonAxis(ButtonTypes buttonType, VRTK_ControllerReference controllerReference);
 
         /// <summary>
-        /// The GetButtonSenseAxis method retrieves the current sense axis value for the given button type on the given controller reference.
-        /// </summary>
-        /// <param name="buttonType">The type of button to check for the sense axis on.</param>
-        /// <param name="controllerReference">The reference to the controller to check the sense axis on.</param>
-        /// <returns>The current sense axis value.</returns>
-        public abstract float GetButtonSenseAxis(ButtonTypes buttonType, VRTK_ControllerReference controllerReference);
-
-        /// <summary>
         /// The GetButtonHairlineDelta method is used to get the difference between the current button press and the previous frame button press.
         /// </summary>
         /// <param name="buttonType">The type of button to get the hairline delta for.</param>
@@ -519,7 +347,7 @@ namespace VRTK
         protected virtual GameObject GetSDKManagerControllerLeftHand(bool actual = false)
         {
             VRTK_SDKManager sdkManager = VRTK_SDKManager.instance;
-            if (sdkManager != null && sdkManager.loadedSetup != null)
+            if (sdkManager != null)
             {
                 return (actual ? sdkManager.loadedSetup.actualLeftController : sdkManager.scriptAliasLeftController);
             }
@@ -529,7 +357,7 @@ namespace VRTK
         protected virtual GameObject GetSDKManagerControllerRightHand(bool actual = false)
         {
             VRTK_SDKManager sdkManager = VRTK_SDKManager.instance;
-            if (sdkManager != null && sdkManager.loadedSetup != null)
+            if (sdkManager != null)
             {
                 return (actual ? sdkManager.loadedSetup.actualRightController : sdkManager.scriptAliasRightController);
             }
@@ -549,9 +377,9 @@ namespace VRTK
         protected virtual bool CheckControllerLeftHand(GameObject controller, bool actual)
         {
             VRTK_SDKManager sdkManager = VRTK_SDKManager.instance;
-            if (sdkManager != null && sdkManager.loadedSetup != null && controller != null)
+            if (sdkManager != null && controller != null)
             {
-                return (actual ? controller == sdkManager.loadedSetup.actualLeftController : controller == sdkManager.scriptAliasLeftController);
+                return (actual ? controller.Equals(sdkManager.loadedSetup.actualLeftController) : controller.Equals(sdkManager.scriptAliasLeftController));
             }
             return false;
         }
@@ -559,9 +387,9 @@ namespace VRTK
         protected virtual bool CheckControllerRightHand(GameObject controller, bool actual)
         {
             VRTK_SDKManager sdkManager = VRTK_SDKManager.instance;
-            if (sdkManager != null && sdkManager.loadedSetup != null && controller != null)
+            if (sdkManager != null && controller != null)
             {
-                return (actual ? controller == sdkManager.loadedSetup.actualRightController : controller == sdkManager.scriptAliasRightController);
+                return (actual ? controller.Equals(sdkManager.loadedSetup.actualRightController) : controller.Equals(sdkManager.scriptAliasRightController));
             }
             return false;
         }
@@ -574,7 +402,7 @@ namespace VRTK
         protected virtual GameObject GetSDKManagerControllerModelForHand(ControllerHand hand)
         {
             VRTK_SDKManager sdkManager = VRTK_SDKManager.instance;
-            if (sdkManager != null && sdkManager.loadedSetup != null)
+            if (sdkManager != null)
             {
                 switch (hand)
                 {
@@ -591,7 +419,7 @@ namespace VRTK
         {
             GameObject returnController = null;
             VRTK_SDKManager sdkManager = VRTK_SDKManager.instance;
-            if (sdkManager != null && sdkManager.loadedSetup != null)
+            if (sdkManager != null)
             {
                 if (IsControllerLeftHand(controller))
                 {
@@ -603,46 +431,6 @@ namespace VRTK
                 }
             }
             return returnController;
-        }
-
-        protected virtual void OnControllerModelReady(ControllerHand hand, VRTK_ControllerReference controllerReference)
-        {
-            VRTKSDKBaseControllerEventArgs e;
-            e.controllerReference = controllerReference;
-
-            switch (hand)
-            {
-                case ControllerHand.Left:
-                    if (LeftControllerModelReady != null)
-                    {
-                        LeftControllerModelReady(this, e);
-                    }
-                    break;
-                case ControllerHand.Right:
-                    if (RightControllerModelReady != null)
-                    {
-                        RightControllerModelReady(this, e);
-                    }
-                    break;
-            }
-        }
-
-        protected virtual bool ShouldWaitForControllerModel(ControllerHand hand, bool ignoreChildCount)
-        {
-            //If the default model isn't set or the current controller model isn't the default controller model, then don't bother waiting for the model to stream in.
-            switch (hand)
-            {
-                case ControllerHand.Left:
-                    return IsDefaultControllerModel(defaultSDKLeftControllerModel, GetControllerModel(ControllerHand.Left), ignoreChildCount);
-                case ControllerHand.Right:
-                    return IsDefaultControllerModel(defaultSDKRightControllerModel, GetControllerModel(ControllerHand.Right), ignoreChildCount);
-            }
-            return false;
-        }
-
-        protected virtual bool IsDefaultControllerModel(Transform givenDefault, GameObject givenActual, bool ignoreChildCount)
-        {
-            return (givenDefault != null && givenActual == givenDefault.gameObject && givenActual != null && (ignoreChildCount || givenActual.transform.childCount == 0));
         }
     }
 

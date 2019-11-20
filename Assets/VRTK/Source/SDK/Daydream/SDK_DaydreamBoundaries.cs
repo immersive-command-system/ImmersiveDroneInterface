@@ -34,8 +34,15 @@ namespace VRTK
         {
             if (area == null)
             {
-                Transform foundCamera = (Camera.main != null ? Camera.main.transform : null); //assume main camera is child of camera rig, using native vr
-                area = (foundCamera != null && foundCamera.parent != null ? foundCamera.parent : foundCamera);
+                Transform camera = Camera.main.transform; //assume main camera is child of camera rig, using native vr
+                if (camera.parent)
+                {
+                    area = camera.parent;
+                }
+                else
+                {
+                    area = camera;
+                }
             }
 
             return area;

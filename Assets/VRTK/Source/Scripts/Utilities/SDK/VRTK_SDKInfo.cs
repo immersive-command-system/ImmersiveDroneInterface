@@ -1,4 +1,4 @@
-﻿// SDK Info|Utilities|90040
+﻿// SDK Info|Utilities|90013
 namespace VRTK
 {
     using UnityEngine;
@@ -37,9 +37,9 @@ namespace VRTK
         /// <summary>
         /// Creates new SDK infos for a type that is known at compile time.
         /// </summary>
-        /// <typeparam name="BaseType">The SDK base type. Must be a subclass of SDK_Base.</typeparam>
-        /// <typeparam name="FallbackType">The SDK type to fall back on if problems occur. Must be a subclass of `BaseType`.</typeparam>
-        /// <typeparam name="ActualType">The SDK type to use. Must be a subclass of `BaseType`.</typeparam>
+        /// <typeparam name="BaseType">The SDK base type. Must be a subclass of <see cref="SDK_Base"/>.</typeparam>
+        /// <typeparam name="FallbackType">The SDK type to fall back on if problems occur. Must be a subclass of <typeparamref name="BaseType"/>.</typeparam>
+        /// <typeparam name="ActualType">The SDK type to use. Must be a subclass of <typeparamref name="BaseType"/>.</typeparam>
         /// <returns>Multiple newly created instances.</returns>
         public static VRTK_SDKInfo[] Create<BaseType, FallbackType, ActualType>() where BaseType : SDK_Base where FallbackType : BaseType where ActualType : BaseType
         {
@@ -49,9 +49,9 @@ namespace VRTK
         /// <summary>
         /// Creates new SDK infos for a type.
         /// </summary>
-        /// <typeparam name="BaseType">The SDK base type. Must be a subclass of SDK_Base.</typeparam>
-        /// <typeparam name="FallbackType">The SDK type to fall back on if problems occur. Must be a subclass of `BaseType.</typeparam>
-        /// <param name="actualType">The SDK type to use. Must be a subclass of `BaseType.</param>
+        /// <typeparam name="BaseType">The SDK base type. Must be a subclass of <see cref="SDK_Base"/>.</typeparam>
+        /// <typeparam name="FallbackType">The SDK type to fall back on if problems occur. Must be a subclass of <typeparamref name="BaseType"/>.</typeparam>
+        /// <param name="actualType">The SDK type to use. Must be a subclass of <typeparamref name="BaseType"/>.</param>
         /// <returns>Multiple newly created instances.</returns>
         public static VRTK_SDKInfo[] Create<BaseType, FallbackType>(Type actualType) where BaseType : SDK_Base where FallbackType : BaseType
         {
@@ -64,7 +64,7 @@ namespace VRTK
                 return new VRTK_SDKInfo[0];
             }
 
-            HashSet<VRTK_SDKInfo> sdkInfos = new HashSet<VRTK_SDKInfo>();
+            List<VRTK_SDKInfo> sdkInfos = new List<VRTK_SDKInfo>(descriptions.Length);
             foreach (SDK_DescriptionAttribute description in descriptions)
             {
                 VRTK_SDKInfo sdkInfo = new VRTK_SDKInfo();
@@ -95,13 +95,13 @@ namespace VRTK
         {
             if (baseType == null || fallbackType == null)
                 return;
-            if (!VRTK_SharedMethods.IsTypeSubclassOf(baseType, typeof(SDK_Base)))
+            if (!baseType.IsSubclassOf(typeof(SDK_Base)))
             {
                 VRTK_Logger.Fatal(new ArgumentOutOfRangeException("baseType", baseType, string.Format("'{0}' is not a subclass of the SDK base type '{1}'.", baseType.Name, typeof(SDK_Base).Name)));
                 return;
             }
 
-            if (!VRTK_SharedMethods.IsTypeSubclassOf(fallbackType, baseType))
+            if (!fallbackType.IsSubclassOf(baseType))
             {
                 VRTK_Logger.Fatal(new ArgumentOutOfRangeException("fallbackType", fallbackType, string.Format("'{0}' is not a subclass of the SDK base type '{1}'.", fallbackType.Name, baseType.Name)));
                 return;
@@ -134,7 +134,7 @@ namespace VRTK
                 return;
             }
 
-            if (!VRTK_SharedMethods.IsTypeSubclassOf(actualType, baseType))
+            if (!actualType.IsSubclassOf(baseType))
             {
                 VRTK_Logger.Fatal(new ArgumentOutOfRangeException("actualTypeName", actualTypeName, string.Format("'{0}' is not a subclass of the SDK base type '{1}'.", actualTypeName, baseType.Name)));
                 return;

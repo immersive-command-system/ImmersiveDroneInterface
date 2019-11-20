@@ -42,31 +42,13 @@ namespace VRTK
             }
         }
 
-        protected virtual void Update()
-        {
-            thickness = (int)Mathf.Clamp(thickness, 0, rectTransform.rect.width / 2);
-        }
-
-        protected virtual UIVertex[] SetVbo(Vector2[] vertices, Vector2[] uvs)
-        {
-            UIVertex[] vbo = new UIVertex[4];
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                UIVertex vert = UIVertex.simpleVert;
-                vert.color = color;
-                vert.position = vertices[i];
-                vert.uv0 = uvs[i];
-                vbo[i] = vert;
-            }
-            return vbo;
-        }
-
-        protected override void OnPopulateMesh(VertexHelper vh)
+        [System.Obsolete("Use OnPopulateMesh(VertexHelper vh) instead.")]
+        protected override void OnPopulateMesh(Mesh toFill)
         {
             float outer = -rectTransform.pivot.x * rectTransform.rect.width;
             float inner = -rectTransform.pivot.x * rectTransform.rect.width + thickness;
-            vh.Clear();
-
+            toFill.Clear();
+            var vbo = new VertexHelper(toFill);
             Vector2 prevX = Vector2.zero;
             Vector2 prevY = Vector2.zero;
             Vector2 uv0 = new Vector2(0, 0);
@@ -103,8 +85,31 @@ namespace VRTK
                 }
                 prevX = pos1;
                 prevY = pos2;
-                vh.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }));
+                vbo.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }));
             }
+            if (vbo.currentVertCount > 3)
+            {
+                vbo.FillMesh(toFill);
+            }
+        }
+
+        protected virtual void Update()
+        {
+            thickness = (int)Mathf.Clamp(thickness, 0, rectTransform.rect.width / 2);
+        }
+
+        protected virtual UIVertex[] SetVbo(Vector2[] vertices, Vector2[] uvs)
+        {
+            UIVertex[] vbo = new UIVertex[4];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                var vert = UIVertex.simpleVert;
+                vert.color = color;
+                vert.position = vertices[i];
+                vert.uv0 = uvs[i];
+                vbo[i] = vert;
+            }
+            return vbo;
         }
     }
 }

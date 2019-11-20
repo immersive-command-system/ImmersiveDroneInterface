@@ -16,9 +16,9 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  serializedVersion: 4
   m_Component:
-  - component: {fileID: 4000013277071232}
+  - 4: {fileID: 4000013277071232}
   m_Layer: 2
   m_Name: OculusTouch_Right
   m_TagString: Untagged
@@ -31,10 +31,10 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  serializedVersion: 4
   m_Component:
-  - component: {fileID: 4000011266277736}
-  - component: {fileID: 65000010588359546}
+  - 4: {fileID: 4000011266277736}
+  - 65: {fileID: 65000010588359546}
   m_Layer: 2
   m_Name: Ring
   m_TagString: Untagged
@@ -47,10 +47,10 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  serializedVersion: 4
   m_Component:
-  - component: {fileID: 4000014126335616}
-  - component: {fileID: 65000013139213930}
+  - 4: {fileID: 4000014126335616}
+  - 65: {fileID: 65000013139213930}
   m_Layer: 2
   m_Name: Base
   m_TagString: Untagged
@@ -63,10 +63,10 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  serializedVersion: 4
   m_Component:
-  - component: {fileID: 4000010737803968}
-  - component: {fileID: 136000013830384766}
+  - 4: {fileID: 4000010737803968}
+  - 136: {fileID: 136000013830384766}
   m_Layer: 2
   m_Name: Handle
   m_TagString: Untagged
@@ -83,10 +83,10 @@ Transform:
   m_LocalRotation: {x: -0.30070576, y: 0, z: 0, w: 0.953717}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: -35, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000013277071232}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: -35, y: 0, z: 0}
 --- !u!4 &4000011266277736
 Transform:
   m_ObjectHideFlags: 1
@@ -96,10 +96,10 @@ Transform:
   m_LocalRotation: {x: 0, y: -0.08715578, z: 0, w: 0.9961947}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: -10, z: 0}
   m_Children: []
   m_Father: {fileID: 4000013277071232}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -10, z: 0}
 --- !u!4 &4000013277071232
 Transform:
   m_ObjectHideFlags: 1
@@ -109,13 +109,13 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 4000011266277736}
   - {fileID: 4000014126335616}
   - {fileID: 4000010737803968}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4000014126335616
 Transform:
   m_ObjectHideFlags: 1
@@ -125,10 +125,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000013277071232}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &65000010588359546
 BoxCollider:
   m_ObjectHideFlags: 1

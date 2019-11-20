@@ -4,21 +4,10 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// Provides the ability to move a GameObject around by sliding it across the `x/z` plane in the scene by updating the Transform position when the corresponding Object Control axis changes.
+    /// The Slide Object Control Action script is used to slide the controlled GameObject around the scene when changing the axis.
     /// </summary>
     /// <remarks>
-    ///   > The effect is a smooth sliding motion in forward and sideways directions to simulate walking.
-    ///
-    /// **Required Components:**
-    ///  * `VRTK_ObjectControl` - The Object Control script to listen for the axis changes on.
-    ///
-    /// **Optional Components:**
-    ///  * `VRTK_BodyPhysics` - The Body Physics script to utilise when checking for potential collisions on movement.
-    ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_SlideObjectControlAction` script on any active scene GameObject.
-    ///  * Link the required Object Control script to the `Object Control Script` parameter of this script.
-    ///  * Set the `Listen On Axis Change` parameter on this script to the axis change to affect with this movement type.
+    /// The effect is a smooth sliding motion in forward and sideways directions to simulate walking.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/017_CameraRig_TouchpadWalking` has a collection of walls and slopes that can be traversed by the user with the touchpad. There is also an area that can only be traversed if the user is crouching.
@@ -50,12 +39,6 @@ namespace VRTK
         {
             currentSpeed = CalculateSpeed(axis, currentlyFalling, modifierActive);
             Move(controlledGameObject, directionDevice, axisDirection);
-        }
-
-        protected override void OnEnable()
-        {
-            internalBodyPhysics = bodyPhysics;
-            base.OnEnable();
         }
 
         protected virtual float CalculateSpeed(float inputValue, bool currentlyFalling, bool modifierActive)

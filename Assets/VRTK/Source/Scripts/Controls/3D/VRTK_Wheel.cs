@@ -14,21 +14,11 @@ namespace VRTK
     /// `VRTK/Examples/025_Controls_Overview` has a collection of wheels that can be rotated by grabbing with the controller and then rotating the controller in the desired direction.
     /// </example>
     [AddComponentMenu("VRTK/Scripts/Controls/3D/VRTK_Wheel")]
-    [System.Obsolete("`VRTK.VRTK_Wheel` has been deprecated and can be recreated with `VRTK.Controllables.ArtificialBased.VRTK_ArtificialRotator`. This script will be removed in a future version of VRTK.")]
     public class VRTK_Wheel : VRTK_Control
     {
-        /// <summary>
-        /// The grab attach mechanic to use.
-        /// </summary>
         public enum GrabTypes
         {
-            /// <summary>
-            /// Utilise the track object grab mechanic.
-            /// </summary>
             TrackObject,
-            /// <summary>
-            /// Utilise the rotator track grab mechanic.
-            /// </summary>
             RotatorTrack
         }
 
@@ -151,9 +141,9 @@ namespace VRTK
 
         protected virtual void SetupHingeRestrictions()
         {
-            float minJointLimit = 0f;
-            float maxJointLimit = maxAngle;
-            float limitOffset = maxAngle - 180f;
+            var minJointLimit = 0f;
+            var maxJointLimit = maxAngle;
+            var limitOffset = maxAngle - 180f;
 
             if (limitOffset > 0f)
             {

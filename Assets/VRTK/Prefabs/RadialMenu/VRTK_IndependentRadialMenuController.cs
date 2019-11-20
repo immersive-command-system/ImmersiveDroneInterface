@@ -1,4 +1,4 @@
-﻿// Independent Radial Menu|Prefabs|0120
+﻿// Independent Radial Menu Controller|Prefabs|0050
 namespace VRTK
 {
     using UnityEngine;
@@ -6,20 +6,18 @@ namespace VRTK
     using System.Collections;
 
     /// <summary>
-    /// Allows the RadialMenu to be anchored to any object, not just a controller.
+    /// This script inherited from `RadialMenuController` and therefore can be used instead of `RadialMenuController` to allow the RadialMenu to be anchored to any object, not just a controller. The RadialMenu will show when a controller is near the object and the buttons can be clicked with the `Use Alias` button. The menu also automatically rotates towards the user.
     /// </summary>
     /// <remarks>
-    /// **Prefab Usage:**
-    ///  * Place the `VRTK/Prefabs/RadialMenu/RadialMenu` prefab as a child of the GameObject to associate the Radial Menu with.
-    ///  * Position and scale the menu by adjusting the transform of the `RadialMenu` empty.
-    ///  * Replace `VRTK_RadialMenuController` with `VRTK_IndependentRadialMenuController` that is located on the `RadialMenu/RadialMenuUI/Panel` GameObject.
-    ///  * Ensure the parent object has the `VRTK_InteractableObject` script.
-    ///  * Verify that `Is Usable` and `Hold Button to Use` are both checked on the `VRTK_InteractableObject`.
-    ///  * Attach `VRTK_InteractTouch` and `VRTK_InteractUse` scripts to the objects that will activate the Radial Menu (e.g. the Controllers).
+    /// To convert the default `RadialMenu` prefab to be independent of the controllers:
+    ///
+    ///   * Make the `RadialMenu` a child of an object other than a controller.
+    ///   * Position and scale the menu by adjusting the transform of the `RadialMenu` empty.
+    ///   * Replace `RadialMenuController` with `VRTK_IndependentRadialMenuController`.
+    ///   * Ensure the parent object has the `VRTK_InteractableObject` script.
+    ///   * Verify that `Is Usable` and `Hold Button to Use` are both checked.
+    ///   * Attach `VRTK_InteractTouch` and `VRTK_InteractUse` scripts to the controllers.
     /// </remarks>
-    /// <example>
-    /// `VRTK/Examples/030_Controls_RadialTouchpadMenu` displays a radial menu for each controller. The left controller uses the `Hide On Release` variable, so it will only be visible if the left touchpad is being touched. It also uses the `Execute On Unclick` variable to delay execution until the touchpad button is unclicked. The example scene also contains a demonstration of anchoring the RadialMenu to an interactable cube instead of a controller.
-    /// </example>
     public class VRTK_IndependentRadialMenuController : VRTK_RadialMenuController
     {
         [Tooltip("If the RadialMenu is the child of an object with VRTK_InteractableObject attached, this will be automatically obtained. It can also be manually set.")]
@@ -37,10 +35,10 @@ namespace VRTK
         [Tooltip("The object the RadialMenu should face towards. If left empty, it will automatically try to find the Headset Camera.")]
         public GameObject rotateTowards;
 
-        protected List<GameObject> interactingObjects = new List<GameObject>(); // Objects (controllers) that are either colliding with the menu or clicking the menu
-        protected HashSet<GameObject> collidingObjects = new HashSet<GameObject>(); // Just objects that are currently colliding with the menu or its parent
+        protected List<GameObject> interactingObjects; // Objects (controllers) that are either colliding with the menu or clicking the menu
+        protected List<GameObject> collidingObjects; // Just objects that are currently colliding with the menu or its parent
         protected SphereCollider menuCollider;
-        protected Coroutine delayedSetColliderEnabledRoutine;
+        protected Coroutine disableCoroutine;
         protected Vector3 desiredColliderCenter;
         protected Quaternion initialRotation;
         protected bool isClicked = false;
@@ -87,11 +85,12 @@ namespace VRTK
             }
 
             // Reset variables
-            interactingObjects.Clear();
-            collidingObjects.Clear();
-            if (delayedSetColliderEnabledRoutine != null)
+            interactingObjects = new List<GameObject>();
+            collidingObjects = new List<GameObject>();
+            if (disableCoroutine != null)
             {
-                StopCoroutine(delayedSetColliderEnabledRoutine);
+                StopCoroutine(disableCoroutine);
+                disableCoroutine = null;
             }
             isClicked = false;
             waitingToDisableCollider = false;
@@ -138,7 +137,7 @@ namespace VRTK
         protected override void Awake()
         {
             menu = GetComponent<VRTK_RadialMenu>();
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Start()
@@ -178,14 +177,14 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
         {
             if (rotateTowards == null) // Backup
             {
-                Transform headset = VRTK_DeviceFinder.HeadsetTransform();
+                var headset = VRTK_DeviceFinder.HeadsetTransform();
                 if (headset)
                 {
                     rotateTowards = headset.gameObject;
@@ -262,13 +261,14 @@ namespace VRTK
         {
             DoShowMenu(CalculateAngle(e.interactingObject), sender);
             collidingObjects.Add(e.interactingObject);
-            VRTK_SharedMethods.AddListValue(interactingObjects, e.interactingObject, true);
+
+            interactingObjects.Add(e.interactingObject);
             if (addMenuCollider && menuCollider != null)
             {
                 SetColliderState(true, e);
-                if (delayedSetColliderEnabledRoutine != null)
+                if (disableCoroutine != null)
                 {
-                    StopCoroutine(delayedSetColliderEnabledRoutine);
+                    StopCoroutine(disableCoroutine);
                 }
             }
         }
@@ -279,16 +279,17 @@ namespace VRTK
             if (((!menu.executeOnUnclick || !isClicked) && menu.hideOnRelease) || (Object)sender == this)
             {
                 DoHideMenu(hideAfterExecution, sender);
+
                 interactingObjects.Remove(e.interactingObject);
                 if (addMenuCollider && menuCollider != null)
                 {
                     // In case there's any gap between the normal collider and the menuCollider, delay a bit. Cancelled if collider is re-entered
-                    delayedSetColliderEnabledRoutine = StartCoroutine(DelayedSetColliderEnabled(false, 0.25f, e));
+                    disableCoroutine = StartCoroutine(DelayedSetColliderEnabled(false, 0.25f, e));
                 }
             }
         }
 
-        protected virtual TouchAngleDeflection CalculateAngle(GameObject interactingObject)
+        protected virtual float CalculateAngle(GameObject interactingObject)
         {
             Vector3 controllerPosition = interactingObject.transform.position;
 
@@ -304,20 +305,22 @@ namespace VRTK
                 angle += 360.0f;
             }
 
-            return new TouchAngleDeflection(angle, 1);
+            return angle;
         }
 
         protected virtual float AngleSigned(Vector3 v1, Vector3 v2, Vector3 n)
         {
-            return Mathf.Atan2(Vector3.Dot(n, Vector3.Cross(v1, v2)), Vector3.Dot(v1, v2)) * Mathf.Rad2Deg;
+            return Mathf.Atan2(
+                Vector3.Dot(n, Vector3.Cross(v1, v2)),
+                Vector3.Dot(v1, v2)) * Mathf.Rad2Deg;
         }
 
         protected virtual void ImmediatelyHideMenu(InteractableObjectEventArgs e)
         {
             ObjectUntouched(this, e);
-            if (delayedSetColliderEnabledRoutine != null)
+            if (disableCoroutine != null)
             {
-                StopCoroutine(delayedSetColliderEnabledRoutine);
+                StopCoroutine(disableCoroutine);
             }
             SetColliderState(false, e); // Don't want to wait for this
         }
@@ -336,14 +339,12 @@ namespace VRTK
                     bool should = true;
                     Collider[] colliders = eventsManager.GetComponents<Collider>();
                     Collider[] controllerColliders = e.interactingObject.GetComponent<VRTK_InteractTouch>().ControllerColliders();
-                    for (int i = 0; i < colliders.Length; i++)
+                    foreach (var collider in colliders)
                     {
-                        Collider collider = colliders[i];
                         if (collider != menuCollider)
                         {
-                            for (int j = 0; j < controllerColliders.Length; j++)
+                            foreach (var controllerCollider in controllerColliders)
                             {
-                                Collider controllerCollider = controllerColliders[j];
                                 if (controllerCollider.bounds.Intersects(collider.bounds))
                                 {
                                     should = false;
@@ -370,6 +371,8 @@ namespace VRTK
             yield return new WaitForSeconds(delay);
 
             SetColliderState(enabled, e);
+
+            StopCoroutine("delayedSetColliderEnabled");
         }
     }
 }

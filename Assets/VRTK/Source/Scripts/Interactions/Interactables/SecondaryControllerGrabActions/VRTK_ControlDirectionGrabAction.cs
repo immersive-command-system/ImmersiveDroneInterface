@@ -5,20 +5,17 @@ namespace VRTK.SecondaryControllerGrabActions
     using System.Collections;
 
     /// <summary>
-    /// Controls the facing direction of the grabbed Interactable Object to rotate in the direction of the secondary grabbing object.
+    /// The Control Direction Grab Action provides a mechanism to control the facing direction of the object when they are grabbed with a secondary controller.
     /// </summary>
     /// <remarks>
-    ///   > Rotation will only occur correctly if the Interactable Object `forward` is correctly aligned to the world `z-axis` and the `up` is correctly aligned to the world `y-axis`. It is also not possible to control the direction of an Interactable Object that uses the Joint based grab mechanics.
+    /// For an object to correctly be rotated it must be created with the front of the object pointing down the z-axis (forward) and the upwards of the object pointing up the y-axis (up). 
     ///
-    /// **Script Usage:**
-    ///  * Place the `VRTK_ControlDirectionGrabAction` script on either:
-    ///    * The GameObject of the Interactable Object to detect interactions on.
-    ///    * Any other scene GameObject and then link that GameObject to the Interactable Objects `Secondary Grab Action Script` parameter to denote use of the secondary grab action.
+    /// It's not possible to control the direction of an interactable object with a `Fixed_Joint` as the joint fixes the rotation of the object.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/043_Controller_SecondaryControllerActions` demonstrates the ability to grab an object with one controller and control their direction with the second controller.
     /// </example>
-    [AddComponentMenu("VRTK/Scripts/Interactions/Interactables/Secondary Controller Grab Actions/VRTK_ControlDirectionGrabAction")]
+    [AddComponentMenu("VRTK/Scripts/Interactions/Secondary Controller Grab Actions/VRTK_ControlDirectionGrabAction")]
     public class VRTK_ControlDirectionGrabAction : VRTK_BaseGrabAction
     {
         [Tooltip("The distance the secondary controller must move away from the original grab position before the secondary controller auto ungrabs the object.")]
@@ -36,11 +33,11 @@ namespace VRTK.SecondaryControllerGrabActions
         /// <summary>
         /// The Initalise method is used to set up the state of the secondary action when the object is initially grabbed by a secondary controller.
         /// </summary>
-        /// <param name="currentGrabbdObject">The Interactable Object script for the object currently being grabbed by the primary grabbing object.</param>
-        /// <param name="currentPrimaryGrabbingObject">The Interact Grab script for the object that is associated with the primary grabbing object.</param>
-        /// <param name="currentSecondaryGrabbingObject">The Interact Grab script for the object that is associated with the secondary grabbing object.</param>
-        /// <param name="primaryGrabPoint">The point on the Interactable Object where the primary Interact Grab initially grabbed the Interactable Object.</param>
-        /// <param name="secondaryGrabPoint">The point on the Interactable Object where the secondary Interact Grab initially grabbed the Interactable Object.</param>
+        /// <param name="currentGrabbdObject">The Interactable Object script for the object currently being grabbed by the primary controller.</param>
+        /// <param name="currentPrimaryGrabbingObject">The Interact Grab script for the object that is associated with the primary controller.</param>
+        /// <param name="currentSecondaryGrabbingObject">The Interact Grab script for the object that is associated with the secondary controller.</param>
+        /// <param name="primaryGrabPoint">The point on the object where the primary controller initially grabbed the object.</param>
+        /// <param name="secondaryGrabPoint">The point on the object where the secondary controller initially grabbed the object.</param>
         public override void Initialise(VRTK_InteractableObject currentGrabbdObject, VRTK_InteractGrab currentPrimaryGrabbingObject, VRTK_InteractGrab currentSecondaryGrabbingObject, Transform primaryGrabPoint, Transform secondaryGrabPoint)
         {
             base.Initialise(currentGrabbdObject, currentPrimaryGrabbingObject, currentSecondaryGrabbingObject, primaryGrabPoint, secondaryGrabPoint);
@@ -50,7 +47,7 @@ namespace VRTK.SecondaryControllerGrabActions
         }
 
         /// <summary>
-        /// The ResetAction method is used to reset the secondary action when the Interactable Object is no longer grabbed by a secondary Interact Grab.
+        /// The ResetAction method is used to reset the secondary action when the object is no longer grabbed by a secondary controller.
         /// </summary>
         public override void ResetAction()
         {
@@ -70,7 +67,7 @@ namespace VRTK.SecondaryControllerGrabActions
         }
 
         /// <summary>
-        /// The OnDropAction method is executed when the current grabbed Interactable Object is dropped and can be used up to clean up any secondary grab actions.
+        /// The OnDropAction method is executed when the current grabbed object is dropped and can be used up to clean up any secondary grab actions.
         /// </summary>
         public override void OnDropAction()
         {
@@ -79,7 +76,7 @@ namespace VRTK.SecondaryControllerGrabActions
         }
 
         /// <summary>
-        /// The ProcessUpdate method runs in every Update on the Interactable Object whilst it is being grabbed by a secondary Interact Grab.
+        /// The ProcessUpdate method runs in every Update on the Interactable Object whilst it is being grabbed by a secondary controller.
         /// </summary>
         public override void ProcessUpdate()
         {
@@ -88,7 +85,7 @@ namespace VRTK.SecondaryControllerGrabActions
         }
 
         /// <summary>
-        /// The ProcessFixedUpdate method runs in every FixedUpdate on the Interactable Object whilst it is being grabbed by a secondary Interact Grab and influences the rotation of the Interactable Object.
+        /// The ProcessFixedUpdate method runs in every FixedUpdate on the Interactable Object whilst it is being grabbed by a secondary controller and influences the rotation of the object.
         /// </summary>
         public override void ProcessFixedUpdate()
         {
@@ -110,7 +107,7 @@ namespace VRTK.SecondaryControllerGrabActions
 
         protected virtual IEnumerator RealignOnRelease()
         {
-            float elapsedTime = 0f;
+            var elapsedTime = 0f;
 
             while (elapsedTime < releaseSnapSpeed)
             {

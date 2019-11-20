@@ -4,22 +4,13 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// A visual pointer representation of a straight beam with an optional cursor at the end.
+    /// The Straight Pointer Renderer emits a coloured beam from the end of the object it is attached to and simulates a laser beam.
     /// </summary>
     /// <remarks>
-    /// **Optional Components:**
-    ///  * `VRTK_PlayAreaCursor` - A Play Area Cursor that will track the position of the pointer cursor.
-    ///  * `VRTK_PointerDirectionIndicator` - A Pointer Direction Indicator that will track the position of the pointer cursor.
-    /// 
-    /// **Script Usage:**
-    ///  * Place the `VRTK_StraightPointerRenderer` script on the same GameObject as the Pointer script it is linked to.
-    ///  * Link this Pointer Renderer script to the `Pointer Renderer` parameter on the required Pointer script.
-    ///
-    /// **Script Dependencies:**
-    ///  * A Pointer script to control the activation of this Pointer Renderer script.
+    /// It can be useful for pointing to objects within a scene and it can also determine the object it is pointing at and the distance the object is from the controller the beam is being emitted from.
     /// </remarks>
     /// <example>
-    /// `VRTK/Examples/003_Controller_SimplePointer` shows the simple pointer in action and code examples of how the events are utilised and listened to can be viewed in the script `VRTK/Examples/ExampleResources/Scripts/VRTK_ControllerPointerEvents_ListenerExample.cs`
+    /// `VRTK/Examples/003_Controller_SimplePointer` shows the simple pointer in action and code examples of how the events are utilised and listened to can be viewed in the script `VRTK/Examples/Resources/Scripts/VRTK_ControllerPointerEvents_ListenerExample.cs`
     /// </example>
     [AddComponentMenu("VRTK/Scripts/Pointers/Pointer Renderers/VRTK_StraightPointerRenderer")]
     public class VRTK_StraightPointerRenderer : VRTK_BasePointerRenderer
@@ -57,7 +48,7 @@ namespace VRTK
         /// </summary>
         public override void UpdateRenderer()
         {
-            if ((controllingPointer != null && controllingPointer.IsPointerActive()) || IsVisible())
+            if ((controllingPointer && controllingPointer.IsPointerActive()) || IsVisible())
             {
                 float tracerLength = CastRayForward();
                 SetPointerAppearance(tracerLength);
@@ -84,16 +75,13 @@ namespace VRTK
         protected override void CreatePointerObjects()
         {
             actualContainer = new GameObject(VRTK_SharedMethods.GenerateVRTKObjectName(true, gameObject.name, "StraightPointerRenderer_Container"));
-            actualContainer.transform.SetParent(pointerOriginTransformFollowGameObject.transform);
             actualContainer.transform.localPosition = Vector3.zero;
-            actualContainer.transform.localRotation = Quaternion.identity;
-            actualContainer.transform.localScale = Vector3.one;
             VRTK_PlayerObject.SetPlayerObject(actualContainer, VRTK_PlayerObject.ObjectTypes.Pointer);
 
             CreateTracer();
             CreateCursor();
             Toggle(false, false);
-            if (controllingPointer != null)
+            if (controllingPointer)
             {
                 controllingPointer.ResetActivationTimer(true);
                 controllingPointer.ResetSelectionTimer(true);
@@ -119,7 +107,7 @@ namespace VRTK
         {
             base.UpdateObjectInteractor();
             //if the object interactor is too far from the pointer tip then set it to the pointer tip position to prevent glitching.
-            if (objectInteractor != null && actualCursor != null && Vector3.Distance(objectInteractor.transform.position, actualCursor.transform.position) > 0f)
+            if (objectInteractor && actualCursor && Vector3.Distance(objectInteractor.transform.position, actualCursor.transform.position) > 0f)
             {
                 objectInteractor.transform.position = actualCursor.transform.position;
             }
@@ -127,7 +115,7 @@ namespace VRTK
 
         protected virtual void CreateTracer()
         {
-            if (customTracer != null)
+            if (customTracer)
             {
                 actualTracer = Instantiate(customTracer);
             }
@@ -149,7 +137,7 @@ namespace VRTK
 
         protected virtual void CreateCursor()
         {
-            if (customCursor != null)
+            if (customCursor)
             {
                 actualCursor = Instantiate(customCursor);
             }
@@ -172,7 +160,7 @@ namespace VRTK
 
         protected virtual void CheckRayMiss(bool rayHit, RaycastHit pointerCollidedWith)
         {
-            if (!rayHit || (destinationHit.collider != null && destinationHit.collider != pointerCollidedWith.collider))
+            if (!rayHit || (destinationHit.collider && destinationHit.collider != pointerCollidedWith.collider))
             {
                 if (destinationHit.collider != null)
                 {
@@ -200,7 +188,9 @@ namespace VRTK
             Transform origin = GetOrigin();
             Ray pointerRaycast = new Ray(origin.position, origin.forward);
             RaycastHit pointerCollidedWith;
-            bool rayHit = VRTK_CustomRaycast.Raycast(customRaycast, pointerRaycast, out pointerCollidedWith, defaultIgnoreLayer, maximumLength);
+#pragma warning disable 0618
+            bool rayHit = VRTK_CustomRaycast.Raycast(customRaycast, pointerRaycast, out pointerCollidedWith, layersToIgnore, maximumLength);
+#pragma warning restore 0618
 
             CheckRayMiss(rayHit, pointerCollidedWith);
             CheckRayHit(rayHit, pointerCollidedWith);
@@ -216,7 +206,7 @@ namespace VRTK
 
         protected virtual void SetPointerAppearance(float tracerLength)
         {
-            if (actualContainer != null)
+            if (actualContainer)
             {
                 //if the additional decimal isn't added then the beam position glitches
                 float beamPosition = tracerLength / (2f + BEAM_ADJUST_OFFSET);
@@ -227,11 +217,13 @@ namespace VRTK
                 actualCursor.transform.localPosition = new Vector3(0f, 0f, tracerLength);
 
                 Transform origin = GetOrigin();
+                actualContainer.transform.position = origin.position;
+                actualContainer.transform.rotation = origin.rotation;
 
                 float objectInteractorScaleIncrease = 1.05f;
                 ScaleObjectInteractor(actualCursor.transform.lossyScale * objectInteractorScaleIncrease);
 
-                if (destinationHit.transform != null)
+                if (destinationHit.transform)
                 {
                     if (cursorMatchTargetRotation)
                     {

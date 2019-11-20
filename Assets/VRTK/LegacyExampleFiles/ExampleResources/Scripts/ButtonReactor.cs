@@ -1,45 +1,31 @@
 ﻿namespace VRTK.Examples
 {
     using UnityEngine;
-    using VRTK.Controllables;
-    using VRTK.Controllables.PhysicsBased;
-    using VRTK.Controllables.ArtificialBased;
+    using UnityEventHelper;
 
     public class ButtonReactor : MonoBehaviour
     {
-        protected VRTK_PhysicsPusher buttonEvents;
-        protected VRTK_ArtificialPusher artbuttonEvents;
+        public GameObject go;
+        public Transform dispenseLocation;
 
-        protected virtual void OnEnable()
+        private VRTK_Button_UnityEvents buttonEvents;
+
+        private void Start()
         {
-            buttonEvents = GetComponent<VRTK_PhysicsPusher>();
-            if (buttonEvents != null)
+            buttonEvents = GetComponent<VRTK_Button_UnityEvents>();
+            if (buttonEvents == null)
             {
-                buttonEvents.MaxLimitReached += MaxLimitReached;
+                buttonEvents = gameObject.AddComponent<VRTK_Button_UnityEvents>();
             }
-            artbuttonEvents = GetComponent<VRTK_ArtificialPusher>();
-            if (artbuttonEvents != null)
-            {
-                artbuttonEvents.MaxLimitReached += MaxLimitReached;
-            }
+            buttonEvents.OnPushed.AddListener(handlePush);
         }
 
-        protected virtual void OnDisable()
+        private void handlePush(object sender, Control3DEventArgs e)
         {
-            if (buttonEvents != null)
-            {
-                buttonEvents.MaxLimitReached -= MaxLimitReached;
-            }
-            if (artbuttonEvents != null)
-            {
-                artbuttonEvents.MaxLimitReached -= MaxLimitReached;
-            }
-        }
+            VRTK_Logger.Info("Pushed");
 
-        protected virtual void MaxLimitReached(object sender, ControllableEventArgs e)
-        {
-            VRTK_BaseControllable senderButton = sender as VRTK_BaseControllable;
-            VRTK_Logger.Info(senderButton.name + " was pushed");
+            GameObject newGo = (GameObject)Instantiate(go, dispenseLocation.position, Quaternion.identity);
+            Destroy(newGo, 10f);
         }
     }
 }

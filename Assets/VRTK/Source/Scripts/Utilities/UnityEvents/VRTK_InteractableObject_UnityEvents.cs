@@ -10,12 +10,6 @@
         [Serializable]
         public sealed class InteractableObjectEvent : UnityEvent<object, InteractableObjectEventArgs> { }
 
-        public InteractableObjectEvent OnObjectEnable = new InteractableObjectEvent();
-        public InteractableObjectEvent OnObjectDisable = new InteractableObjectEvent();
-
-        public InteractableObjectEvent OnNearTouch = new InteractableObjectEvent();
-        public InteractableObjectEvent OnNearUntouch = new InteractableObjectEvent();
-
         public InteractableObjectEvent OnTouch = new InteractableObjectEvent();
         public InteractableObjectEvent OnUntouch = new InteractableObjectEvent();
 
@@ -32,12 +26,6 @@
 
         protected override void AddListeners(VRTK_InteractableObject component)
         {
-            component.InteractableObjectEnabled += Enable;
-            component.InteractableObjectDisabled += Disable;
-
-            component.InteractableObjectNearTouched += NearTouch;
-            component.InteractableObjectNearUntouched += NearUnTouch;
-
             component.InteractableObjectTouched += Touch;
             component.InteractableObjectUntouched += UnTouch;
 
@@ -55,12 +43,6 @@
 
         protected override void RemoveListeners(VRTK_InteractableObject component)
         {
-            component.InteractableObjectEnabled -= Enable;
-            component.InteractableObjectDisabled -= Disable;
-
-            component.InteractableObjectNearTouched -= NearTouch;
-            component.InteractableObjectNearUntouched -= NearUnTouch;
-
             component.InteractableObjectTouched -= Touch;
             component.InteractableObjectUntouched -= UnTouch;
 
@@ -74,26 +56,6 @@
             component.InteractableObjectExitedSnapDropZone -= ExitSnapDropZone;
             component.InteractableObjectSnappedToDropZone -= SnapToDropZone;
             component.InteractableObjectUnsnappedFromDropZone -= UnsnapFromDropZone;
-        }
-
-        private void Enable(object o, InteractableObjectEventArgs e)
-        {
-            OnObjectEnable.Invoke(o, e);
-        }
-
-        private void Disable(object o, InteractableObjectEventArgs e)
-        {
-            OnObjectDisable.Invoke(o, e);
-        }
-
-        private void NearTouch(object o, InteractableObjectEventArgs e)
-        {
-            OnNearTouch.Invoke(o, e);
-        }
-
-        private void NearUnTouch(object o, InteractableObjectEventArgs e)
-        {
-            OnNearUntouch.Invoke(o, e);
         }
 
         private void Touch(object o, InteractableObjectEventArgs e)

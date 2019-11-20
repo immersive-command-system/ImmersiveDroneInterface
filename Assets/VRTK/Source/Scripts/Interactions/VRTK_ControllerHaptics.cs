@@ -6,12 +6,8 @@ namespace VRTK
     using System.Collections.Generic;
 
     /// <summary>
-    /// A collection of static methods for calling haptic functions on a given controller.
+    /// The Controller Haptics scripts are a collection of static methods for calling haptic functions on a given controller.
     /// </summary>
-    /// <remarks>
-    /// **Script Usage:**
-    ///   > There is no requirement to add this script to a GameObject as all of the public methods are static and can be called directly e.g. `VRTK_ControllerHaptics.TriggerHapticPulse(ref, 1f)`.
-    /// </remarks>
     public class VRTK_ControllerHaptics : MonoBehaviour
     {
         protected static VRTK_ControllerHaptics instance;
@@ -82,7 +78,7 @@ namespace VRTK
 
         protected static void SetupInstance()
         {
-            if (instance == null && VRTK_SDKManager.ValidInstance())
+            if (instance == null && VRTK_SDKManager.instance != null)
             {
                 instance = VRTK_SDKManager.instance.gameObject.AddComponent<VRTK_ControllerHaptics>();
             }
@@ -101,7 +97,10 @@ namespace VRTK
             float hapticPulseStrength = Mathf.Clamp(strength, 0f, 1f);
             SDK_ControllerHapticModifiers hapticModifiers = VRTK_SDK_Bridge.GetHapticModifiers();
             Coroutine hapticLoop = StartCoroutine(SimpleHapticPulseRoutine(controllerReference, duration * hapticModifiers.durationModifier, hapticPulseStrength, pulseInterval * hapticModifiers.intervalModifier));
-            VRTK_SharedMethods.AddDictionaryValue(hapticLoopCoroutines, controllerReference, hapticLoop);
+            if (!hapticLoopCoroutines.ContainsKey(controllerReference))
+            {
+                hapticLoopCoroutines.Add(controllerReference, hapticLoop);
+            }
         }
 
         protected virtual void InternalTriggerHapticPulse(VRTK_ControllerReference controllerReference, AudioClip clip)
@@ -111,16 +110,18 @@ namespace VRTK
             {
                 //If the SDK Bridge doesn't support audio clips then defer to a local version
                 Coroutine hapticLoop = StartCoroutine(AudioClipHapticsRoutine(controllerReference, clip));
-                VRTK_SharedMethods.AddDictionaryValue(hapticLoopCoroutines, controllerReference, hapticLoop);
+                if (!hapticLoopCoroutines.ContainsKey(controllerReference))
+                {
+                    hapticLoopCoroutines.Add(controllerReference, hapticLoop);
+                }
             }
         }
 
         protected virtual void InternalCancelHapticPulse(VRTK_ControllerReference controllerReference)
         {
-            Coroutine currentHapticLoopRoutine = VRTK_SharedMethods.GetDictionaryValue(hapticLoopCoroutines, controllerReference);
-            if (currentHapticLoopRoutine != null)
+            if (hapticLoopCoroutines.ContainsKey(controllerReference) && hapticLoopCoroutines[controllerReference] != null)
             {
-                StopCoroutine(currentHapticLoopRoutine);
+                StopCoroutine(hapticLoopCoroutines[controllerReference]);
                 hapticLoopCoroutines.Remove(controllerReference);
             }
         }

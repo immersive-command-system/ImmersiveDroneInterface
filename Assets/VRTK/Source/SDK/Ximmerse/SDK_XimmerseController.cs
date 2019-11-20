@@ -75,9 +75,8 @@ namespace VRTK
         /// <summary>
         /// The GetCurrentControllerType method returns the current used ControllerType based on the SDK and headset being used.
         /// </summary>
-        /// <param name="controllerReference">The reference to the controller to get type of.</param>
         /// <returns>The ControllerType based on the SDK and headset being used.</returns>
-        public override ControllerType GetCurrentControllerType(VRTK_ControllerReference controllerReference = null)
+        public override ControllerType GetCurrentControllerType()
         {
             return ControllerType.Ximmerse_Flip;
         }
@@ -125,7 +124,7 @@ namespace VRTK
                 case ControllerElements.Body:
                     return path + "/object_1";
             }
-            return "";
+            return null;
         }
 
         /// <summary>
@@ -197,7 +196,6 @@ namespace VRTK
         /// The GenerateControllerPointerOrigin method can create a custom pointer origin Transform to represent the pointer position and forward.
         /// </summary>
         /// <returns>A generated Transform that contains the custom pointer origin.</returns>
-        [System.Obsolete("GenerateControllerPointerOrigin has been deprecated and will be removed in a future version of VRTK.")]
         public override Transform GenerateControllerPointerOrigin(GameObject parent)
         {
             return null;
@@ -213,7 +211,7 @@ namespace VRTK
             GameObject controller = GetSDKManagerControllerLeftHand(actual);
             if (controller == null && actual)
             {
-                controller = VRTK_SharedMethods.FindEvenInactiveGameObject<VRContext>("TrackingSpace/LeftHandAnchor", true);
+                controller = VRTK_SharedMethods.FindEvenInactiveGameObject<VRContext>("TrackingSpace/LeftHandAnchor");
             }
             return controller;
         }
@@ -228,7 +226,7 @@ namespace VRTK
             GameObject controller = GetSDKManagerControllerRightHand(actual);
             if (controller == null && actual)
             {
-                controller = VRTK_SharedMethods.FindEvenInactiveGameObject<VRContext>("TrackingSpace/RightHandAnchor", true);
+                controller = VRTK_SharedMethods.FindEvenInactiveGameObject<VRContext>("TrackingSpace/RightHandAnchor");
             }
             return controller;
         }
@@ -273,16 +271,6 @@ namespace VRTK
         public override bool IsControllerRightHand(GameObject controller, bool actual)
         {
             return CheckControllerRightHand(controller, actual);
-        }
-
-        /// <summary>
-        /// The WaitForControllerModel method determines whether the controller model for the given hand requires waiting to load in on scene start.
-        /// </summary>
-        /// <param name="hand">The hand to determine if the controller model will be ready for.</param>
-        /// <returns>Returns true if the controller model requires loading in at runtime and therefore needs waiting for. Returns false if the controller model will be available at start.</returns>
-        public override bool WaitForControllerModel(ControllerHand hand)
-        {
-            return false;
         }
 
         /// <summary>
@@ -484,18 +472,8 @@ namespace VRTK
                     }
                     break;
             }
-            return Vector2.zero;
-        }
 
-        /// <summary>
-        /// The GetButtonSenseAxis method retrieves the current sense axis value for the given button type on the given controller reference.
-        /// </summary>
-        /// <param name="buttonType">The type of button to check for the sense axis on.</param>
-        /// <param name="controllerReference">The reference to the controller to check the sense axis on.</param>
-        /// <returns>The current sense axis value.</returns>
-        public override float GetButtonSenseAxis(ButtonTypes buttonType, VRTK_ControllerReference controllerReference)
-        {
-            return 0f;
+            return Vector2.zero;
         }
 
         /// <summary>
@@ -561,9 +539,8 @@ namespace VRTK
             return false;
         }
 
-        protected override void Awake()
+        protected virtual void Awake()
         {
-            base.Awake();
             SetTrackedControllerCaches(true);
         }
 

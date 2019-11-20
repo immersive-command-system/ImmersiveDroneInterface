@@ -1,7 +1,8 @@
-﻿#if (UNITY_5_4_OR_NEWER)
+#if (UNITY_5_4_OR_NEWER)
 namespace VRTK
 {
     using System;
+    using System.Globalization;
     using UnityEditor;
     using UnityEngine;
 
@@ -28,7 +29,7 @@ namespace VRTK
         {
             serializedObject.Update();
 
-            VRTK_AdaptiveQuality adaptiveQuality = (VRTK_AdaptiveQuality)target;
+            var adaptiveQuality = (VRTK_AdaptiveQuality)target;
 
             EditorGUILayout.HelpBox(DontDisableHelpBoxText, adaptiveQuality.enabled ? MessageType.Warning : MessageType.Error);
             EditorGUILayout.Space();
@@ -43,10 +44,38 @@ namespace VRTK
                 EditorGUILayout.BeginToggleGroup(VRTK_EditorUtilities.BuildGUIContent<VRTK_AdaptiveQuality>("scaleRenderViewport"),
                                                  adaptiveQuality.scaleRenderViewport);
             {
-                Limits2D renderScaleLimits = adaptiveQuality.renderScaleLimits;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("renderScaleLimits"));
+                float minimumRenderScale = adaptiveQuality.minimumRenderScale;
+                float maximumRenderScale = adaptiveQuality.maximumRenderScale;
 
-                if (renderScaleLimits.maximum > adaptiveQuality.BiggestAllowedMaximumRenderScale())
+                EditorGUILayout.BeginHorizontal();
+                {
+                    var fieldInfo = adaptiveQuality.GetType().GetField("minimumRenderScale");
+                    var rangeAttribute = (RangeAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(RangeAttribute));
+
+                    EditorGUI.BeginChangeCheck();
+                    {
+                        float maxFloatWidth = GUI.skin.textField.CalcSize(new GUIContent(1.23f.ToString(CultureInfo.InvariantCulture))).x;
+                        minimumRenderScale = EditorGUILayout.FloatField(minimumRenderScale, GUILayout.MaxWidth(maxFloatWidth));
+
+                        EditorGUILayout.MinMaxSlider(
+                            ref minimumRenderScale,
+                            ref maximumRenderScale,
+                            rangeAttribute.min,
+                            rangeAttribute.max);
+
+                        maximumRenderScale = EditorGUILayout.FloatField(maximumRenderScale, GUILayout.MaxWidth(maxFloatWidth));
+                    }
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        serializedObject.FindProperty("minimumRenderScale").floatValue =
+                            Mathf.Clamp((float)Math.Round(minimumRenderScale, 2), rangeAttribute.min, rangeAttribute.max);
+                        serializedObject.FindProperty("maximumRenderScale").floatValue =
+                            Mathf.Clamp((float)Math.Round(maximumRenderScale, 2), rangeAttribute.min, rangeAttribute.max);
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+
+                if (maximumRenderScale > adaptiveQuality.BiggestAllowedMaximumRenderScale())
                 {
                     EditorGUILayout.HelpBox(MaximumRenderScaleTooBigHelpBoxText, MessageType.Error);
                 }

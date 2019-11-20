@@ -4,47 +4,38 @@ namespace VRTK
     using UnityEngine;
 
     /// <summary>
-    /// Multiplies each real world step within the play area to enable further distances to be travelled in the virtual world.
+    /// This script allows the playArea to move with the user. The play area is only moved when at the edge of a defined circle.
     /// </summary>
     /// <remarks>
-    /// **Script Usage:**
-    ///  * Place the `VRTK_RoomExtender` script on any active scene GameObject.
-    ///
-    /// **Script Dependencies:**
-    ///  * The Controller Events script on the controller Script Alias to determine when the touchpad is pressed.
+    /// There is an additional script `VRTK_RoomExtender_PlayAreaGizmo` which can be attached alongside to visualize the extended playArea within the Editor.
     /// </remarks>
     /// <example>
     /// `VRTK/Examples/028_CameraRig_RoomExtender` shows how the RoomExtender script is controlled by a VRTK_RoomExtender_Controller Example script located at both controllers. Pressing the `Touchpad` on the controller activates the Room Extender. The Additional Movement Multiplier is changed based on the touch distance to the centre of the touchpad.
     /// </example>
     [AddComponentMenu("VRTK/Scripts/Locomotion/VRTK_RoomExtender")]
-    [System.Obsolete("`VRTK_RoomExtender` has been replaced with `VRTK_StepMultiplier`. This script will be removed in a future version of VRTK.")]
     public class VRTK_RoomExtender : MonoBehaviour
     {
         /// <summary>
         /// Movement methods.
         /// </summary>
+        /// <param name="Nonlinear">Moves the head with a non-linear drift movement.</param>
+        /// <param name="LinearDirect">Moves the headset in a direct linear movement.</param>
         public enum MovementFunction
         {
-            /// <summary>
-            /// Moves the head with a non-linear drift movement.
-            /// </summary>
             Nonlinear,
-            /// <summary>
-            /// Moves the headset in a direct linear movement.
-            /// </summary>
             LinearDirect
         }
 
         [Tooltip("This determines the type of movement used by the extender.")]
         public MovementFunction movementFunction = MovementFunction.LinearDirect;
-        [Tooltip("Enables the additional movement.")]
+        [Tooltip("This is the a public variable to enable the additional movement. This can be used in other scripts to toggle the play area movement.")]
         public bool additionalMovementEnabled = true;
-        [Tooltip("If this is checked then the touchpad needs to be pressed to enable it. If this is unchecked then it is disabled by pressing the touchpad.")]
+        [Tooltip("This configures the controls of the RoomExtender. If this is true then the touchpad needs to be pressed to enable it. If this is false then it is disabled by pressing the touchpad.")]
         public bool additionalMovementEnabledOnButtonPress = true;
-        [Tooltip("This is the factor by which movement at the edge of the circle is amplified. `0` is no movement of the play area. Higher values simulate a bigger play area but may be too uncomfortable.")]
+        [Tooltip("This is the factor by which movement at the edge of the circle is amplified. 0 is no movement of the play area. Higher values simulate a bigger play area but may be too uncomfortable.")]
         [Range(0, 10)]
         public float additionalMovementMultiplier = 1.0f;
-        [Tooltip("This is the size of the circle in which the play area is not moved and everything is normal. If it is to low it becomes uncomfortable when crouching.")]
+        [Tooltip("This is the size of the circle in which the playArea is not moved and everything is normal. If it is to low it becomes uncomfortable when crouching.")]
         [Range(0, 5)]
         public float headZoneRadius = 0.25f;
         [Tooltip("This transform visualises the circle around the user where the play area is not moved. In the demo scene this is a cylinder at floor level. Remember to turn of collisions.")]
@@ -61,7 +52,7 @@ namespace VRTK
 
         protected virtual void Awake()
         {
-            VRTK_SDKManager.AttemptAddBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.AddBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void OnEnable()
@@ -73,7 +64,7 @@ namespace VRTK
             }
             playArea = VRTK_DeviceFinder.PlayAreaTransform();
             additionalMovementEnabled = !additionalMovementEnabledOnButtonPress;
-            if (debugTransform != null)
+            if (debugTransform)
             {
                 debugTransform.localScale = new Vector3(headZoneRadius * 2, 0.01f, headZoneRadius * 2);
             }
@@ -83,7 +74,7 @@ namespace VRTK
 
         protected virtual void OnDestroy()
         {
-            VRTK_SDKManager.AttemptRemoveBehaviourToToggleOnLoadedSetupChange(this);
+            VRTK_SDKManager.instance.RemoveBehaviourToToggleOnLoadedSetupChange(this);
         }
 
         protected virtual void Update()
@@ -104,7 +95,7 @@ namespace VRTK
         protected virtual void Move(Vector3 movement)
         {
             headCirclePosition += movement;
-            if (debugTransform != null)
+            if (debugTransform)
             {
                 debugTransform.localPosition = new Vector3(headCirclePosition.x, debugTransform.localPosition.y, headCirclePosition.z);
             }
@@ -118,7 +109,7 @@ namespace VRTK
         protected virtual void MoveHeadCircle()
         {
             //Get the movement of the head relative to the headCircle.
-            Vector3 circleCenterToHead = new Vector3(movementTransform.localPosition.x - headCirclePosition.x, 0, movementTransform.localPosition.z - headCirclePosition.z);
+            var circleCenterToHead = new Vector3(movementTransform.localPosition.x - headCirclePosition.x, 0, movementTransform.localPosition.z - headCirclePosition.z);
 
             //Get the direction of the head movement.
             UpdateLastMovement();
@@ -133,10 +124,10 @@ namespace VRTK
 
         protected virtual void MoveHeadCircleNonLinearDrift()
         {
-            Vector3 movement = new Vector3(movementTransform.localPosition.x - headCirclePosition.x, 0, movementTransform.localPosition.z - headCirclePosition.z);
+            var movement = new Vector3(movementTransform.localPosition.x - headCirclePosition.x, 0, movementTransform.localPosition.z - headCirclePosition.z);
             if (movement.sqrMagnitude > headZoneRadius * headZoneRadius)
             {
-                Vector3 deltaMovement = movement.normalized * (movement.magnitude - headZoneRadius);
+                var deltaMovement = movement.normalized * (movement.magnitude - headZoneRadius);
                 Move(deltaMovement);
             }
         }
