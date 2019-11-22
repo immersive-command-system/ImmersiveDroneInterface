@@ -60,7 +60,6 @@ public class DebugUISample : MonoBehaviour
 
     void LogButtonPressed()
     {
-        ROSDroneConnection.GetAuthority()
         Debug.Log("Button pressed");
     }
 }

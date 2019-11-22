@@ -19,9 +19,9 @@ namespace ROSBridgeLib
 
             public M210_DronePositionMsg(JSONNode msg)
             {
-                _lat = (float.Parse(msg["latitude"]));
-                _long = (float.Parse(msg["altitude"]));
-                _altitude = (float.Parse(msg["longitude"]));
+                _lat = (float.Parse(msg["latitude"])); // position X
+                _altitude = (float.Parse(msg["altitude"])); // position Y
+                _long = (float.Parse(msg["longitude"])); // position Z
             }
 
             public M210_DronePositionMsg(float x, float y, float z)

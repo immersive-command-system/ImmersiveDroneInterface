@@ -162,8 +162,8 @@ public class ROSDroneConnection : MonoBehaviour
             command_params[i] = 0;
         }
 
-        MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.0001f, 0.0f, 0.01f, 0.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 1, 10000, new MissionWaypointActionMsg(1, command_list, command_params));
-        MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(0.0002f, 0.0f, 0.01f, 0.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 1, 10000, new MissionWaypointActionMsg(1, command_list, command_params));
+        MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.0001f, 0.0f, 0.005f, 0.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 1, 10000, new MissionWaypointActionMsg(1, command_list, command_params));
+        MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(0.050f, 0.050f, 0.050f, 0.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 1, 10000, new MissionWaypointActionMsg(1, command_list, command_params));
         Debug.Log(test_waypoint_1.ToYAMLString());
 
         MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2 };

@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Oculus/SampleFramework/Usage/DebugUI.unity
+- path: Assets/Scenes/M210_BareProject.unity
   isLoaded: 1
   isActive: 1
