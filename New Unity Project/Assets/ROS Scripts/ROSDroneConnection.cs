@@ -11,6 +11,7 @@ using System.IO;
 public class ROSDroneConnection : MonoBehaviour
 {
     private ROSBridgeWebSocketConnection ros = null;
+    public bool connectionStatus = false;
 
     void Start()
     {
@@ -26,6 +27,7 @@ public class ROSDroneConnection : MonoBehaviour
 
         ros.Connect();
         Debug.Log("Sending connection attempt to ROS");
+        connectionStatus = true;
     }
 
     // Extremely important to disconnect from ROS. OTherwise packets continue to flow
@@ -81,7 +83,28 @@ public class ROSDroneConnection : MonoBehaviour
 
         if (Input.GetKeyUp("p"))
         {
-            UploadMission();
+
+            uint[] command_list = new uint[16];
+            uint[] command_params = new uint[16];
+            for (int i = 0; i < 16; i++)
+            {
+                command_list[i] = 0;
+                command_params[i] = 0;
+            }
+
+            MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.00f, 0.00f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(0.0005f, 0.0005f, 25.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            Debug.Log(test_waypoint_1.ToYAMLString());
+
+            MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2 };
+            /*for (int i = 0; i < 2; i++)
+            {
+                Debug.Log(test_waypoint_array[i].ToString());
+            }
+            */
+            MissionWaypointTaskMsg test_Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.COORDINATED, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, test_waypoint_array);
+
+            UploadMission(test_Task);
         }
 
         if (Input.GetKeyUp("e"))
@@ -97,9 +120,15 @@ public class ROSDroneConnection : MonoBehaviour
     }
 
     // Functions for ROS
+    public bool GetConnectionStatus()
+    {
+        return connectionStatus;
+    }
+
+
     public void GetAuthority()
     {
-        print("Get Auth");
+        print("Get Authority");
         string service_name = "/dji_sdk/sdk_control_authority";
         ros.CallService(service_name, "[1]");
     }
@@ -146,43 +175,12 @@ public class ROSDroneConnection : MonoBehaviour
         ros.CallService(service_name, "[6]");
     }
 
-    public void UploadMission()
+    public void UploadMission(MissionWaypointTaskMsg Task)
     {
         print("Upload Test Waypoint Mission");
         string service_name = "/dji_sdk/mission_waypoint_upload";
-
-        // Initial Sim La, Long, Atl, etc can be set on the Windows Pc
-        // Can also use the GPS stream data to get initial values
-
-        uint[] command_list = new uint[16];
-        uint[] command_params = new uint[16];
-        for (int i = 0; i < 16; i++)
-        {
-            command_list[i] = 0;
-            command_params[i] = 0;
-        }
-
-        MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.0001f, 0.0f, 0.005f, 0.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 1, 10000, new MissionWaypointActionMsg(1, command_list, command_params));
-        MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(0.050f, 0.050f, 0.050f, 0.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 1, 10000, new MissionWaypointActionMsg(1, command_list, command_params));
-        Debug.Log(test_waypoint_1.ToYAMLString());
-
-        MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2 };
-        /* for (int i = 0; i < 2; i++)
-         {
-             Debug.Log(test_waypoint_array[i].ToString());
-         }*/
-
-
-
-        MissionWaypointTaskMsg test_Task = new MissionWaypointTaskMsg(5.0f, 0.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, test_waypoint_array);
-
-        /* for (int i = 0; i < 2; i++)
-         {
-             MissionWaypointMsg[] test = test_Task.GetMissionWaypoints();
-             Debug.Log(test[i].ToString());
-         }*/
-        Debug.Log(test_Task.ToYAMLString());
-        ros.CallService(service_name, string.Format("[{0}]", test_Task.ToYAMLString())); // try with and without []
+        Debug.Log(Task.ToYAMLString());
+        ros.CallService(service_name, string.Format("[{0}]", Task.ToYAMLString())); // try with and without []
     }
 
     public void ExecuteMission()
@@ -197,6 +195,13 @@ public class ROSDroneConnection : MonoBehaviour
         print("get info for Waypoint Mission");
         string service_name = "/dji_sdk/mission_waypoint_getInfo";
         ros.CallService(service_name, "[0]");
+    }
+
+    public void GoHome()
+    {
+        print("Going Home");
+        string service_name = "/dji_sdk/drone_task_control";
+        ros.CallService(service_name, "[1]");
     }
 
 

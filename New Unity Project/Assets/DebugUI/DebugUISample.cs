@@ -10,24 +10,18 @@ public class DebugUISample : MonoBehaviour
     bool inMenu;
     private Text sliderText;
 
+    public ISAACS_Master ISAACS_master_controller;
+
 	void Start ()
     {
-        DebugUIBuilder.instance.AddButton("Button Pressed", LogButtonPressed);
-        DebugUIBuilder.instance.AddLabel("Label");
-        var sliderPrefab = DebugUIBuilder.instance.AddSlider("Slider", 1.0f, 10.0f, SliderPressed, true);
-        var textElementsInSlider = sliderPrefab.GetComponentsInChildren<Text>();
-        Assert.AreEqual(textElementsInSlider.Length, 2, "Slider prefab format requires 2 text components (label + value)");
-        sliderText = textElementsInSlider[1];
-        Assert.IsNotNull(sliderText, "No text component on slider prefab");
-        sliderText.text = sliderPrefab.GetComponentInChildren<Slider>().value.ToString();
-        DebugUIBuilder.instance.AddDivider();
-        DebugUIBuilder.instance.AddToggle("Toggle", TogglePressed);
-        DebugUIBuilder.instance.AddRadio("Radio1", "group", delegate(Toggle t) { RadioPressed("Radio1", "group", t); }) ;
-        DebugUIBuilder.instance.AddRadio("Radio2", "group", delegate(Toggle t) { RadioPressed("Radio2", "group", t); }) ;
-        DebugUIBuilder.instance.AddLabel("Secondary Tab", 1);
-		DebugUIBuilder.instance.AddDivider(1);
-        DebugUIBuilder.instance.AddRadio("Side Radio 1", "group2", delegate(Toggle t) { RadioPressed("Side Radio 1", "group2", t); }, DebugUIBuilder.DEBUG_PANE_RIGHT);
-        DebugUIBuilder.instance.AddRadio("Side Radio 2", "group2", delegate(Toggle t) { RadioPressed("Side Radio 2", "group2", t); }, DebugUIBuilder.DEBUG_PANE_RIGHT);
+        //TODO
+
+        DebugUIBuilder.instance.AddButton("Get Auth", GetAuthPressed);
+        DebugUIBuilder.instance.AddButton("TakeOff", TakeoffPressed);
+        DebugUIBuilder.instance.AddButton("Publish", PublishPressed);
+        DebugUIBuilder.instance.AddButton("Execute", ExecutePressed);
+        DebugUIBuilder.instance.AddButton("Land", LandPressed);
+        DebugUIBuilder.instance.AddButton("Home", HomePressed);
 
         DebugUIBuilder.instance.Show();
         inMenu = true;
@@ -58,8 +52,44 @@ public class DebugUISample : MonoBehaviour
         }
     }
 
-    void LogButtonPressed()
+    private void GetAuthPressed()
     {
-        Debug.Log("Button pressed");
+        //Requests ISAACS_master_controller to GetAuthority when GetAuth button is pressed in UI
+        Debug.Log("UI Get Auth button was pressed.");
+        ISAACS_master_controller.Get_Authority_Request();
+    }
+
+    private void TakeoffPressed()
+    {
+        //Requests ISAACS_master_controller to Takeoff when Takeoff button is pressed in UI
+        Debug.Log("UI Takeoff button was pressed.");
+        ISAACS_master_controller.Takeoff_Request();
+    }
+
+    private void PublishPressed()
+    {
+        //Requests ISAACS_master_controller to Fly when Fly button is pressed in UI
+        Debug.Log("UI Publish button was pressed.");
+        ISAACS_master_controller.Publish_Request();
+    }
+
+    private void LandPressed()
+    {
+        //Requests ISAACS_master_controller to Land when Land button is pressed in UI
+        Debug.Log("UI Land button was pressed.");
+        ISAACS_master_controller.Land_Request();
+    }
+
+    private void HomePressed()
+    {
+        //Requests ISAACS_master_controller to GoHome when Home button is pressed in UI
+        Debug.Log("UI Home button was pressed.");
+        ISAACS_master_controller.Go_Home_Request();
+    }
+    private void ExecutePressed()
+    {
+        //Requests ISAACS_master_controller to GetAuthority when GetAuth button is pressed in UI
+        Debug.Log("Execute was pressed.");
+        ISAACS_master_controller.Execute_Request();
     }
 }

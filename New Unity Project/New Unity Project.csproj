@@ -235,13 +235,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Oculus.VR.Scripts.Editor.csproj">
-      <Project>{8DEDC9B6-1468-C3FB-4525-23AE84A2B54C}</Project>
-      <Name>Oculus.VR.Scripts.Editor</Name>
-    </ProjectReference>
     <ProjectReference Include="Oculus.VR.Editor.csproj">
       <Project>{9118B019-1FEF-914B-7CA9-E544A3C6DF5C}</Project>
       <Name>Oculus.VR.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Oculus.VR.Scripts.Editor.csproj">
+      <Project>{8DEDC9B6-1468-C3FB-4525-23AE84A2B54C}</Project>
+      <Name>Oculus.VR.Scripts.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Oculus.VR.csproj">
       <Project>{ABAA9E89-904E-F248-9658-14F9444302C5}</Project>
@@ -534,6 +534,7 @@
     <Compile Include="Assets\Oculus\Spatializer\scripts\ONSPPropagationSettings.cs" />
     <Compile Include="Assets\Oculus\Spatializer\scripts\ONSPSettings.cs" />
     <Compile Include="Assets\Oculus\Spatializer\scripts\ONSPVersion.cs" />
+    <Compile Include="Assets\ROS Scripts\ISAACS_Master.cs" />
     <Compile Include="Assets\ROS Scripts\M210\M210_DronePositionMsg.cs" />
     <Compile Include="Assets\ROS Scripts\M210\M210_DronePositionSubscriber.cs" />
     <Compile Include="Assets\ROS Scripts\M210\M210_MissionWaypointAction_Publisher.cs" />
@@ -543,6 +544,7 @@
     <Compile Include="Assets\ROS Scripts\M210\MissionWaypointTaskMsg.cs" />
     <Compile Include="Assets\ROS Scripts\ROSDroneConnection.cs" />
     <Compile Include="Assets\ROS Scripts\ROSDroneServiceResponse.cs" />
+    <Compile Include="Assets\ROS Scripts\Waypoint_Master.cs" />
     <Compile Include="Assets\ROSBridgeLib\auv_msgs\DecimalLatLonMsg.cs" />
     <Compile Include="Assets\ROSBridgeLib\auv_msgs\NavStsMsg.cs" />
     <Compile Include="Assets\ROSBridgeLib\auv_msgs\NEDMsg.cs" />
@@ -607,6 +609,7 @@
     <Compile Include="Assets\ROSBridgeLib\std_msgs\UInt64MultiArrayMsg.cs" />
     <Compile Include="Assets\ROSBridgeLib\std_msgs\UInt8Msg.cs" />
     <Compile Include="Assets\ROSBridgeLib\std_msgs\UInt8MultiArrayMsg.cs" />
+    <Compile Include="Assets\test_OVRinput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Oculus\Avatar\Resources\Materials\AvatarMaterialStateShader.cginc" />

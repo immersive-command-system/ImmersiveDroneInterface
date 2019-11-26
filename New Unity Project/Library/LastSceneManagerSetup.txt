@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scenes/M210_BareProject.unity
+- path: Assets/DebugUI.unity
   isLoaded: 1
   isActive: 1

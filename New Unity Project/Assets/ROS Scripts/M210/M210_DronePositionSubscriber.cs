@@ -63,7 +63,7 @@ public class M210_DronePositionSubscriber : MonoBehaviour {
         float y_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Sin(long_rad);
         float z_pos = (earth_radius + alt_rad) * (float)Math.Sin(lat_rad); */
 
-        return new Vector3(_lat * 1000000, _altitude - 100, _long * 1000000);
+        return new Vector3(_lat * 10000, _altitude - 100, _long * 10000);
         //return new Vector3(0, 0, 0);
     }
 
