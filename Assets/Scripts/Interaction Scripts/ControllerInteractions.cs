@@ -99,6 +99,14 @@
         /// </summary>
         void Update()
         {
+            /**
+            foreach (Waypoint x in WorldProperties.selectedDrone.waypoints)
+            {
+                Debug.Log(x.id + " : " + x.unityLocation);
+            }
+            Debug.Log("---");
+            **/
+
             // SELECTION POINTER  
             SelectionPointerChecks();
 
@@ -222,9 +230,12 @@
             {
                 // Updating the line colliders
                 grabbedWaypoint.UpdateLineColliders();
+                grabbedWaypoint.UpdateLocation(grabbedWaypoint.gameObjectPointer.transform.localPosition);
 
                 // Sending a ROS MODIFY Update
                 UserpointInstruction msg = new UserpointInstruction(grabbedWaypoint, "MODIFY");
+
+                //grabbedWaypoint.UpdateLocation()
                 WorldProperties.worldObject.GetComponent<ROSDroneConnection>().PublishWaypointUpdateMessage(msg);
 
                 // Updating the controller state and noting that we are not grabbing anything

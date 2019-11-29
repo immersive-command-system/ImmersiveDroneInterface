@@ -42,7 +42,7 @@
                 if (WorldProperties.selectedDrone != null && !flying)
                 {
                     WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/takeoff", "");
-                    GetComponentInChildren<Text>().text = "Land";
+                    //GetComponentInChildren<Text>().text = "Land";
                     flying = true;
                     Debug.Log("Total planning time was: " + WorldProperties.planningTime + "s");
 
@@ -51,7 +51,7 @@
                 else if (WorldProperties.selectedDrone != null && flying)
                 {
                     WorldProperties.worldObject.GetComponent<ROSDroneConnection>().SendServiceCall("/land", "");
-                    GetComponentInChildren<Text>().text = "Takeoff";
+                    //GetComponentInChildren<Text>().text = "Takeoff";
                     flying = false;
                     Debug.Log("Total flight time was: " + WorldProperties.runtime + "s");
 
