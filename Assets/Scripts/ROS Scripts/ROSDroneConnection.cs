@@ -22,10 +22,12 @@ public class ROSDroneConnection : MonoBehaviour
         //ros.AddSubscriber(typeof(EnvironmentSubscriber));
         //ros.AddSubscriber(typeof(DronePositionSubscriber));
         //ros.AddPublisher(typeof(UserpointPublisher));
+
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
 
         ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
-
+        ros.AddSubscriber(typeof(M210_Battery_Subscriber));
+        ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
 
         ros.Connect();
         Debug.Log("Sending connection attempt to ROS");
