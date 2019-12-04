@@ -96,7 +96,7 @@ public class ROSDroneConnection : MonoBehaviour
                 command_params[i] = 0;
             }
 
-            MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.00f, 0.00f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.0002f, 0.003f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
             MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(0.0005f, 0.0005f, 25.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
             Debug.Log(test_waypoint_1.ToYAMLString());
 
@@ -109,6 +109,11 @@ public class ROSDroneConnection : MonoBehaviour
             MissionWaypointTaskMsg test_Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.COORDINATED, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, test_waypoint_array);
 
             UploadMission(test_Task);
+        }
+
+        if (Input.GetKeyUp("w"))
+        {
+            CreateMission();
         }
 
         if (Input.GetKeyUp("e"))
@@ -195,10 +200,15 @@ public class ROSDroneConnection : MonoBehaviour
 
         foreach (Waypoint waypoint in WorldProperties.selectedDrone.waypoints)
         {
-            float x = waypoint.unityLocation.x / 10000;
+            float x = waypoint.unityLocation.x;
             float y = waypoint.unityLocation.y;
-            float z = waypoint.unityLocation.z / 10000;
-            MissionWaypointMsg new_waypoint = new MissionWaypointMsg(x, z, y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            float z = waypoint.unityLocation.z;
+
+            Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
+
+            Debug.Log("Uploading waypoint at : " + ROS_coordinates);
+
+            MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_coordinates.x, ROS_coordinates.z, ROS_coordinates.y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
 
             missionMissionMsgList.Add(new_waypoint);
 

@@ -140,7 +140,7 @@
             // WAYPOINT COLLISION
             if (currentCollider.gameObject.CompareTag("waypoint"))
             {
-                Debug.Log("getting here");
+                //Debug.Log("getting here");
                 
                 Waypoint collidedWaypoint = currentCollider.gameObject.GetComponent<WaypointProperties>().classPointer;
                 if (collidedWaypoint.id == "A0")

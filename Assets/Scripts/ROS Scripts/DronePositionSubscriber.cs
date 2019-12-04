@@ -35,11 +35,11 @@ public class DronePositionSubscriber : ROSBridgeSubscriber
         {
             DronePositionMsg pose = (DronePositionMsg)msg;
 
-            robot.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x, pose._y, pose._z) + 
-                                            WorldProperties.droneModelOffset;
+            robot.transform.localPosition = WorldProperties.RosSpaceToWorldSpace(pose._x, pose._y, pose._z);
+                //+  WorldProperties.droneModelOffset;
 
-            Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
-            robot.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
+            //Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;
+            //robot.transform.localPosition = new Vector3(-pose._x, pose._z + tablePos.z + 0.148f, -pose._y);
 
             SaveData();
 

@@ -21,11 +21,11 @@ namespace ROSBridgeLib
                 CLOCKWISE = 0,
                 COUNTERCLOCKWISE = 1
             };
-            private TurnMode turn_mode;
+            public TurnMode turn_mode;
 
-            private int has_action;
-            private uint action_time_limit;
-            private MissionWaypointActionMsg waypoint_action;
+            public int has_action;
+            public uint action_time_limit;
+            public MissionWaypointActionMsg waypoint_action;
 
             public MissionWaypointMsg(JSONNode msg)
             {

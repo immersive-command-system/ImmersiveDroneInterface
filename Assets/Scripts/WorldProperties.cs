@@ -1,10 +1,14 @@
 ﻿namespace ISAACS
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using UnityEditor;
     using UnityEngine;
+    using ROSBridgeLib;
+    using ROSBridgeLib.std_msgs;
+    using ROSBridgeLib.interface_msgs;
 
     /// <summary>
     /// This is the only class that should have static variables or functions that are consistent throughout the entire program.
@@ -44,6 +48,12 @@
         public static HashSet<int> obstacleids; //used in ObstacleSubscriber
         public static List<string> obstacleDistsToPrint;
 
+        // M210 ROs-Unity conversion variables
+        public static float earth_radius = 6378137;
+        public static Vector3 initial_DroneROS_Position = Vector3.zero;
+        public static Vector3 initial_DroneUnity_Position = Vector3.zero;
+        public static float ROS_to_Unity_Scale = 0.0f;
+
         // Use this for initialization
         void Start()
         {
@@ -79,6 +89,7 @@
         private void Update()
         {
             planningTime += Time.deltaTime;
+            // float relative_scale =
         }
 
         /// <summary>
@@ -118,6 +129,85 @@
                 selectedDrone = newDrone;
             }
         }
+
+
+        public static void M210_FirstPositionCallback(M210_DronePositionMsg new_ROSPosition, Vector3 _initial_DroneUnity_Position)
+        {
+            float lat_rad = Mathf.PI * new_ROSPosition._lat / 180;
+            float alt_rad = Mathf.PI * new_ROSPosition._altitude / 180;
+            float long_rad = Mathf.PI * new_ROSPosition._long / 180;
+
+
+            float x_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Cos(long_rad);
+            float y_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Sin(long_rad);
+            float z_pos = (earth_radius + alt_rad) * (float)Math.Sin(lat_rad);
+
+
+
+            initial_DroneROS_Position.x = x_pos;
+            initial_DroneROS_Position.y = y_pos;
+            initial_DroneROS_Position.z = z_pos;
+
+            initial_DroneUnity_Position = _initial_DroneUnity_Position;
+
+            ROS_to_Unity_Scale = initial_DroneROS_Position.magnitude / initial_DroneUnity_Position.magnitude;
+
+
+            Debug.Log("Initial Drone ROS Pos: " + initial_DroneROS_Position);
+            Debug.Log("Initial Drone Unity Pos: " + initial_DroneUnity_Position);
+            Debug.Log("Scale set to: " + ROS_to_Unity_Scale);
+        }
+
+
+        /// <summary>
+        /// ROS (Spherical) to Unity (Cartesian) Coordinate conversion for the M210
+        /// Assumed the earth is a sphere to greatly simplify the math
+        /// </summary>
+        /// <param name="ROS_lat"></param>
+        /// <param name="ROS_alt"></param>
+        /// <param name="ROS_long"></param>
+        /// <returns></returns>
+        public static Vector3 M210_ROSToUnity(float ROS_lat, float ROS_alt, float ROS_long)
+        {
+            /*float lat_rad = Mathf.PI * ROS_lat / 180;
+            float alt_rad = Mathf.PI * ROS_alt / 180;
+            float long_rad = Mathf.PI * ROS_long / 180;
+
+
+            float x_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Cos(long_rad) / ROS_to_Unity_Scale;
+            float y_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Sin(long_rad) / ROS_to_Unity_Scale;
+            float z_pos = (earth_radius + alt_rad) * (float)Math.Sin(lat_rad) / ROS_to_Unity_Scale; */
+
+            //Debug.LogFormat("Input: {0} {1} {2} ", ROS_lat, ROS_alt, ROS_long);
+            //Debug.LogFormat("Output: {0} {1} {2} ", x_pos, y_pos, z_pos);
+            //Debug.Log(ROS_to_Unity_Scale);
+
+            //Debug.LogFormat("Input: {0}  Output: {1} ", ROS_alt, y_pos);
+
+
+            //return new Vector3(x_pos, y_pos, z_pos);
+            //return new Vector3(ROS_lat, ROS_alt - 100.0f, ROS_long);
+            return new Vector3(ROS_lat*10000, ROS_alt - 100, ROS_long * 10000);
+        }
+
+        public static Vector3 M210_UnityToROS(float x , float y, float z)
+        {
+            Vector3 final_ROS_coordinates = Vector3.zero;
+
+
+            float unity_long = (float)Math.Atan(y / z);
+            float unity_lat = (float)Math.Atan((z / y) * (float)Math.Sin(unity_long));
+            float unity_alt = z / (float)Math.Sin(unity_lat) - earth_radius;
+
+            final_ROS_coordinates.x = unity_long;
+            final_ROS_coordinates.y = unity_lat;
+            final_ROS_coordinates.z = unity_alt;
+
+            //return final_ROS_coordinates * ROS_to_Unity_Scale;
+            //return new Vector3(x / 100000, y + 100.0f, z / 100000);
+            return new Vector3(x / 10000, y, z / 10000);
+        }
+
 
         /// <summary>
         /// Converts the worldPosition vector to the ROSPosition vector
