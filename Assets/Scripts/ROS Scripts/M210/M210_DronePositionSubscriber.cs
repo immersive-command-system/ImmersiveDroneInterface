@@ -50,10 +50,25 @@
                 }*/
 
                 // All CallBack Logic: Update the drone position.
+                 Vector3 initial_DronePos = new Vector3(0.0f, 0.1f, 0.0f);
+
+                //Debug.Log("Initial: " + initial_DronePos);
+                
                 Vector3 new_DroneUnityPositon = WorldProperties.M210_ROSToUnity(new_ROSPosition._lat, new_ROSPosition._altitude, new_ROSPosition._long);
 
+                //Debug.Log("Callback: " + new_DroneUnityPositon);
+                
+                Vector3 change_DronePos = (new_DroneUnityPositon - initial_DronePos);
+              //  change_DronePos.y /= 5;
 
-                drone.transform.localPosition = new_DroneUnityPositon;
+
+                //Debug.Log("Change: " + change_DronePos);
+
+                //change_DronePos.y = change_DronePos.y - 2.3f;
+
+                //Debug.Log("Scaled: " + change_DronePos);
+
+                drone.transform.localPosition = WorldProperties.selectedDroneStartPos + change_DronePos;
             }
             else
             {

@@ -11,7 +11,7 @@
         public GameObject gameObjectPointer; // This is the related game object
         public ArrayList ROSpoints; // Keeps track of the ROSpoints received over the ROSBridge
         public string id; // This is the identifier of the drone in the dronesDict and across the ROSBridge
-        public Vector3 unityLocation;
+        //public Vector3 unityLocation;
 
         // The PathPoints are used by the line renderer to connect the full path.
         // NOTE: The assignment of these variables is handled by the drone based on how the waypoint is added/removed from the path
@@ -27,7 +27,7 @@
         {
             // Linking this waypoint to its drone
             referenceDrone = myDrone;
-            this.unityLocation = position;
+            //this.unityLocation = position;
 
             // Setting up all the related gameObject parameters
             GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().waypointBaseObject;
@@ -62,7 +62,7 @@
         public void UpdateLocation(Vector3 newLocation)
         {
             Debug.Log("Updating Location");
-            this.unityLocation = newLocation;
+            //this.unityLocation = newLocation;
         }
     }
 }

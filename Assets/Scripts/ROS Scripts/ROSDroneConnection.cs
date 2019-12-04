@@ -198,21 +198,30 @@ public class ROSDroneConnection : MonoBehaviour
             command_params[i] = 0;
         }
 
+        bool skip = true;
+
         foreach (Waypoint waypoint in WorldProperties.selectedDrone.waypoints)
         {
-            float x = waypoint.unityLocation.x;
-            float y = waypoint.unityLocation.y;
-            float z = waypoint.unityLocation.z;
+            if (skip)
+            {
+                skip = false;
+                continue;
+            }
+
+            float x = waypoint.gameObjectPointer.transform.localPosition.x;
+            float y = waypoint.gameObjectPointer.transform.localPosition.y;
+            float z = waypoint.gameObjectPointer.transform.localPosition.z;
 
             Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
 
+            Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
             Debug.Log("Uploading waypoint at : " + ROS_coordinates);
 
             MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_coordinates.x, ROS_coordinates.z, ROS_coordinates.y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
 
             missionMissionMsgList.Add(new_waypoint);
 
-            Debug.Log(waypoint.id + " : " + waypoint.unityLocation);
+           
         }
 
         MissionWaypointTaskMsg Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, missionMissionMsgList.ToArray());
