@@ -27,6 +27,7 @@
         public static Dictionary<char, GameObject> hoopsDict;
 
         public static Drone selectedDrone;
+        public static Vector3 selectedDroneStartPos;
 
         public static GameObject worldObject;
         public static GameObject placementPlane;
@@ -125,8 +126,11 @@
         {
             if (!GameObject.FindWithTag("Drone"))
             {
+
+                Debug.Log("Initializing drone");
                 Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
                 selectedDrone = newDrone;
+                selectedDroneStartPos = newDrone.gameObjectPointer.transform.localPosition;
             }
         }
 
@@ -187,7 +191,7 @@
 
             //return new Vector3(x_pos, y_pos, z_pos);
             //return new Vector3(ROS_lat, ROS_alt - 100.0f, ROS_long);
-            return new Vector3(ROS_lat*10000, ROS_alt - 100, ROS_long * 10000);
+            return new Vector3(ROS_lat*10000, (ROS_alt - 100)/5, ROS_long * 10000);
         }
 
         public static Vector3 M210_UnityToROS(float x , float y, float z)
@@ -205,7 +209,7 @@
 
             //return final_ROS_coordinates * ROS_to_Unity_Scale;
             //return new Vector3(x / 100000, y + 100.0f, z / 100000);
-            return new Vector3(x / 10000, y, z / 10000);
+            return new Vector3(x / 10000, y*5, z / 10000);
         }
 
 

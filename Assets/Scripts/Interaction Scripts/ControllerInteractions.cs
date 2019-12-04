@@ -459,6 +459,7 @@
                 {
                     // Create a new waypoint at that location
                     Waypoint newWaypoint = new Waypoint(currentlySelectedDrone, newLocation);
+                    Debug.Log("**creating waypoint at: "+  newLocation + ". This is before Unity to  ROS conversions");
 
                     // Grabbing the waypoint at the origin of the line (the lines point back towards the start)
                     Waypoint lineOriginWaypoint = mostRecentCollision.waypoint;
