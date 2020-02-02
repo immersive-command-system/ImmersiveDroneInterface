@@ -17,15 +17,16 @@ public class ROSDroneConnection : MonoBehaviour
     void Start()
     {
         // This is the IP of the linux computer that is connected to the drone.  
-        ros = new ROSBridgeWebSocketConnection("ws://192.168.50.48", 9090);
         //ros.AddSubscriber(typeof(ObstacleSubscriber));
+        //ros = new ROSBridgeWebSocketConnection("ws://192.168.50.48", 9090);
+        ros = new ROSBridgeWebSocketConnection("ws://169.254.217.10", 9090);
         //ros.AddSubscriber(typeof(EnvironmentSubscriber));
         //ros.AddSubscriber(typeof(DronePositionSubscriber));
         //ros.AddPublisher(typeof(UserpointPublisher));
 
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
 
-        ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
+        ros.AddSubscriber(typeof(M210_DronePositionSubscriber)); // Add _Local to enable xyz rather than lal
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
 
@@ -224,7 +225,7 @@ public class ROSDroneConnection : MonoBehaviour
            
         }
 
-        MissionWaypointTaskMsg Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, missionMissionMsgList.ToArray());
+        MissionWaypointTaskMsg Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.AUTO_LANDING, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, missionMissionMsgList.ToArray());
 
         UploadMission(Task);
     }
