@@ -15,6 +15,7 @@
         public new static string GetMessageTopic()
         {
             Debug.Log("Get Message Topic");
+
             return "/dji_sdk/local_position";
         }
 
@@ -22,18 +23,22 @@
         {
             Debug.Log("Get Message Type");
             return "geometry_msgs/PointStamped";
+
+
         }
 
         public new static ROSBridgeMsg ParseMessage(JSONNode msg)
         {
             Debug.Log("Parse Message");
             return new M210_DronePositionMsgLocal(msg);
+
         }
 
         public new static void CallBack(ROSBridgeMsg msg)
         {
-            // Debug.Log(msg);
+
             Debug.Log("Drone Position Local Callback");
+
 
             // Get the Drone Gameobject
             GameObject robot = GameObject.FindWithTag("Drone");

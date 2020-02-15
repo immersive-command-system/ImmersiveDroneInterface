@@ -217,6 +217,29 @@
             return new Vector3(x, z, y);
         }
 
+        public static Vector3 M210_ROSToUnityLocal(float x, float y, float z)
+        {
+            /*float lat_rad = Mathf.PI * ROS_lat / 180;
+            float alt_rad = Mathf.PI * ROS_alt / 180;
+            float long_rad = Mathf.PI * ROS_long / 180;
+
+
+            float x_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Cos(long_rad) / ROS_to_Unity_Scale;
+            float y_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Sin(long_rad) / ROS_to_Unity_Scale;
+            float z_pos = (earth_radius + alt_rad) * (float)Math.Sin(lat_rad) / ROS_to_Unity_Scale; */
+
+            //Debug.LogFormat("Input: {0} {1} {2} ", ROS_lat, ROS_alt, ROS_long);
+            //Debug.LogFormat("Output: {0} {1} {2} ", x_pos, y_pos, z_pos);
+            //Debug.Log(ROS_to_Unity_Scale);
+
+            //Debug.LogFormat("Input: {0}  Output: {1} ", ROS_alt, y_pos);
+
+
+            //return new Vector3(x_pos, y_pos, z_pos);
+            //return new Vector3(ROS_lat, ROS_alt - 100.0f, ROS_long);
+            return new Vector3(x, y, z);
+        }
+
 
         /// <summary>
         /// Converts the worldPosition vector to the ROSPosition vector
