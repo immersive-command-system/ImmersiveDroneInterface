@@ -16,8 +16,8 @@ public class ROSDroneConnection : MonoBehaviour
 
     void Start()
     {
-        // This is the IP of the linux computer that is connected to the drone.  
-        ros = new ROSBridgeWebSocketConnection("ws://192.168.50.48", 9090);
+        // This is the IP of the linux computer that is connected to the drone. (make sure the ip starts with ws://[ip]) 
+        ros = new ROSBridgeWebSocketConnection("ws://192.168.50.191", 9090);
         //ros.AddSubscriber(typeof(ObstacleSubscriber));
         //ros.AddSubscriber(typeof(EnvironmentSubscriber));
         //ros.AddSubscriber(typeof(DronePositionSubscriber));
@@ -26,6 +26,9 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
 
         ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
+        //ros.CallService("/dji_sdk/set_local_pos_ref", "[]");
+        
+        //ros.AddSubscriber(typeof(M210_DronePositionSubscriber_Local)); // 2/13/2020: Local position subscriber doesn't work. Error: trying to write to a closed websocket when calling rosservice to set local reference position
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
 
@@ -126,6 +129,12 @@ public class ROSDroneConnection : MonoBehaviour
             InfoMission();
         }
 
+        if (Input.GetKeyUp("["))
+        {
+            Debug.Log(WorldProperties.LongDiffMeters(122.2578f, 122.4783f, 37.8721f));
+        }
+        
+
     }
 
     // Functions for ROS
@@ -212,13 +221,18 @@ public class ROSDroneConnection : MonoBehaviour
             float y = waypoint.gameObjectPointer.transform.localPosition.y;
             float z = waypoint.gameObjectPointer.transform.localPosition.z;
 
-            Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
-
+            //Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
+            Vector3 ROS_coordinates = new Vector3(
+                WorldProperties.UnityXToLat(M210_DronePositionSubscriber.gpsLat, x),
+                M210_DronePositionSubscriber.gpsAlt * 10, 
+                WorldProperties.UnityZToLong(M210_DronePositionSubscriber.gpsLong, M210_DronePositionSubscriber.gpsLat, z));
             Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
-            Debug.Log("Uploading waypoint at : " + ROS_coordinates);
-
+            //Debug.Log("Uploading waypoint at : " + ROS_coordinates);
+           // Debug.Log("x coord: " + ROS_coordinates.x);
+           // Debug.Log("y coord: " + ROS_coordinates.y);
+           // Debug.Log("z coord: " + ROS_coordinates.z);
             MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_coordinates.x, ROS_coordinates.z, ROS_coordinates.y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-
+            Debug.Log(new_waypoint);
             missionMissionMsgList.Add(new_waypoint);
 
            

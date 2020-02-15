@@ -49,7 +49,7 @@
         public static HashSet<int> obstacleids; //used in ObstacleSubscriber
         public static List<string> obstacleDistsToPrint;
 
-        // M210 ROs-Unity conversion variables
+        // M210 ROS-Unity conversion variables
         public static float earth_radius = 6378137;
         public static Vector3 initial_DroneROS_Position = Vector3.zero;
         public static Vector3 initial_DroneUnity_Position = Vector3.zero;
@@ -86,7 +86,7 @@
             NewDrone();
         }
 
-       
+
         private void Update()
         {
             planningTime += Time.deltaTime;
@@ -191,10 +191,10 @@
 
             //return new Vector3(x_pos, y_pos, z_pos);
             //return new Vector3(ROS_lat, ROS_alt - 100.0f, ROS_long);
-            return new Vector3(ROS_lat*10000, (ROS_alt - 100)/5, ROS_long * 10000);
+            return new Vector3(ROS_lat * 10000, (ROS_alt - 100) / 5, ROS_long * 10000);
         }
 
-        public static Vector3 M210_UnityToROS(float x , float y, float z)
+        public static Vector3 M210_UnityToROS(float x, float y, float z)
         {
             Vector3 final_ROS_coordinates = Vector3.zero;
 
@@ -209,7 +209,12 @@
 
             //return final_ROS_coordinates * ROS_to_Unity_Scale;
             //return new Vector3(x / 100000, y + 100.0f, z / 100000);
-            return new Vector3(x / 10000, y*5, z / 10000);
+            return new Vector3(x / 10000, y * 5, z / 10000);
+        }
+
+        public static Vector3 M210_ROSToUnityLocal(float x, float y, float z)
+        {
+            return new Vector3(x, z, y);
         }
 
 
@@ -302,7 +307,7 @@
         /// </summary>
         void OnApplicationQuit()
         {
-           
+
         }
 
         /// <summary>
@@ -333,6 +338,51 @@
 
             //Print the text from the file
             //Debug.Log("Text " + WorldProperties.asset.text);
+        }
+
+        /*
+        public static float latLongtoMetersConverter(float lat1, float long1, float alt1, float lat2, float long2, float alt2)
+        {
+
+            const float Rad = 6378.137f;
+            float dLat = (float) (lat2 * Math.PI / 180 - lat1 * Math.PI / 180);
+            float dLong = (float) (long2 * Math.PI / 180 - long1 * Math.PI / 180);
+            float a = (float) (Math.Sin(dLat / 2) * Math.Sin(dLat / 2) + Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180) * Math.Sin(dLong / 2) * Math.Sin(dLong/2));
+            float c = (float) (2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)));
+            float d = (float) (Rad * c);
+            return (float) (Math.Sqrt(Math.Pow(d * 1000, 2) + Math.Pow((alt2 - alt1), 2)));
+        }
+        */
+
+        public static float LatDiffMeters(float lat1, float lat2)
+        {
+            // assuming earth is a sphere with c = 40075km
+            // 1 degree of latitude is = 111.32 km
+            //slight inaccuracies
+            float delLat = (lat2 - lat1) * 111.32f * 1000;
+            //110994.04016313434
+            return delLat;
+        }
+
+        public static float LongDiffMeters(float long1, float long2, float lat)
+        {
+            // 1 degree of longitude = 40075 km * cos (lat) / 360
+            // we use an arbitrary latitude for the conversion because the difference is minimal 
+            //slight inaccuracies
+            float delLong = (long2 - long1) * 40075 *(float)Math.Cos(lat) / 360 * 1000;
+            return delLong;
+        }
+
+        public static float UnityXToLat(float lat1, float unityXCoord)
+        {
+            float delLat = (unityXCoord / (1000 * 111.32f) * 10) + lat1;
+            return delLat;
+        }
+
+        public static float UnityZToLong(float long1, float lat, float unityZCoord)
+        {
+            float delLong = (((unityZCoord * 360) / (1000 * 40075 * (float)Math.Cos(lat))) * 10) + long1;
+            return delLong;
         }
     }
 }
