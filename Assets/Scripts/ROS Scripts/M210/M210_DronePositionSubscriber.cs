@@ -9,15 +9,15 @@
     using UnityEditor;
 
     public class M210_DronePositionSubscriber : MonoBehaviour {
-
-        public static float[] gpsArrLat = new float[5];
-        public static float[] gpsArrLong = new float[5];
-        public static float[] gpsArrAlt = new float[5];
-        public static float gpsLat = float.NaN;
-        public static float gpsLong = float.NaN;
-        public static float gpsAlt = float.NaN;
-        public static Vector3 initialPos;
+        
+        public static float InitialGPSLat = float.NaN;
+        public static float InitialGPSLong = float.NaN;
+        public static float InitialGPSAlt = float.NaN;
         public static bool initialized = false;
+        public static Vector3 initialPos = new Vector3(0.0f, 0.1f, 0.0f);
+        public static Vector3 offsetPos;
+        private static Vector3 changePos;
+        private static bool gotROSPosition = false;
 
         public new static string GetMessageTopic()
         {
@@ -51,11 +51,11 @@
                 
                 M210_DronePositionMsg new_ROSPosition = (M210_DronePositionMsg)msg;
 
-                if (float.IsNaN(gpsLat) && float.IsNaN(gpsLong) && float.IsNaN(gpsAlt))
+                if (float.IsNaN(InitialGPSLat) && float.IsNaN(InitialGPSLong) && float.IsNaN(InitialGPSAlt))
                 {
-                    gpsLat = new_ROSPosition._lat;
-                    gpsLong = new_ROSPosition._long;
-                    gpsAlt = new_ROSPosition._altitude;
+                    InitialGPSLat = new_ROSPosition._lat;
+                    InitialGPSLong = new_ROSPosition._long;
+                    InitialGPSAlt = new_ROSPosition._altitude;
                     Debug.Log("GPS Long: " + new_ROSPosition._long);
                     Debug.Log("GPS Lat: " +  new_ROSPosition._lat);
                 }
@@ -66,31 +66,25 @@
                     WorldProperties.M210_FirstPositionCallback(new_ROSPosition, drone.transform.localPosition);
                 }*/
 
-                // All CallBack Logic: Update the drone position.
-                 Vector3 initial_DronePos = new Vector3(0.0f, 0.1f, 0.0f);
-
                 //Debug.Log("Initial: " + initial_DronePos);
 
                 // Non lat long conversion code
                 // Vector3 new_DroneUnityPositon = WorldProperties.M210_ROSToUnity(new_ROSPosition._lat, new_ROSPosition._altitude, new_ROSPosition._long);
                 // Vector3 change_DronePos = (new_DroneUnityPositon - initial_DronePos);
 
-                Vector3 change_DronePos = new Vector3(
-                    (WorldProperties.LatDiffMeters(gpsLat, new_ROSPosition._lat))/10,
-                    (new_ROSPosition._altitude - gpsAlt)/10,
-                    (WorldProperties.LongDiffMeters(gpsLong, new_ROSPosition._long, gpsLat)))/10;
-                //Debug.Log("Callback: " + new_DroneUnityPositon);
+                changePos = new Vector3(
+                    (WorldProperties.LatDiffMeters(InitialGPSLat, new_ROSPosition._lat)),// / 10,
+                    (new_ROSPosition._altitude - InitialGPSAlt),// / 10,
+                    (WorldProperties.LongDiffMeters(InitialGPSLong, new_ROSPosition._long, new_ROSPosition._lat))
+                  );
+                
+                /*if (gotROSPosition == false)
+                {
+                    offsetPos = changePos;
+                }
+                gotROSPosition = true;*/
 
-                //  change_DronePos.y /= 5;
-
-
-                //Debug.Log("Change: " + change_DronePos);
-
-                //change_DronePos.y = change_DronePos.y - 2.3f;
-
-                //Debug.Log("Scaled: " + change_DronePos);
-
-                drone.transform.localPosition = WorldProperties.selectedDroneStartPos + change_DronePos;
+                drone.transform.localPosition = WorldProperties.selectedDroneStartPos + initialPos + changePos; // offsetPos
             }
             else
             {

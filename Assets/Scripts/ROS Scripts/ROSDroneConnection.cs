@@ -21,7 +21,7 @@ public class ROSDroneConnection : MonoBehaviour
 
         //ros.AddSubscriber(typeof(ObstacleSubscriber));
         //ros = new ROSBridgeWebSocketConnection("ws://192.168.50.48", 9090);
-        ros = new ROSBridgeWebSocketConnection("ws://169.254.217.10", 9090);
+     
         //ros.AddSubscriber(typeof(EnvironmentSubscriber));
         //ros.AddSubscriber(typeof(DronePositionSubscriber));
         //ros.AddPublisher(typeof(UserpointPublisher));
@@ -29,7 +29,6 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
 
         ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
-        ros.AddSubscriber(typeof(M210_DronePositionSubscriber)); // Add _Local to enable xyz rather than lal
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
 
@@ -221,19 +220,21 @@ public class ROSDroneConnection : MonoBehaviour
             float x = waypoint.gameObjectPointer.transform.localPosition.x;
             float y = waypoint.gameObjectPointer.transform.localPosition.y;
             float z = waypoint.gameObjectPointer.transform.localPosition.z;
-
-            //Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
-            Vector3 ROS_coordinates = new Vector3(
-                WorldProperties.UnityXToLat(M210_DronePositionSubscriber.gpsLat, x),
-                M210_DronePositionSubscriber.gpsAlt * 10, 
-                WorldProperties.UnityZToLong(M210_DronePositionSubscriber.gpsLong, M210_DronePositionSubscriber.gpsLat, z));
+            
+            
+            Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
+            /*Vector3 ROS_coordinates = new Vector3(
+                 WorldProperties.UnityXToLat(M210_DronePositionSubscriber.gpsLat, x),
+                 M210_DronePositionSubscriber.gpsAlt * 10, 
+                 WorldProperties.UnityZToLong(M210_DronePositionSubscriber.gpsLong, M210_DronePositionSubscriber.gpsLat, z));
+            */
             Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
             //Debug.Log("Uploading waypoint at : " + ROS_coordinates);
            // Debug.Log("x coord: " + ROS_coordinates.x);
            // Debug.Log("y coord: " + ROS_coordinates.y);
            // Debug.Log("z coord: " + ROS_coordinates.z);
             MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_coordinates.x, ROS_coordinates.z, ROS_coordinates.y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-            Debug.Log(new_waypoint);
+            Debug.Log("single waypoint info: " + new_waypoint);
             missionMissionMsgList.Add(new_waypoint);
 
            

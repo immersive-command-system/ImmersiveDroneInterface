@@ -41,7 +41,8 @@ public class M210_GPSHealth_Subscriber : MonoBehaviour {
         GameObject robot = GameObject.FindWithTag("Drone");
         GameObject drone = WorldProperties.selectedDrone.gameObjectPointer;
 
-        if (drone != null)
+        if (
+        != null)
         {
             TODO:
             Update Drone Gameobject

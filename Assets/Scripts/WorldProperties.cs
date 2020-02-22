@@ -128,7 +128,7 @@
             {
 
                 Debug.Log("Initializing drone");
-                Drone newDrone = new Drone(worldObject.transform.position + new Vector3(0, 0.1f, 0));
+                Drone newDrone = new Drone(worldObject.transform.position);
                 selectedDrone = newDrone;
                 selectedDroneStartPos = newDrone.gameObjectPointer.transform.localPosition;
             }
@@ -163,60 +163,20 @@
         }
 
 
-        /// <summary>
-        /// ROS (Spherical) to Unity (Cartesian) Coordinate conversion for the M210
-        /// Assumed the earth is a sphere to greatly simplify the math
-        /// </summary>
-        /// <param name="ROS_lat"></param>
-        /// <param name="ROS_alt"></param>
-        /// <param name="ROS_long"></param>
-        /// <returns></returns>
+        /* Deprecated as of 2/20/2020; changed from scaled conversion to latitude/longitude conversion. See LatDiffMeters(float lat1, float lat2) and LongDiffMeters(float long1, float long2, float lat) for more info. -Varun,Shreyas */
         public static Vector3 M210_ROSToUnity(float ROS_lat, float ROS_alt, float ROS_long)
         {
-            /*float lat_rad = Mathf.PI * ROS_lat / 180;
-            float alt_rad = Mathf.PI * ROS_alt / 180;
-            float long_rad = Mathf.PI * ROS_long / 180;
-
-
-            float x_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Cos(long_rad) / ROS_to_Unity_Scale;
-            float y_pos = (earth_radius + alt_rad) * (float)Math.Cos(lat_rad) * (float)Math.Sin(long_rad) / ROS_to_Unity_Scale;
-            float z_pos = (earth_radius + alt_rad) * (float)Math.Sin(lat_rad) / ROS_to_Unity_Scale; */
-
-            //Debug.LogFormat("Input: {0} {1} {2} ", ROS_lat, ROS_alt, ROS_long);
-            //Debug.LogFormat("Output: {0} {1} {2} ", x_pos, y_pos, z_pos);
-            //Debug.Log(ROS_to_Unity_Scale);
-
-            //Debug.LogFormat("Input: {0}  Output: {1} ", ROS_alt, y_pos);
-
-
-            //return new Vector3(x_pos, y_pos, z_pos);
-            //return new Vector3(ROS_lat, ROS_alt - 100.0f, ROS_long);
             return new Vector3(ROS_lat * 10000, (ROS_alt - 100) / 5, ROS_long * 10000);
         }
 
+        /* Deprecated as of 2/20/2020; changed from scaled conversion to latitude/longitude conversion. See UnityXToLat(float lat1, float unityXCoord) and UnityZToLong(float long1, float lat, float unityZCoord) for more info. -Varun,Shreyas */
         public static Vector3 M210_UnityToROS(float x, float y, float z)
         {
-            Vector3 final_ROS_coordinates = Vector3.zero;
-
-
-            float unity_long = (float)Math.Atan(y / z);
-            float unity_lat = (float)Math.Atan((z / y) * (float)Math.Sin(unity_long));
-            float unity_alt = z / (float)Math.Sin(unity_lat) - earth_radius;
-
-            final_ROS_coordinates.x = unity_long;
-            final_ROS_coordinates.y = unity_lat;
-            final_ROS_coordinates.z = unity_alt;
-
-            //return final_ROS_coordinates * ROS_to_Unity_Scale;
             //return new Vector3(x / 100000, y + 100.0f, z / 100000);
             return new Vector3(x / 10000, y * 5, z / 10000);
         }
 
-        public static Vector3 M210_ROSToUnityLocal(float x, float y, float z)
-        {
-            return new Vector3(x, z, y);
-        }
-
+        /* Deprecated as of 2/20/2020; changed from scaled conversion to latitude/longitude conversion. See LatDiffMeters(float lat1, float lat2) and LongDiffMeters(float long1, float long2, float lat) for more info. -Varun,Shreyas */
         public static Vector3 M210_ROSToUnityLocal(float x, float y, float z)
         {
             /*float lat_rad = Mathf.PI * ROS_lat / 180;
@@ -246,6 +206,8 @@
         /// </summary>
         /// <param name="worldPosition"></param>
         /// <returns></returns>
+        /// 
+        /* Deprecated as of 2/20/2020; changed from scaled conversion to latitude/longitude conversion. See UnityXToLat(float lat1, float unityXCoord) and UnityZToLong(float long1, float lat, float unityZCoord) for more info. -Varun,Shreyas */
         public static Vector3 WorldSpaceToRosSpace(Vector3 worldPosition)
         {
             return new Vector3(
@@ -260,6 +222,8 @@
         /// </summary>
         /// <param name="worldPosition"></param>
         /// <returns></returns>
+        /// 
+        /* Deprecated as of 2/20/2020; changed from scaled conversion to latitude/longitude conversion. See UnityXToLat(float lat1, float unityXCoord) and UnityZToLong(float long1, float lat, float unityZCoord) for more info. -Varun,Shreyas */
         public static Vector3 RosSpaceToWorldSpace(Vector3 ROSPosition)
         {
             return new Vector3(
@@ -274,6 +238,7 @@
         /// </summary>
         /// <param name="worldPosition"></param>
         /// <returns></returns>
+        /* Deprecated as of 2/20/2020; changed from scaled conversion to latitude/longitude conversion. See UnityXToLat(float lat1, float unityXCoord) and UnityZToLong(float long1, float lat, float unityZCoord) for more info. -Varun,Shreyas */
         public static Vector3 RosSpaceToWorldSpace(float pose_x, float pose_y, float pose_z)
         {
             return new Vector3(

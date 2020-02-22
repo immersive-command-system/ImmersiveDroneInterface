@@ -78,7 +78,7 @@
 
                 //Debug.Log("Scaled: " + change_DronePos);
 
-                drone.transform.localPosition = WorldProperties.selectedDroneStartPos + change_DronePos;
+                //drone.transform.localPosition = WorldProperties.selectedDroneStartPos + change_DronePos;
             }
             else
             {
