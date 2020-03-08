@@ -55,6 +55,7 @@ namespace ROSBridgeLib
                 has_action = _has_action;
                 action_time_limit = _action_time_limit;
                 waypoint_action = _waypoint_action;
+                Debug.Log("constructor accuracy: " + _latitude);
             }
 
             public static string GetMessageType()

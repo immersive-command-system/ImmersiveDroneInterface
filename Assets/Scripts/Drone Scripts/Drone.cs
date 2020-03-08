@@ -27,12 +27,15 @@
             // Create gameObject at position
             GameObject baseObject = (GameObject)WorldProperties.worldObject.GetComponent<WorldProperties>().droneBaseObject;
             gameObjectPointer = Object.Instantiate(baseObject, position, Quaternion.identity);
+            Debug.Log("Position init: " + position.ToString());
             gameObjectPointer.GetComponent<DroneProperties>().classPointer = this; // Connect the gameObject back to the classObject
             gameObjectPointer.tag = "Drone";
             gameObjectPointer.name = baseObject.name;
             gameObjectPointer.transform.localScale = WorldProperties.actualScale / 5;
             gameObjectPointer.transform.parent = WorldProperties.worldObject.transform;
             WorldProperties.AddClipShader(gameObjectPointer.transform);
+            Debug.Log("Position init final: " + gameObjectPointer.transform.position.ToString());
+            Debug.Log("Position init final: " + gameObjectPointer.transform.localPosition.ToString());
 
             // Initialize path and placement order lists
             waypoints = new ArrayList(0);

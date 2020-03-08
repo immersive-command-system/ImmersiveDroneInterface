@@ -21,6 +21,13 @@
         public GameObject waypointBaseObject;
         public GameObject torus;
 
+        public static float droneHomeLat;
+        public static float droneHomeLong;
+        public static float droneHomeAlt;
+
+        public static bool droneInitialPositionSet = false;
+
+
         public static Shader clipShader;
 
         public static Dictionary<char, Drone> dronesDict;
@@ -55,6 +62,11 @@
         public static Vector3 initial_DroneUnity_Position = Vector3.zero;
         public static float ROS_to_Unity_Scale = 0.0f;
 
+        //Unity to lat --> multiply by scale; lat to Unity --> divide by scale
+        public static float Unity_X_To_Lat_Scale = 10.0f;
+        public static float Unity_Y_To_Alt_Scale = 10.0f;
+        public static float Unity_Z_To_Long_Scale = 10.0f;
+
         // Use this for initialization
         void Start()
         {
@@ -82,6 +94,8 @@
             closestDist = -1;
             obstacleids = new HashSet<int>();
             obstacleDistsToPrint = new List<string>();
+
+            
 
             NewDrone();
         }
@@ -131,6 +145,7 @@
                 Drone newDrone = new Drone(worldObject.transform.position);
                 selectedDrone = newDrone;
                 selectedDroneStartPos = newDrone.gameObjectPointer.transform.localPosition;
+                
             }
         }
 
@@ -363,13 +378,13 @@
 
         public static float UnityXToLat(float lat1, float unityXCoord)
         {
-            float delLat = (unityXCoord / (1000 * 111.32f) * 10) + lat1;
+            float delLat = (unityXCoord / (1000 * 111.32f) * Unity_X_To_Lat_Scale) + lat1;
             return delLat;
         }
 
         public static float UnityZToLong(float long1, float lat, float unityZCoord)
         {
-            float delLong = (((unityZCoord * 360) / (1000 * 40075 * (float)Math.Cos(lat))) * 10) + long1;
+            float delLong = (((unityZCoord * 360) / (1000 * 40075 * (float)Math.Cos(lat))) * Unity_Z_To_Long_Scale) + long1;
             return delLong;
         }
     }

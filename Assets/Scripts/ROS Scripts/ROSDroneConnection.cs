@@ -51,6 +51,17 @@ public class ROSDroneConnection : MonoBehaviour
     // Update is called once per frame in Unity
     void Update()
     {
+        //float startLat = 37.91532757f;
+       // float startLong = 122.33805556f;
+       // Debug.Log("waypoint 1 unityX: " + WorldProperties.LatDiffMeters(startLat, 37.915701652f) / WorldProperties.Unity_X_To_Lat_Scale);
+        //Debug.Log("waypoint 2 unityX: " + WorldProperties.LatDiffMeters(startLat, 37.915585270f) / WorldProperties.Unity_X_To_Lat_Scale);
+        //Debug.Log("waypoint 3 unityX: " + WorldProperties.LatDiffMeters(startLat, 37.915457249f) / WorldProperties.Unity_X_To_Lat_Scale);
+
+//        Debug.Log("waypoint 1 unityZ: " + WorldProperties.LongDiffMeters(startLong, 122.337967237f, startLat) / WorldProperties.Unity_Z_To_Long_Scale);
+  //      Debug.Log("waypoint 2 unityZ: " + WorldProperties.LongDiffMeters(startLong, 122.338122805f, startLat) / WorldProperties.Unity_Z_To_Long_Scale);
+    //    Debug.Log("waypoint 3 unityZ: " + WorldProperties.LongDiffMeters(startLong, 122.338015517f, startLat) / WorldProperties.Unity_Z_To_Long_Scale);
+
+
         ros.Render();
 
         if (Input.GetKeyUp("1"))
@@ -58,37 +69,32 @@ public class ROSDroneConnection : MonoBehaviour
             GetAuthority();
         }
 
-        if (Input.GetKeyUp("v"))
+        if (Input.GetKeyUp("2"))
         {
             GetVersion();
         }
-
-        if (Input.GetKeyUp("a"))
-        {
-            Activation();
-        }
-
-        if (Input.GetKeyUp("2"))
+        
+        if (Input.GetKeyUp("3"))
         {
             Spin();
         }
 
-        if (Input.GetKeyUp("0"))
+        if (Input.GetKeyUp("4"))
         {
             StopSpinning();
         }
 
-        if (Input.GetKeyUp("3"))
+        if (Input.GetKeyUp("5"))
         {
             Takeoff();
         }
 
-        if (Input.GetKeyUp("4"))
+        if (Input.GetKeyUp("6"))
         {
             Land();
         }
 
-        if (Input.GetKeyUp("p"))
+        if (Input.GetKeyUp("q"))
         {
 
             uint[] command_list = new uint[16];
@@ -99,11 +105,13 @@ public class ROSDroneConnection : MonoBehaviour
                 command_params[i] = 0;
             }
 
-            MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(0.0002f, 0.003f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-            MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(0.0005f, 0.0005f, 25.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-            Debug.Log(test_waypoint_1.ToYAMLString());
+            MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(37.915701652f, -122.337967237f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(37.915585270f, -122.338122805f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            MissionWaypointMsg test_waypoint_3 = new MissionWaypointMsg(37.915457249f, -122.338015517f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
 
-            MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2 };
+            Debug.Log("Check float accuracy here" + test_waypoint_1.ToYAMLString());
+
+            MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2, test_waypoint_3 };
             /*for (int i = 0; i < 2; i++)
             {
                 Debug.Log(test_waypoint_array[i].ToString());
@@ -222,17 +230,19 @@ public class ROSDroneConnection : MonoBehaviour
             float z = waypoint.gameObjectPointer.transform.localPosition.z;
             
             
-            Vector3 ROS_coordinates = WorldProperties.M210_UnityToROS(x, y, z);
-            /*Vector3 ROS_coordinates = new Vector3(
-                 WorldProperties.UnityXToLat(M210_DronePositionSubscriber.gpsLat, x),
-                 M210_DronePositionSubscriber.gpsAlt * 10, 
-                 WorldProperties.UnityZToLong(M210_DronePositionSubscriber.gpsLong, M210_DronePositionSubscriber.gpsLat, z));
-            */
+            Vector3 ROS_coordinates = new Vector3();
             Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
+
             //Debug.Log("Uploading waypoint at : " + ROS_coordinates);
-           // Debug.Log("x coord: " + ROS_coordinates.x);
-           // Debug.Log("y coord: " + ROS_coordinates.y);
-           // Debug.Log("z coord: " + ROS_coordinates.z);
+            // Debug.Log("x coord: " + ROS_coordinates.x);
+            // Debug.Log("y coord: " + ROS_coordinates.y);
+            // Debug.Log("z coord: " + ROS_coordinates.z);
+
+            // Peru's attempt at fixing the stuff as of 3/3/2020
+            ROS_coordinates.x = WorldProperties.UnityXToLat(WorldProperties.droneHomeLat, x);
+            ROS_coordinates.y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;// + WorldProperties.droneHomeAlt; // The 100 has to be the same number that we divide the ROS coordinate by in M210_DronePositionSubscriber line 75
+            ROS_coordinates.z = WorldProperties.UnityZToLong(WorldProperties.droneHomeLong, WorldProperties.droneHomeLat ,z);
+
             MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_coordinates.x, ROS_coordinates.z, ROS_coordinates.y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
             Debug.Log("single waypoint info: " + new_waypoint);
             missionMissionMsgList.Add(new_waypoint);
