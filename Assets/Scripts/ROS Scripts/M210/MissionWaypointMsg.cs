@@ -11,8 +11,8 @@ namespace ROSBridgeLib
     {
         public class MissionWaypointMsg : ROSBridgeMsg
         {
-            //changed type double to type float for lat and long
-            public float latitude, longitude;
+            //changed type float to type double for lat and long
+            public double latitude, longitude;
             public float altitude, damping_distance;
             public int target_yaw, target_gimbal_pitch;
 
@@ -30,8 +30,8 @@ namespace ROSBridgeLib
             public MissionWaypointMsg(JSONNode msg)
             {
                 //changes "asDouble" to AsFloat
-                latitude = msg["latitude"].AsFloat;
-                longitude = msg["longitude"].AsFloat;
+                latitude = msg["latitude"].AsDouble;
+                longitude = msg["longitude"].AsDouble;
                 altitude = msg["altitude"].AsFloat;
                 damping_distance = msg["damping_distance"].AsFloat;
                 target_yaw = msg["target_yaw"].AsInt;
@@ -42,8 +42,8 @@ namespace ROSBridgeLib
                 action_time_limit = (uint)msg["action_time_limit"].AsInt;
                 waypoint_action = new MissionWaypointActionMsg(msg["waypoint_action"]);
             }
-            //changed lat and long to floats from doubles, changes has-action from bool to int
-            public MissionWaypointMsg(float _latitude, float _longitude, float _altitude, float _damping_distance, int _target_yaw, int _target_gimbal_pitch, TurnMode _turn_mode, int _has_action, uint _action_time_limit, MissionWaypointActionMsg _waypoint_action)
+            //changed lat and long to double from float, changes has-action from bool to int
+            public MissionWaypointMsg(double _latitude, double _longitude, float _altitude, float _damping_distance, int _target_yaw, int _target_gimbal_pitch, TurnMode _turn_mode, int _has_action, uint _action_time_limit, MissionWaypointActionMsg _waypoint_action)
             {
                 latitude = _latitude;
                 longitude = _longitude;
@@ -63,12 +63,12 @@ namespace ROSBridgeLib
                 return "dji_sdk/MissionWaypoint";
             }
 
-            public float GetLatitude()
+            public double GetLatitude()
             {
                 return latitude;
             }
 
-            public float GetLongitude()
+            public double GetLongitude()
             {
                 return longitude;
             }

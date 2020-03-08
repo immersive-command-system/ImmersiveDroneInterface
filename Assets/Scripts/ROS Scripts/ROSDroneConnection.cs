@@ -14,8 +14,7 @@ public class ROSDroneConnection : MonoBehaviour
     public bool connectionStatus = false;
 
 
-    void Start()
-    {
+    void Start() {
         // This is the IP of the linux computer that is connected to the drone. (make sure the ip starts with ws://[ip]) 
         ros = new ROSBridgeWebSocketConnection("ws://192.168.50.191", 9090);
 
@@ -230,8 +229,8 @@ public class ROSDroneConnection : MonoBehaviour
             float z = waypoint.gameObjectPointer.transform.localPosition.z;
             
             
-            Vector3 ROS_coordinates = new Vector3();
-            Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
+       
+           // Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
 
             //Debug.Log("Uploading waypoint at : " + ROS_coordinates);
             // Debug.Log("x coord: " + ROS_coordinates.x);
@@ -239,11 +238,11 @@ public class ROSDroneConnection : MonoBehaviour
             // Debug.Log("z coord: " + ROS_coordinates.z);
 
             // Peru's attempt at fixing the stuff as of 3/3/2020
-            ROS_coordinates.x = WorldProperties.UnityXToLat(WorldProperties.droneHomeLat, x);
-            ROS_coordinates.y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;// + WorldProperties.droneHomeAlt; // The 100 has to be the same number that we divide the ROS coordinate by in M210_DronePositionSubscriber line 75
-            ROS_coordinates.z = WorldProperties.UnityZToLong(WorldProperties.droneHomeLong, WorldProperties.droneHomeLat ,z);
+            double ROS_x = WorldProperties.UnityXToLat(WorldProperties.droneHomeLat, x);
+            float ROS_y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;// + WorldProperties.droneHomeAlt; // The 100 has to be the same number that we divide the ROS coordinate by in M210_DronePositionSubscriber line 75
+            double ROS_z = WorldProperties.UnityZToLong(WorldProperties.droneHomeLong, WorldProperties.droneHomeLat ,z);
 
-            MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_coordinates.x, ROS_coordinates.z, ROS_coordinates.y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_x, ROS_z, ROS_y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
             Debug.Log("single waypoint info: " + new_waypoint);
             missionMissionMsgList.Add(new_waypoint);
 

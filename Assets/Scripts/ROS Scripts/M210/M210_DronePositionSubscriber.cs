@@ -14,6 +14,7 @@
         public static float InitialGPSLong = float.NaN;
         public static float InitialGPSAlt = float.NaN;
         public static bool initialized = false;
+
         public static Vector3 offsetPos = new Vector3(0.0f, 0.1f, 0.0f);
         private static Vector3 changePos;
 
@@ -67,6 +68,9 @@
                     Debug.Log("GPS Alt:  " + new_ROSPosition._altitude);
 
 
+                    // Initilize cityMap
+                    // Peru: 3/7/2020 : Map Integration
+                    GameObject.FindWithTag("World").GetComponent<WorldProperties>().InitializeCityMap();
                 }
 
                 // Non lat long conversion code
@@ -75,17 +79,16 @@
                 //Debug.Log("initial gps alt: " + InitialGPSAlt);
                 //Debug.Log("current gps alt: " + new_ROSPosition._altitude);
                 changePos = new Vector3(
-                    ((WorldProperties.LatDiffMeters(InitialGPSLat, new_ROSPosition._lat)) / WorldProperties.Unity_X_To_Lat_Scale),
+                    ((float) (WorldProperties.LatDiffMeters(InitialGPSLat, new_ROSPosition._lat)) / WorldProperties.Unity_X_To_Lat_Scale),
                     ((new_ROSPosition._altitude - InitialGPSAlt) / WorldProperties.Unity_Y_To_Alt_Scale),
-                    ((WorldProperties.LongDiffMeters(InitialGPSLong, new_ROSPosition._long, new_ROSPosition._lat) / WorldProperties.Unity_Z_To_Long_Scale))
+                    ((float)(WorldProperties.LongDiffMeters(InitialGPSLong, new_ROSPosition._long, new_ROSPosition._lat) / WorldProperties.Unity_Z_To_Long_Scale))
                   );
 
                // Debug.Log("----");
                 //Debug.Log(new_ROSPosition._lat + ":" + new_ROSPosition._long + ":" + new_ROSPosition._altitude);
                 drone.transform.localPosition = WorldProperties.selectedDroneStartPos + offsetPos + changePos; // offsetPos
-                //Debug.Log(drone.transform.localPosition);
-                //Debug.Log("----");
-
+                                                                                                               //Debug.Log(drone.transform.localPosition);
+                                                                                                               //Debug.Log("----");
 
             }
             else

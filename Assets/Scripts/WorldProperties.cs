@@ -9,6 +9,8 @@
     using ROSBridgeLib;
     using ROSBridgeLib.std_msgs;
     using ROSBridgeLib.interface_msgs;
+    using Mapbox.Unity.Map;
+    using Mapbox.Utils;
 
     /// <summary>
     /// This is the only class that should have static variables or functions that are consistent throughout the entire program.
@@ -21,8 +23,8 @@
         public GameObject waypointBaseObject;
         public GameObject torus;
 
-        public static float droneHomeLat;
-        public static float droneHomeLong;
+        public static double droneHomeLat;
+        public static double droneHomeLong;
         public static float droneHomeAlt;
 
         public static bool droneInitialPositionSet = false;
@@ -67,6 +69,40 @@
         public static float Unity_Y_To_Alt_Scale = 10.0f;
         public static float Unity_Z_To_Long_Scale = 10.0f;
 
+
+        // Peru: 3/7/2020 : Map Integration Move
+        // Mapbox Interactions
+        public GameObject citySim;
+        public AbstractMap abstractMap;
+        public float initZoom_citySim = 21.0f;
+        public double initLat_citySim;
+        public double initLong_citySim;
+
+
+        // Peru: 3/7/2020 : Map Integration
+        public void InitializeCityMap()
+        {
+            // MapBox Initial Variables
+
+            initLat_citySim = WorldProperties.droneHomeLat;
+            initLong_citySim = WorldProperties.droneHomeLong;
+
+            Vector2d intiLatLong = new Vector2d(WorldProperties.droneHomeLat, WorldProperties.droneHomeLong);
+            abstractMap.Initialize(intiLatLong, (int)initZoom_citySim);
+
+            this.GetComponent<MapInteractions>().citySimActive = true;
+            this.GetComponent<MapInteractions>().initZoom_citySim = initZoom_citySim;
+
+            this.GetComponent<MapInteractions>().initLat_citySim = initLat_citySim;
+            this.GetComponent<MapInteractions>().initLong_citySim = initLong_citySim;
+            this.GetComponent<MapInteractions>().initPosition_citySim = citySim.transform.position;
+
+            this.GetComponent<MapInteractions>().currLat_citySim = initLat_citySim;
+            this.GetComponent<MapInteractions>().currLong_citySim = initLong_citySim;
+            this.GetComponent<MapInteractions>().currPosition_citySim = citySim.transform.position;
+
+        }
+
         // Use this for initialization
         void Start()
         {
@@ -105,6 +141,14 @@
         {
             planningTime += Time.deltaTime;
             // float relative_scale =
+
+            // Peru: 3/7/2020 : Map Integration Move
+            if (Input.GetKeyUp("p"))
+            {
+                WorldProperties.droneHomeLat = 37.91532757;
+                WorldProperties.droneHomeLong = -122.33805556;
+                InitializeCityMap();
+            }
         }
 
         /// <summary>
@@ -357,34 +401,34 @@
         }
         */
 
-        public static float LatDiffMeters(float lat1, float lat2)
+        public static double LatDiffMeters(double lat1, double lat2)
         {
             // assuming earth is a sphere with c = 40075km
             // 1 degree of latitude is = 111.32 km
             //slight inaccuracies
-            float delLat = (lat2 - lat1) * 111.32f * 1000;
+            double delLat = (lat2 - lat1) * 111.32f * 1000;
             //110994.04016313434
             return delLat;
         }
 
-        public static float LongDiffMeters(float long1, float long2, float lat)
+        public static double LongDiffMeters(double long1, double long2, double lat)
         {
             // 1 degree of longitude = 40075 km * cos (lat) / 360
             // we use an arbitrary latitude for the conversion because the difference is minimal 
             //slight inaccuracies
-            float delLong = (long2 - long1) * 40075 *(float)Math.Cos(lat) / 360 * 1000;
+            double delLong = (long2 - long1) * 40075 *(double)Math.Cos(lat) / 360 * 1000;
             return delLong;
         }
 
-        public static float UnityXToLat(float lat1, float unityXCoord)
+        public static double UnityXToLat(double lat1, float unityXCoord)
         {
-            float delLat = (unityXCoord / (1000 * 111.32f) * Unity_X_To_Lat_Scale) + lat1;
+            double delLat = (unityXCoord / (1000 * 111.32f) * Unity_X_To_Lat_Scale) + lat1;
             return delLat;
         }
 
-        public static float UnityZToLong(float long1, float lat, float unityZCoord)
+        public static double UnityZToLong(double long1, double lat, float unityZCoord)
         {
-            float delLong = (((unityZCoord * 360) / (1000 * 40075 * (float)Math.Cos(lat))) * Unity_Z_To_Long_Scale) + long1;
+            double delLong = (((unityZCoord * 360) / (1000 * 40075 * (double)Math.Cos(lat))) * Unity_Z_To_Long_Scale) + long1;
             return delLong;
         }
     }

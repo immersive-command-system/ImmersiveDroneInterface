@@ -1,9 +1,11 @@
-﻿namespace ISAACS
+namespace ISAACS
 {
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEditor;
+    using Mapbox.Unity.Map;
+    using Mapbox.Utils;
 
     public class MapInteractions : MonoBehaviour
     {
@@ -54,6 +56,28 @@
         private GameObject controller;
         private VRTK.VRTK_StraightPointerRenderer pointer;
 
+        // Peru: 3/7/2020 : Map Integration Variables
+        public bool droneOutOfBounds = false;
+
+
+        public bool citySimActive = false;
+        public GameObject citySimParent;
+        public GameObject citySim;
+        public AbstractMap abstractMap;
+
+        public float initZoom_citySim = 21.0f;
+        public double initLat_citySim;
+        public double initLong_citySim;
+        public Vector3 initPosition_citySim;
+
+        public double currLat_citySim;
+        public double currLong_citySim;
+        public Vector3 currPosition_citySim;
+
+        public float minZoom_citySim = 0.0f;
+        public float maxZoom_citySim = 22.0f;
+
+
         // Use this for initialization
         void Start()
         {
@@ -96,7 +120,7 @@
 
                 // ROTATE WORLD - these methods check for just one grip input on a turntable handle or the right joystick moving
                 ControllerRotateWorld();
-                ManualRotateWorld();
+                //ManualRotateWorld();
             }
 
             // MOVING WORLD
@@ -115,6 +139,13 @@
                 mapState = MapState.IDLE; // Controller input overrides manual
                 float angle = deltaX * rotSpeed * 360 * Time.fixedDeltaTime;
                 transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+
+                // Peru: 3/7/2020 : Map Integration Rotate
+                if (citySimActive)
+                {
+                    citySimParent.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+                }
+
                 if (rotatingTable)
                 {
                     rotatingTable.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
@@ -215,10 +246,43 @@
             {
                 // update map position based on input
                 Vector3 position = transform.position;
+
                 position.x += moveX * speed * Time.deltaTime;
                 position.z += moveZ * speed * Time.deltaTime;
+
                 transform.position = position;
                 mapState = MapState.MOVING;
+
+                // Peru: 3/7/2020 : Map Integration Move
+                // TODO: Fix movement if it's along the circumference of the table
+                if (citySimActive && !droneOutOfBounds)
+                {
+                    // TODO: find relation between speed and spped_cityMap 
+                    // (it'll relate to scale somehow)
+                    float speed_cityMap = speed *2;
+
+                    // Calculate delta X,Z
+                    float deltaX = moveX * speed_cityMap * Time.deltaTime;
+                    float deltaZ = moveZ * speed_cityMap * Time.deltaTime;
+
+                    // Update unity currPosition
+                    // TODO: make local based on roatation
+                    currPosition_citySim.x -= deltaX;
+                    currPosition_citySim.z += deltaZ;
+
+                    // Find new Lat,Long
+                    // TODO: Well shit
+                    double newLat_citySim = WorldProperties.UnityXToLat(initLat_citySim, currPosition_citySim.x) ;
+                    double newLong_citySim = WorldProperties.UnityZToLong(initLong_citySim, initLat_citySim, currPosition_citySim.z) ;
+
+                    // Update current position
+                    currLat_citySim = newLat_citySim;
+                    currLong_citySim = newLong_citySim;
+                    
+                    Vector2d finalLatLong = new Vector2d(currLat_citySim, currLong_citySim);
+                    abstractMap.UpdateMap(finalLatLong);
+                }
+
             }
             else if (mapState == MapState.MOVING)
             {
@@ -262,6 +326,17 @@
                 transform.localScale = endScale;
                 transform.position = FinalPosition;
                 mapState = MapState.SCALING;
+
+                // Peru: 3/7/2020 : Map Integration Scale
+                if (citySimActive)
+                {
+                    // Update Zoom of the cityMap
+                    //TODO: Figure out the scaling
+                    float currZoom = abstractMap.Zoom;
+                    float zoomScale = final_result; 
+
+                    abstractMap.UpdateMap(currZoom* zoomScale);
+                }
             }
             else if (mapState == MapState.SCALING)
             {
@@ -293,6 +368,11 @@
             float distSqr = Vector3.SqrMagnitude(tableCenter - mapCenter);
             if (distSqr > Mathf.Pow(tableRadius + worldMapRadius, 2))
             {
+                // Peru: 3/7/2020 : Map Integration
+                droneOutOfBounds = true;
+                // Peru: 3/7/2020 : Map Integration
+
+
                 // Create vector from mapCenter to edge of table circle (in bounds)
                 float distDiff = Vector3.Distance(tableCenter, mapCenter) - tableRadius - worldMapRadius;
                 Vector3 movement = Vector3.Normalize(tableCenter - mapCenter) * distDiff;
@@ -301,7 +381,13 @@
                 // Move
                 transform.Translate(movement, Space.World);
             }
+            else
+            {
+                droneOutOfBounds = false;
+            }
         }
+
+
     }
 
 }
