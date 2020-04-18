@@ -200,7 +200,9 @@ public class ROSDroneConnection : MonoBehaviour
         ros.CallService(service_name, "[6]");
     }
 
-
+    /// <summary>
+    /// Create the mission and send it through ROS
+    /// </summary>
     public void CreateMission()
     {
         List<MissionWaypointMsg> missionMissionMsgList = new List<MissionWaypointMsg>();

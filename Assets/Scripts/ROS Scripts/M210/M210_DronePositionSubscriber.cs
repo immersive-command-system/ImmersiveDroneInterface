@@ -33,6 +33,10 @@
             return new M210_DronePositionMsg(msg);
         }
 
+        /// <summary>
+        ///  Callback to update the unity drone model upon reception of gps coordinates from the drone.
+        /// </summary>
+        /// <param name="msg"></param>
         public new static void CallBack(ROSBridgeMsg msg)
         {
             //Debug.Log("Drone Position Callback");
