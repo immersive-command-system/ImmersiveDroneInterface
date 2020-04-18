@@ -12,6 +12,7 @@
     using Mapbox.Unity.Map;
     using Mapbox.Utils;
 
+    // TODO: we might want to lock FPS!
     /// <summary>
     /// This is the only class that should have static variables or functions that are consistent throughout the entire program.
     /// </summary>
@@ -83,8 +84,8 @@
         // Apollo: 4/18: This needs to become private
         public void InitializeCityMap()
         {
-            // MapBox Initial Variables
 
+            // Display a map centered around the current drone position
             initLat_citySim = WorldProperties.droneHomeLat;
             initLong_citySim = WorldProperties.droneHomeLong;
 
@@ -94,6 +95,7 @@
             this.GetComponent<MapInteractions>().citySimActive = true;
             this.GetComponent<MapInteractions>().initZoom_citySim = initZoom_citySim;
 
+            // Apollo: 4/18: This needs to be deleted, we are updating these variables on the next block.
             this.GetComponent<MapInteractions>().initLat_citySim = initLat_citySim;
             this.GetComponent<MapInteractions>().initLong_citySim = initLong_citySim;
             this.GetComponent<MapInteractions>().initPosition_citySim = citySim.transform.position;
