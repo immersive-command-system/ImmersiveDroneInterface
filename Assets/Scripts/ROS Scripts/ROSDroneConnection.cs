@@ -9,9 +9,10 @@ using System.IO;
 using ISAACS;
 
 /// <summary>
-/// This class deals with ROS all drone control through the Unity interface. It first creates a ROSBridgeWebSocketConnection with the onboard computer for all
-/// Unity to Manifold and vice-versae communication. It also defines public methods that call ROS Services
-/// to control the drone (takeoff, land, go home, create mission from Unity waypoints, execute mission, etc).
+/// This class deals with ROS and all drone control through the Unity interface. It first creates a
+/// ROSBridgeWebSocketConnection with the onboard computer for all Unity to Manifold and vice-versa communication.
+/// It also defines public methods that call ROS Services to control the drone
+/// (takeoff, land, go home, create mission from Unity waypoints, execute mission, etc).
 /// Through simple keyboard inputs, these ROS Service calls can be tested.
 /// </summary>
 public class ROSDroneConnection : MonoBehaviour
