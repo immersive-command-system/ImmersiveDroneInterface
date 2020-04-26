@@ -8,25 +8,23 @@ using UnityEditor;
 using System.IO;
 using ISAACS;
 
+/// <summary>
+/// This class deals with ROS all drone control through the Unity interface. It first creates a ROSBridgeWebSocketConnection with the onboard computer for all
+/// Unity to Manifold and vice-versae communication. It also defines public methods that call ROS Services
+/// to control the drone (takeoff, land, go home, create mission from Unity waypoints, execute mission, etc).
+/// Through simple keyboard inputs, these ROS Service calls can be tested.
+/// </summary>
 public class ROSDroneConnection : MonoBehaviour
 {
     private ROSBridgeWebSocketConnection ros = null;
     public bool connectionStatus = false;
 
-
     void Start() {
-        // This is the IP of the linux computer that is connected to the drone. (make sure the ip starts with ws://[ip]) 
+        // This is the IP of the linux computer that is connected to the drone. (make sure the ip starts with ws://[ip])
         ros = new ROSBridgeWebSocketConnection("ws://192.168.50.191", 9090);
-
-        //ros.AddSubscriber(typeof(ObstacleSubscriber));
-        //ros = new ROSBridgeWebSocketConnection("ws://192.168.50.48", 9090);
-     
-        //ros.AddSubscriber(typeof(EnvironmentSubscriber));
-        //ros.AddSubscriber(typeof(DronePositionSubscriber));
-        //ros.AddPublisher(typeof(UserpointPublisher));
-
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
-
+        //Subscribe to the relevant subscribers. Using these ROS subscribers, the Unity projects gains access to important
+        //drone information such as it's real-time GPS position, battery left, GPS signal quality, etc.
         ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
@@ -37,7 +35,9 @@ public class ROSDroneConnection : MonoBehaviour
 
     }
 
-    // Extremely important to disconnect from ROS. OTherwise packets continue to flow
+    /// <summary>
+    /// Extremely important to disconnect from ROS. OTherwise packets continue to flow
+    /// </summary>
     void OnApplicationQuit()
     {
         Debug.Log("Disconnecting from ROS");
@@ -47,22 +47,16 @@ public class ROSDroneConnection : MonoBehaviour
         }
     }
 
-    // Update is called once per frame in Unity
+    /// <summary>
+    /// Update is called once per frame in Unity. Here, we take care of keyboard inputs for when the Unity project is running.
+    /// Each key press results in the corresponding method to be called.
+    /// Method descriptions can be found further below.
+    /// </summary>
     void Update()
     {
-        //float startLat = 37.91532757f;
-       // float startLong = 122.33805556f;
-       // Debug.Log("waypoint 1 unityX: " + WorldProperties.LatDiffMeters(startLat, 37.915701652f) / WorldProperties.Unity_X_To_Lat_Scale);
-        //Debug.Log("waypoint 2 unityX: " + WorldProperties.LatDiffMeters(startLat, 37.915585270f) / WorldProperties.Unity_X_To_Lat_Scale);
-        //Debug.Log("waypoint 3 unityX: " + WorldProperties.LatDiffMeters(startLat, 37.915457249f) / WorldProperties.Unity_X_To_Lat_Scale);
-
-//        Debug.Log("waypoint 1 unityZ: " + WorldProperties.LongDiffMeters(startLong, 122.337967237f, startLat) / WorldProperties.Unity_Z_To_Long_Scale);
-  //      Debug.Log("waypoint 2 unityZ: " + WorldProperties.LongDiffMeters(startLong, 122.338122805f, startLat) / WorldProperties.Unity_Z_To_Long_Scale);
-    //    Debug.Log("waypoint 3 unityZ: " + WorldProperties.LongDiffMeters(startLong, 122.338015517f, startLat) / WorldProperties.Unity_Z_To_Long_Scale);
-
 
         ros.Render();
-
+        // Keyboard inputs when the Unity project is running.
         if (Input.GetKeyUp("1"))
         {
             GetAuthority();
@@ -72,7 +66,7 @@ public class ROSDroneConnection : MonoBehaviour
         {
             GetVersion();
         }
-        
+
         if (Input.GetKeyUp("3"))
         {
             Spin();
@@ -92,7 +86,7 @@ public class ROSDroneConnection : MonoBehaviour
         {
             Land();
         }
-
+        //creates a hardcoded test mission and uploads it to the drone. For testing/sanity check purposes only.
         if (Input.GetKeyUp("q"))
         {
 
@@ -111,11 +105,7 @@ public class ROSDroneConnection : MonoBehaviour
             Debug.Log("Check float accuracy here" + test_waypoint_1.ToYAMLString());
 
             MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2, test_waypoint_3 };
-            /*for (int i = 0; i < 2; i++)
-            {
-                Debug.Log(test_waypoint_array[i].ToString());
-            }
-            */
+
             MissionWaypointTaskMsg test_Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.COORDINATED, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, test_waypoint_array);
 
             UploadMission(test_Task);
@@ -140,24 +130,27 @@ public class ROSDroneConnection : MonoBehaviour
         {
             Debug.Log(WorldProperties.LongDiffMeters(122.2578f, 122.4783f, 37.8721f));
         }
-        
+
 
     }
 
-    // Functions for ROS
+    // Functions for ROS begin here.
     public bool GetConnectionStatus()
     {
         return connectionStatus;
     }
 
-
+/// <summary>
+/// Running this service gives the onboard computer (Manifold 2 in our case) control over the drone.
+/// Attempts to control the drone through the Manifold before calling this ROS Service will not work.
+/// </summary>
     public void GetAuthority()
     {
         print("Get Authority");
         string service_name = "/dji_sdk/sdk_control_authority";
         ros.CallService(service_name, "[1]");
     }
-
+/// <summary> Returns the version of the drone. </summary>
     public void GetVersion()
     {
         print("version");
@@ -172,27 +165,28 @@ public class ROSDroneConnection : MonoBehaviour
         ros.CallService(service_name, string.Format("[{0}]", 1));
     }
 
+    /// <summary> Calls the ROS service to make the rotors start spinning (the drone won't move, it's rotors will just begin to spin). </summary>
     public void Spin()
     {
         print("Spin");
         string service_name = "/dji_sdk/drone_arm_control";
         ros.CallService(service_name, "[1]");
     }
-
+  /// <summary> Calls the ROS Service to stop the rotors from spinning. </summary>
     public void StopSpinning()
     {
         print("Stop spinning");
         string service_name = "/dji_sdk/drone_arm_control";
         ros.CallService(service_name, "[0]");
     }
-
+    /// <summary> Calls the ROS Service that makes the drone take off and hover in place just above the ground. </summary>
     public void Takeoff()
     {
         print("Takeoff");
         string service_name = "/dji_sdk/drone_task_control";
         ros.CallService(service_name, "[4]");
     }
-
+    /// <summary> Makes the drone land in place. (Different from returning to home).</summary>
     public void Land()
     {
         print("Land");
@@ -200,7 +194,10 @@ public class ROSDroneConnection : MonoBehaviour
         ros.CallService(service_name, "[6]");
     }
 
-
+    /// <summary>
+    /// Creates a mission task from the user-created waypoints stored in WorldProperties and uploads it to the drone.
+    /// The drone will not start flying. It will store the mission, and wait for an excecute mission call before flying.
+    /// </summary>
     public void CreateMission()
     {
         List<MissionWaypointMsg> missionMissionMsgList = new List<MissionWaypointMsg>();
@@ -227,34 +224,21 @@ public class ROSDroneConnection : MonoBehaviour
             float x = waypoint.gameObjectPointer.transform.localPosition.x;
             float y = waypoint.gameObjectPointer.transform.localPosition.y;
             float z = waypoint.gameObjectPointer.transform.localPosition.z;
-            
-            
-       
-           // Debug.Log(waypoint.id + " : " + waypoint.gameObjectPointer.transform.localPosition);
-
-            //Debug.Log("Uploading waypoint at : " + ROS_coordinates);
-            // Debug.Log("x coord: " + ROS_coordinates.x);
-            // Debug.Log("y coord: " + ROS_coordinates.y);
-            // Debug.Log("z coord: " + ROS_coordinates.z);
-
-            // Peru's attempt at fixing the stuff as of 3/3/2020
             double ROS_x = WorldProperties.UnityXToLat(WorldProperties.droneHomeLat, x);
-            float ROS_y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;// + WorldProperties.droneHomeAlt; // The 100 has to be the same number that we divide the ROS coordinate by in M210_DronePositionSubscriber line 75
+            float ROS_y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;
             double ROS_z = WorldProperties.UnityZToLong(WorldProperties.droneHomeLong, WorldProperties.droneHomeLat ,z);
-
             MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_x, ROS_z, ROS_y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
             Debug.Log("single waypoint info: " + new_waypoint);
             missionMissionMsgList.Add(new_waypoint);
-
-           
         }
-
         MissionWaypointTaskMsg Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.AUTO_LANDING, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, missionMissionMsgList.ToArray());
-
         UploadMission(Task);
     }
 
-
+    /// <summary>
+    /// Uploads the given Waypoint mission task to the drone.
+    /// The drone will not start flying. It will store the mission, and wait for an excecute_mission call before actually flying.
+    /// </summary>
     public void UploadMission(MissionWaypointTaskMsg Task)
     {
         print("Upload Waypoint Mission");
@@ -262,21 +246,26 @@ public class ROSDroneConnection : MonoBehaviour
         Debug.Log(Task.ToYAMLString());
         ros.CallService(service_name, string.Format("[{0}]", Task.ToYAMLString())); // try with and without []
     }
-
+    /// <summary> Executes whatever mission was previously uploaded. (This makes the drone actually fly) </summary>
     public void ExecuteMission()
     {
         print("Execute test Waypoint Mission");
         string service_name = "/dji_sdk/mission_waypoint_action";
         ros.CallService(service_name, "[0]");
     }
-
+/// <summary>
+/// Returns information regarding the currently uploaded mission. This will print all the waypoints left in the mission.
+/// </summary>
     public void InfoMission()
     {
         print("get info for Waypoint Mission");
         string service_name = "/dji_sdk/mission_waypoint_getInfo";
         ros.CallService(service_name, "[0]");
     }
-
+    /// <summary>
+    /// Makes the drone fly to its home point.
+    /// It first flies laterally until its above the home coordinate, and then lands.
+    /// </summary>
     public void GoHome()
     {
         print("Going Home");
@@ -290,7 +279,7 @@ public class ROSDroneConnection : MonoBehaviour
         //Debug.Log("Published new userpoint instruction: "+ msg.ToYAMLString());
         //ros.Publish(UserpointPublisher.GetMessageTopic(), msg);
     }
-
+    /// <summary> a general helper method to call any ROS Service with any argument.</summary>
     public void SendServiceCall(string service, string args)
     {
         Debug.Log("Calling service: " + service);
@@ -298,4 +287,3 @@ public class ROSDroneConnection : MonoBehaviour
     }
 
 }
-
