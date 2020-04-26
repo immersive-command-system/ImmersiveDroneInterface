@@ -12,6 +12,7 @@
     using Mapbox.Unity.Map;
     using Mapbox.Utils;
 
+    // TODO: we might want to lock FPS!
     /// <summary>
     /// This is the only class that should have static variables or functions that are consistent throughout the entire program.
     /// </summary>
@@ -80,10 +81,11 @@
 
 
         // Peru: 3/7/2020 : Map Integration
+        // Apollo: 4/18: This needs to become private
         public void InitializeCityMap()
         {
-            // MapBox Initial Variables
 
+            // Display a map centered around the current drone position
             initLat_citySim = WorldProperties.droneHomeLat;
             initLong_citySim = WorldProperties.droneHomeLong;
 
@@ -93,6 +95,7 @@
             this.GetComponent<MapInteractions>().citySimActive = true;
             this.GetComponent<MapInteractions>().initZoom_citySim = initZoom_citySim;
 
+            // Apollo: 4/18: This needs to be deleted, we are updating these variables on the next block.
             this.GetComponent<MapInteractions>().initLat_citySim = initLat_citySim;
             this.GetComponent<MapInteractions>().initLong_citySim = initLong_citySim;
             this.GetComponent<MapInteractions>().initPosition_citySim = citySim.transform.position;
@@ -401,6 +404,12 @@
         }
         */
 
+        /// <summary>
+        ///     Converts the difference between two latitude values to a difference in meters.
+        /// </summary>
+        /// <param name="lat1"></param>
+        /// <param name="lat2"></param>
+        /// <returns>double, difference in meters</returns>
         public static double LatDiffMeters(double lat1, double lat2)
         {
             // assuming earth is a sphere with c = 40075km
@@ -411,6 +420,13 @@
             return delLat;
         }
 
+        /// <summary>
+        ///     Converts the difference between two longitude values to a difference in meters.
+        /// </summary>
+        /// <param name="long1"></param>
+        /// <param name="long2"></param>
+        /// <param name="lat"></param>
+        /// <returns>double, distance in meters</returns>
         public static double LongDiffMeters(double long1, double long2, double lat)
         {
             // 1 degree of longitude = 40075 km * cos (lat) / 360
@@ -420,12 +436,25 @@
             return delLong;
         }
 
+        /// <summary>
+        ///     Converts the current unity x coordinate to the corresponding latitude for sending waypooints to the drone
+        /// </summary>
+        /// <param name="lat1"> the home latitude coordinate when the drone first connected to Unity</param>
+        /// <param name="unityXCoord">the unity x coordinate for conversion</param>
+        /// <returns></returns>
         public static double UnityXToLat(double lat1, float unityXCoord)
         {
             double delLat = (unityXCoord / (1000 * 111.32f) * Unity_X_To_Lat_Scale) + lat1;
             return delLat;
         }
 
+        /// <summary>
+        ///     Converts the current unity z coordinate to the corresponding longitude for sending waypoints to the drone.
+        /// </summary>
+        /// <param name="long1">the home longitude coordinate when the drone first connected to Unity</param>
+        /// <param name="lat">the home latitude coordinate when the drone first connected to Unity</param>
+        /// <param name="unityZCoord">the unity z coordinate for conversion</param>
+        /// <returns></returns>
         public static double UnityZToLong(double long1, double lat, float unityZCoord)
         {
             double delLong = (((unityZCoord * 360) / (1000 * 40075 * (double)Math.Cos(lat))) * Unity_Z_To_Long_Scale) + long1;

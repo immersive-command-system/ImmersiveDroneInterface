@@ -8,13 +8,13 @@
     using System.IO;
     using UnityEditor;
 
-    /// <summary> 
+    /// <summary>
     /// Subscriber for the M210's GPS position data, including latitude/longitude/altitude.
     /// We use it to update the drone's Unity position, so as the drone flies in the real world,
     /// its movements are matched in the Unity interface.
     /// </summary>
     public class M210_DronePositionSubscriber : MonoBehaviour {
-        
+
         //InitialGPSLat/Long/Alt store the coordinates of the drone when the Unity project first connects to the drone and receives
         //data from the subscriber. We use this to center our Unity map around this coordinate, so all Unity positions are relative
         //to this coordinate.
@@ -27,7 +27,7 @@
 
         public static Vector3 offsetPos = new Vector3(0.0f, 0.1f, 0.0f);
         private static Vector3 changePos;
-        
+
         /// <summary>
         /// Returns the name of the ROS topic to subscribe to on the Manifold.
         /// </summary>
@@ -49,8 +49,8 @@
         {
             return new M210_DronePositionMsg(msg);
         }
-        /// <summary> 
-        /// CallBack is called every time the subscriber receives a new message. It updates the drone game object's 
+        /// <summary>
+        /// CallBack is called every time the subscriber receives a new message. It updates the drone game object's
         /// position in the Unity world to match its real-world GPS position. If this is the first message received,
         /// it sets the drone's initial latitude/longitude/altitude positions.
         /// </summary>
@@ -69,14 +69,14 @@
             {
                 /// new_ROSPosition is the ROS message containing all position data received from the drone.
                 M210_DronePositionMsg new_ROSPosition = (M210_DronePositionMsg)msg;
-                
+
                 /// Sets the drone's initial pos when called for the first time.
                 if (float.IsNaN(InitialGPSLat) && float.IsNaN(InitialGPSLong) && float.IsNaN(InitialGPSAlt))
                 {
                     InitialGPSLat = new_ROSPosition._lat;
                     InitialGPSLong = new_ROSPosition._long;
                     InitialGPSAlt = new_ROSPosition._altitude;
-                    
+
                     //Initial position is also stored as global variables in WorldProperties.
                     WorldProperties.droneHomeLat = new_ROSPosition._lat;
                     WorldProperties.droneHomeLong = new_ROSPosition._long;
@@ -87,7 +87,7 @@
                     GameObject.FindWithTag("World").GetComponent<WorldProperties>().InitializeCityMap();
                 }
 
-                /// Calculates the 3D displacement of the drone from it's initial position, to its current position, in Unity coordinates.            
+                /// Calculates the 3D displacement of the drone from it's initial position, to its current position, in Unity coordinates.
                 changePos = new Vector3(
                     ((float) (WorldProperties.LatDiffMeters(InitialGPSLat, new_ROSPosition._lat)) / WorldProperties.Unity_X_To_Lat_Scale),
                     ((new_ROSPosition._altitude - InitialGPSAlt) / WorldProperties.Unity_Y_To_Alt_Scale),
@@ -95,7 +95,7 @@
                   );
 
                 /// sets the drone Game Object's local position in the Unity world to be it's start position plus the newly calculated 3d displacement to the drone's current position.
-                drone.transform.localPosition = WorldProperties.selectedDroneStartPos + offsetPos + changePos; 
+                drone.transform.localPosition = WorldProperties.selectedDroneStartPos + offsetPos + changePos;
             }
             else
             {
