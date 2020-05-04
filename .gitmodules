@@ -1,3 +1,7 @@
 [submodule "ROSBridgeLib"]
 	path = Assets/ROSBridgeLib
 	url = https://github.com/MathiasCiarlo/ROSBridgeLib
+
+[submodule "Assets\\UnityOctree"]
+	path = Assets/UnityOctree
+	url = https://github.com/jeshlee121/UnityOctree.git
