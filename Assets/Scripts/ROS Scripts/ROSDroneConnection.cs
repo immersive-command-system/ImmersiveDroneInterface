@@ -9,28 +9,36 @@ using System.IO;
 using ISAACS;
 
 /// <summary>
-/// This class deals with ROS and all drone control through the Unity interface. It first creates a
-/// ROSBridgeWebSocketConnection with the onboard computer for all Unity to Manifold and vice-versa communication.
-/// It also defines public methods that call ROS Services to control the drone
-/// (takeoff, land, go home, create mission from Unity waypoints, execute mission, etc).
+/// This class uses ROSBridgeWebSocketConnection to communicate between Unity and on-board computer.
+/// It first creates a
+/// ROSBridgeWebSocketConnection with the onboard computer for all Unity <--> Manifold communication.
+/// It allows to call ROS Services to control the drone (takeoff, create waypoint mission, execute mission, etc).
 /// Through simple keyboard inputs, these ROS Service calls can be tested.
 /// </summary>
 public class ROSDroneConnection : MonoBehaviour
 {
     private ROSBridgeWebSocketConnection ros = null;
+    private ROSBridgeWebSocketConnection lamp_ros = null;
     public bool connectionStatus = false;
 
     void Start() {
-        // This is the IP of the linux computer that is connected to the drone. (make sure the ip starts with ws://[ip])
+        // This is the IP of the on-board linux computer (Manifold). (make sure the ip starts with ws://[ip])
         ros = new ROSBridgeWebSocketConnection("ws://192.168.50.191", 9090);
+
+        // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
+        lamp_ros = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+
+        // Create ROS Subscribe that listen to relevant ROS topics. Using these ROS subscribers, the Unity projects 
+        // gains access to important drone information such as drone real-time GPS position, battery life,
+        // GPS signal quality, Radiation Point Cloud etc.
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
-        //Subscribe to the relevant subscribers. Using these ROS subscribers, the Unity projects gains access to important
-        //drone information such as it's real-time GPS position, battery left, GPS signal quality, etc.
         ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
+        lamp_ros.AddSubscriber(typeof(PointCloud2Subscriber));
 
         ros.Connect();
+        lamp_ros.Connect();
         Debug.Log("Sending connection attempt to ROS");
         connectionStatus = true;
 
@@ -46,6 +54,11 @@ public class ROSDroneConnection : MonoBehaviour
         {
             ros.Disconnect();
         }
+
+        if (lamp_ros != null)
+        {
+            lamp_ros.Disconnect();
+        }
     }
 
     /// <summary>
@@ -57,6 +70,7 @@ public class ROSDroneConnection : MonoBehaviour
     {
 
         ros.Render();
+        lamp_ros.Render();
         // Keyboard inputs when the Unity project is running.
         if (Input.GetKeyUp("1"))
         {
@@ -285,6 +299,24 @@ public class ROSDroneConnection : MonoBehaviour
     {
         Debug.Log("Calling service: " + service);
         ros.CallService(service, args);
+    }
+
+    // Tool to get your local ip address.
+    public static class IPManager
+    {
+        public static string GetLocalIPAddress()
+        {
+            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+
+            throw new System.Exception("No network adapters with an IPv4 address in the system!");
+        }
     }
 
 }

@@ -14,11 +14,11 @@ namespace ROSBridgeLib
     namespace sensor_msgs
     {
 
-        public class BatteryStateMsg : ROSBridgeMsg
+        public class DroneBatteryStateMsg : ROSBridgeMsg
         {
             public float battery_percentage;
 
-            public BatteryStateMsg(JSONNode msg)
+            public DroneBatteryStateMsg(JSONNode msg)
             {
                 battery_percentage = (float.Parse(msg["percentage"]));
             }

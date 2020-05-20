@@ -37,7 +37,7 @@ public class M210_Battery_Subscriber : MonoBehaviour {
     /// </summary>
     public new static ROSBridgeMsg ParseMessage(JSONNode msg)
     {
-        return new BatteryStateMsg(msg);
+        return new DroneBatteryStateMsg(msg);
     }
 
     /// <summary> 
@@ -49,7 +49,7 @@ public class M210_Battery_Subscriber : MonoBehaviour {
     {
         /// TODO: actually do what the callback comments say.
         // Float representing the current battery level.
-        BatteryStateMsg batteryState = (BatteryStateMsg)msg;
+        DroneBatteryStateMsg batteryState = (DroneBatteryStateMsg)msg;
         float batteryPercentage = batteryState.GetBatteryPercentage();
 
         /** TODO: everything
