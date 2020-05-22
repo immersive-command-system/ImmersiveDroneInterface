@@ -56,9 +56,36 @@ public class PointCloudVisualizer : MonoBehaviour
             childPoint.transform.parent = cloudParent.transform;
             // TODO color by intensity
             // Use point.intensity
-            
+            Color red = new Color(255, 0, 0, 1);
+            Color orange = new Color(255, 130, 0, 1);
+            Color yellow = new Color(255, 255, 0, 1);
+            Color green = new Color(0, 255, 0, 1);
+            Color blue = new Color(0, 0, 255, 1);
+            MeshRenderer pRenderer = point.GetComponent<MeshRenderer>();
+            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
+            // TODO: Intensities are porbably between 0 and 1
+            if (point.intensity == 1)
+            {
+                pMaterial.color = red;
+            }
+            else if (point.intensity == 0)
+            {
+                pMaterial.color = orange;
+            }
+            else if (point.intensity == 0)
+            {
+                pMaterial.color = yellow;
+            }
+            else if (point.intensity == 0)
+            {
+                pMaterial.color = green;
+            }
+            else if (point.intensity == 0)
+            {
+                pMaterial.color = blue;
+            }
+            point.material = pMaterial;
         }
-
         hasChanged = true;
     }
 
