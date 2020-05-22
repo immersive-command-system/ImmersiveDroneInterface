@@ -5,17 +5,7 @@ We are using Unity 2017.2.
 
 These commands will handle updating of the ROS submodules. Run them from the top directory of the project using git bash.
 
-> git submodule update --init
-
-> cd Assets/ROSBridgeLib
-
-> git reset --hard HEAD
-
-> printf '[submodule "Pointcloud"]\n\tpath = Pointcloud\n\turl = https://github.com/srv/Pointcloud.git'>.gitmodules
-
-> git submodule sync
-
-> git submodule update --init
+> git submodule update --init --recursive
 
 ## Related Repositories
 [Tablet Interface](https://github.com/tcheng96/2d-drone-interface)
