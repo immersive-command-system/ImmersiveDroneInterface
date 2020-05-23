@@ -61,7 +61,7 @@ public class PointCloudVisualizer : MonoBehaviour
             Color yellow = new Color(255, 255, 0, 1);
             Color green = new Color(0, 255, 0, 1);
             Color blue = new Color(0, 0, 255, 1);
-            MeshRenderer pRenderer = point.GetComponent<MeshRenderer>();
+            MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
             Material pMaterial = new Material(Shader.Find("Unlit/Color"));
             // TODO: Intensities are porbably between 0 and 1
             if (point.intensity == 1)
@@ -84,7 +84,7 @@ public class PointCloudVisualizer : MonoBehaviour
             {
                 pMaterial.color = blue;
             }
-            point.material = pMaterial;
+            pRenderer.material = pMaterial;
         }
         hasChanged = true;
     }
