@@ -23,12 +23,14 @@ public class ROSDroneConnection : MonoBehaviour
     private ROSBridgeWebSocketConnection lamp_ros_constant = null;
 
     public bool connectionStatus = false;
+    public string LampIP = "192.168.1.73";
+    public string ManifoldIP = "192.168.60.191";
 
     void Start() {
         // This is the IP of the on-board linux computer (Manifold). (make sure the ip starts with ws://[ip])
-        ros = new ROSBridgeWebSocketConnection("ws://192.168.50.191", 9090);
+        ros = new ROSBridgeWebSocketConnection("ws://" + ManifoldIP, 9090);
 
-        // Create ROS Subscribe that listen to relevant ROS topics. Using these ROS subscribers, the Unity projects 
+	// Create ROS Subscribe that listen to relevant ROS topics. Using these ROS subscribers, the Unity projects 
         // gains access to important drone information such as drone real-time GPS position, battery life,
         // GPS signal quality, Radiation Point Cloud etc.
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
@@ -38,9 +40,9 @@ public class ROSDroneConnection : MonoBehaviour
 
         ros.Connect();
 
-        // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
-        lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
-        //lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+         // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
+        lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
+        //lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
 
         // TODO: Create SurfaceMeshSubscriber
         //lamp_ros_constant.AddSubscriber(typeof(SurfaceMeshSubscriber));

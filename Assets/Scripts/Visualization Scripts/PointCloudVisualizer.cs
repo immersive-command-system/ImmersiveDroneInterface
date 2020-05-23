@@ -39,6 +39,80 @@ public class PointCloudVisualizer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Replace the current point cloud with a new point cloud.
+    /// </summary>
+    /// <param name="newCloud"></param>
+    public void SetPointCloud(PointCloud<PointXYZRGBAIntensity> newCloud)
+    {
+        Destroy(cloudParent);
+        // Insert timestamp here maybe?
+        cloudParent = new GameObject("PointCloud");
+        foreach (PointXYZRGBAIntensity point in newCloud.Points)
+        {
+            GameObject childPoint = Instantiate(pointObject);
+            childPoint.transform.position = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
+            childPoint.transform.parent = cloudParent.transform;
+            
+            Color color = new Color(point.R, point.G, point.B, point.A);
+            MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
+            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
+            pMaterial.color = color;
+            pRenderer.material = pMaterial;
+            // TODO do something with the intensity
+        }
+        hasChanged = true;
+    }
+
+    /// <summary>
+    /// Replace the current point cloud with a new point cloud.
+    /// </summary>
+    /// <param name="newCloud"></param>
+    public void SetPointCloud(PointCloud<PointXYZRGBA> newCloud)
+    {
+        Destroy(cloudParent);
+        // Insert timestamp here maybe?
+        cloudParent = new GameObject("PointCloud");
+        foreach (PointXYZRGBA point in newCloud.Points)
+        {
+            GameObject childPoint = Instantiate(pointObject);
+            childPoint.transform.position = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
+            childPoint.transform.parent = cloudParent.transform;
+            
+            Color color = new Color(point.R, point.G, point.B, point.A);
+            MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
+            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
+            pMaterial.color = color;
+            pRenderer.material = pMaterial;
+        }
+        hasChanged = true;
+    }
+
+
+    /// <summary>
+    /// Replace the current point cloud with a new point cloud.
+    /// </summary>
+    /// <param name="newCloud"></param>
+    public void SetPointCloud(PointCloud<PointXYZRGB> newCloud)
+    {
+        Destroy(cloudParent);
+        // Insert timestamp here maybe?
+        cloudParent = new GameObject("PointCloud");
+        foreach (PointXYZRGB point in newCloud.Points)
+        {
+            GameObject childPoint = Instantiate(pointObject);
+            childPoint.transform.position = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
+            childPoint.transform.parent = cloudParent.transform;
+            
+            Color color = new Color(point.R, point.G, point.B, 1);
+            MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
+            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
+            pMaterial.color = color;
+            pRenderer.material = pMaterial;
+        }
+        hasChanged = true;
+    }
+
 
     /// <summary>
     /// Replace the current point cloud with a new point cloud.
