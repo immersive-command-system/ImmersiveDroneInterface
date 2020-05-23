@@ -18,15 +18,15 @@ using ISAACS;
 public class ROSDroneConnection : MonoBehaviour
 {
     private ROSBridgeWebSocketConnection ros = null;
-    private ROSBridgeWebSocketConnection lamp_ros = null;
+
+    private ROSBridgeWebSocketConnection lamp_ros_variable = null;
+    private ROSBridgeWebSocketConnection lamp_ros_constant = null;
+
     public bool connectionStatus = false;
 
     void Start() {
         // This is the IP of the on-board linux computer (Manifold). (make sure the ip starts with ws://[ip])
         ros = new ROSBridgeWebSocketConnection("ws://192.168.50.191", 9090);
-
-        // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
-        lamp_ros = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
 
         // Create ROS Subscribe that listen to relevant ROS topics. Using these ROS subscribers, the Unity projects 
         // gains access to important drone information such as drone real-time GPS position, battery life,
@@ -35,11 +35,20 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
-        lamp_ros.AddSubscriber(typeof(PointCloud2Subscriber));
 
         ros.Connect();
-        lamp_ros.Connect();
+
+        // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
+        lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+        //lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+
+        // TODO: Create SurfaceMeshSubscriber
+        //lamp_ros_constant.AddSubscriber(typeof(SurfaceMeshSubscriber));
+
+        lamp_ros_constant.Connect();
+
         Debug.Log("Sending connection attempt to ROS");
+
         connectionStatus = true;
 
     }
@@ -55,9 +64,9 @@ public class ROSDroneConnection : MonoBehaviour
             ros.Disconnect();
         }
 
-        if (lamp_ros != null)
+        if (lamp_ros_variable != null)
         {
-            lamp_ros.Disconnect();
+            lamp_ros_variable.Disconnect();
         }
     }
 
@@ -70,7 +79,10 @@ public class ROSDroneConnection : MonoBehaviour
     {
 
         ros.Render();
-        lamp_ros.Render();
+
+        lamp_ros_variable.Render();
+        lamp_ros_constant.Render();
+
         // Keyboard inputs when the Unity project is running.
         if (Input.GetKeyUp("1"))
         {
@@ -147,6 +159,64 @@ public class ROSDroneConnection : MonoBehaviour
         }
 
 
+    }
+
+    /// <summary>
+    /// Helper functions for subscribing to different LAMP topics.
+    /// </summary>
+    /// <returns></returns>
+
+    private void resetLampConnection()
+    {
+        if (lamp_ros_variable != null)
+        {
+            lamp_ros_variable.Disconnect();
+        }
+
+        lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+        lamp_ros_variable.Connect();
+    }
+
+    public void LampSubscribe_SurfacePointcloud()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+    }
+
+    public void LampSubscribe_Colorized_0()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
+    }
+
+    public void LampSubscribe_Colorized_1()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud1Subscriber));
+    }
+
+    public void LampSubscribe_Colorized_2()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud2Subscriber));
+    }
+
+    public void LampSubscribe_Colorized_3()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
+    }
+
+    public void LampSubscribe_Colorized_4()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+    }
+
+    public void LampSubscribe_Colorized_5()
+    {
+        resetLampConnection();
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud5Subscriber));
     }
 
     // Functions for ROS begin here.
