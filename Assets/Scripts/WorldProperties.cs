@@ -79,32 +79,13 @@
         public double initLat_citySim;
         public double initLong_citySim;
 
-
-        // Peru: 3/7/2020 : Map Integration
-        // Apollo: 4/18: This needs to become private
-        public void InitializeCityMap()
-        {
-
-            // Display a map centered around the current drone position
-            initLat_citySim = WorldProperties.droneHomeLat;
-            initLong_citySim = WorldProperties.droneHomeLong;
-
-            Vector2d intiLatLong = new Vector2d(WorldProperties.droneHomeLat, WorldProperties.droneHomeLong);
-            abstractMap.Initialize(intiLatLong, (int)initZoom_citySim);
-
-            this.GetComponent<MapInteractions>().citySimActive = true;
-            this.GetComponent<MapInteractions>().initZoom_citySim = initZoom_citySim;
-
-            // Apollo: 4/18: This needs to be deleted, we are updating these variables on the next block.
-            this.GetComponent<MapInteractions>().initLat_citySim = initLat_citySim;
-            this.GetComponent<MapInteractions>().initLong_citySim = initLong_citySim;
-            this.GetComponent<MapInteractions>().initPosition_citySim = citySim.transform.position;
-
-            this.GetComponent<MapInteractions>().currLat_citySim = initLat_citySim;
-            this.GetComponent<MapInteractions>().currLong_citySim = initLong_citySim;
-            this.GetComponent<MapInteractions>().currPosition_citySim = citySim.transform.position;
-
-        }
+        // Dynamic waypoint system variables
+        // We should have a system design discussion on where to have this code
+        private bool missionActive = false;
+        private bool waypointMissionUploading = false;
+        private bool inFlight = false;
+        private int currentWaypointID = 0;
+        private int prevWaypointID = 0;
 
         // Use this for initialization
         void Start()
@@ -134,24 +115,208 @@
             obstacleids = new HashSet<int>();
             obstacleDistsToPrint = new List<string>();
 
-            
+
 
             NewDrone();
         }
 
-
         private void Update()
         {
             planningTime += Time.deltaTime;
-            // float relative_scale =
 
-            // Peru: 3/7/2020 : Map Integration Move
+            // Peru: 3/7/2020 : Map Integration 
             if (Input.GetKeyUp("p"))
             {
                 WorldProperties.droneHomeLat = 37.91532757;
                 WorldProperties.droneHomeLong = -122.33805556;
                 InitializeCityMap();
             }
+
+            // Peru: 5/23/2020 : Dynamic waypoint system
+
+            /// <summary>
+            /// Query the drone to check if waypoint mission is finished uploading
+            /// </summary>
+            if (waypointMissionUploading)
+            {
+                //TODO: write ros service call to query drone status and trigger execute mission 
+                bool droneWaypointMissionUploaded = false;
+
+                if (droneWaypointMissionUploaded)
+                {
+                    worldObject.GetComponent<ROSDroneConnection>().ExecuteMission();
+                    waypointMissionUploading = false;
+                    inFlight = true;
+                }
+
+            }
+
+            /// <summary>
+            /// Query the drone to check if waypoint mission is finished executing
+            /// </summary>
+            if (inFlight)
+            {
+                //TODO: write ros service call to query drone status and trigger next 
+                bool droneWaypointMissionCompleted = false;
+
+                if (droneWaypointMissionCompleted)
+                {
+                    inFlight = false;
+                }
+            }
+
+            /// <summary>
+            /// Create and execute next waypoint if mission is active
+            /// </summary>
+            if (missionActive && !inFlight)
+            {
+                UploadNextWaypointMission();
+            }
+        }
+
+        /// <summary>
+        /// Starts the drone flight. Uploads the first user-created waypoint.
+        /// The drone will not start flying. It will store the mission, and wait for an execute mission call before flying.
+        /// </summary>
+        public void StartDroneMission()
+        {
+            // Create and execute waypoint mission of first two waypoints
+            List<MissionWaypointMsg> missionMissionMsgList = new List<MissionWaypointMsg>();
+
+            uint[] command_list = new uint[16];
+            uint[] command_params = new uint[16];
+
+            for (int i = 0; i < 16; i++)
+            {
+                command_list[i] = 0;
+                command_params[i] = 0;
+            }
+
+            ArrayList waypoints = WorldProperties.selectedDrone.waypoints;
+
+            // Waypoint 0 is disregared as it is the act of taking off.
+            Waypoint waypoint_0 = (Waypoint)waypoints[0];
+
+            // Waypoint 1 is the first waypoint mission.
+            Waypoint waypoint_1 = (Waypoint)waypoints[1];
+
+            // TODO: Generate dummy waypoints for the mission
+
+            float x = waypoint_1.gameObjectPointer.transform.localPosition.x;
+            float y = waypoint_1.gameObjectPointer.transform.localPosition.y;
+            float z = waypoint_1.gameObjectPointer.transform.localPosition.z;
+
+            double ROS_x = WorldProperties.UnityXToLat(WorldProperties.droneHomeLat, x);
+            float ROS_y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;
+            double ROS_z = WorldProperties.UnityZToLong(WorldProperties.droneHomeLong, WorldProperties.droneHomeLat, z);
+
+            MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_x, ROS_z, ROS_y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            Debug.Log("single waypoint info: " + new_waypoint);
+            missionMissionMsgList.Add(new_waypoint);
+
+            MissionWaypointTaskMsg Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.NO_ACTION, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, missionMissionMsgList.ToArray());
+            worldObject.GetComponent<ROSDroneConnection>().UploadMission(Task);
+
+            // Start loop to check and publish waypoints
+            currentWaypointID = 1;
+            prevWaypointID = 0;
+            missionActive = true;
+            waypointMissionUploading = true;
+        }
+
+        /// <summary>
+        /// Creates a mission task for the next user-created waypoint stored in WorldProperties and uploads it to the drone.
+        /// The drone will not start flying. It will store the mission, and wait for an excecute mission call before flying.
+        /// </summary>
+        public void UploadNextWaypointMission()
+        {
+            // Create and execute waypoint mission of first two waypoints
+            List<MissionWaypointMsg> missionMissionMsgList = new List<MissionWaypointMsg>();
+
+            uint[] command_list = new uint[16];
+            uint[] command_params = new uint[16];
+
+            for (int i = 0; i < 16; i++)
+            {
+                command_list[i] = 0;
+                command_params[i] = 0;
+            }
+
+            ArrayList waypoints = WorldProperties.selectedDrone.waypoints;
+
+            // The next id to be send.
+            Waypoint next_waypoint = (Waypoint)waypoints[currentWaypointID + 1];
+
+            // TODO: Generate dummy waypoints for the mission
+
+            float x = next_waypoint.gameObjectPointer.transform.localPosition.x;
+            float y = next_waypoint.gameObjectPointer.transform.localPosition.y;
+            float z = next_waypoint.gameObjectPointer.transform.localPosition.z;
+
+            double ROS_x = WorldProperties.UnityXToLat(WorldProperties.droneHomeLat, x);
+            float ROS_y = (y * WorldProperties.Unity_Y_To_Alt_Scale) - 1f;
+            double ROS_z = WorldProperties.UnityZToLong(WorldProperties.droneHomeLong, WorldProperties.droneHomeLat, z);
+
+            MissionWaypointMsg new_waypoint = new MissionWaypointMsg(ROS_x, ROS_z, ROS_y, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
+            Debug.Log("single waypoint info: " + new_waypoint);
+            missionMissionMsgList.Add(new_waypoint);
+
+            MissionWaypointTaskMsg Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.NO_ACTION, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.POINT, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, missionMissionMsgList.ToArray());
+            worldObject.GetComponent<ROSDroneConnection>().UploadMission(Task);
+
+            // Start loop to check and publish waypoints
+            prevWaypointID = currentWaypointID;
+            currentWaypointID = currentWaypointID + 1;
+            waypointMissionUploading = true;
+        }
+
+        /// <summary>
+        /// Pause the drone flight
+        /// </summary>
+        public void PauseDroneMission()
+        {
+            missionActive = false;
+            inFlight = false;
+            worldObject.GetComponent<ROSDroneConnection>().PauseMission();
+        }
+
+        /// <summary>
+        /// Resume the drone flight
+        /// </summary>
+        public void ResumeDroneMission()
+        {
+            missionActive = true;
+            inFlight = false;
+            worldObject.GetComponent<ROSDroneConnection>().ResumeMission();
+        }
+
+        /// <summary>
+        /// Initizlize MapBox API
+        /// </summary>
+        // Peru: 3/7/2020 : Map Integration
+        // Apollo: 4/18: This needs to become private
+        public void InitializeCityMap()
+        {
+
+            // Display a map centered around the current drone position
+            initLat_citySim = WorldProperties.droneHomeLat;
+            initLong_citySim = WorldProperties.droneHomeLong;
+
+            Vector2d intiLatLong = new Vector2d(WorldProperties.droneHomeLat, WorldProperties.droneHomeLong);
+            abstractMap.Initialize(intiLatLong, (int)initZoom_citySim);
+
+            this.GetComponent<MapInteractions>().citySimActive = true;
+            this.GetComponent<MapInteractions>().initZoom_citySim = initZoom_citySim;
+
+            // Apollo: 4/18: This needs to be deleted, we are updating these variables on the next block.
+            this.GetComponent<MapInteractions>().initLat_citySim = initLat_citySim;
+            this.GetComponent<MapInteractions>().initLong_citySim = initLong_citySim;
+            this.GetComponent<MapInteractions>().initPosition_citySim = citySim.transform.position;
+
+            this.GetComponent<MapInteractions>().currLat_citySim = initLat_citySim;
+            this.GetComponent<MapInteractions>().currLong_citySim = initLong_citySim;
+            this.GetComponent<MapInteractions>().currPosition_citySim = citySim.transform.position;
+
         }
 
         /// <summary>
@@ -192,7 +357,7 @@
                 Drone newDrone = new Drone(worldObject.transform.position);
                 selectedDrone = newDrone;
                 selectedDroneStartPos = newDrone.gameObjectPointer.transform.localPosition;
-                
+
             }
         }
 
@@ -261,7 +426,6 @@
             //return new Vector3(ROS_lat, ROS_alt - 100.0f, ROS_long);
             return new Vector3(x, y, z);
         }
-
 
         /// <summary>
         /// Converts the worldPosition vector to the ROSPosition vector
@@ -432,7 +596,7 @@
             // 1 degree of longitude = 40075 km * cos (lat) / 360
             // we use an arbitrary latitude for the conversion because the difference is minimal 
             //slight inaccuracies
-            double delLong = (long2 - long1) * 40075 *(double)Math.Cos(lat) / 360 * 1000;
+            double delLong = (long2 - long1) * 40075 * (double)Math.Cos(lat) / 360 * 1000;
             return delLong;
         }
 
