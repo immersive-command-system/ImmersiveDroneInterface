@@ -386,9 +386,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 72917792}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 567047bb8f959d1458fe3c5a1a66ac85, type: 3}
+  m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level_0: 0
+  Level_1: 0
+  Level_2: 0
+  Level_3: 0
+  Level_4: 0
+  Level_5: 1
 --- !u!65 &72917795
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -857,6 +863,7 @@ GameObject:
   - component: {fileID: 125690760}
   - component: {fileID: 125690759}
   - component: {fileID: 125690758}
+  - component: {fileID: 125690762}
   m_Layer: 5
   m_Name: RadLevel_2
   m_TagString: DroneMenu
@@ -963,6 +970,23 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 125690756}
+--- !u!114 &125690762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 125690756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Level_0: 0
+  Level_1: 0
+  Level_2: 1
+  Level_3: 0
+  Level_4: 0
+  Level_5: 0
 --- !u!1 &146794962
 GameObject:
   m_ObjectHideFlags: 0
@@ -3070,9 +3094,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 716024044}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef547826673bc604dab244557a4c0f1a, type: 3}
+  m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level_0: 0
+  Level_1: 0
+  Level_2: 0
+  Level_3: 0
+  Level_4: 1
+  Level_5: 0
 --- !u!65 &716024047
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4880,9 +4910,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1470007008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc833152ed8f99f4e83ef66dbb230015, type: 3}
+  m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level_0: 0
+  Level_1: 0
+  Level_2: 0
+  Level_3: 1
+  Level_4: 0
+  Level_5: 0
 --- !u!65 &1470007011
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5113,9 +5149,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1509680894}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5effa4935693a84cbc2286d07455651, type: 3}
+  m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level_0: 1
+  Level_1: 0
+  Level_2: 0
+  Level_3: 0
+  Level_4: 0
+  Level_5: 0
 --- !u!65 &1509680897
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7232,9 +7274,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 2093951358}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5effa4935693a84cbc2286d07455651, type: 3}
+  m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level_0: 0
+  Level_1: 1
+  Level_2: 0
+  Level_3: 0
+  Level_4: 0
+  Level_5: 0
 --- !u!65 &2093951361
 BoxCollider:
   m_ObjectHideFlags: 0
