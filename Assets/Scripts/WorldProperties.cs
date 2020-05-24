@@ -132,14 +132,16 @@
                 InitializeCityMap();
             }
 
-            // Peru: 5/23/2020 : Dynamic waypoint system
+            // Peru: 5/24/2020 : Dynamic waypoint system
+            //TODO: consider using invokes to not bombard the drone with queries
+            //TODO: change the architecture to trigger an invoke instead of a boolean
 
             /// <summary>
             /// Query the drone to check if waypoint mission is finished uploading
             /// </summary>
             if (waypointMissionUploading)
             {
-                //TODO: write ros service call to query drone status and trigger execute mission 
+                //TODO: write ros service call to query drone status and trigger execute mission
                 bool droneWaypointMissionUploaded = false;
 
                 if (droneWaypointMissionUploaded)
