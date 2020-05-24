@@ -42,12 +42,16 @@ public class ROSDroneConnection : MonoBehaviour
 
          // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
         lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
-        //lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
+        lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
 
         // TODO: Create SurfaceMeshSubscriber
         //lamp_ros_constant.AddSubscriber(typeof(SurfaceMeshSubscriber));
 
+        // TODO: Update default subscriber after testing system.
+        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+
         lamp_ros_constant.Connect();
+        lamp_ros_variable.Connect();
 
         Debug.Log("Sending connection attempt to ROS");
 
