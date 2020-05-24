@@ -81,11 +81,11 @@
 
         // Dynamic waypoint system variables
         // We should have a system design discussion on where to have this code
-        private bool missionActive = false;
-        private bool waypointMissionUploading = false;
-        private bool inFlight = false;
-        private int currentWaypointID = 0;
-        private int prevWaypointID = 0;
+        private static bool missionActive = false;
+        private static bool waypointMissionUploading = false;
+        private static bool inFlight = false;
+        private static int currentWaypointID = 0;
+        private static int prevWaypointID = 0;
 
         // Use this for initialization
         void Start()
@@ -178,7 +178,7 @@
         /// Starts the drone flight. Uploads the first user-created waypoint.
         /// The drone will not start flying. It will store the mission, and wait for an execute mission call before flying.
         /// </summary>
-        public void StartDroneMission()
+        public static void StartDroneMission()
         {
             // Create and execute waypoint mission of first two waypoints
             List<MissionWaypointMsg> missionMissionMsgList = new List<MissionWaypointMsg>();
@@ -228,7 +228,7 @@
         /// Creates a mission task for the next user-created waypoint stored in WorldProperties and uploads it to the drone.
         /// The drone will not start flying. It will store the mission, and wait for an excecute mission call before flying.
         /// </summary>
-        public void UploadNextWaypointMission()
+        public static void UploadNextWaypointMission()
         {
             // Create and execute waypoint mission of first two waypoints
             List<MissionWaypointMsg> missionMissionMsgList = new List<MissionWaypointMsg>();
@@ -273,7 +273,7 @@
         /// <summary>
         /// Pause the drone flight
         /// </summary>
-        public void PauseDroneMission()
+        public static void PauseDroneMission()
         {
             missionActive = false;
             inFlight = false;
@@ -283,7 +283,7 @@
         /// <summary>
         /// Resume the drone flight
         /// </summary>
-        public void ResumeDroneMission()
+        public static void ResumeDroneMission()
         {
             missionActive = true;
             inFlight = false;

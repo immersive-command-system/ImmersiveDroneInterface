@@ -1791,9 +1791,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 322076860}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef547826673bc604dab244557a4c0f1a, type: 3}
+  m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMission: 1
+  pauseMission: 0
+  resumeMission: 0
+  clearWaypoints: 0
+  landDrone: 0
+  homeDrone: 0
 --- !u!21 &363945726
 Material:
   serializedVersion: 6
@@ -1997,9 +2003,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 459626910}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c731fe323efb444193ff2199cf86eee, type: 3}
+  m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMission: 0
+  pauseMission: 0
+  resumeMission: 0
+  clearWaypoints: 0
+  landDrone: 1
+  homeDrone: 0
 --- !u!65 &459626913
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2413,9 +2425,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 553067302}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef547826673bc604dab244557a4c0f1a, type: 3}
+  m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMission: 0
+  pauseMission: 1
+  resumeMission: 0
+  clearWaypoints: 0
+  landDrone: 0
+  homeDrone: 0
 --- !u!65 &553067305
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3569,9 +3587,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1050719667}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5effa4935693a84cbc2286d07455651, type: 3}
+  m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMission: 0
+  pauseMission: 0
+  resumeMission: 0
+  clearWaypoints: 0
+  landDrone: 0
+  homeDrone: 1
 --- !u!65 &1050719670
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4780,9 +4804,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1409379668}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc833152ed8f99f4e83ef66dbb230015, type: 3}
+  m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMission: 0
+  pauseMission: 0
+  resumeMission: 1
+  clearWaypoints: 0
+  landDrone: 0
+  homeDrone: 0
 --- !u!65 &1409379671
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6134,9 +6164,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1830922788}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 567047bb8f959d1458fe3c5a1a66ac85, type: 3}
+  m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMission: 0
+  pauseMission: 0
+  resumeMission: 0
+  clearWaypoints: 1
+  landDrone: 0
+  homeDrone: 0
 --- !u!1 &1834927014
 GameObject:
   m_ObjectHideFlags: 0
