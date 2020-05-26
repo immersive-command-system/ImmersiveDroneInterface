@@ -2,11 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PointCloud;
+using ISAACS;
 
 public class PointCloudVisualizer : MonoBehaviour
 {
     /// <value> Attach DataServer object. If nonexistant, create an empty GameObject and attach the script `DataServer.cs`.</value>
     public bool flipYZ = false;
+
+
+    Color red = new Color(255, 0, 0, 1);
+    Color orange = new Color(255, 130, 0, 1);
+    Color yellow = new Color(255, 255, 0, 1);
+    Color green = new Color(0, 255, 0, 1);
+    Color blue = new Color(0, 0, 255, 1);
+    Color light_blue = new Color(52, 174, 235, 1);
+    Color white = new Color(255, 255, 255, 1);
+
 
     /// <summary>
     /// Object to use to represent points in the point cloud.
@@ -63,6 +74,7 @@ public class PointCloudVisualizer : MonoBehaviour
 
             GameObject childPoint = Instantiate(pointObject);
             childPoint.transform.parent = cloudParent.transform;
+
             childPoint.transform.localPosition = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
             childPoint.transform.localScale = new Vector3(size, size, size); // size of each point
             if (!printOnce)
@@ -71,8 +83,43 @@ public class PointCloudVisualizer : MonoBehaviour
                 Debug.Log("R:" + point.R + "\tG:" + point.G + "\tB" + point.B + "\tA" + point.A);
             }
             Color color = new Color((float)point.R / 255.0f, (float)point.G / 255.0f, (float)point.B / 255.0f, (float)point.A / 255.0f);
+            
             MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
             Material pMaterial = new Material(Shader.Find("Unlit/Color")); // new material with unlit color
+
+            // Peru: 5/26/20 : New color scheme
+
+            int pointCloudLevel = WorldProperties.worldObject.GetComponent<ROSDroneConnection>().pointCloudLevel;
+            
+            if (pointCloudLevel == 5)
+            {
+                color = red;
+            }
+            else if (pointCloudLevel == 4)
+            {
+                color = orange;
+            }
+            else if (pointCloudLevel == 3)
+            {
+                color = yellow;
+            }
+            else if (pointCloudLevel == 2)
+            {
+                color = green;
+            }
+            else if (pointCloudLevel == 1)
+            {
+                color = blue;
+            }
+            else if (pointCloudLevel == 0)
+            {
+                color = light_blue;
+            }
+            else
+            {
+                color = white;
+            }
+
             pMaterial.color = color;
             pRenderer.material = pMaterial;
             // TODO do something with the intensity
@@ -148,14 +195,16 @@ public class PointCloudVisualizer : MonoBehaviour
             childPoint.transform.parent = cloudParent.transform;
             // TODO color by intensity
             // Use point.intensity
+
+            MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
+            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
+            // TODO: Intensities are porbably between 0 and 1
             Color red = new Color(255, 0, 0, 1);
             Color orange = new Color(255, 130, 0, 1);
             Color yellow = new Color(255, 255, 0, 1);
             Color green = new Color(0, 255, 0, 1);
             Color blue = new Color(0, 0, 255, 1);
-            MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
-            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
-            // TODO: Intensities are porbably between 0 and 1
+
             if (point.intensity == 1)
             {
                 pMaterial.color = red;
