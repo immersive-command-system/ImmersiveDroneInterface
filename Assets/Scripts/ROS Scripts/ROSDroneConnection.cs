@@ -25,6 +25,7 @@ public class ROSDroneConnection : MonoBehaviour
     public bool connectionStatus = false;
     public string LampIP = "192.168.1.73";
     public string ManifoldIP = "192.168.60.191";
+    public int pointCloudLevel = 0;
 
     void Start()
     {
@@ -188,42 +189,49 @@ public class ROSDroneConnection : MonoBehaviour
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+        pointCloudLevel = -1;
     }
 
     public void LampSubscribe_Colorized_0()
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
+        pointCloudLevel = 0;
     }
 
     public void LampSubscribe_Colorized_1()
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud1Subscriber));
+        pointCloudLevel = 1;
     }
 
     public void LampSubscribe_Colorized_2()
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud2Subscriber));
+        pointCloudLevel = 2;
     }
 
     public void LampSubscribe_Colorized_3()
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
+        pointCloudLevel = 3;
     }
 
     public void LampSubscribe_Colorized_4()
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+        pointCloudLevel = 4;
     }
 
     public void LampSubscribe_Colorized_5()
     {
         resetLampConnection();
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud5Subscriber));
+        pointCloudLevel = 5;
     }
 
     // Functions for ROS begin here.
