@@ -39,9 +39,9 @@ public class ColorizedCloud1Subscriber : ROSBridgeSubscriber
             sb.Append(pointCloudMsg.GetFieldString());
             Debug.Log(sb.ToString());
         }
+        Debug.Log("Updated Point Cloud #1");
 
         PointCloudVisualizer visualizer = GameObject.Find(rendererObjectName).GetComponent<PointCloudVisualizer>();
         visualizer.SetPointCloud(pointCloudMsg.GetCloud());
-        Debug.Log("Updated Point Cloud");
     }
 }

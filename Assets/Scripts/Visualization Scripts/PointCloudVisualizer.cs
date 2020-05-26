@@ -16,7 +16,8 @@ public class PointCloudVisualizer : MonoBehaviour
     /// <summary>
     /// scale of the pointObject.
     /// </summary>
-    public float size = 0.1f;
+    public float size = 0.001f; // see comment below
+    public float cloud_scale = 0.05286196f; // these variables are not useable in functions below for some weird reason?? "We're done" - Peru & Nitz
 
     private GameObject cloudParent;
 
@@ -27,7 +28,7 @@ public class PointCloudVisualizer : MonoBehaviour
     {
         cloudParent = new GameObject("Initial");
         // configure the pointObject here.
-        pointObject.transform.localScale = new Vector3(size, size, size);
+        //pointObject.transform.localScale = new Vector3(size, size, size);
     }
     
     // Update is called once per frame
@@ -45,23 +46,39 @@ public class PointCloudVisualizer : MonoBehaviour
     /// <param name="newCloud"></param>
     public void SetPointCloud(PointCloud<PointXYZRGBAIntensity> newCloud)
     {
+        Debug.Log("Setting point cloud XYZ RGBA Intensity");
         Destroy(cloudParent);
         // Insert timestamp here maybe?
         cloudParent = new GameObject("PointCloud");
+        cloudParent.transform.position = new Vector3(0.242f, 2.082f, -0.742f);
+        cloudParent.transform.localScale = new Vector3(0.05286196f, 0.05286196f, 0.05286196f);
+        cloudParent.transform.Rotate(0.0f, 128.382f, 0.0f, Space.World);
+        bool printOnce = false;
         foreach (PointXYZRGBAIntensity point in newCloud.Points)
         {
+            if (Random.value < 0.97)
+            {
+                continue;
+            }
+
             GameObject childPoint = Instantiate(pointObject);
-            childPoint.transform.position = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
             childPoint.transform.parent = cloudParent.transform;
-            
-            Color color = new Color(point.R, point.G, point.B, point.A);
+            childPoint.transform.localPosition = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
+            childPoint.transform.localScale = new Vector3(size, size, size); // size of each point
+            if (!printOnce)
+            {
+                printOnce = true;
+                Debug.Log("R:" + point.R + "\tG:" + point.G + "\tB" + point.B + "\tA" + point.A);
+            }
+            Color color = new Color((float)point.R / 255.0f, (float)point.G / 255.0f, (float)point.B / 255.0f, (float)point.A / 255.0f);
             MeshRenderer pRenderer = childPoint.GetComponent<MeshRenderer>();
-            Material pMaterial = new Material(Shader.Find("Unlit/Color"));
+            Material pMaterial = new Material(Shader.Find("Unlit/Color")); // new material with unlit color
             pMaterial.color = color;
             pRenderer.material = pMaterial;
             // TODO do something with the intensity
         }
-        hasChanged = true;
+
+        //hasChanged = true;
     }
 
     /// <summary>
@@ -70,6 +87,7 @@ public class PointCloudVisualizer : MonoBehaviour
     /// <param name="newCloud"></param>
     public void SetPointCloud(PointCloud<PointXYZRGBA> newCloud)
     {
+        
         Destroy(cloudParent);
         // Insert timestamp here maybe?
         cloudParent = new GameObject("PointCloud");

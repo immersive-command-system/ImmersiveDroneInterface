@@ -49,10 +49,22 @@ public class ROSDroneConnection : MonoBehaviour
         //lamp_ros_constant.AddSubscriber(typeof(SurfaceMeshSubscriber));
 
         // TODO: Update default subscriber after testing system.
-        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+        //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud3Subscriber));
+        //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+
+        lamp_ros_constant.AddSubscriber(typeof(PointCloud2Subscriber));
+
+        /*
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud1Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud2Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud5Subscriber));
+        */
 
         lamp_ros_constant.Connect();
-        lamp_ros_variable.Connect();
+        //lamp_ros_variable.Connect();
 
         Debug.Log("Sending connection attempt to ROS");
 
@@ -87,7 +99,7 @@ public class ROSDroneConnection : MonoBehaviour
 
         ros.Render();
 
-        lamp_ros_variable.Render();
+        //lamp_ros_variable.Render();
         lamp_ros_constant.Render();
 
         // Keyboard inputs when the Unity project is running.
