@@ -25,7 +25,7 @@ public class ROSDroneConnection : MonoBehaviour
     public bool connectionStatus = false;
     public string LampIP = "192.168.1.73";
     public string ManifoldIP = "192.168.60.191";
-    public int pointCloudLevel = 0;
+    public int pointCloudLevel = -1;
 
     void Start()
     {
@@ -40,7 +40,7 @@ public class ROSDroneConnection : MonoBehaviour
         ros.AddSubscriber(typeof(M210_Battery_Subscriber));
         ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
 
-        ros.Connect();
+        
 
         // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
         lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
@@ -64,8 +64,9 @@ public class ROSDroneConnection : MonoBehaviour
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud5Subscriber));
         */
 
+        ros.Connect();
         lamp_ros_constant.Connect();
-        //lamp_ros_variable.Connect();
+        lamp_ros_variable.Connect();
 
         Debug.Log("Sending connection attempt to ROS");
 
@@ -100,8 +101,9 @@ public class ROSDroneConnection : MonoBehaviour
 
         ros.Render();
 
-        //lamp_ros_variable.Render();
+        
         lamp_ros_constant.Render();
+        lamp_ros_variable.Render();
 
         // Keyboard inputs when the Unity project is running.
         if (Input.GetKeyUp("1"))
