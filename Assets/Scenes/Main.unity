@@ -1080,7 +1080,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc1dbd07f7a099546995229a1320899c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  speed: 0.2
 --- !u!114 &146794966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1810,6 +1810,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulation: 1
   startMission: 1
   pauseMission: 0
   resumeMission: 0
@@ -2022,6 +2023,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 0
@@ -2444,6 +2446,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulation: 1
   startMission: 0
   pauseMission: 1
   resumeMission: 0
@@ -3607,6 +3610,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 0
@@ -5012,6 +5016,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 1
@@ -6381,6 +6386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 0
