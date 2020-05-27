@@ -105,6 +105,7 @@ public class DroneFlyingDemo : MonoBehaviour
 
     public void flyHome()
     {
+        nextWaypointID = 10000;
         FlyNextWaypoint(home);
     }
 
