@@ -74,7 +74,9 @@ public class DroneFlyingDemo : MonoBehaviour
         origin = drone.gameObjectPointer.transform.localPosition;
         destination = waypoint.gameObjectPointer.transform.localPosition;
         flying = true;
-
+        nextWaypointID += 1;
+        fraction = 0.0f;
+        Debug.Log(nextWaypointID);
     }
 
     void FlyNextWaypoint(Vector3 waypoint)
