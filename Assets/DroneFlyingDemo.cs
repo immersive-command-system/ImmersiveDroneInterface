@@ -13,6 +13,7 @@ public class DroneFlyingDemo : MonoBehaviour
     private bool flying = false;
     private Vector3 origin;
     private Vector3 destination;
+    private Vector3 home;
     private float fraction = 0;
 
     // Update is called once per frame
@@ -22,6 +23,7 @@ public class DroneFlyingDemo : MonoBehaviour
         {
             Debug.Log("Init drone");
             drone = WorldProperties.selectedDrone;
+            home = drone.gameObjectPointer.transform.localPosition;
             Debug.Log(drone);
         }
 
@@ -51,13 +53,14 @@ public class DroneFlyingDemo : MonoBehaviour
             else
             {
                 flying = false;
+                FlyNextWaypoint();
             }
 
         }
         
     }
 
-    void FlyNextWaypoint()
+    public void FlyNextWaypoint()
     {
         ArrayList waypoints = WorldProperties.selectedDrone.waypoints;
 
@@ -79,7 +82,7 @@ public class DroneFlyingDemo : MonoBehaviour
         Debug.Log(nextWaypointID);
     }
 
-    void FlyNextWaypoint(Vector3 waypoint)
+    public void FlyNextWaypoint(Vector3 waypoint)
     {
         origin = drone.gameObjectPointer.transform.localPosition;
         destination = waypoint;
@@ -88,6 +91,21 @@ public class DroneFlyingDemo : MonoBehaviour
         Debug.Log("Dest:   " + destination);
 
         flying = true;
+    }
+
+    public void pauseFlight()
+    {
+        flying = false;
+    }
+
+    public void resumeFlight()
+    {
+        flying = true;
+    }
+
+    public void flyHome()
+    {
+        FlyNextWaypoint(home);
     }
 
 }

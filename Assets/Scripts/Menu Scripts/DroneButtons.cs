@@ -11,6 +11,8 @@ public class DroneButtons : MonoBehaviour {
     Drone drone;
     private GameObject controller; //needed to access pointer
 
+    public bool simulation = true;
+
     public bool startMission = false;
     public bool pauseMission = false;
     public bool resumeMission = false;
@@ -33,6 +35,14 @@ public class DroneButtons : MonoBehaviour {
         {
             Debug.Log("Start Mission Button");
 
+            if (simulation)
+            {
+                GameObject world = GameObject.FindGameObjectWithTag("World");
+                DroneFlyingDemo drone = world.GetComponent<DroneFlyingDemo>();
+                drone.FlyNextWaypoint();
+                return;
+            }
+
             // Static Waypoint system:
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().CreateMission();
 
@@ -43,6 +53,14 @@ public class DroneButtons : MonoBehaviour {
         if (pauseMission)
         {
             Debug.Log("TO TEST: Pause Mission Button");
+
+            if (simulation)
+            {
+                GameObject world = GameObject.FindGameObjectWithTag("World");
+                DroneFlyingDemo drone = world.GetComponent<DroneFlyingDemo>();
+                drone.pauseFlight();
+                return;
+            }
             // Test and switch
             // WorldProperties.PauseDroneMission();
         }
@@ -50,6 +68,14 @@ public class DroneButtons : MonoBehaviour {
         if (resumeMission)
         {
             Debug.Log("TO TEST: Resume Mission Button");
+            if (simulation)
+            {
+                GameObject world = GameObject.FindGameObjectWithTag("World");
+                DroneFlyingDemo drone = world.GetComponent<DroneFlyingDemo>();
+                drone.resumeFlight();
+                return;
+            }
+
             // Test and switch
             // WorldProperties.ResumeDroneMission();
         }
@@ -82,6 +108,15 @@ public class DroneButtons : MonoBehaviour {
         if (homeDrone)
         {
             Debug.Log("Home  Button");
+
+            if (simulation)
+            {
+                GameObject world = GameObject.FindGameObjectWithTag("World");
+                DroneFlyingDemo drone = world.GetComponent<DroneFlyingDemo>();
+                drone.flyHome();
+                return;
+            }
+
             WorldProperties.worldObject.GetComponent<ROSDroneConnection>().GoHome();
         }
 
