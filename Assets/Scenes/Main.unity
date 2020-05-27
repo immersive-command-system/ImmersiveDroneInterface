@@ -661,6 +661,7 @@ MonoBehaviour:
   flipYZ: 1
   pointObject: {fileID: 1834927014}
   size: 0.1
+  cloud_scale: 0.05286196
 --- !u!1 &79195765
 GameObject:
   m_ObjectHideFlags: 0
@@ -1081,6 +1082,7 @@ MonoBehaviour:
   connectionStatus: 0
   LampIP: 192.168.1.73
   ManifoldIP: 192.168.60.191
+  pointCloudLevel: -1
 --- !u!114 &146794967
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3242,7 +3244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &901874429
 MonoBehaviour:
   m_ObjectHideFlags: 0
