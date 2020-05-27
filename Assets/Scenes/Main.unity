@@ -999,6 +999,7 @@ GameObject:
   - component: {fileID: 146794964}
   - component: {fileID: 146794966}
   - component: {fileID: 146794967}
+  - component: {fileID: 146794965}
   m_Layer: 0
   m_Name: World
   m_TagString: World
@@ -1068,6 +1069,18 @@ MonoBehaviour:
   currPosition_citySim: {x: 0, y: 0, z: 0}
   minZoom_citySim: 0
   maxZoom_citySim: 22
+--- !u!114 &146794965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 146794962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc1dbd07f7a099546995229a1320899c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 1
 --- !u!114 &146794966
 MonoBehaviour:
   m_ObjectHideFlags: 0
