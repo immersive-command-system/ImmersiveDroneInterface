@@ -3,39 +3,58 @@ using System.Collections.Generic;
 using UnityEngine;
 using ISAACS;
 
-public class DroneFlyingDemo : MonoBehaviour {
+public class DroneFlyingDemo : MonoBehaviour
+{
 
-    public GameObject drone;
+    public Drone drone;
     public float speed = 1.0f;
 
     private int nextWaypointID = 0;
     private bool flying = false;
     private Vector3 origin;
     private Vector3 destination;
+    private float fraction = 0;
 
-
-	// Use this for initialization
-	void Start () {
-        drone = WorldProperties.selectedDrone.gameObjectPointer;
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        if (Input.GetKeyDown(KeyCode.F))
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.J))
         {
+            Debug.Log("Init drone");
+            drone = WorldProperties.selectedDrone;
+            Debug.Log(drone);
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            Debug.Log("test waypoint");
+            Vector3 test_waypoint = new Vector3(1.0f, 1.0f, 1.0f);
+            FlyNextWaypoint(test_waypoint);
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            Debug.Log("Start flying");
             FlyNextWaypoint();
         }
 
 
         if (flying)
         {
-            drone.transform.localPosition = Vector3.Lerp(origin, destination, speed * Time.deltaTime);
-        }
+            if (fraction < 1)
+            {
+                fraction += Time.deltaTime * speed;
+                Vector3 new_position = Vector3.Lerp(origin, destination, fraction);
+                drone.gameObjectPointer.transform.localPosition = new_position;
+            }
+            else
+            {
+                flying = false;
+            }
 
-        if (flying && Vector3.Distance(drone.transform.position, destination) < 0.5f)
-        {
-            flying = false;
         }
+        
     }
 
     void FlyNextWaypoint()
@@ -51,11 +70,22 @@ public class DroneFlyingDemo : MonoBehaviour {
             return;
         }
 
-        Waypoint waypoint = (Waypoint)waypoints[nextWaypointID];      
-        origin = drone.transform.localPosition;
+        Waypoint waypoint = (Waypoint)waypoints[nextWaypointID];
+        origin = drone.gameObjectPointer.transform.localPosition;
         destination = waypoint.gameObjectPointer.transform.localPosition;
         flying = true;
-         
+
+    }
+
+    void FlyNextWaypoint(Vector3 waypoint)
+    {
+        origin = drone.gameObjectPointer.transform.localPosition;
+        destination = waypoint;
+
+        Debug.Log("Origin: " + origin);
+        Debug.Log("Dest:   " + destination);
+
+        flying = true;
     }
 
 }
