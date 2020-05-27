@@ -85,10 +85,16 @@ public class ROSDroneConnection : MonoBehaviour
             ros.Disconnect();
         }
 
+        if (lamp_ros_constant != null)
+        {
+            lamp_ros_constant.Disconnect();
+        }
+        
         if (lamp_ros_variable != null)
         {
             lamp_ros_variable.Disconnect();
         }
+
     }
 
     /// <summary>
@@ -188,7 +194,7 @@ public class ROSDroneConnection : MonoBehaviour
     /// </summary>
     /// <returns></returns>
 
-    private void resetLampConnection()
+    private void resetLampConnection(System.Type subscriber)
     {
         if (lamp_ros_variable != null)
         {
@@ -196,55 +202,49 @@ public class ROSDroneConnection : MonoBehaviour
         }
 
         lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+        lamp_ros_variable.AddSubscriber(subscriber);
         lamp_ros_variable.Connect();
     }
 
     public void LampSubscribe_SurfacePointcloud()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+        resetLampConnection(typeof(PointCloud2Subscriber));
         pointCloudLevel = -1;
     }
 
     public void LampSubscribe_Colorized_0()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
+        resetLampConnection(typeof(ColorizedCloud0Subscriber));
         pointCloudLevel = 0;
     }
 
     public void LampSubscribe_Colorized_1()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud1Subscriber));
+        resetLampConnection(typeof(ColorizedCloud1Subscriber));
         pointCloudLevel = 1;
     }
 
     public void LampSubscribe_Colorized_2()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud2Subscriber));
+        resetLampConnection(typeof(ColorizedCloud2Subscriber));
         pointCloudLevel = 2;
     }
 
     public void LampSubscribe_Colorized_3()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
+        resetLampConnection(typeof(ColorizedCloud3Subscriber));
         pointCloudLevel = 3;
     }
 
     public void LampSubscribe_Colorized_4()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+        resetLampConnection(typeof(ColorizedCloud4Subscriber));
         pointCloudLevel = 4;
     }
 
     public void LampSubscribe_Colorized_5()
     {
-        resetLampConnection();
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud5Subscriber));
+        resetLampConnection(typeof(ColorizedCloud5Subscriber));
         pointCloudLevel = 5;
     }
 
