@@ -1503,12 +1503,12 @@ GameObject:
   - component: {fileID: 277881836}
   - component: {fileID: 277881840}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Hardcoded Waypoint 0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &277881836
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2292,12 +2292,12 @@ GameObject:
   - component: {fileID: 524727668}
   - component: {fileID: 524727672}
   m_Layer: 0
-  m_Name: Sphere (2)
+  m_Name: Hardcoded Waypoint 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &524727668
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3847,12 +3847,12 @@ GameObject:
   - component: {fileID: 1094677131}
   - component: {fileID: 1094677135}
   m_Layer: 0
-  m_Name: Sphere (1)
+  m_Name: Hardcoded Waypoint 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &1094677131
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6058,7 +6058,17 @@ Prefab:
     - target: {fileID: 114196496685157712, guid: 5bb46bae81bf04608ac699be504c5e66,
         type: 2}
       propertyPath: _initializeOnStart
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114196496685157712, guid: 5bb46bae81bf04608ac699be504c5e66,
+        type: 2}
+      propertyPath: _imagery._layerProperty.sourceType
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114196496685157712, guid: 5bb46bae81bf04608ac699be504c5e66,
+        type: 2}
+      propertyPath: _imagery._layerProperty.sourceOptions.layerSource.Id
+      value: mapbox.satellite
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5bb46bae81bf04608ac699be504c5e66, type: 2}
