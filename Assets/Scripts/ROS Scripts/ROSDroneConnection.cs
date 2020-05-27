@@ -201,7 +201,7 @@ public class ROSDroneConnection : MonoBehaviour
             lamp_ros_variable.Disconnect();
         }
 
-        lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://192.168.1.73", 9090);
+        lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://"+LampIP, 9090);
         lamp_ros_variable.AddSubscriber(subscriber);
         lamp_ros_variable.Connect();
     }
