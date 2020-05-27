@@ -67,16 +67,38 @@ public class PointCloudVisualizer : MonoBehaviour
         bool printOnce = false;
         foreach (PointXYZRGBAIntensity point in newCloud.Points)
         {
-            if (Random.value < 0.97)
+
+
+            if (Random.value < 0.89)
             {
                 continue;
             }
+
+            
+
+            Vector3 pointPosition = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
+            //Debug.Log("X:" + pointPosition.x + "\tZ:" + pointPosition.z + "\tY" + pointPosition.y);
+            
+            if (pointPosition.x > 11 || pointPosition.z > -10 || pointPosition.x < -10 || pointPosition.z < -30 || pointPosition.y < -0.03 || pointPosition.y > 5.2)
+            {
+                continue;
+            }
+            
+            //if(pointPosition - )
+
+
+
+
 
             GameObject childPoint = Instantiate(pointObject);
             childPoint.transform.parent = cloudParent.transform;
 
             childPoint.transform.localPosition = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
             childPoint.transform.localScale = new Vector3(size, size, size); // size of each point
+            Debug.Log("X:" + childPoint.transform.localPosition.x + "\tZ:" + childPoint.transform.localPosition.z + "\tY" + childPoint.transform.localPosition.y);
+
+
+
             if (!printOnce)
             {
                 printOnce = true;
