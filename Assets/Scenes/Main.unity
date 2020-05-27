@@ -1080,7 +1080,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc1dbd07f7a099546995229a1320899c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.2
+  speed: 0.1
 --- !u!114 &146794966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1093,7 +1093,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectionStatus: 0
-  LampIP: 192.168.1.73
+  LampIP: 99.46.143.114
   ManifoldIP: 192.168.60.191
   pointCloudLevel: -1
 --- !u!114 &146794967

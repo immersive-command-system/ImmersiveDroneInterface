@@ -61,6 +61,8 @@ public class PointCloudVisualizer : MonoBehaviour
         Destroy(cloudParent);
         // Insert timestamp here maybe?
         cloudParent = new GameObject("PointCloud");
+        //GameObject world = GameObject.FindGameObjectWithTag("World");
+        //cloudParent.transform.parent = world.transform;
         cloudParent.transform.position = new Vector3(0.242f, 2.082f, -0.742f);
         cloudParent.transform.localScale = new Vector3(0.05286196f, 0.05286196f, 0.05286196f);
         cloudParent.transform.Rotate(0.0f, 128.382f, 0.0f, Space.World);

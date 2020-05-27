@@ -53,7 +53,7 @@ public class ROSDroneConnection : MonoBehaviour
         //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud3Subscriber));
         //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud4Subscriber));
 
-        lamp_ros_constant.AddSubscriber(typeof(PointCloud2Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
 
         /*
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
