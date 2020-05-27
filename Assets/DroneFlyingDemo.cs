@@ -14,6 +14,7 @@ public class DroneFlyingDemo : MonoBehaviour
     private Vector3 origin;
     private Vector3 destination;
     private Vector3 home;
+    private bool endFlight = false;
     private float fraction = 0;
 
     // Update is called once per frame
@@ -42,7 +43,7 @@ public class DroneFlyingDemo : MonoBehaviour
         }
 
 
-        if (flying)
+        if (flying) 
         {
             if (fraction < 1)
             {
@@ -53,16 +54,25 @@ public class DroneFlyingDemo : MonoBehaviour
             else
             {
                 flying = false;
-                FlyNextWaypoint();
+                if (!endFlight)
+                {
+                    FlyNextWaypoint();
+                }
             }
 
         }
         
     }
 
-    public void FlyNextWaypoint()
+    public void FlyNextWaypoint(bool restart=false)
     {
         ArrayList waypoints = WorldProperties.selectedDrone.waypoints;
+
+        if (restart)
+        {
+            endFlight = false;
+            nextWaypointID = 0;
+        }
 
         /// Check if there is another waypoint
         if (waypoints.Count == nextWaypointID)
@@ -105,7 +115,7 @@ public class DroneFlyingDemo : MonoBehaviour
 
     public void flyHome()
     {
-        nextWaypointID = 10000;
+        endFlight = true;
         FlyNextWaypoint(home);
     }
 

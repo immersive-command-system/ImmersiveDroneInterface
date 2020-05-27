@@ -39,7 +39,7 @@ public class DroneButtons : MonoBehaviour {
             {
                 GameObject world = GameObject.FindGameObjectWithTag("World");
                 DroneFlyingDemo drone = world.GetComponent<DroneFlyingDemo>();
-                drone.FlyNextWaypoint();
+                drone.FlyNextWaypoint(true);
                 return;
             }
 
