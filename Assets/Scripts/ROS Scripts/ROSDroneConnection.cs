@@ -25,7 +25,7 @@ public class ROSDroneConnection : MonoBehaviour
     public bool connectionStatus = false;
     public string LampIP = "192.168.1.73";
     public string ManifoldIP = "192.168.60.191";
-    public int pointCloudLevel = -1;
+    public int pointCloudLevel;
 
     void Start()
     {
@@ -51,9 +51,10 @@ public class ROSDroneConnection : MonoBehaviour
 
         // TODO: Update default subscriber after testing system.
         //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud3Subscriber));
-        //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+        pointCloudLevel = 4;
 
-        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+        //lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
 
         /*
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
@@ -216,7 +217,7 @@ public class ROSDroneConnection : MonoBehaviour
             lamp_ros_variable.Disconnect();
         }
 
-        lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://"+LampIP, 9090);
+        //lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://"+LampIP, 9090);
         lamp_ros_variable.AddSubscriber(subscriber);
         lamp_ros_variable.Connect();
     }

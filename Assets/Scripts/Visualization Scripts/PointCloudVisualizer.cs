@@ -10,13 +10,13 @@ public class PointCloudVisualizer : MonoBehaviour
     public bool flipYZ = false;
 
 
-    Color red = new Color(255, 0, 0, 1);
-    Color orange = new Color(255, 130, 0, 1);
-    Color yellow = new Color(255, 255, 0, 1);
-    Color green = new Color(0, 255, 0, 1);
-    Color blue = new Color(0, 0, 255, 1);
-    Color light_blue = new Color(52, 174, 235, 1);
-    Color white = new Color(255, 255, 255, 1);
+    Color red = new Color32(255, 0, 0, 128);
+    Color orange = new Color32(255, 130, 0, 128);
+    Color yellow = new Color32(255, 255, 0, 128);
+    Color green = new Color32(0, 255, 0, 128);
+    Color blue = new Color32(0, 0, 255, 128);
+    Color light_blue = new Color32(52, 174, 235, 128);
+    Color white = new Color32(255, 255, 255, 128);
 
 
     /// <summary>
@@ -67,11 +67,15 @@ public class PointCloudVisualizer : MonoBehaviour
         cloudParent.transform.localScale = new Vector3(0.05286196f, 0.05286196f, 0.05286196f);
         cloudParent.transform.Rotate(0.0f, 128.382f, 0.0f, Space.World);
         bool printOnce = false;
+        int cloudLength = newCloud.Points.Count;
+        double discard = System.Math.Max(0, 1 - 10000.0 / cloudLength);
+        Debug.Log("Discard: " + discard + "\tCount: " + cloudLength);
         foreach (PointXYZRGBAIntensity point in newCloud.Points)
         {
 
+            
 
-            if (Random.value < 0.89)
+            if (Random.value < discard)
             {
                 continue;
             }
@@ -81,10 +85,12 @@ public class PointCloudVisualizer : MonoBehaviour
             Vector3 pointPosition = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
             //Debug.Log("X:" + pointPosition.x + "\tZ:" + pointPosition.z + "\tY" + pointPosition.y);
             
-            if (pointPosition.x > 11 || pointPosition.z > -10 || pointPosition.x < -10 || pointPosition.z < -30 || pointPosition.y < -0.03 || pointPosition.y > 5.2)
+            
+            if (pointPosition.x > 14 || pointPosition.z > -10 || pointPosition.x < -14 || pointPosition.z < -30 || pointPosition.y < -0.03 || pointPosition.y > 5.2)
             {
                 continue;
             }
+            
             
             //if(pointPosition - )
 
@@ -99,12 +105,15 @@ public class PointCloudVisualizer : MonoBehaviour
             childPoint.transform.localScale = new Vector3(size, size, size); // size of each point
             //Debug.Log("X:" + childPoint.transform.localPosition.x + "\tZ:" + childPoint.transform.localPosition.z + "\tY" + childPoint.transform.localPosition.y);
 
+            int pointCloudLevel = WorldProperties.worldObject.GetComponent<ROSDroneConnection>().pointCloudLevel;
 
 
             if (!printOnce)
             {
                 printOnce = true;
                 Debug.Log("R:" + point.R + "\tG:" + point.G + "\tB" + point.B + "\tA" + point.A);
+                Debug.Log("Point Cloud Level: " + pointCloudLevel);
+
             }
             Color color = new Color((float)point.R / 255.0f, (float)point.G / 255.0f, (float)point.B / 255.0f, (float)point.A / 255.0f);
             
@@ -113,7 +122,6 @@ public class PointCloudVisualizer : MonoBehaviour
 
             // Peru: 5/26/20 : New color scheme
 
-            int pointCloudLevel = WorldProperties.worldObject.GetComponent<ROSDroneConnection>().pointCloudLevel;
             
             if (pointCloudLevel == 5)
             {
@@ -122,6 +130,7 @@ public class PointCloudVisualizer : MonoBehaviour
             else if (pointCloudLevel == 4)
             {
                 color = orange;
+                
             }
             else if (pointCloudLevel == 3)
             {
@@ -143,6 +152,7 @@ public class PointCloudVisualizer : MonoBehaviour
             {
                 color = white;
             }
+
 
             pMaterial.color = color;
             pRenderer.material = pMaterial;

@@ -8,7 +8,7 @@ public class PointCloud2Subscriber : ROSBridgeSubscriber
 {
     public static string rendererObjectName = "PlacementPlane"; // pick a center point of the map, ideally as part of rotating map
 
-    private static bool verbose = false;
+    private static bool verbose = true;
 
     public new static string GetMessageTopic()
     {
