@@ -89,7 +89,7 @@ public class PointCloud2Msg : ROSBridgeMsg {
             float z = System.BitConverter.ToSingle(_data, i * (int)_point_step + 8);
             uint rgba = System.BitConverter.ToUInt32(_data, i * (int)_point_step + 12);
             float intensity = System.BitConverter.ToSingle(_data, i * (int)_point_step + 12);
-            if (!(float.IsNaN(x) || float.IsNaN(y) || float.IsNaN(z) || float.IsNaN(intensity)))
+            if (!(float.IsNaN(x) || float.IsNaN(y) || float.IsNaN(z)))
             {
              
                 PointXYZRGBAIntensity p = new PointXYZRGBAIntensity(x, y, z, rgba, intensity);
