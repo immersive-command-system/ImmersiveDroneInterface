@@ -1,4 +1,4 @@
-namespace ISAACS
+﻿namespace ISAACS
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -144,6 +144,14 @@ namespace ISAACS
                 if (citySimActive)
                 {
                     citySimParent.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
+                }
+
+                // Peru: 5/28/2020 : Point Cloud Rotate
+                GameObject pointCloud = GameObject.Find("PointCloud");
+
+                if (pointCloud)
+                {
+                    pointCloud.transform.RotateAround(pivot.transform.position, Vector3.up, angle);
                 }
 
                 if (rotatingTable)

@@ -1112,6 +1112,7 @@ MonoBehaviour:
   waypointBaseObject: {fileID: 1161822125618724, guid: c209b41633a109640bb6a3527c86c801,
     type: 2}
   torus: {fileID: 1895450155305386, guid: ba09a8628d2ed474786002f92e987b58, type: 2}
+  rsf_roof: {fileID: 1320984946}
   citySim: {fileID: 1672332645}
   abstractMap: {fileID: 1672332646}
   initZoom_citySim: 21
@@ -4434,11 +4435,11 @@ GameObject:
   - component: {fileID: 1320984948}
   m_Layer: 0
   m_Name: RFS Building Rooftop
-  m_TagString: Untagged
+  m_TagString: rfs_roof
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1320984947
 Transform:
   m_ObjectHideFlags: 0

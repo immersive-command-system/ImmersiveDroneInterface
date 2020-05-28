@@ -23,6 +23,7 @@
         public GameObject droneBaseObject;
         public GameObject waypointBaseObject;
         public GameObject torus;
+        public GameObject rsf_roof;
 
         public static double droneHomeLat;
         public static double droneHomeLong;
@@ -405,6 +406,7 @@
             this.GetComponent<MapInteractions>().currLong_citySim = initLong_citySim;
             this.GetComponent<MapInteractions>().currPosition_citySim = citySim.transform.position;
 
+            rsf_roof.SetActive(true);
         }
 
         /// <summary>

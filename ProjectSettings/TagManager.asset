@@ -26,6 +26,7 @@ TagManager:
   - WaypointPlacement
   - selectionZone
   - drone1
+  - rfs_roof
   layers:
   - Default
   - TransparentFX
