@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI; // <-- you need this to access UI (button in this case) functionalities
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -11,6 +11,7 @@ public class RadiationButtons : MonoBehaviour {
     Drone drone;
     private GameObject controller; //needed to access pointer
 
+    public bool surface_pointcloud = false;
     public bool Level_0 = false;
     public bool Level_1 = false;
     public bool Level_2 = false;
@@ -28,6 +29,11 @@ public class RadiationButtons : MonoBehaviour {
 
     void OnClickEvent()
     {
+        if (surface_pointcloud)
+        {
+            Debug.Log("Switching to surface point cloud");
+            WorldProperties.worldObject.GetComponent<ROSDroneConnection>().LampSubscribe_SurfacePointcloud();
+        }
 
         if (Level_0)
         {

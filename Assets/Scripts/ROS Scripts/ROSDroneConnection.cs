@@ -51,8 +51,8 @@ public class ROSDroneConnection : MonoBehaviour
 
         // TODO: Update default subscriber after testing system.
         //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud3Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
-        pointCloudLevel = 4;
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
+        pointCloudLevel = 3;
 
         //lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
 
