@@ -97,7 +97,7 @@ public class PointCloudVisualizer : MonoBehaviour
 
             childPoint.transform.localPosition = (flipYZ) ? new Vector3(point.X, point.Z, point.Y) : new Vector3(point.X, point.Y, point.Z);
             childPoint.transform.localScale = new Vector3(size, size, size); // size of each point
-            Debug.Log("X:" + childPoint.transform.localPosition.x + "\tZ:" + childPoint.transform.localPosition.z + "\tY" + childPoint.transform.localPosition.y);
+            //Debug.Log("X:" + childPoint.transform.localPosition.x + "\tZ:" + childPoint.transform.localPosition.z + "\tY" + childPoint.transform.localPosition.y);
 
 
 

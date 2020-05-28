@@ -112,34 +112,47 @@ public class ROSDroneConnection : MonoBehaviour
         lamp_ros_variable.Render();
 
         // Keyboard inputs when the Unity project is running.
+
+
+        if (Input.GetKeyUp("0"))
+        {
+            LampSubscribe_Colorized_0();
+        }
+
         if (Input.GetKeyUp("1"))
         {
-            GetAuthority();
+            LampSubscribe_Colorized_1();
+            //GetAuthority();
         }
 
         if (Input.GetKeyUp("2"))
         {
-            GetVersion();
+            LampSubscribe_Colorized_2();
+            //GetVersion();
         }
 
         if (Input.GetKeyUp("3"))
         {
-            Spin();
+            LampSubscribe_Colorized_3();
+            //Spin();
         }
 
         if (Input.GetKeyUp("4"))
         {
-            StopSpinning();
+            LampSubscribe_Colorized_4();
+            //StopSpinning();
         }
 
         if (Input.GetKeyUp("5"))
         {
-            Takeoff();
+            LampSubscribe_Colorized_5();
+            //Takeoff();
         }
 
         if (Input.GetKeyUp("6"))
         {
-            Land();
+            LampSubscribe_SurfacePointcloud();
+            //Land();
         }
         //creates a hardcoded test mission and uploads it to the drone. For testing/sanity check purposes only.
         if (Input.GetKeyUp("q"))
@@ -166,6 +179,8 @@ public class ROSDroneConnection : MonoBehaviour
             UploadMission(test_Task);
         }
 
+        /* Old Debugging statements
+
         if (Input.GetKeyUp("w"))
         {
             CreateMission();
@@ -185,7 +200,7 @@ public class ROSDroneConnection : MonoBehaviour
         {
             Debug.Log(WorldProperties.LongDiffMeters(122.2578f, 122.4783f, 37.8721f));
         }
-
+        */
 
     }
 
