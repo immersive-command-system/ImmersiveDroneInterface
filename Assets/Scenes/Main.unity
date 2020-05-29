@@ -389,12 +389,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Level_0: 0
+  surface_pointcloud: 0
+  Level_0: 1
   Level_1: 0
   Level_2: 0
   Level_3: 0
   Level_4: 0
-  Level_5: 1
+  Level_5: 0
 --- !u!65 &72917795
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -982,10 +983,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  surface_pointcloud: 0
   Level_0: 0
   Level_1: 0
-  Level_2: 1
-  Level_3: 0
+  Level_2: 0
+  Level_3: 1
   Level_4: 0
   Level_5: 0
 --- !u!1 &146794962
@@ -3136,11 +3138,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  surface_pointcloud: 0
   Level_0: 0
-  Level_1: 0
+  Level_1: 1
   Level_2: 0
   Level_3: 0
-  Level_4: 1
+  Level_4: 0
   Level_5: 0
 --- !u!65 &716024047
 BoxCollider:
@@ -5154,10 +5157,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  surface_pointcloud: 0
   Level_0: 0
   Level_1: 0
-  Level_2: 0
-  Level_3: 1
+  Level_2: 1
+  Level_3: 0
   Level_4: 0
   Level_5: 0
 --- !u!65 &1470007011
@@ -5393,12 +5397,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Level_0: 1
+  surface_pointcloud: 0
+  Level_0: 0
   Level_1: 0
   Level_2: 0
   Level_3: 0
   Level_4: 0
-  Level_5: 0
+  Level_5: 1
 --- !u!65 &1509680897
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7534,11 +7539,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54686ca702f5d8a4a877621c43257c75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  surface_pointcloud: 0
   Level_0: 0
-  Level_1: 1
+  Level_1: 0
   Level_2: 0
   Level_3: 0
-  Level_4: 0
+  Level_4: 1
   Level_5: 0
 --- !u!65 &2093951361
 BoxCollider:

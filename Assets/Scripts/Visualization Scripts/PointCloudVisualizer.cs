@@ -65,6 +65,7 @@ public class PointCloudVisualizer : MonoBehaviour
         //cloudParent.transform.parent = world.transform;
         cloudParent.transform.position = new Vector3(0.242f, 2.082f, -0.742f);
         cloudParent.transform.localScale = new Vector3(0.05286196f, 0.05286196f, 0.05286196f);
+        //cloudParent.transform.Rotate(0.0f, 163.152f, 0.0f, Space.World);
         cloudParent.transform.Rotate(0.0f, 128.382f, 0.0f, Space.World);
         bool printOnce = false;
         int cloudLength = newCloud.Points.Count;
@@ -123,28 +124,28 @@ public class PointCloudVisualizer : MonoBehaviour
             // Peru: 5/26/20 : New color scheme
 
             
-            if (pointCloudLevel == 5)
+            if (pointCloudLevel == 0)
             {
                 color = red;
             }
-            else if (pointCloudLevel == 4)
+            else if (pointCloudLevel == 1)
             {
                 color = orange;
                 
             }
-            else if (pointCloudLevel == 3)
+            else if (pointCloudLevel == 2)
             {
                 color = yellow;
             }
-            else if (pointCloudLevel == 2)
+            else if (pointCloudLevel == 3)
             {
                 color = green;
             }
-            else if (pointCloudLevel == 1)
+            else if (pointCloudLevel == 4)
             {
                 color = blue;
             }
-            else if (pointCloudLevel == 0)
+            else if (pointCloudLevel == 5)
             {
                 color = light_blue;
             }

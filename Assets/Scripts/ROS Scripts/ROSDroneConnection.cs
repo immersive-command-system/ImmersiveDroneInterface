@@ -51,8 +51,8 @@ public class ROSDroneConnection : MonoBehaviour
 
         // TODO: Update default subscriber after testing system.
         //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud3Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
-        pointCloudLevel = 3;
+        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+        pointCloudLevel = 4;
 
         //lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
 
@@ -115,36 +115,36 @@ public class ROSDroneConnection : MonoBehaviour
         // Keyboard inputs when the Unity project is running.
 
 
-        if (Input.GetKeyUp("0"))
+        if (Input.GetKeyUp("5"))
         {
             LampSubscribe_Colorized_0();
         }
 
-        if (Input.GetKeyUp("1"))
+        if (Input.GetKeyUp("4"))
         {
             LampSubscribe_Colorized_1();
             //GetAuthority();
         }
 
-        if (Input.GetKeyUp("2"))
+        if (Input.GetKeyUp("3"))
         {
             LampSubscribe_Colorized_2();
             //GetVersion();
         }
 
-        if (Input.GetKeyUp("3"))
+        if (Input.GetKeyUp("2"))
         {
             LampSubscribe_Colorized_3();
             //Spin();
         }
 
-        if (Input.GetKeyUp("4"))
+        if (Input.GetKeyUp("1"))
         {
             LampSubscribe_Colorized_4();
             //StopSpinning();
         }
 
-        if (Input.GetKeyUp("5"))
+        if (Input.GetKeyUp("0"))
         {
             LampSubscribe_Colorized_5();
             //Takeoff();
@@ -243,19 +243,23 @@ public class ROSDroneConnection : MonoBehaviour
     public void LampSubscribe_Colorized_2()
     {
         resetLampConnection(typeof(ColorizedCloud2Subscriber));
-        pointCloudLevel = 2;
+        //pointCloudLevel = 2;
+        pointCloudLevel = 0;
+
     }
 
     public void LampSubscribe_Colorized_3()
     {
         resetLampConnection(typeof(ColorizedCloud3Subscriber));
-        pointCloudLevel = 3;
+        //pointCloudLevel = 3;
+        pointCloudLevel = 0;
     }
 
     public void LampSubscribe_Colorized_4()
     {
         resetLampConnection(typeof(ColorizedCloud4Subscriber));
-        pointCloudLevel = 4;
+        //pointCloudLevel = 4;
+        pointCloudLevel = 3;
     }
 
     public void LampSubscribe_Colorized_5()
