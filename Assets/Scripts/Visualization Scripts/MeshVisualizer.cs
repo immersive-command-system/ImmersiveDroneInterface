@@ -38,6 +38,7 @@ public class MeshVisualizer : MonoBehaviour
         float scale_factor = meshMsg.GetBlockEdgeLength();
 
         MeshBlockMsg[] mesh_blocks = meshMsg.GetMeshBlocks();
+        Debug.Log(mesh_blocks.Length);
         for (int i = 0; i < mesh_blocks.Length; i++)
         {
             Int64[] index = mesh_blocks[i].GetIndex();
@@ -46,21 +47,21 @@ public class MeshVisualizer : MonoBehaviour
             float[] pos_x = new float[x.Length];
             for (int j = 0; j < pos_x.Length; j++)
             {
-                pos_x[i] = (float)x[i] / 32768.0f + index[0] * scale_factor;
+                pos_x[j] = (float)x[j] / 32768.0f + index[0] * scale_factor;
             }
 
             UInt16[] y = mesh_blocks[i].GetY();
             float[] pos_y = new float[y.Length];
             for (int j = 0; j < pos_x.Length; j++)
             {
-                pos_y[i] = (float)y[i] / 32768.0f + index[1] * scale_factor;
+                pos_y[j] = (float)y[j] / 32768.0f + index[1] * scale_factor;
             }
 
             UInt16[] z = mesh_blocks[i].GetZ();
             float[] pos_z = new float[z.Length];
             for (int j = 0; j < pos_z.Length; j++)
             {
-                pos_z[i] = (float)z[i] / 32768.0f + index[2] * scale_factor;
+                pos_z[j] = (float)z[j] / 32768.0f + index[2] * scale_factor;
             }
 
             byte[] r = mesh_blocks[i].GetR();
@@ -94,7 +95,7 @@ public class MeshVisualizer : MonoBehaviour
         foreach (KeyValuePair<Int64[], List<float[,]>> entry in mesh_dict)
         {
             float[,] pos_list = entry.Value[0];
-            Vector3[] verts = new Vector3[pos_list.GetLength(0)];
+            Vector3[] verts = new Vector3[pos_list.GetLength(1)];
 
             for (int i = 0; i < verts.Length; i++)
             {
@@ -104,9 +105,9 @@ public class MeshVisualizer : MonoBehaviour
             newVertices.AddRange(verts);
 
             float[,] color_list = entry.Value[1];
-            Color[] colors = new Color[color_list.GetLength(0)];
+            Color[] colors = new Color[color_list.GetLength(1)];
 
-            for (int i = 0; i < verts.Length; i++)
+            for (int i = 0; i < colors.Length; i++)
             {
                 colors[i] = new Color(color_list[0, i], color_list[1, i], color_list[2, i], 0.2f);
             }
