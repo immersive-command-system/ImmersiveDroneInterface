@@ -97,6 +97,10 @@ namespace ROSBridgeLib
                 }
                 
                 temp = msg["r"].AsArray;
+                if (temp == null)
+                {
+                    temp = new byte[0];
+                }
                 _r = new byte[temp.Count];
                 for (int i = 0; i < _r.Length; i++)
                 {
