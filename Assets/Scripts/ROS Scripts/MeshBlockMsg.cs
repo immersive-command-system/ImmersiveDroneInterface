@@ -97,28 +97,33 @@ namespace ROSBridgeLib
                 }
                 
                 temp = msg["r"].AsArray;
-                if (temp == null)
+                if (temp != null)
                 {
-                    temp = new byte[0];
+                    _r = new byte[temp.Count];
+                    for (int i = 0; i < _r.Length; i++)
+                    {
+                        _r[i] = (byte)temp[i].AsInt;
+                    }
+
+                    temp = msg["g"].AsArray;
+                    _g = new byte[temp.Count];
+                    for (int i = 0; i < _g.Length; i++)
+                    {
+                        _g[i] = (byte)temp[i].AsInt;
+                    }
+
+                    temp = msg["b"].AsArray;
+                    _b = new byte[temp.Count];
+                    for (int i = 0; i < _b.Length; i++)
+                    {
+                        _b[i] = (byte)temp[i].AsInt;
+                    }
                 }
-                _r = new byte[temp.Count];
-                for (int i = 0; i < _r.Length; i++)
+                else
                 {
-                    _r[i] = (byte) temp[i].AsInt;
-                }
-                
-                temp = msg["g"].AsArray;
-                _g = new byte[temp.Count];
-                for (int i = 0; i < _g.Length; i++)
-                {
-                    _g[i] = (byte) temp[i].AsInt;
-                }
-                
-                temp = msg["b"].AsArray;
-                _b = new byte[temp.Count];
-                for (int i = 0; i < _b.Length; i++)
-                {
-                    _b[i] = (byte) temp[i].AsInt;
+                    _r = new byte[0];
+                    _b = new byte[0];
+                    _g = new byte[0];
                 }
                 
             }
