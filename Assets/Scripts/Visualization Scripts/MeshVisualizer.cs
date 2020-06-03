@@ -35,9 +35,9 @@ public class MeshVisualizer : MonoBehaviour
     public void SetMesh(MeshMsg meshMsg)
     {
         Debug.Log("Setting New Mesh");
-        float scale_factor = 1.6f;
+        float scale_factor = meshMsg.GetBlockEdgeLength();
 
-        ROSBridgeLib.voxblox_msgs.MeshBlockMsg[] mesh_blocks = meshMsg.GetMeshBlocks();
+        MeshBlockMsg[] mesh_blocks = meshMsg.GetMeshBlocks();
         for (int i = 0; i < mesh_blocks.Length; i++)
         {
             Int64[] index = mesh_blocks[i].GetIndex();
