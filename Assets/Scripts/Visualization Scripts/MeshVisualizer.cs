@@ -34,6 +34,7 @@ public class MeshVisualizer : MonoBehaviour
     /// <param name="meshMsg">ROSBridge Voxblox Mesh Message</param>
     public void SetMesh(MeshMsg meshMsg)
     {
+        Debug.Log("Setting New Mesh");
         float scale_factor = 1.6f;
 
         ROSBridgeLib.voxblox_msgs.MeshBlockMsg[] mesh_blocks = meshMsg.GetMeshBlocks();
@@ -122,10 +123,13 @@ public class MeshVisualizer : MonoBehaviour
         Destroy(meshParent);
         // Insert timestamp here maybe?
         meshParent = new GameObject("Mesh");
- 
+
+        MeshRenderer meshRenderer = meshParent.AddComponent<MeshRenderer>();
+        meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
+
         // TODO
         Mesh mesh = new Mesh();
-        meshParent.GetComponent<MeshFilter>().mesh = mesh;
+        MeshFilter meshFilter = meshParent.AddComponent<MeshFilter>();
         mesh.vertices = newVertices.ToArray();
         // ?
         //mesh.uv = newUV;
@@ -134,7 +138,8 @@ public class MeshVisualizer : MonoBehaviour
 
         // colors may not be the same lengths as vertices. Unity demands that it be the same as the vertices.
         mesh.colors = newColors.ToArray();
-       
+        meshFilter.mesh = mesh;
+
         hasChanged = true;
     }
 }

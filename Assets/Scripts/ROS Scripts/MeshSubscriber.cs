@@ -14,12 +14,12 @@ public class MeshSubscriber : ROSBridgeSubscriber
 
     public new static string GetMessageTopic()
     {
-        return "/voxblox_node/Mesh";
+        return "/voxblox_node/mesh";
     }
 
     public new static string GetMessageType()
     {
-        return "voxblox_msgs/MeshMsg";
+        return "voxblox_msgs/Mesh";
     }
 
     public new static ROSBridgeMsg ParseMessage(JSONNode msg)
@@ -29,8 +29,9 @@ public class MeshSubscriber : ROSBridgeSubscriber
 
     public new static void CallBack(ROSBridgeMsg msg)
     {
+        Debug.Log("Mesh Visualizer Callback.");
         MeshMsg meshMsg = (MeshMsg)msg;
         MeshVisualizer visualizer = GameObject.Find(rendererObjectName).GetComponent<MeshVisualizer>();
         visualizer.SetMesh(meshMsg);
-   }
+    }
 }

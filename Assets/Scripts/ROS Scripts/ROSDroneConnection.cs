@@ -49,7 +49,7 @@ public class ROSDroneConnection : MonoBehaviour
         //lamp_ros_constant.AddSubscriber(typeof(SurfaceMeshSubscriber));
 
         // TODO: Update default subscriber after testing system.
-        lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
+        lamp_ros_variable.AddSubscriber(typeof(MeshSubscriber));
 
         lamp_ros_constant.Connect();
         lamp_ros_variable.Connect();
