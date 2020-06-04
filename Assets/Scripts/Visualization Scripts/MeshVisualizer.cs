@@ -17,9 +17,6 @@ public class MeshVisualizer : MonoBehaviour
     {
         mesh_dict = new Dictionary<long[], MeshFilter>();
         meshParent = new GameObject("Mesh");
-        if (flipYZ) {
-            meshParent.transform.rotation = Quaternion.Euler(-90.0f, 0, 0);
-        }
     }
 
     // Update is called once per frame
@@ -55,10 +52,17 @@ public class MeshVisualizer : MonoBehaviour
             UInt16[] z = mesh_blocks[i].GetZ();
             for (int j = 0; j < x.Length; j++)
             {
-                float zv = (float)z[j] / 32768.0f + index[2] * scale_factor;
-                float xv = (float)x[j] / 32768.0f + index[0] * scale_factor;
-                float yv = (float)y[j] / 32768.0f + index[1] * scale_factor;
-                newVertices.Add(new Vector3(xv, yv, zv));
+                float zv = ((float)z[j] / 32768.0f + index[2]) * scale_factor;
+                float xv = ((float)x[j] / 32768.0f + index[0]) * scale_factor;
+                float yv = ((float)y[j] / 32768.0f + index[1]) * scale_factor;
+                if (flipYZ)
+                {
+                    newVertices.Add(new Vector3(xv, zv, yv));
+                } 
+                else
+                {
+                    newVertices.Add(new Vector3(xv, yv, zv));
+                }
             }
             byte[] r = mesh_blocks[i].GetR();
             byte[] g = mesh_blocks[i].GetG();
@@ -66,9 +70,14 @@ public class MeshVisualizer : MonoBehaviour
 
             for (int j = 0; j < r.Length; j++)
             {
+                if (j == 0)
+                {
+                    Debug.Log("R: " + r[j] + " G: " + g[j] + " B: " + b[j]);
+                }
                 newColors.Add(new Color32(r[j], g[j], b[j], 51));
             }
 
+            Debug.Log("Color Length:" + r.Length);
             //    mesh_dict.Add(index, data_list);
 
             int[] newTriangles = new int[newVertices.Count / 3 * 3];
@@ -85,7 +94,7 @@ public class MeshVisualizer : MonoBehaviour
                 meshObject.transform.parent = meshParent.transform;
                 MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
                 MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-                meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
+                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Surface"));
                 mesh_dict.Add(index, meshFilter);
             }
             mesh.vertices = newVertices.ToArray();

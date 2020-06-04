@@ -95,32 +95,35 @@ namespace ROSBridgeLib
                 {
                     _z[i] = (UInt16) temp[i].AsInt;
                 }
+                Debug.Log("Block");
                 
-                temp = msg["r"].AsArray;
-                if (temp != null)
+                JSONArray tempColor = msg["r"].AsArray;
+                if (tempColor != null)
                 {
-                    _r = new byte[temp.Count];
+                    Debug.Log("Not Null Color");
+                    _r = new byte[tempColor.Count];
                     for (int i = 0; i < _r.Length; i++)
                     {
-                        _r[i] = (byte)temp[i].AsInt;
+                        _r[i] = (byte)tempColor[i].AsInt;
                     }
 
-                    temp = msg["g"].AsArray;
-                    _g = new byte[temp.Count];
+                    tempColor = msg["g"].AsArray;
+                    _g = new byte[tempColor.Count];
                     for (int i = 0; i < _g.Length; i++)
                     {
-                        _g[i] = (byte)temp[i].AsInt;
+                        _g[i] = (byte)tempColor[i].AsInt;
                     }
 
-                    temp = msg["b"].AsArray;
-                    _b = new byte[temp.Count];
+                    tempColor = msg["b"].AsArray;
+                    _b = new byte[tempColor.Count];
                     for (int i = 0; i < _b.Length; i++)
                     {
-                        _b[i] = (byte)temp[i].AsInt;
+                        _b[i] = (byte)tempColor[i].AsInt;
                     }
                 }
                 else
                 {
+                    Debug.Log("Null Color" + msg["r"].AsArray);
                     _r = new byte[0];
                     _b = new byte[0];
                     _g = new byte[0];
