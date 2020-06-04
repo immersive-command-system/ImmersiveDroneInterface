@@ -999,10 +999,11 @@ GameObject:
   m_Component:
   - component: {fileID: 146794963}
   - component: {fileID: 146794964}
-  - component: {fileID: 146794966}
   - component: {fileID: 146794967}
   - component: {fileID: 146794968}
   - component: {fileID: 146794965}
+  - component: {fileID: 146794966}
+  - component: {fileID: 146794969}
   m_Layer: 0
   m_Name: World
   m_TagString: World
@@ -1095,10 +1096,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aebd008abee601a489d49b2b7b8a3328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ManifoldIP: 192.168.60.191
   connectionStatus: 0
   LampIP: 99.46.143.114
-  ManifoldIP: 192.168.60.191
   pointCloudLevel: -1
+  DronePosition: 1
+  DroneBattery: 0
+  GPSHealth: 0
 --- !u!114 &146794967
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1148,6 +1152,23 @@ MonoBehaviour:
   executeUploadedMission: u
   worldProperties: {fileID: 0}
   rosDroneConnection: {fileID: 0}
+--- !u!114 &146794969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 146794962}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce92dc007be5484299b77fd511d38c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sensorIP: 192.168.1.73
+  pointCloudLevel: 0
+  connectionStatus: 0
+  surfacePointCloud: 1
+  colorizedPointCloud3: 0
+  surfaceMeshSubscriber: 0
 --- !u!1 &161977055
 GameObject:
   m_ObjectHideFlags: 0
