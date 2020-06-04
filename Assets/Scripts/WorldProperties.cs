@@ -18,6 +18,9 @@
     /// </summary>
     public class WorldProperties : MonoBehaviour
     {
+
+        public static bool simulation = true;
+
         public static double planningTime;
         public static double runtime;
         public GameObject droneBaseObject;
@@ -88,6 +91,9 @@
         private static int nextWaypointID = 0;
         private static int currentWaypointID = 0;
 
+        // private DroneFlightSim
+        private static DroneSimulationManager droneSim;
+
         // Use this for initialization
         void Start()
         {
@@ -116,9 +122,14 @@
             obstacleids = new HashSet<int>();
             obstacleDistsToPrint = new List<string>();
 
-
-
             NewDrone();
+
+            if (simulation)
+            {
+                droneSim = worldObject.GetComponent<DroneSimulationManager>();
+                droneSim.InitDroneSim();
+            }
+
         }
 
         private void Update()
@@ -183,6 +194,13 @@
         /// </summary>
         public static void StartDroneMission()
         {
+            if (simulation)
+            {
+                DroneSimulationManager droneSim = worldObject.GetComponent<DroneSimulationManager>();
+                droneSim.FlyNextWaypoint(true);
+                return;
+            }
+
 
             ArrayList waypoints = WorldProperties.selectedDrone.waypoints;
 
@@ -364,6 +382,12 @@
         /// </summary>
         public static void PauseDroneMission()
         {
+            if (simulation)
+            {
+                droneSim.pauseFlight();
+                return;
+            }
+
             missionActive = false;
             inFlight = false;
             worldObject.GetComponent<ROSDroneConnection>().PauseMission();
@@ -374,9 +398,42 @@
         /// </summary>
         public static void ResumeDroneMission()
         {
+            if (simulation)
+            {
+                droneSim.resumeFlight();
+                return;
+            }
+
             missionActive = true;
             inFlight = false;
             worldObject.GetComponent<ROSDroneConnection>().ResumeMission();
+        }
+
+        /// <summary>
+        /// Land the drone
+        /// </summary>
+        public static void LandDrone()
+        {
+            if (simulation)
+            {
+                return;
+            }
+
+            worldObject.GetComponent<ROSDroneConnection>().Land();
+        }
+
+        /// <summary>
+        /// Send the drone home
+        /// </summary>
+        public static void SendDroneHome()
+        {
+            if (simulation)
+            {
+                droneSim.flyHome();
+                return;
+            }
+
+            worldObject.GetComponent<ROSDroneConnection>().GoHome();
         }
 
         /// <summary>

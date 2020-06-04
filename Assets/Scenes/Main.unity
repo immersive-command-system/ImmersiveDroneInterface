@@ -1001,6 +1001,7 @@ GameObject:
   - component: {fileID: 146794964}
   - component: {fileID: 146794966}
   - component: {fileID: 146794967}
+  - component: {fileID: 146794968}
   - component: {fileID: 146794965}
   m_Layer: 0
   m_Name: World
@@ -1079,10 +1080,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 146794962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc1dbd07f7a099546995229a1320899c, type: 3}
+  m_Script: {fileID: 11500000, guid: 2b86b85bed8ddbd4182b293bba8676c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.1
+  speed: 0.2
 --- !u!114 &146794966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1120,6 +1121,33 @@ MonoBehaviour:
   initZoom_citySim: 21
   initLat_citySim: 0
   initLong_citySim: 0
+--- !u!114 &146794968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 146794962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bc7a46ece2871e4db778d4473366e70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  subscribeSurfacePointCloud: 6
+  subscribeColorized0: 0
+  subscribeColorized1: 1
+  subscribeColorized2: 2
+  subscribeColorized3: 3
+  subscribeColorized4: 4
+  subscribeColorized5: 5
+  getAuthority: q
+  getVersion: w
+  takeoffDrone: e
+  landDrone: r
+  uploadTestMission: t
+  missionInfo: y
+  executeUploadedMission: u
+  worldProperties: {fileID: 0}
+  rosDroneConnection: {fileID: 0}
 --- !u!1 &161977055
 GameObject:
   m_ObjectHideFlags: 0
@@ -1814,7 +1842,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulation: 1
   startMission: 1
   pauseMission: 0
   resumeMission: 0
@@ -2027,7 +2054,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 0
@@ -2450,7 +2476,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulation: 1
   startMission: 0
   pauseMission: 1
   resumeMission: 0
@@ -3619,7 +3644,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 0
@@ -5025,7 +5049,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 1
@@ -6397,7 +6420,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578ceabbac682ee4680e7ff06395e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulation: 1
   startMission: 0
   pauseMission: 0
   resumeMission: 0

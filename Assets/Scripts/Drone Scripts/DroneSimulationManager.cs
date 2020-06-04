@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using ISAACS;
 
-public class DroneFlyingDemo : MonoBehaviour
-{
+public class DroneSimulationManager : MonoBehaviour {
 
+    [Header("Selected drone and simulation speed")]
     public Drone drone;
-    public float speed = 1.0f;
+    public float speed = 0.2f;
 
     private int nextWaypointID = 0;
     private bool flying = false;
@@ -20,30 +20,8 @@ public class DroneFlyingDemo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            Debug.Log("Init drone");
-            drone = WorldProperties.selectedDrone;
-            home = drone.gameObjectPointer.transform.localPosition;
-            Debug.Log(drone);
-        }
 
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            Debug.Log("test waypoint");
-            Vector3 test_waypoint = new Vector3(1.0f, 1.0f, 1.0f);
-            FlyNextWaypoint(test_waypoint);
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            Debug.Log("Start flying");
-            FlyNextWaypoint();
-        }
-
-
-        if (flying) 
+        if (flying)
         {
             if (fraction < 1)
             {
@@ -61,10 +39,18 @@ public class DroneFlyingDemo : MonoBehaviour
             }
 
         }
-        
+
     }
 
-    public void FlyNextWaypoint(bool restart=false)
+    public void InitDroneSim()
+    {
+        Debug.Log("Drone Flight Sim initilized");
+        drone = WorldProperties.selectedDrone;
+        home = drone.gameObjectPointer.transform.localPosition;
+
+    }
+
+    public void FlyNextWaypoint(bool restart = false)
     {
         ArrayList waypoints = WorldProperties.selectedDrone.waypoints;
 

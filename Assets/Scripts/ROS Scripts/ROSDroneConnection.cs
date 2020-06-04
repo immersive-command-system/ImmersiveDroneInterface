@@ -19,13 +19,25 @@ public class ROSDroneConnection : MonoBehaviour
 {
     private ROSBridgeWebSocketConnection ros = null;
 
+    // TODO: Remove 
+    //***
     private ROSBridgeWebSocketConnection lamp_ros_variable = null;
     private ROSBridgeWebSocketConnection lamp_ros_constant = null;
+    // ***
 
-    public bool connectionStatus = false;
-    public string LampIP = "192.168.1.73";
+    [Header("Drone Variables")]
     public string ManifoldIP = "192.168.60.191";
+    public bool connectionStatus = false;
+
+    [Header("TO REMOVE: Sensor Variables")]
+    public string LampIP = "192.168.1.73";
     public int pointCloudLevel;
+
+    [Header("Drone Subscribers")]
+    public bool DronePosition = true;
+    public bool DroneBattery = false;
+    public bool GPSHealth = false;
+
 
     void Start()
     {
@@ -36,41 +48,39 @@ public class ROSDroneConnection : MonoBehaviour
         // gains access to important drone information such as drone real-time GPS position, battery life,
         // GPS signal quality, Radiation Point Cloud etc.
         ros.AddServiceResponse(typeof(ROSDroneServiceResponse));
-        ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
-        ros.AddSubscriber(typeof(M210_Battery_Subscriber));
-        ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
 
-        
+        if (DronePosition)
+        {
+            ros.AddSubscriber(typeof(M210_DronePositionSubscriber));
+        }
+
+        if (DroneBattery)
+        {
+            ros.AddSubscriber(typeof(M210_Battery_Subscriber));
+        }
+
+        if (GPSHealth)
+        {
+            ros.AddSubscriber(typeof(M210_GPSHealth_Subscriber));
+        }
+
+        // TODO: Remove
+        // ***
 
         // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
         lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
         lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
 
-        // TODO: Create SurfaceMeshSubscriber
-        //lamp_ros_constant.AddSubscriber(typeof(SurfaceMeshSubscriber));
-
-        // TODO: Update default subscriber after testing system.
-        //lamp_ros_constant.AddSubscriber(typeof(ColorizedCloud3Subscriber));
         lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
         pointCloudLevel = 4;
-
-        //lamp_ros_variable.AddSubscriber(typeof(PointCloud2Subscriber));
-
-        /*
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud0Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud1Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud2Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud3Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud5Subscriber));
-        */
-
-        ros.Connect();
+        
         lamp_ros_constant.Connect();
         lamp_ros_variable.Connect();
 
-        Debug.Log("Sending connection attempt to ROS");
+        // ***
 
+        Debug.Log("Sending connection attempt to ROS");
+        ros.Connect();
         connectionStatus = true;
 
     }
@@ -86,6 +96,9 @@ public class ROSDroneConnection : MonoBehaviour
             ros.Disconnect();
         }
 
+        //TODO: Remove
+        // ***
+
         if (lamp_ros_constant != null)
         {
             lamp_ros_constant.Disconnect();
@@ -96,6 +109,8 @@ public class ROSDroneConnection : MonoBehaviour
             lamp_ros_variable.Disconnect();
         }
 
+        // ***
+
     }
 
     /// <summary>
@@ -105,105 +120,22 @@ public class ROSDroneConnection : MonoBehaviour
     /// </summary>
     void Update()
     {
-
         ros.Render();
 
-        
+        //TODO: Remove
+        // ***
+
         lamp_ros_constant.Render();
         lamp_ros_variable.Render();
 
-        // Keyboard inputs when the Unity project is running.
-
-
-        if (Input.GetKeyUp("5"))
-        {
-            LampSubscribe_Colorized_0();
-        }
-
-        if (Input.GetKeyUp("4"))
-        {
-            LampSubscribe_Colorized_1();
-            //GetAuthority();
-        }
-
-        if (Input.GetKeyUp("3"))
-        {
-            LampSubscribe_Colorized_2();
-            //GetVersion();
-        }
-
-        if (Input.GetKeyUp("2"))
-        {
-            LampSubscribe_Colorized_3();
-            //Spin();
-        }
-
-        if (Input.GetKeyUp("1"))
-        {
-            LampSubscribe_Colorized_4();
-            //StopSpinning();
-        }
-
-        if (Input.GetKeyUp("0"))
-        {
-            LampSubscribe_Colorized_5();
-            //Takeoff();
-        }
-
-        if (Input.GetKeyUp("6"))
-        {
-            LampSubscribe_SurfacePointcloud();
-            //Land();
-        }
-        //creates a hardcoded test mission and uploads it to the drone. For testing/sanity check purposes only.
-        if (Input.GetKeyUp("q"))
-        {
-
-            uint[] command_list = new uint[16];
-            uint[] command_params = new uint[16];
-            for (int i = 0; i < 16; i++)
-            {
-                command_list[i] = 0;
-                command_params[i] = 0;
-            }
-
-            MissionWaypointMsg test_waypoint_1 = new MissionWaypointMsg(37.915701652f, -122.337967237f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-            MissionWaypointMsg test_waypoint_2 = new MissionWaypointMsg(37.915585270f, -122.338122805f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-            MissionWaypointMsg test_waypoint_3 = new MissionWaypointMsg(37.915457249f, -122.338015517f, 20.0f, 3.0f, 0, 0, MissionWaypointMsg.TurnMode.CLOCKWISE, 0, 30, new MissionWaypointActionMsg(0, command_list, command_params));
-
-            Debug.Log("Check float accuracy here" + test_waypoint_1.ToYAMLString());
-
-            MissionWaypointMsg[] test_waypoint_array = new MissionWaypointMsg[] { test_waypoint_1, test_waypoint_2, test_waypoint_3 };
-
-            MissionWaypointTaskMsg test_Task = new MissionWaypointTaskMsg(15.0f, 15.0f, MissionWaypointTaskMsg.ActionOnFinish.RETURN_TO_HOME, 1, MissionWaypointTaskMsg.YawMode.AUTO, MissionWaypointTaskMsg.TraceMode.COORDINATED, MissionWaypointTaskMsg.ActionOnRCLost.FREE, MissionWaypointTaskMsg.GimbalPitchMode.FREE, test_waypoint_array);
-
-            UploadMission(test_Task);
-        }
-
-        /* Old Debugging statements
-
-        if (Input.GetKeyUp("w"))
-        {
-            CreateMission();
-        }
-
-        if (Input.GetKeyUp("e"))
-        {
-            ExecuteMission();
-        }
-
-        if (Input.GetKeyUp("i"))
-        {
-            InfoMission();
-        }
-
-        if (Input.GetKeyUp("["))
-        {
-            Debug.Log(WorldProperties.LongDiffMeters(122.2578f, 122.4783f, 37.8721f));
-        }
-        */
+        //TODO: Remove
+        // ***
 
     }
+
+    //TODO: Remove
+    // ***
+
 
     /// <summary>
     /// Helper functions for subscribing to different LAMP topics.
@@ -267,6 +199,9 @@ public class ROSDroneConnection : MonoBehaviour
         resetLampConnection(typeof(ColorizedCloud5Subscriber));
         pointCloudLevel = 5;
     }
+    
+    // ***
+
 
     // Functions for ROS begin here.
     public bool GetConnectionStatus()
