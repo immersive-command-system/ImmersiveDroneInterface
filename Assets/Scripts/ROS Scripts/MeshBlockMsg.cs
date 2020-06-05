@@ -111,28 +111,6 @@ namespace ROSBridgeLib
                 _b = Convert.FromBase64String(tempColor);
                 tempColor = msg["g"].Value;
                 _g = Convert.FromBase64String(tempColor);
-
-                if (_r.Length != _b.Length || _r.Length != _g.Length)
-                {
-                    Debug.Log("Color Length Missmatch");
-                }
-
-                if (_r.Length != _x.Length)
-                {
-                    Debug.Log("Vert and Color Missmatch");
-                    Debug.Log("Color length: " + _r.Length + " Vert Length: " + _x.Length);
-                }
-
-                
-                if (_x.Length > 10)
-                {
-                    String lines = "";
-                    foreach (byte b in _b)
-                    {
-                        lines += b + ", ";
-                    }
-                    File.WriteAllText("JSONMsgBlock.txt", lines);
-                }
                 
             }
 

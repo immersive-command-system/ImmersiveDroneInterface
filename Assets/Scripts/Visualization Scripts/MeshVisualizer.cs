@@ -8,16 +8,34 @@ public class MeshVisualizer : MonoBehaviour
     /// <value> Attach DataServer object. If nonexistant, create an empty GameObject and attach the script `DataServer.cs`.</value>
     public bool flipYZ = false;
 
+    /// <summary>
+    /// Object that holds all the individual mesh blocks.
+    /// </summary>
     private GameObject meshParent;
 
     private bool hasChanged = false;
 
+    /// <summary>
+    /// Number of faces required for a block to be deemed worthy of being rendered.
+    /// </summary>
     public int faceThreshold = 25;
+    /// <summary>
+    /// Time in seconds between accepting updates of a block.
+    /// </summary>
     public float updateInterval = 30.0f;
+    /// <summary>
+    /// Maximum distance from the drone to override update time delay. Note that this is total taxi distance x+y+z not crow distance x^2+y^2+z^2
+    /// </summary>
     public float distThreshold = 10.0f;
 
+    /// <summary>
+    /// Dictionary of meshes for each index.
+    /// </summary>
     private Dictionary<Int64[], MeshFilter> mesh_dict;    // Use this for initialization
 
+    /// <summary>
+    /// Dictionary of last update times for each index.
+    /// </summary>
     private Dictionary<Int64[], float> last_update;
     void Start()
     {
@@ -35,13 +53,24 @@ public class MeshVisualizer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns if a block is close enough to the drone to warrant updating.
+    /// </summary>
+    /// <param name="index">Location of the block.</param>
+    /// <returns>If the block is within distThreshold of the drone</returns>
     private bool closeToDrone(Int64[] index)
     {
+        // TODO take into account blocklength. Right now we are assuming a block length of 1 which is incorrect.
         Int64[] dronePosition = new Int64[3] { 0, 0, 0 };
         long dist = Math.Abs(index[0] - dronePosition[0]) + Math.Abs(index[1] - dronePosition[1]) + Math.Abs(index[2] - dronePosition[2]);
         return dist < distThreshold;
     }
 
+    /// <summary>
+    /// Returns if a block should update. Either due to not being updated in a while or being close to the drone.
+    /// </summary>
+    /// <param name="index">Location of the block</param>
+    /// <returns>If the block should update</returns>
     private bool shouldUpdate(Int64[] index)
     {
         if (!last_update.ContainsKey(index))
@@ -104,15 +133,8 @@ public class MeshVisualizer : MonoBehaviour
 
             for (int j = 0; j < r.Length; j++)
             {
-/*                if (j == 0)
-                {
-                    Debug.Log("R: " + r[j] + " G: " + g[j] + " B: " + b[j]);
-                }
- */               newColors.Add(new Color32(r[j], g[j], b[j], 51));
+                newColors.Add(new Color32(r[j], g[j], b[j], 51));
             }
-
-            // Debug.Log("Color Length:" + r.Length);
-            //    mesh_dict.Add(index, data_list);
 
             int[] newTriangles = new int[newVertices.Count / 3 * 3];
             for (int j = 0; j < newTriangles.Length; j++)
@@ -150,6 +172,10 @@ public class MeshVisualizer : MonoBehaviour
         hasChanged = true;
     }
 }
+
+/// <summary>
+/// Element wise equality comparer for long arrays. This is primarily used for updating the dictionary using the block index.
+/// </summary>
 public class LongArrayEqualityComparer : IEqualityComparer<long[]>
 {
     public bool Equals(long[] x, long[] y)
