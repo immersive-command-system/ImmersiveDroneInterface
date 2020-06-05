@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ROSBridgeLib.voxblox_msgs;
-using WebSocketSharp;
 
 public class MeshVisualizer : MonoBehaviour
 {
@@ -15,14 +14,15 @@ public class MeshVisualizer : MonoBehaviour
 
     public int faceThreshold = 25;
     public float updateInterval = 30.0f;
+    public float distThreshold = 10.0f;
 
     private Dictionary<Int64[], MeshFilter> mesh_dict;    // Use this for initialization
 
     private Dictionary<Int64[], float> last_update;
     void Start()
     {
-        mesh_dict = new Dictionary<long[], MeshFilter>();
-        last_update = new Dictionary<long[], float>();
+        mesh_dict = new Dictionary<long[], MeshFilter>(new LongArrayEqualityComparer());
+        last_update = new Dictionary<long[], float>(new LongArrayEqualityComparer());
         meshParent = new GameObject("Mesh");
     }
 
@@ -37,8 +37,9 @@ public class MeshVisualizer : MonoBehaviour
 
     private bool closeToDrone(Int64[] index)
     {
-        Int64[] dronePosition = new Int64[3];
-        return true;
+        Int64[] dronePosition = new Int64[3] { 0, 0, 0 };
+        long dist = Math.Abs(index[0] - dronePosition[0]) + Math.Abs(index[1] - dronePosition[1]) + Math.Abs(index[2] - dronePosition[2]);
+        return dist < distThreshold;
     }
 
     private bool shouldUpdate(Int64[] index)
@@ -66,7 +67,8 @@ public class MeshVisualizer : MonoBehaviour
             Int64[] index = mesh_blocks[i].GetIndex();
             if (!shouldUpdate(index))
             {
-            //    continue;
+                Debug.Log("Delay Update");
+                continue;
             }
 
             List<Vector3> newVertices = new List<Vector3>();
@@ -76,7 +78,8 @@ public class MeshVisualizer : MonoBehaviour
             UInt16[] x = mesh_blocks[i].GetX();
             if (x.Length < faceThreshold)
             {
-            //    continue;
+                Debug.Log("Not enough faces");
+                continue;
             }
 
             UInt16[] y = mesh_blocks[i].GetY();
@@ -129,6 +132,10 @@ public class MeshVisualizer : MonoBehaviour
                 meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
                 mesh_dict.Add(index, meshFilter);
             }
+            else
+            {
+                Debug.Log("Reusing GameObject");
+            }
             mesh.vertices = newVertices.ToArray();
             // ?
             //mesh.uv = newUV;
@@ -138,10 +145,39 @@ public class MeshVisualizer : MonoBehaviour
             // colors may not be the same lengths as vertices. Unity demands that it be the same as the vertices.
 //            mesh.colors = newColors.ToArray();
             mesh_dict[index].mesh = mesh;
-            last_update.Add(index, Time.time);
+            last_update[index] = Time.time;
         }
         hasChanged = true;
     }
 }
+public class LongArrayEqualityComparer : IEqualityComparer<long[]>
+{
+    public bool Equals(long[] x, long[] y)
+    {
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
+        for (int i = 0; i < x.Length; i++)
+        {
+            if (x[i] != y[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
- 
+    public int GetHashCode(long[] obj)
+    {
+        int result = 17;
+        for (int i = 0; i < obj.Length; i++)
+        {
+            unchecked
+            {
+                result = (int)(((long)result * 23) + obj[i]);
+            }
+        }
+        return result;
+    }
+}
