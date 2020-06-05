@@ -36,7 +36,9 @@
         private CapsuleCollider lineCollider;
 
         private GameObject world;
-        private GameObject controller;
+        // Peru: 6/5/2020
+        // Variable never used
+        // private GameObject controller;
 
         public static GameObject controller_right;
 
@@ -48,7 +50,9 @@
             referenceDroneGameObject = referenceDrone.gameObjectPointer;
 
             world = GameObject.FindGameObjectWithTag("World");
-            controller = GameObject.FindGameObjectWithTag("GameController");
+            // Peru: 6/5/2020
+            // Variable never used
+            // controller = GameObject.FindGameObjectWithTag("GameController");
             controller_right = GameObject.Find("controller_right");
 
             if (classPointer.prevPathPoint != null)

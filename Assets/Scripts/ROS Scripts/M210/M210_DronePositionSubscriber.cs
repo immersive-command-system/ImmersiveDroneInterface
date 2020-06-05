@@ -13,7 +13,9 @@
     /// We use it to update the drone's Unity position, so as the drone flies in the real world,
     /// its movements are matched in the Unity interface.
     /// </summary>
-    public class M210_DronePositionSubscriber : MonoBehaviour {
+    /// PERU 6/5/2020: Changed MonoBehaviour to ROSBridgeSubsccriber
+
+    public class M210_DronePositionSubscriber : ROSBridgeSubscriber {
 
         //InitialGPSLat/Long/Alt store the coordinates of the drone when the Unity project first connects to the drone and receives
         //data from the subscriber. We use this to center our Unity map around this coordinate, so all Unity positions are relative
@@ -58,7 +60,7 @@
         {
 
             // Get the Drone Gameobject
-            GameObject robot = GameObject.FindWithTag("Drone");
+            // Depricated: GameObject robot = GameObject.FindWithTag("Drone");
             GameObject drone = WorldProperties.selectedDrone.gameObjectPointer;
 
             /// <summary>

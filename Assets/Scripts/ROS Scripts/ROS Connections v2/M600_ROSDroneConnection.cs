@@ -14,14 +14,6 @@ using ISAACS;
 public class M600_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
 {
     // Drone state enums    
-    public enum FlightStatusM100
-    {
-        ON_GROUND_STANDBY = 1,
-        TAKEOFF = 2,
-        IN_AIR_STANDBY = 3,
-        LANDING = 4,
-        FINISHING_LANDING = 5
-    }
     public enum FlightStatus
     {
         STOPED = 0,
@@ -63,7 +55,6 @@ public class M600_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
     }
     bool has_authority = false;
     BatteryStateMsg battery_state;
-    FlightStatusM100 m100_flight_status;
     FlightStatus flight_status;
     JoyMsg remote_controller_msg;
     Quaternion attitude = Quaternion.identity;
@@ -379,11 +370,6 @@ public class M600_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         return has_authority;
     }
 
-    public FlightStatusM100 GetFlightStatusM100()
-    {
-        return m100_flight_status;
-    }
-
     public FlightStatus GetFlightStatus()
     {
         return flight_status;
@@ -409,6 +395,21 @@ public class M600_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         return local_position;
     }
 
+    public Vector3 GetVelocity()
+    {
+        return velocity;
+    }
+
+    public Vector3 GetGimbleJointAngles()
+    {
+        return gimble_joint_angles;
+    }
+
+    public float GetGPSHealth()
+    {
+        return gps_health;
+    }
+
     // Common CallBack for all subscribers
     // TODO: Break down further if we ever need for the M100
 
@@ -428,7 +429,7 @@ public class M600_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
                 result = battery_state;
                 break;
             case "/dji_sdk/flight_status":
-                m100_flight_status = (FlightStatusM100)(new UInt8Msg(raw_msg)).GetData();
+                flight_status = (FlightStatus)(new UInt8Msg(raw_msg)).GetData();
                 break;
             case "/dji_sdk/gimbal_angle":
                 Vector3Msg gimbleAngleMsg = (parsed == null) ? new Vector3Msg(raw_msg["vector"]) : (Vector3Msg)parsed;

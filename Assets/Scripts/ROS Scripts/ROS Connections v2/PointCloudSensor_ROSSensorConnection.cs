@@ -41,6 +41,12 @@ public class PointCloudSensor_ROSSensorConnection : MonoBehaviour, ROSTopicSubsc
         }
     }
 
+    //Get State variables
+    public string GetID()
+    {
+        return client_id;
+    }
+
     // ROS Topic Subscriber methods
     public ROSBridgeMsg OnReceiveMessage(string topic, JSONNode raw_msg, ROSBridgeMsg parsed = null)
     {

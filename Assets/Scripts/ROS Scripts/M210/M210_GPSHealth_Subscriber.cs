@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using UnityEngine;
 using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
 using ROSBridgeLib.interface_msgs;
@@ -14,7 +13,9 @@ using ISAACS;
 /// Subscriber for the M210's GPS health (signal strength). We store the updated health, and display it 
 /// in the Unity user interface. If the signal strenght is too low, the drone shouldn't be allowed to fly.
 /// </summary>
-public class M210_GPSHealth_Subscriber : MonoBehaviour {
+/// PERU 6/5/2020: Changed MonoBehaviour to ROSBridgeSubsccriber
+
+public class M210_GPSHealth_Subscriber : ROSBridgeSubscriber {
     /// <summary>
     /// Returns the name of the ROS topic to subscribe to on the Manifold.
     /// </summary>
@@ -43,10 +44,11 @@ public class M210_GPSHealth_Subscriber : MonoBehaviour {
     /// </summary>
     public new static void CallBack(ROSBridgeMsg msg)
     {
+        /* TODO: Update global variable storing the drone's current GPS health, and display it in the UI.
+
         GPSHealthMsg gpsHealth = (GPSHealthMsg)msg;
         float gpsHealthPercent = gpsHealth.GeGPSHealthPercentage();
-      /* TODO: Update global variable storing the drone's current GPS health, and display it in the UI.
-
+      
         GameObject robot = GameObject.FindWithTag("Drone");
         GameObject drone = WorldProperties.selectedDrone.gameObjectPointer;
 

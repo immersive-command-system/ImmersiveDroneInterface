@@ -9,7 +9,8 @@ public class RadiationButtons : MonoBehaviour {
 
     Button myButton;
     Drone drone;
-    private GameObject controller; //needed to access pointer
+    // Peru 6/5/2020: Unused variable
+    // private GameObject controller;
 
     public bool surface_pointcloud = false;
     public bool Level_0 = false;
@@ -21,7 +22,8 @@ public class RadiationButtons : MonoBehaviour {
 
     void Awake()
     {
-        controller = GameObject.FindGameObjectWithTag("GameController");
+        // Peru 6/5/2020: Unused variable
+        // controller = GameObject.FindGameObjectWithTag("GameController");
 
         myButton = GetComponent<Button>(); // <-- you get access to the button component here
         myButton.onClick.AddListener(() => { OnClickEvent(); });  // <-- you assign a method to the button OnClick event here

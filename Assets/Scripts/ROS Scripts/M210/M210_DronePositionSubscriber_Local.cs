@@ -8,7 +8,9 @@
     using System.IO;
     using UnityEditor;
 
-    public class M210_DronePositionSubscriber_Local : MonoBehaviour
+    /// PERU 6/5/2020: Changed MonoBehaviour to ROSBridgeSubsccriber
+
+    public class M210_DronePositionSubscriber_Local : ROSBridgeSubscriber
     {
 
 
@@ -39,9 +41,10 @@
 
             Debug.Log("Drone Position Local Callback");
 
-
+            /** TODO: Implement Logic IF Necessary
+             
             // Get the Drone Gameobject
-            GameObject robot = GameObject.FindWithTag("Drone");
+            // Depreciated GameObject robot = GameObject.FindWithTag("Drone");
             GameObject drone = WorldProperties.selectedDrone.gameObjectPointer;
 
             /// <summary>
@@ -54,10 +57,10 @@
 
 
                 // First CallBack Logic
-                /*if (WorldProperties.initial_DroneROS_Position == Vector3.zero)
+                if (WorldProperties.initial_DroneROS_Position == Vector3.zero)
                 {
                     WorldProperties.M210_FirstPositionCallback(new_ROSPosition, drone.transform.localPosition);
-                }*/
+                }
 
                 // All CallBack Logic: Update the drone position.
                 Vector3 initial_DronePos = new Vector3(0.0f, 0.1f, 0.0f);
@@ -84,6 +87,8 @@
             {
                 Debug.Log("The RosDroneSubscriber script can't find the robot.");
             }
+            **/
+
         }
 
 

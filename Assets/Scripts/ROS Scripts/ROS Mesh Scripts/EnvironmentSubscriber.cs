@@ -15,22 +15,22 @@ public class EnvironmentSubscriber : ROSBridgeSubscriber
 
     public static int numberThing = 0;
 
-    public static string GetMessageTopic()
+    public new static string GetMessageTopic()
     {
         return "/tf";
     }
 
-    public static string GetMessageType()
+    public new static string GetMessageType()
     {
         return "tf2_msgs/TFMessage";
     }
 
-    public static ROSBridgeMsg ParseMessage(JSONNode msg)
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg)
     {
         return new EnvironmentMsg(msg);
     }
 
-    public static void CallBack(ROSBridgeMsg msg)
+    public new static void CallBack(ROSBridgeMsg msg)
     {
         EnvironmentMsg poseMsg = (EnvironmentMsg)msg;
         

@@ -33,7 +33,7 @@ public class LampSensor_ROSSensorConnection : MonoBehaviour, ROSTopicSubscriber
 
     // Private connection variables
     private ROSBridgeWebSocketConnection ros = null;
-    string client_id;
+    public string client_id;
 
     // Initilize the sensor
     public void InitilizeSensor(int uniqueID, string sensorIP, int sensorPort, List<string> sensorSubscribers)

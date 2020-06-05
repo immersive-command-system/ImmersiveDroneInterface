@@ -10,25 +10,26 @@ using System.IO;
 
 public class ObstacleSubscriber : ROSBridgeSubscriber
 {
-    private static int numberThing = 0;
 
+    // Peru 6/5/2020: Unused variable
+    // private static int numberThing = 0;
 
-    public static string GetMessageTopic()
+    public new static string GetMessageTopic()
     {
         return "/vis/true_env";
     }
 
-    public static string GetMessageType()
+    public new static string GetMessageType()
     {
         return "visualization_msgs/Marker";
     }
 
-    public static ROSBridgeMsg ParseMessage(JSONNode msg)
+    public new static ROSBridgeMsg ParseMessage(JSONNode msg)
     {
         return new ObstacleMsg(msg);
     }
 
-    public static void CallBack(ROSBridgeMsg msg)
+    public new static void CallBack(ROSBridgeMsg msg)
     {
         Debug.Log("callback");
         Vector3 tablePos = GameObject.FindWithTag("Table").transform.position;

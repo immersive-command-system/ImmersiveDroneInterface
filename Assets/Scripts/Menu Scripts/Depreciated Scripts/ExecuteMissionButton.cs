@@ -9,12 +9,9 @@ public class ExecuteMissionButton : MonoBehaviour
 {
     Button myButton;
     Drone drone;
-    private GameObject controller; //needed to access pointer
 
     void Awake()
     {
-        controller = GameObject.FindGameObjectWithTag("GameController");
-
         myButton = GetComponent<Button>(); // <-- you get access to the button component here
         myButton.onClick.AddListener(() => { OnClickEvent(); });  // <-- you assign a method to the button OnClick event here
     }

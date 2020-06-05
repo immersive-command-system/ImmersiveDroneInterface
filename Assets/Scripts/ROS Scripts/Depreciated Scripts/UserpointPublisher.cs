@@ -8,12 +8,12 @@ using UnityEngine;
 public class UserpointPublisher : ROSBridgePublisher
 {
 
-    public static string GetMessageTopic()
+    public new static string GetMessageTopic()
     {
         return "userpoint";
     }
 
-    public static string GetMessageType()
+    public new static string GetMessageType()
     {
         return "meta_planner_msgs/UserpointInstruction";
     }

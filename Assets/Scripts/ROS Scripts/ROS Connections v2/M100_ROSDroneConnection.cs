@@ -64,7 +64,6 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
     bool has_authority = false;
     BatteryStateMsg battery_state;
     FlightStatusM100 m100_flight_status;
-    FlightStatus flight_status;
     JoyMsg remote_controller_msg;
     Quaternion attitude = Quaternion.identity;
     Quaternion offset = Quaternion.Euler(90, 180, 0);
@@ -475,11 +474,6 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         return m100_flight_status;
     }
 
-    public FlightStatus GetFlightStatus()
-    {
-        return flight_status;
-    }
-
     public Quaternion GetAttitude()
     {
         return attitude;
@@ -498,6 +492,21 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
     public Vector3 GetLocalPosition()
     {
         return local_position;
+    }
+
+    public Vector3 GetVelocity()
+    {
+        return velocity;
+    }
+
+    public Vector3 GetGimbleJointAngles()
+    {
+        return gimble_joint_angles;
+    }
+
+    public float GetGPSHealth()
+    {
+        return gps_health;
     }
 
     // Helper Methods

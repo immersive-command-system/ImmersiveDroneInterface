@@ -129,19 +129,18 @@ public class ROSManager : MonoBehaviour {
         {
             case SensorType.PointCloud:
                 Debug.Log("PointCloud Sensor created");
-                PointCloudSensor_ROSSensorConnection pcSensor_rosDroneConnection = sensor.AddComponent<PointCloudSensor_ROSSensorConnection>();
-                //M100_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M100_ROSDroneConnection>();
+                PointCloudSensor_ROSSensorConnection pcSensor_rosSensorConnection = sensor.AddComponent<PointCloudSensor_ROSSensorConnection>();
+                pcSensor_rosSensorConnection.InitilizeSensor(uniqueID, sensorIP, sensorPort, sensorSubscribers);
                 break;
 
             case SensorType.Mesh:
                 Debug.Log("Mesh Sensor architecture not implemented yet");
-                //M210_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M210_ROSDroneConnection>();
                 break;
 
             case SensorType.LAMP:
                 Debug.Log("LAMP Sensor created");
                 LampSensor_ROSSensorConnection lamp_rosSensorConnection = sensor.AddComponent<LampSensor_ROSSensorConnection>();
-                //M600_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M600_ROSDroneConnection>();
+                lamp_rosSensorConnection.InitilizeSensor(uniqueID, sensorIP, sensorPort, sensorSubscribers);
                 break;
 
             default:

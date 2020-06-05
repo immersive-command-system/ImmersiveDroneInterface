@@ -27,6 +27,10 @@ TagManager:
   - selectionZone
   - drone1
   - rfs_roof
+  - LAMP
+  - M210
+  - M100
+  - M600
   layers:
   - Default
   - TransparentFX

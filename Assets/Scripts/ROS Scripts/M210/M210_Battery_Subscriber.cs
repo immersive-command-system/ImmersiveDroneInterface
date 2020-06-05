@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using UnityEngine;
 using ROSBridgeLib;
 using ROSBridgeLib.std_msgs;
 using ROSBridgeLib.sensor_msgs;
@@ -15,7 +14,7 @@ using ISAACS;
 /// in the Unity user interface. If the level drops below a given threshold, we warn the user
 /// to end the mission and return to home soon.
 /// </summary>
-public class M210_Battery_Subscriber : MonoBehaviour {
+public class M210_Battery_Subscriber : ROSBridgeSubscriber {
 
     public static Vector3 initialPosition = Vector3.zero;
     /// <summary>
@@ -47,12 +46,14 @@ public class M210_Battery_Subscriber : MonoBehaviour {
     /// </summary>
     public new static void CallBack(ROSBridgeMsg msg)
     {
-        /// TODO: actually do what the callback comments say.
+        /// TODO: Connect to UI
+
+        /** TODO: everything
+
         // Float representing the current battery level.
         DroneBatteryStateMsg batteryState = (DroneBatteryStateMsg)msg;
         float batteryPercentage = batteryState.GetBatteryPercentage();
 
-        /** TODO: everything
         GameObject robot = GameObject.FindWithTag("Drone");
         GameObject drone = WorldProperties.selectedDrone.gameObjectPointer;
 

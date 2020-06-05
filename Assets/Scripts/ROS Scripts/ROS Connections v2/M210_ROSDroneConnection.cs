@@ -49,7 +49,6 @@ public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         RESUME = 3
     }
 
-
     // Private connection variables
     private ROSBridgeWebSocketConnection ros = null;
     string client_id;
@@ -64,7 +63,6 @@ public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
     }
     bool has_authority = false;
     BatteryStateMsg battery_state;
-    FlightStatusM100 m100_flight_status;
     FlightStatus flight_status;
     JoyMsg remote_controller_msg;
     Quaternion attitude = Quaternion.identity;
@@ -378,11 +376,6 @@ public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         return has_authority;
     }
 
-    public FlightStatusM100 GetFlightStatusM100()
-    {
-        return m100_flight_status;
-    }
-
     public FlightStatus GetFlightStatus()
     {
         return flight_status;
@@ -408,6 +401,21 @@ public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         return local_position;
     }
 
+    public Vector3 GetVelocity()
+    {
+        return velocity;
+    }
+
+    public Vector3 GetGimbleJointAngles()
+    {
+        return gimble_joint_angles;
+    }
+
+    public float GetGPSHealth()
+    {
+        return gps_health;
+    }
+
     // Common CallBack for all subscribers
     // TODO: Break down further to connect with the frontend logic.
     // TODO: Port over old logic to connect with frontend in logical manner
@@ -430,7 +438,7 @@ public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
                 result = battery_state;
                 break;
             case "/dji_sdk/flight_status":
-                m100_flight_status = (FlightStatusM100)(new UInt8Msg(raw_msg)).GetData();
+                flight_status = (FlightStatus)(new UInt8Msg(raw_msg)).GetData();
                 break;
             case "/dji_sdk/gimbal_angle":
                 Vector3Msg gimbleAngleMsg = (parsed == null) ? new Vector3Msg(raw_msg["vector"]) : (Vector3Msg)parsed;
