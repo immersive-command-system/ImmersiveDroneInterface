@@ -571,6 +571,7 @@ GameObject:
   - component: {fileID: 79141384}
   - component: {fileID: 79141383}
   - component: {fileID: 79141386}
+  - component: {fileID: 79141387}
   m_Layer: 0
   m_Name: PlacementPlane
   m_TagString: Ground
@@ -661,6 +662,20 @@ MonoBehaviour:
   flipYZ: 1
   pointObject: {fileID: 1834927014}
   size: 0.1
+--- !u!114 &79141387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 79141381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d05a78da9fc38443a36c1fa24bc3d9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flipYZ: 1
+  faceThreshold: 25
+  updateInterval: 30
 --- !u!1 &79195765
 GameObject:
   m_ObjectHideFlags: 0
@@ -1078,7 +1093,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectionStatus: 0
-  LampIP: 192.168.1.73
+  LampIP: localhost
   ManifoldIP: 192.168.60.191
 --- !u!114 &146794967
 MonoBehaviour:

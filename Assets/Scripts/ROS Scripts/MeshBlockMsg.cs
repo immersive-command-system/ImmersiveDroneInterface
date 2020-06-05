@@ -104,15 +104,15 @@ namespace ROSBridgeLib
                 {
                     _z[i] = (UInt16) temp[i].AsInt;
                 }
-                Debug.Log("Block");
+ //               Debug.Log("Block");
                 
                 String tempColor = msg["r"].Value;
-                _r = Encoding.UTF7.GetBytes(tempColor);
+                _r = Encoding.UTF8.GetBytes(tempColor);
                 tempColor = msg["b"].Value;
                 _b = Encoding.UTF8.GetBytes(tempColor);
                 tempColor = msg["g"].Value;
                 _g = Encoding.UTF8.GetBytes(tempColor);
-
+/*
                 if (_r.Length != _b.Length || _r.Length != _g.Length)
                 {
                     Debug.Log("Color Length Missmatch");
@@ -128,6 +128,7 @@ namespace ROSBridgeLib
                 {
                     File.WriteAllText("JSONMsgBlock.txt", msg.ToString());
                 }
+                */
                 /*_r = new byte[tempColor.Length];
                 for (int i = 0; i < _r.Length; i++)
                 {

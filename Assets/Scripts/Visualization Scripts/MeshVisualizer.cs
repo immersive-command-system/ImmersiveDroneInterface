@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ROSBridgeLib.voxblox_msgs;
+using WebSocketSharp;
 
 public class MeshVisualizer : MonoBehaviour
 {
@@ -12,10 +13,16 @@ public class MeshVisualizer : MonoBehaviour
 
     private bool hasChanged = false;
 
+    public int faceThreshold = 25;
+    public float updateInterval = 30.0f;
+
     private Dictionary<Int64[], MeshFilter> mesh_dict;    // Use this for initialization
+
+    private Dictionary<Int64[], float> last_update;
     void Start()
     {
         mesh_dict = new Dictionary<long[], MeshFilter>();
+        last_update = new Dictionary<long[], float>();
         meshParent = new GameObject("Mesh");
     }
 
@@ -26,6 +33,21 @@ public class MeshVisualizer : MonoBehaviour
         {
             // Do stuff maybe?
         }
+    }
+
+    private bool closeToDrone(Int64[] index)
+    {
+        Int64[] dronePosition = new Int64[3];
+        return true;
+    }
+
+    private bool shouldUpdate(Int64[] index)
+    {
+        if (!last_update.ContainsKey(index))
+        {
+            return true;
+        }
+        return closeToDrone(index) || last_update[index] < Time.time - updateInterval;
     }
 
     /// <summary>
@@ -42,12 +64,21 @@ public class MeshVisualizer : MonoBehaviour
         for (int i = 0; i < mesh_blocks.Length; i++)
         {
             Int64[] index = mesh_blocks[i].GetIndex();
+            if (!shouldUpdate(index))
+            {
+            //    continue;
+            }
 
             List<Vector3> newVertices = new List<Vector3>();
             // Also not sure what to do with all the newColors...
             List<Color> newColors = new List<Color>();
         
             UInt16[] x = mesh_blocks[i].GetX();
+            if (x.Length < faceThreshold)
+            {
+            //    continue;
+            }
+
             UInt16[] y = mesh_blocks[i].GetY();
             UInt16[] z = mesh_blocks[i].GetZ();
             for (int j = 0; j < x.Length; j++)
@@ -70,11 +101,11 @@ public class MeshVisualizer : MonoBehaviour
 
             for (int j = 0; j < r.Length; j++)
             {
-                if (j == 0)
+/*                if (j == 0)
                 {
                     Debug.Log("R: " + r[j] + " G: " + g[j] + " B: " + b[j]);
                 }
-                newColors.Add(new Color32(r[j], g[j], b[j], 51));
+ */               newColors.Add(new Color32(r[j], g[j], b[j], 51));
             }
 
             // Debug.Log("Color Length:" + r.Length);
@@ -94,7 +125,8 @@ public class MeshVisualizer : MonoBehaviour
                 meshObject.transform.parent = meshParent.transform;
                 MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
                 MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+                //                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+                meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
                 mesh_dict.Add(index, meshFilter);
             }
             mesh.vertices = newVertices.ToArray();
@@ -104,8 +136,9 @@ public class MeshVisualizer : MonoBehaviour
             mesh.triangles = newTriangles;
 
             // colors may not be the same lengths as vertices. Unity demands that it be the same as the vertices.
-            mesh.colors = newColors.ToArray();
+//            mesh.colors = newColors.ToArray();
             mesh_dict[index].mesh = mesh;
+            last_update.Add(index, Time.time);
         }
         hasChanged = true;
     }
