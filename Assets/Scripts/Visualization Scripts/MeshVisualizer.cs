@@ -128,8 +128,8 @@ public class MeshVisualizer : MonoBehaviour
                 meshObject.transform.parent = meshParent.transform;
                 MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
                 MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-                //                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
-                meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
+                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+                //meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
                 mesh_dict.Add(index, meshFilter);
             }
             else
@@ -143,7 +143,7 @@ public class MeshVisualizer : MonoBehaviour
             mesh.triangles = newTriangles;
 
             // colors may not be the same lengths as vertices. Unity demands that it be the same as the vertices.
-//            mesh.colors = newColors.ToArray();
+            mesh.colors = newColors.ToArray();
             mesh_dict[index].mesh = mesh;
             last_update[index] = Time.time;
         }

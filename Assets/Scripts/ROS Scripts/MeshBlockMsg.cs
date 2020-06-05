@@ -104,15 +104,14 @@ namespace ROSBridgeLib
                 {
                     _z[i] = (UInt16) temp[i].AsInt;
                 }
- //               Debug.Log("Block");
                 
                 String tempColor = msg["r"].Value;
-                _r = Encoding.UTF8.GetBytes(tempColor);
+                _r = Convert.FromBase64String(tempColor);
                 tempColor = msg["b"].Value;
-                _b = Encoding.UTF8.GetBytes(tempColor);
+                _b = Convert.FromBase64String(tempColor);
                 tempColor = msg["g"].Value;
-                _g = Encoding.UTF8.GetBytes(tempColor);
-/*
+                _g = Convert.FromBase64String(tempColor);
+
                 if (_r.Length != _b.Length || _r.Length != _g.Length)
                 {
                     Debug.Log("Color Length Missmatch");
@@ -121,40 +120,19 @@ namespace ROSBridgeLib
                 if (_r.Length != _x.Length)
                 {
                     Debug.Log("Vert and Color Missmatch");
-                    Debug.Log("Color length: " + msg["r"].Value.Length + " Vert Length: " + _x.Length);
+                    Debug.Log("Color length: " + _r.Length + " Vert Length: " + _x.Length);
                 }
 
-                if (_x.Length > 0)
+                
+                if (_x.Length > 10)
                 {
-                    File.WriteAllText("JSONMsgBlock.txt", msg.ToString());
+                    String lines = "";
+                    foreach (byte b in _b)
+                    {
+                        lines += b + ", ";
+                    }
+                    File.WriteAllText("JSONMsgBlock.txt", lines);
                 }
-                */
-                /*_r = new byte[tempColor.Length];
-                for (int i = 0; i < _r.Length; i++)
-                {
-                    _r[i] = (byte)tempColor[i];
-                }
-
-                tempColor = msg["g"].Value;
-                _g = new byte[tempColor.Count];
-                for (int i = 0; i < _g.Length; i++)
-                {
-                    _g[i] = (byte)tempColor[i].AsInt;
-                }
-
-                tempColor = msg["b"].Value;
-                _b = new byte[tempColor.Count];
-                for (int i = 0; i < _b.Length; i++)
-                {
-                    _b[i] = (byte)tempColor[i].AsInt;
-                }
-                else
-                {
-                    //Debug.Log("Null Color: " + msg["r"]);
-                    _r = new byte[0];
-                    _b = new byte[0];
-                    _g = new byte[0];
-                }*/
                 
             }
 
