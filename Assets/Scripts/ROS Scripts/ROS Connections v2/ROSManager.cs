@@ -78,21 +78,24 @@ public class ROSManager : MonoBehaviour {
         {
             case DroneType.M100:
                 Debug.Log("M100 created");
-                M100_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M100_ROSDroneConnection>();
+                M100_ROSDroneConnection M100_rosDroneConnection = drone.AddComponent<M100_ROSDroneConnection>();
+                M100_rosDroneConnection.InitilizeDrone(uniqueID, droneIP, dronePort, droneSubscribers);
                 break;
 
             case DroneType.M210:
                 Debug.Log("M210 created");
-                //M210_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M210_ROSDroneConnection>();
+                M210_ROSDroneConnection M210_rosDroneConnection = drone.AddComponent<M210_ROSDroneConnection>();
+                M210_rosDroneConnection.InitilizeDrone(uniqueID, droneIP, dronePort, droneSubscribers);
                 break;
 
             case DroneType.M600:
                 Debug.Log("M600 created");
-                //M600_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M600_ROSDroneConnection>();
+                M600_ROSDroneConnection M600_rosDroneConnection = drone.AddComponent<M600_ROSDroneConnection>();
+                M600_rosDroneConnection.InitilizeDrone(uniqueID, droneIP, dronePort, droneSubscribers);
                 break;
 
             case DroneType.Sprite:
-                Debug.Log("Sprite created");
+                Debug.Log("Sprite class not implemented created");
                 //Sprite_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<Sprite_ROSDroneConnection>();
                 break;
             
@@ -126,16 +129,18 @@ public class ROSManager : MonoBehaviour {
         {
             case SensorType.PointCloud:
                 Debug.Log("PointCloud Sensor created");
+                PointCloudSensor_ROSSensorConnection pcSensor_rosDroneConnection = sensor.AddComponent<PointCloudSensor_ROSSensorConnection>();
                 //M100_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M100_ROSDroneConnection>();
                 break;
 
             case SensorType.Mesh:
-                Debug.Log("Mesh Sensor created");
+                Debug.Log("Mesh Sensor architecture not implemented yet");
                 //M210_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M210_ROSDroneConnection>();
                 break;
 
             case SensorType.LAMP:
                 Debug.Log("LAMP Sensor created");
+                LampSensor_ROSSensorConnection lamp_rosSensorConnection = sensor.AddComponent<LampSensor_ROSSensorConnection>();
                 //M600_ROSDroneConnection drone_rosDroneConnection = drone.AddComponent<M600_ROSDroneConnection>();
                 break;
 

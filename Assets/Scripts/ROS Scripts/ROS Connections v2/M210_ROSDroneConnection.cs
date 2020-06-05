@@ -12,7 +12,7 @@ using ROSBridgeLib.interface_msgs;
 using ISAACS;
 
 
-public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
+public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
 {
     // Drone state enums    
     public enum FlightStatusM100
@@ -48,7 +48,8 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         PAUSE = 2,
         RESUME = 3
     }
-    
+
+
     // Private connection variables
     private ROSBridgeWebSocketConnection ros = null;
     string client_id;
@@ -76,13 +77,13 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
     uint gps_health;
     NavSatFixMsg gps_position;
 
-    // Initilize the drone
+
     public void InitilizeDrone(int uniqueID, string droneIP, int dronePort, List<string> droneSubscribers)
     {
         ros = new ROSBridgeWebSocketConnection("ws://" + droneIP, dronePort);
         client_id = uniqueID.ToString();
 
-        foreach ( string subscriber in droneSubscribers)
+        foreach (string subscriber in droneSubscribers)
         {
             ros.AddSubscriber("/dji_sdk/" + subscriber, this);
         }
@@ -95,99 +96,6 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         {
             ros.Render();
         }
-    }
-
-    // Common CallBack for all subscribers
-    // TODO: Break down further if we ever need for the M100
-
-    // ROS Topic Subscriber methods
-    public ROSBridgeMsg OnReceiveMessage(string topic, JSONNode raw_msg, ROSBridgeMsg parsed = null)
-    {
-        ROSBridgeMsg result = null;
-        // Writing all code in here for now. May need to move out to separate handler functions when it gets too unwieldy.
-        switch (topic)
-        {
-            case "/dji_sdk/attitude":
-                QuaternionMsg attitudeMsg = (parsed == null) ? new QuaternionMsg(raw_msg["quaternion"]) : (QuaternionMsg)parsed;
-                attitude = offset * (new Quaternion(attitudeMsg.GetX(), attitudeMsg.GetY(), attitudeMsg.GetZ(), attitudeMsg.GetW()));
-                result = attitudeMsg;
-                break;
-            case "/dji_sdk/battery_state":
-                battery_state = (parsed == null) ? new BatteryStateMsg(raw_msg) : (BatteryStateMsg)parsed;
-                result = battery_state;
-                break;
-            case "/dji_sdk/flight_status":
-                m100_flight_status = (FlightStatusM100)(new UInt8Msg(raw_msg)).GetData();
-                break;
-            case "/dji_sdk/gimbal_angle":
-                Vector3Msg gimbleAngleMsg = (parsed == null) ? new Vector3Msg(raw_msg["vector"]) : (Vector3Msg)parsed;
-                gimble_joint_angles = new Vector3((float)gimbleAngleMsg.GetX(), (float)gimbleAngleMsg.GetY(), (float)gimbleAngleMsg.GetZ());
-                result = gimbleAngleMsg;
-                break;
-            case "/dji_sdk/gps_health":
-                gps_health = (parsed == null) ? (new UInt8Msg(raw_msg)).GetData() : ((UInt8Msg)parsed).GetData();
-                break;
-            case "/dji_sdk/gps_position":
-                gps_position = (parsed == null) ? new NavSatFixMsg(raw_msg) : (NavSatFixMsg)parsed;
-                result = gps_position;
-                break;
-            case "/dji_sdk/imu":
-                imu = (parsed == null) ? new IMUMsg(raw_msg) : (IMUMsg)parsed;
-                result = imu;
-                break;
-            case "/dji_sdk/rc":
-                remote_controller_msg = (parsed == null) ? new JoyMsg(raw_msg) : (JoyMsg)parsed;
-                result = remote_controller_msg;
-                break;
-            case "/dji_sdk/velocity":
-                Vector3Msg velocityMsg = (parsed == null) ? new Vector3Msg(raw_msg["vector"]) : (Vector3Msg)parsed;
-                velocity = new Vector3((float)velocityMsg.GetX(), (float)velocityMsg.GetY(), (float)velocityMsg.GetZ());
-                result = velocityMsg;
-                break;
-            case "/dji_sdk/height_above_takeoff":
-                relative_altitude = (parsed == null) ? (new Float32Msg(raw_msg)).GetData() : ((Float32Msg)parsed).GetData();
-                break;
-            case "/dji_sdk/local_position":
-                PointMsg pointMsg = (parsed == null) ? new PointMsg(raw_msg["point"]) : (PointMsg)parsed;
-                local_position = new Vector3(pointMsg.GetX(), pointMsg.GetY(), pointMsg.GetZ());
-                result = pointMsg;
-                Debug.Log(result);
-                break;
-            default:
-                Debug.LogError("Topic not implemented: " + topic);
-                break;
-        }
-        return result;
-    }
-    public string GetMessageType(string topic)
-    {
-        switch (topic)
-        {
-            case "/dji_sdk/attitude":
-                return "geometry_msgs/QuaternionStamped";
-            case "/dji_sdk/battery_state":
-                return "sensor_msgs/BatteryState";
-            case "/dji_sdk/flight_status":
-                return "std_msgs/UInt8";
-            case "/dji_sdk/gimbal_angle":
-                return "geometry_msgs/Vector3Stamped";
-            case "/dji_sdk/gps_health":
-                return "std_msgs/UInt8";
-            case "/dji_sdk/gps_position":
-                return "sensor_msgs/NavSatFix";
-            case "/dji_sdk/imu":
-                return "sensor_msgs/Imu";
-            case "/dji_sdk/rc":
-                return "sensor_msgs/Joy";
-            case "/dji_sdk/velocity":
-                return "geometry_msgs/Vector3Stamped";
-            case "/dji_sdk/height_above_takeoff":
-                return "std_msgs/Float32";
-            case "/dji_sdk/local_position":
-                return "geometry_msgs/PointStamped";
-        }
-        Debug.LogError("Topic " + topic + " not registered.");
-        return "";
     }
 
     // Service Calls and corresponding callbacks
@@ -500,7 +408,104 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         return local_position;
     }
 
-    // Helper Methods
+    // Common CallBack for all subscribers
+    // TODO: Break down further to connect with the frontend logic.
+    // TODO: Port over old logic to connect with frontend in logical manner
+
+    // ROS Topic SubscriberInterface Methods
+
+    public ROSBridgeMsg OnReceiveMessage(string topic, JSONNode raw_msg, ROSBridgeMsg parsed = null)
+    {
+        ROSBridgeMsg result = null;
+        // Writing all code in here for now. May need to move out to separate handler functions when it gets too unwieldy.
+        switch (topic)
+        {
+            case "/dji_sdk/attitude":
+                QuaternionMsg attitudeMsg = (parsed == null) ? new QuaternionMsg(raw_msg["quaternion"]) : (QuaternionMsg)parsed;
+                attitude = offset * (new Quaternion(attitudeMsg.GetX(), attitudeMsg.GetY(), attitudeMsg.GetZ(), attitudeMsg.GetW()));
+                result = attitudeMsg;
+                break;
+            case "/dji_sdk/battery_state":
+                battery_state = (parsed == null) ? new BatteryStateMsg(raw_msg) : (BatteryStateMsg)parsed;
+                result = battery_state;
+                break;
+            case "/dji_sdk/flight_status":
+                m100_flight_status = (FlightStatusM100)(new UInt8Msg(raw_msg)).GetData();
+                break;
+            case "/dji_sdk/gimbal_angle":
+                Vector3Msg gimbleAngleMsg = (parsed == null) ? new Vector3Msg(raw_msg["vector"]) : (Vector3Msg)parsed;
+                gimble_joint_angles = new Vector3((float)gimbleAngleMsg.GetX(), (float)gimbleAngleMsg.GetY(), (float)gimbleAngleMsg.GetZ());
+                result = gimbleAngleMsg;
+                break;
+            case "/dji_sdk/gps_health":
+                gps_health = (parsed == null) ? (new UInt8Msg(raw_msg)).GetData() : ((UInt8Msg)parsed).GetData();
+                break;
+            case "/dji_sdk/gps_position":
+                gps_position = (parsed == null) ? new NavSatFixMsg(raw_msg) : (NavSatFixMsg)parsed;
+                result = gps_position;
+                break;
+            case "/dji_sdk/imu":
+                imu = (parsed == null) ? new IMUMsg(raw_msg) : (IMUMsg)parsed;
+                result = imu;
+                break;
+            case "/dji_sdk/rc":
+                remote_controller_msg = (parsed == null) ? new JoyMsg(raw_msg) : (JoyMsg)parsed;
+                result = remote_controller_msg;
+                break;
+            case "/dji_sdk/velocity":
+                Vector3Msg velocityMsg = (parsed == null) ? new Vector3Msg(raw_msg["vector"]) : (Vector3Msg)parsed;
+                velocity = new Vector3((float)velocityMsg.GetX(), (float)velocityMsg.GetY(), (float)velocityMsg.GetZ());
+                result = velocityMsg;
+                break;
+            case "/dji_sdk/height_above_takeoff":
+                relative_altitude = (parsed == null) ? (new Float32Msg(raw_msg)).GetData() : ((Float32Msg)parsed).GetData();
+                break;
+            case "/dji_sdk/local_position":
+                PointMsg pointMsg = (parsed == null) ? new PointMsg(raw_msg["point"]) : (PointMsg)parsed;
+                local_position = new Vector3(pointMsg.GetX(), pointMsg.GetY(), pointMsg.GetZ());
+                result = pointMsg;
+                Debug.Log(result);
+                break;
+            default:
+                Debug.LogError("Topic not implemented: " + topic);
+                break;
+        }
+        return result;
+    }
+
+    public string GetMessageType(string topic)
+    {
+        switch (topic)
+        {
+            case "/dji_sdk/attitude":
+                return "geometry_msgs/QuaternionStamped";
+            case "/dji_sdk/battery_state":
+                return "sensor_msgs/BatteryState";
+            case "/dji_sdk/flight_status":
+                return "std_msgs/UInt8";
+            case "/dji_sdk/gimbal_angle":
+                return "geometry_msgs/Vector3Stamped";
+            case "/dji_sdk/gps_health":
+                return "std_msgs/UInt8";
+            case "/dji_sdk/gps_position":
+                return "sensor_msgs/NavSatFix";
+            case "/dji_sdk/imu":
+                return "sensor_msgs/Imu";
+            case "/dji_sdk/rc":
+                return "sensor_msgs/Joy";
+            case "/dji_sdk/velocity":
+                return "geometry_msgs/Vector3Stamped";
+            case "/dji_sdk/height_above_takeoff":
+                return "std_msgs/Float32";
+            case "/dji_sdk/local_position":
+                return "geometry_msgs/PointStamped";
+        }
+        Debug.LogError("Topic " + topic + " not registered.");
+        return "";
+    }
+
+    // Not sure what they do
+
     private void subscribe_to_all_sdk_topics(ROSBridgeWebSocketConnection connection)
     {
         connection.AddSubscriber("/dji_sdk/attitude", this);
@@ -515,8 +520,6 @@ public class M100_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         connection.AddSubscriber("/dji_sdk/height_above_takeoff", this);
         connection.AddSubscriber("/dji_sdk/local_position", this);
     }
-
-    // Not sure what they do
 
     DateTime epoch = new DateTime(1970, 1, 1);
     int[] dummy = new int[0];
