@@ -42,7 +42,8 @@ namespace ROSBridgeLib
 
             public voxblox_msgs.MeshBlockMsg[] GetMeshBlocks()
             {
-                return (voxblox_msgs.MeshBlockMsg[])_mesh_blocks.Clone();
+                //return (voxblox_msgs.MeshBlockMsg[])_mesh_blocks.Clone();
+                return _mesh_blocks;
             }
         }
     }

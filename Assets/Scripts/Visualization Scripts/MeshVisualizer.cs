@@ -77,7 +77,7 @@ public class MeshVisualizer : MonoBehaviour
                 newColors.Add(new Color32(r[j], g[j], b[j], 51));
             }
 
-            Debug.Log("Color Length:" + r.Length);
+            // Debug.Log("Color Length:" + r.Length);
             //    mesh_dict.Add(index, data_list);
 
             int[] newTriangles = new int[newVertices.Count / 3 * 3];
@@ -94,7 +94,7 @@ public class MeshVisualizer : MonoBehaviour
                 meshObject.transform.parent = meshParent.transform;
                 MeshFilter meshFilter = meshObject.AddComponent<MeshFilter>();
                 MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
-                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Surface"));
+                meshRenderer.sharedMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
                 mesh_dict.Add(index, meshFilter);
             }
             mesh.vertices = newVertices.ToArray();

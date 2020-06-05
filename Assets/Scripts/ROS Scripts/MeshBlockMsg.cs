@@ -4,6 +4,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.CodeDom.Compiler;
 using System.Runtime.InteropServices;
+using System.IO;
+using System.Text;
 
 namespace ROSBridgeLib
 {
@@ -29,37 +31,44 @@ namespace ROSBridgeLib
 
             public Int64[] GetIndex()
             {
-                return (Int64[])_index.Clone();
+                //return (Int64[])_index.Clone();
+                return _index;
             }
 
             public UInt16[] GetX()
             {
-                return (UInt16[])_x.Clone();
+                //return (UInt16[])_x.Clone();
+                return _x;
             }
 
             public UInt16[] GetY()
             {
-                return (UInt16[])_y.Clone();
+                //return (UInt16[])_y.Clone();
+                return _y;
             }
 
             public UInt16[] GetZ()
             {
-                return (UInt16[])_z.Clone();
+                //return (UInt16[])_z.Clone();
+                return _z;
             }
 
             public byte[] GetR()
             {
-                return (byte[])_r.Clone();
+                //return (byte[])_r.Clone();
+                return _r;
             }
 
             public byte[] GetG()
             {
-                return (byte[])_g.Clone();
+                //return (byte[])_g.Clone();
+                return _g;
             }
 
             public byte[] GetB()
             {
-                return (byte[])_b.Clone();
+                //return (byte[])_b.Clone();
+                return _b;
             }
 
             /// <summary>
@@ -97,37 +106,54 @@ namespace ROSBridgeLib
                 }
                 Debug.Log("Block");
                 
-                JSONArray tempColor = msg["r"].AsArray;
-                if (tempColor != null)
+                String tempColor = msg["r"].Value;
+                _r = Encoding.UTF7.GetBytes(tempColor);
+                tempColor = msg["b"].Value;
+                _b = Encoding.UTF8.GetBytes(tempColor);
+                tempColor = msg["g"].Value;
+                _g = Encoding.UTF8.GetBytes(tempColor);
+
+                if (_r.Length != _b.Length || _r.Length != _g.Length)
                 {
-                    Debug.Log("Not Null Color");
-                    _r = new byte[tempColor.Count];
-                    for (int i = 0; i < _r.Length; i++)
-                    {
-                        _r[i] = (byte)tempColor[i].AsInt;
-                    }
+                    Debug.Log("Color Length Missmatch");
+                }
 
-                    tempColor = msg["g"].AsArray;
-                    _g = new byte[tempColor.Count];
-                    for (int i = 0; i < _g.Length; i++)
-                    {
-                        _g[i] = (byte)tempColor[i].AsInt;
-                    }
+                if (_r.Length != _x.Length)
+                {
+                    Debug.Log("Vert and Color Missmatch");
+                    Debug.Log("Color length: " + msg["r"].Value.Length + " Vert Length: " + _x.Length);
+                }
 
-                    tempColor = msg["b"].AsArray;
-                    _b = new byte[tempColor.Count];
-                    for (int i = 0; i < _b.Length; i++)
-                    {
-                        _b[i] = (byte)tempColor[i].AsInt;
-                    }
+                if (_x.Length > 0)
+                {
+                    File.WriteAllText("JSONMsgBlock.txt", msg.ToString());
+                }
+                /*_r = new byte[tempColor.Length];
+                for (int i = 0; i < _r.Length; i++)
+                {
+                    _r[i] = (byte)tempColor[i];
+                }
+
+                tempColor = msg["g"].Value;
+                _g = new byte[tempColor.Count];
+                for (int i = 0; i < _g.Length; i++)
+                {
+                    _g[i] = (byte)tempColor[i].AsInt;
+                }
+
+                tempColor = msg["b"].Value;
+                _b = new byte[tempColor.Count];
+                for (int i = 0; i < _b.Length; i++)
+                {
+                    _b[i] = (byte)tempColor[i].AsInt;
                 }
                 else
                 {
-                    Debug.Log("Null Color" + msg["r"].AsArray);
+                    //Debug.Log("Null Color: " + msg["r"]);
                     _r = new byte[0];
                     _b = new byte[0];
                     _g = new byte[0];
-                }
+                }*/
                 
             }
 
