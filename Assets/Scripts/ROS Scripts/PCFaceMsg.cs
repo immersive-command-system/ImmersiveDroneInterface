@@ -42,30 +42,15 @@ namespace ROSBridgeLib
                 {
                     vert_z[i] = temp[i].AsFloat;
                 }
-                temp = msg["color_r"].AsArray;
-                color_r = new byte[temp.Count];
-                for (int i = 0; i < color_r.Length; i++)
-                {
-                    color_r[i] = (byte)temp[i].AsInt;
-                }
-                temp = msg["color_g"].AsArray;
-                color_g = new byte[temp.Count];
-                for (int i = 0; i < color_g.Length; i++)
-                {
-                    color_g[i] = (byte)temp[i].AsInt;
-                }
-                temp = msg["color_b"].AsArray;
-                color_b = new byte[temp.Count];
-                for (int i = 0; i < color_b.Length; i++)
-                {
-                    color_b[i] = (byte)temp[i].AsInt;
-                }
-                temp = msg["color_a"].AsArray;
-                color_a = new byte[temp.Count];
-                for (int i = 0; i < color_a.Length; i++)
-                {
-                    color_a[i] = (byte)temp[i].AsInt;
-                }
+                String tempColor = msg["color_r"].Value;
+                color_r = Convert.FromBase64String(tempColor);
+                tempColor = msg["color_b"].Value;
+                color_b = Convert.FromBase64String(tempColor);
+                tempColor = msg["color_g"].Value;
+                color_g = Convert.FromBase64String(tempColor);
+                tempColor = msg["color_a"].Value;
+                color_a = Convert.FromBase64String(tempColor);
+
                 temp = msg["face_0"].AsArray;
                 face_0 = new UInt16[temp.Count];
                 for (int i = 0; i < face_0.Length; i++)

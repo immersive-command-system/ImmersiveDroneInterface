@@ -1,0 +1,11 @@
+std_msgs/Header header
+float32[]            vert_x
+float32[]            vert_y
+float32[]            vert_z
+uint8[]              color_r
+uint8[]              color_g
+uint8[]              color_b
+uint8[]              color_a
+uint16[]             face_0
+uint16[]             face_1
+uint16[]             face_2
