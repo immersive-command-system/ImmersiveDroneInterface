@@ -998,6 +998,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ManifoldIP: 192.168.60.191
   connectionStatus: 0
+  implementLamp: 0
   LampIP: 99.46.143.114
   pointCloudLevel: -1
   DronePosition: 1
@@ -1081,19 +1082,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DronesList:
-  - droneName: Default_M210
+  - droneName: M210
     droneTag: M210
-    ipAddress: 192.168.60.191
-    port: 0
+    ipAddress: 75.75.75.75
+    port: 6060
     droneType: 1
-    droneSubscribers: 050000000800000001000000
+    droneSubscribers: 0800000001000000
   SensorsList:
-  - sensorName: Default_LAMP
+  - sensorName: LAMP
     sensorTag: LAMP
-    ipAddress: 99.46.143.114
-    port: 0
-    sensorType: 2
-    sensorSubscribers: 0000000007000000
+    ipAddress: 75.25.126.85
+    port: 9090
+    sensorType: 0
+    sensorSubscribers: 00000000
   success: 0
   uniqueID: 0
 --- !u!1 &161977055

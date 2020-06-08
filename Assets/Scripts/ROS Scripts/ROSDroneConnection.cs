@@ -30,6 +30,7 @@ public class ROSDroneConnection : MonoBehaviour
     public bool connectionStatus = false;
 
     [Header("TO REMOVE: Sensor Variables")]
+    public bool implementLamp = true;
     public string LampIP = "192.168.1.73";
     public int pointCloudLevel;
 
@@ -68,14 +69,19 @@ public class ROSDroneConnection : MonoBehaviour
         // ***
 
         // This is the IP of the LAMP data computer. (make sure the ip starts with ws://[ip])
-        lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
-        lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
 
-        lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
-        pointCloudLevel = 4;
+        if (implementLamp)
+        {
+
+            lamp_ros_constant = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
+            lamp_ros_variable = new ROSBridgeWebSocketConnection("ws://" + LampIP, 9090);
+
+            lamp_ros_variable.AddSubscriber(typeof(ColorizedCloud4Subscriber));
+            pointCloudLevel = 4;
         
-        lamp_ros_constant.Connect();
-        lamp_ros_variable.Connect();
+            lamp_ros_constant.Connect();
+            lamp_ros_variable.Connect();
+        }
 
         // ***
 
@@ -125,8 +131,11 @@ public class ROSDroneConnection : MonoBehaviour
         //TODO: Remove
         // ***
 
-        lamp_ros_constant.Render();
-        lamp_ros_variable.Render();
+        if (implementLamp)
+        {
+            lamp_ros_constant.Render();
+            lamp_ros_variable.Render();
+        }
 
         //TODO: Remove
         // ***

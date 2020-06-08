@@ -85,6 +85,9 @@ public class M210_ROSDroneConnection : MonoBehaviour, ROSTopicSubscriber
         {
             ros.AddSubscriber("/dji_sdk/" + subscriber, this);
         }
+
+        // TODO: Initilize Informative UI Prefab and attach as child.
+
     }
 
     // Update is called once per frame in Unity

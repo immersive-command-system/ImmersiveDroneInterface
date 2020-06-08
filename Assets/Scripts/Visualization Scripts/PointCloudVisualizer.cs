@@ -106,7 +106,8 @@ public class PointCloudVisualizer : MonoBehaviour
             childPoint.transform.localScale = new Vector3(size, size, size); // size of each point
             //Debug.Log("X:" + childPoint.transform.localPosition.x + "\tZ:" + childPoint.transform.localPosition.z + "\tY" + childPoint.transform.localPosition.y);
 
-            int pointCloudLevel = WorldProperties.worldObject.GetComponent<ROSDroneConnection>().pointCloudLevel;
+            int pointCloudLevel = -1;
+                //WorldProperties.worldObject.GetComponent<ROSDroneConnection>().pointCloudLevel;
 
 
             if (!printOnce)

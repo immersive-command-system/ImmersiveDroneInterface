@@ -38,6 +38,8 @@ public class LampSensor_ROSSensorConnection : MonoBehaviour, ROSTopicSubscriber
     // Initilize the sensor
     public void InitilizeSensor(int uniqueID, string sensorIP, int sensorPort, List<string> sensorSubscribers)
     {
+        Debug.Log("Init LAMP Connection at IP " + sensorIP + " Port " + sensorPort.ToString());
+
         ros = new ROSBridgeWebSocketConnection("ws://" + sensorIP, sensorPort);
         client_id = uniqueID.ToString();
 
@@ -54,9 +56,12 @@ public class LampSensor_ROSSensorConnection : MonoBehaviour, ROSTopicSubscriber
                     subscriberTopic = "/" + subscriber;
                     break;
             }
-
+            Debug.Log(" LAMP Subscribing to : " + subscriberTopic);
             ros.AddSubscriber(subscriberTopic, this);
         }
+
+        Debug.Log("Lamp Connection Established");
+        ros.Connect();
     }
     // Update is called once per frame in Unity
     void Update()
@@ -70,11 +75,14 @@ public class LampSensor_ROSSensorConnection : MonoBehaviour, ROSTopicSubscriber
     // ROS Topic Subscriber methods
     public ROSBridgeMsg OnReceiveMessage(string topic, JSONNode raw_msg, ROSBridgeMsg parsed = null)
     {
+        Debug.Log(" LAMP Recieved message");
+
         ROSBridgeMsg result = null;
         // Writing all code in here for now. May need to move out to separate handler functions when it gets too unwieldy.
         switch (topic)
         {
             case "/voxblox_node/surface_pointcloud":
+                Debug.Log(" LAMP Recieved surface point cloud message");
                 PointCloud2Msg pointCloudMsg = new PointCloud2Msg(raw_msg);
                 PointCloudVisualizer(pointCloudMsg);
                 break;
@@ -86,8 +94,8 @@ public class LampSensor_ROSSensorConnection : MonoBehaviour, ROSTopicSubscriber
     }
     public string GetMessageType(string topic)
     {
-        Debug.Log("Point Cloud message type is returned as sensor_msg/PointCloud2 by deafault");
-        return "sensor_msg/PointCloud2";
+        Debug.Log("Point Cloud message type is returned as sensor_msg/PointCloud2 by default");
+        return "sensor_msgs/PointCloud2";
         /**
         switch (topic)
         {
